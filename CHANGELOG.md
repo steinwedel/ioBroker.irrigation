@@ -1,5 +1,10 @@
 # Changelog
-## 0.2.4 (2026-07-20)
+## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **FIXED**: A Gardena valve started from the Gardena app or from ioBroker could be immediately closed again — `AutomationEngine.recoverAfterRestart()` unconditionally called `stop()` on every configured valve on every single adapter start/restart, regardless of whether an automation run was actually interrupted. It now only stops the specific valves recorded in `automation.batchZones`, and only when the persisted `automation.running` state confirms a plan-driven run was genuinely in progress when the process last shut down. Added regression tests
+* (Gerhard Steinwedel) **FIXED**: `npm test` was silently skipping all tests in `src/main.test.ts` — the `src/**/*.test.ts` glob relies on shell globstar support, which `/bin/sh` (used by `npm run` on macOS) does not have, so only test files nested at least one directory deep ever ran. Mocha is now given the unexpanded, quoted glob directly so its own recursive matching is used regardless of the invoking shell
+* (Gerhard Steinwedel) **FIXED**: Unit tests could non-deterministically fail to resolve local module imports under Node 23's default-enabled native TypeScript stripping racing with `ts-node/register`'s CommonJS loader; `--no-experimental-strip-types` is now set for `test:ts`
+
+### 0.2.4 (2026-07-20)
 * (Gerhard Steinwedel) **FIXED**: Root cause of the adapter restart loop found and fixed — `extendForeignObjectAsync` deep-merges arrays by index instead of replacing them, so stale `valves`/`plans` array elements survived and kept re-triggering the "needs migration" check on every restart. All native config writes now use a full read-modify-write (`writeNativeAsync`) instead
 * (Gerhard Steinwedel) **FIXED**: Real Husqvarna/Gardena API rate-limit violations found in production — `RateLimiter.acquire()` had a "fast path" with no mutual exclusion: concurrent calls from independent valve event handlers could all observe an empty window and the same stale `lastRequestTime`, then all get admitted within the same minimum-interval window instead of being spaced out. All `acquire()` calls are now funneled through a single serialized queue so no two callers can ever be granted a slot within `MIN_INTERVAL_MS` of each other, with regression tests covering the concurrency case
 

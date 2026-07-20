@@ -245,7 +245,8 @@
                 },
                 "planEditorHeader": {
                     "type": "header",
-                    "text": "Valve assignment"
+                    "text": "Valve assignment",
+                    "size": 4
                 },
                 "_editPlan": {
                     "type": "selectSendTo",
@@ -283,7 +284,8 @@
                 },
                 "planButtons": {
                     "type": "header",
-                    "text": "Actions"
+                    "text": "Actions",
+                    "size": 4
                 },
                 "assignSelected": {
                     "type": "sendTo",

@@ -173,16 +173,34 @@ const IRRIGATION_FUNCTION_NAMES = ["bew\xE4sserung", "irrigation"];
 async function findIrrigationFunctionEnum(adapter) {
   var _a;
   const enums = await adapter.getForeignObjectsAsync("enum.functions.*", "enum");
+  const matches = [];
   for (const enumObj of Object.values(enums)) {
     const name = (_a = enumObj == null ? void 0 : enumObj.common) == null ? void 0 : _a.name;
     const candidates = typeof name === "string" ? [name] : Object.values(name != null ? name : {});
     if (candidates.some(
       (candidate) => typeof candidate === "string" && IRRIGATION_FUNCTION_NAMES.includes(candidate.toLowerCase())
     )) {
-      return enumObj;
+      matches.push(enumObj);
     }
   }
-  return null;
+  if (matches.length === 0) {
+    return null;
+  }
+  if (matches.length === 1) {
+    return matches[0];
+  }
+  adapter.log.debug(
+    `Found ${matches.length} irrigation function enums (${matches.map((e) => e._id).join(", ")}) - merging their members`
+  );
+  const mergedMembers = [...new Set(matches.flatMap((e) => {
+    var _a2, _b;
+    return (_b = (_a2 = e.common) == null ? void 0 : _a2.members) != null ? _b : [];
+  }))];
+  return {
+    ...matches[0],
+    _id: matches.map((e) => e._id).join("+"),
+    common: { ...matches[0].common, members: mergedMembers }
+  };
 }
 async function scanHomematic(adapter, instance) {
   var _a, _b;

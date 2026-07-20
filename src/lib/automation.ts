@@ -134,14 +134,45 @@ export class AutomationEngine {
     }
 
     /**
-     * Called once at adapter start. If the persisted automation state claims
-     * a run was in progress, all valves are closed defensively and the
-     * automation is reset to idle - see plan "Config-Änderung während
-     * Laufzeit" / risk "Compact Mode".
+     * Called once at adapter start. Previously this unconditionally called
+     * stop() on every configured valve on every single restart - including
+     * normal/frequent restarts (config changes, host reloads, etc.) - which
+     * meant a Gardena valve started moments earlier from the Gardena app or
+     * from ioBroker was immediately closed again by the very next restart,
+     * regardless of who/what started it and regardless of whether an
+     * automation run was actually interrupted.
+     *
+     * Only defensively stop valves if the persisted `automation.running`
+     * state confirms a plan-driven run was genuinely in progress when the
+     * process last shut down (e.g. a real crash mid-run, not a clean
+     * shutdown or an unrelated valve being controlled independently), and
+     * then only stop the specific valves recorded in `automation.batchZones`
+     * - not every configured valve. Manual single-valve runs
+     * (requestManualStart()) are not persisted at all and are intentionally
+     * left untouched here: there is no reliable evidence either way, and
+     * erring on the side of not touching them is what avoids stopping a
+     * valve someone just started externally.
      */
     public async recoverAfterRestart(): Promise<void> {
-        for (const valve of this.deps.valves) {
-            await valve.stop();
+        const runningState = await this.deps.adapter.getStateAsync('automation.running');
+        const wasRunning = runningState?.val === true;
+        if (wasRunning) {
+            const batchZonesState = await this.deps.adapter.getStateAsync('automation.batchZones');
+            let interruptedValveIndexes: number[] = [];
+            try {
+                const parsed = JSON.parse(typeof batchZonesState?.val === 'string' ? batchZonesState.val : '[]');
+                if (Array.isArray(parsed)) {
+                    interruptedValveIndexes = parsed.filter((v): v is number => typeof v === 'number');
+                }
+            } catch {
+                interruptedValveIndexes = [];
+            }
+            for (const valveIndex of interruptedValveIndexes) {
+                const valve = this.deps.valves[valveIndex];
+                if (valve) {
+                    await valve.stop();
+                }
+            }
         }
         this.status = 'idle';
         this.pauseReason = null;

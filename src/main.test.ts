@@ -5,10 +5,11 @@
  */
 
 import { expect } from 'chai';
-import { buildBatches } from './lib/automation';
+import { AutomationEngine, buildBatches } from './lib/automation';
 import { parseDwdTemperature } from './lib/dwd';
 import { resolvePlanFromIcalTitle } from './lib/scheduler';
-import type { IValveConfig } from './lib/types';
+import type { AutomationDeps } from './lib/automation';
+import type { IrrigationNativeConfig, IValveConfig } from './lib/types';
 
 function makeValve(overrides: Partial<IValveConfig> = {}): IValveConfig {
     return {
@@ -117,5 +118,158 @@ describe('scheduler.resolvePlanFromIcalTitle', () => {
 
     it('falls back to the default plan when the title does not match the prefix', () => {
         expect(resolvePlanFromIcalTitle('Anderes Event', 'Bewässerung', planNames, 'Alle')).to.equal('Alle');
+    });
+});
+
+/**
+ * Regression tests for AutomationEngine.recoverAfterRestart(). This is
+ * called once from main.ts:onReady() on every adapter start. It used to
+ * unconditionally call stop() on every configured valve regardless of
+ * whether an automation run was actually interrupted - which meant a
+ * Gardena valve started moments earlier (from the Gardena app or from
+ * ioBroker) was immediately closed again by the very next adapter restart.
+ * These tests lock in the fix: only stop valves that automation.batchZones
+ * says were genuinely part of an interrupted run, and only when
+ * automation.running confirms a run was in progress.
+ */
+describe('automation.recoverAfterRestart', () => {
+    class FakeValve {
+        public stopCalls = 0;
+        public stop(): Promise<void> {
+            this.stopCalls++;
+            return Promise.resolve();
+        }
+    }
+
+    function makeFakeAdapter(initialStates: Record<string, ioBroker.StateValue> = {}): ioBroker.Adapter {
+        const states = new Map<string, ioBroker.StateValue>(Object.entries(initialStates));
+        const fake = {
+            getStateAsync: (id: string) => {
+                if (!states.has(id)) {
+                    return Promise.resolve(null);
+                }
+                return Promise.resolve({ val: states.get(id) } as ioBroker.State);
+            },
+            setStateAsync: (id: string, state: unknown) => {
+                states.set(id, (state as { val: ioBroker.StateValue }).val);
+                return Promise.resolve();
+            },
+            setInterval: () => undefined as unknown as ReturnType<ioBroker.Adapter['setInterval']>,
+            clearInterval: () => undefined,
+            log: { debug: () => undefined, info: () => undefined, warn: () => undefined, error: () => undefined },
+        };
+        return fake as unknown as ioBroker.Adapter;
+    }
+
+    function makeConfig(valveCount: number): IrrigationNativeConfig {
+        return {
+            expertMode: false,
+            valves: Array.from({ length: valveCount }, () => makeValve()),
+            plans: [{ name: 'Alle', valveIndexes: [] }],
+            scheduler: {
+                autoMode: false,
+                timerTimes: [],
+                extensionFactor: 1,
+                pumpCapacity: 0,
+                valvePause: 0,
+                seasonEnabled: false,
+                seasonStart: 4,
+                seasonEnd: 10,
+                frostEnabled: false,
+                frostMinTemp: 2,
+                icalAdapterInstance: '',
+                icalTriggerState: '',
+                icalTitlePrefix: 'Bewässerung',
+            },
+            sensors: { rainId: '', soilMoistureId: '', temperatureId: '' },
+            weather: {
+                enabled: false,
+                apiType: 'openweathermap',
+                apiKey: '',
+                latitude: 0,
+                longitude: 0,
+                pollInterval: 30,
+            },
+            legalRestriction: {
+                enabled: false,
+                stationId: '',
+                monthStart: 6,
+                monthEnd: 9,
+                hourStart: 11,
+                hourEnd: 17,
+                minTemperature: 27,
+                checkInterval: 10,
+            },
+            notifications: { pushoverInstance: '', telegramInstance: '' },
+            waterConsumption: { enabled: false },
+        };
+    }
+
+    function makeDeps(adapter: ioBroker.Adapter, valves: FakeValve[], config: IrrigationNativeConfig): AutomationDeps {
+        return {
+            adapter,
+            getConfig: () => config,
+            valves: valves as unknown as AutomationDeps['valves'],
+            isValveBlockedForAutoRun: () => ({ blocked: false }),
+            isLegallyRestricted: () => false,
+        };
+    }
+
+    it('does not stop any valve when no automation run was in progress (fresh install / normal restart)', async () => {
+        const valves = [new FakeValve(), new FakeValve(), new FakeValve()];
+        const adapter = makeFakeAdapter(); // no automation.running state at all, like a fresh install
+        const engine = new AutomationEngine(makeDeps(adapter, valves, makeConfig(valves.length)));
+
+        await engine.recoverAfterRestart();
+
+        for (const valve of valves) {
+            expect(valve.stopCalls).to.equal(0);
+        }
+    });
+
+    it('does not stop any valve when automation.running is false, even if a valve is running externally', async () => {
+        const valves = [new FakeValve(), new FakeValve()];
+        // Simulates: a Gardena valve was just started via the app or via ioBroker,
+        // automation itself is idle. The bug used to stop this valve anyway.
+        const adapter = makeFakeAdapter({ 'automation.running': false, 'automation.batchZones': '[]' });
+        const engine = new AutomationEngine(makeDeps(adapter, valves, makeConfig(valves.length)));
+
+        await engine.recoverAfterRestart();
+
+        for (const valve of valves) {
+            expect(valve.stopCalls).to.equal(0);
+        }
+    });
+
+    it('stops only the valves recorded in automation.batchZones when automation.running is true', async () => {
+        const valves = [new FakeValve(), new FakeValve(), new FakeValve()];
+        // Simulates: the adapter crashed mid-run while valves 0 and 2 were part of the
+        // active batch; valve 1 was never part of it and must not be touched.
+        const adapter = makeFakeAdapter({
+            'automation.running': true,
+            'automation.batchZones': JSON.stringify([0, 2]),
+        });
+        const engine = new AutomationEngine(makeDeps(adapter, valves, makeConfig(valves.length)));
+
+        await engine.recoverAfterRestart();
+
+        expect(valves[0].stopCalls).to.equal(1);
+        expect(valves[1].stopCalls).to.equal(0);
+        expect(valves[2].stopCalls).to.equal(1);
+    });
+
+    it('does not throw and stops nothing when automation.running is true but batchZones is malformed', async () => {
+        const valves = [new FakeValve(), new FakeValve()];
+        const adapter = makeFakeAdapter({
+            'automation.running': true,
+            'automation.batchZones': 'not valid json',
+        });
+        const engine = new AutomationEngine(makeDeps(adapter, valves, makeConfig(valves.length)));
+
+        await engine.recoverAfterRestart();
+
+        for (const valve of valves) {
+            expect(valve.stopCalls).to.equal(0);
+        }
     });
 });

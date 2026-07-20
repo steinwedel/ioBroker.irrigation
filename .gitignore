@@ -22,3 +22,6 @@ docs/
 plans/
 .DS_Store
 BW Automatik.js
+
+# server access credentials (never committed)
+.env

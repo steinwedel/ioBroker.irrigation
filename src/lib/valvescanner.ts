@@ -254,13 +254,26 @@ async function scanGardena(adapter: ioBroker.Adapter, instance: string, location
 const IRRIGATION_FUNCTION_NAMES = ['bewässerung', 'irrigation'];
 
 /**
- * Finds the `enum.functions.*` object whose display name matches "Bewässerung"
- * or "Irrigation" (case-insensitive, across all configured languages).
+ * Finds the `enum.functions.*` object(s) whose display name matches
+ * "Bewässerung" or "Irrigation" (case-insensitive, across all configured
+ * languages), and merges their members into a single result.
+ *
+ * ioBroker installations can end up with two such enums at once: the
+ * standard `enum.functions.irrigation` created by the admin adapter/setup
+ * (often left with empty `members`), and a separately/manually created one
+ * such as `enum.functions.Bewässerung` that actually holds the assigned
+ * Homematic devices. Returning only the first match found (in whatever
+ * order the backend happens to return `enum.functions.*` in - not
+ * necessarily alphabetical) could silently return the empty one and make
+ * discovery find 0 valves even though matching devices exist under the
+ * other enum. Merging avoids depending on that order and also covers the
+ * case where a user's devices are split across both enums.
  *
  * @param adapter
  */
 async function findIrrigationFunctionEnum(adapter: ioBroker.Adapter): Promise<ioBroker.EnumObject | null> {
     const enums = await adapter.getForeignObjectsAsync('enum.functions.*', 'enum');
+    const matches: ioBroker.EnumObject[] = [];
     for (const enumObj of Object.values(enums)) {
         const name = enumObj?.common?.name;
         const candidates = typeof name === 'string' ? [name] : Object.values(name ?? {});
@@ -270,10 +283,26 @@ async function findIrrigationFunctionEnum(adapter: ioBroker.Adapter): Promise<io
                     typeof candidate === 'string' && IRRIGATION_FUNCTION_NAMES.includes(candidate.toLowerCase()),
             )
         ) {
-            return enumObj;
+            matches.push(enumObj);
         }
     }
-    return null;
+
+    if (matches.length === 0) {
+        return null;
+    }
+    if (matches.length === 1) {
+        return matches[0];
+    }
+
+    adapter.log.debug(
+        `Found ${matches.length} irrigation function enums (${matches.map(e => e._id).join(', ')}) - merging their members`,
+    );
+    const mergedMembers = [...new Set(matches.flatMap(e => e.common?.members ?? []))];
+    return {
+        ...matches[0],
+        _id: matches.map(e => e._id).join('+'),
+        common: { ...matches[0].common, members: mergedMembers },
+    };
 }
 
 /**
