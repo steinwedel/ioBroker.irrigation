@@ -36,6 +36,10 @@ var import_notifications = require("./lib/notifications");
 var import_flow_monitor = require("./lib/flow-monitor");
 var import_valvescanner = require("./lib/valvescanner");
 var import_rate_limiter = require("./lib/rate-limiter");
+function readPlanIndex(message) {
+  const value = message == null ? void 0 : message._editPlan;
+  return typeof value === "number" ? value : void 0;
+}
 class Irrigation extends utils.Adapter {
   config2;
   valves = [];
@@ -478,7 +482,7 @@ class Irrigation extends utils.Adapter {
     await this.writeNativeAsync({ valves });
   }
   async onMessage(obj) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m;
+    var _a, _b, _c, _d, _e, _f, _g, _h;
     if (typeof obj !== "object" || !obj.command) {
       return;
     }
@@ -607,7 +611,7 @@ class Irrigation extends utils.Adapter {
       return;
     }
     if (obj.command === "deletePlan" && obj.callback) {
-      const planIndex = (_g = obj.message) == null ? void 0 : _g._editPlan;
+      const planIndex = readPlanIndex(obj.message);
       if (planIndex === void 0 || planIndex < 0 || planIndex >= this.config2.plans.length) {
         this.sendTo(obj.from, obj.command, { error: "noSelection" }, obj.callback);
         return;
@@ -624,7 +628,7 @@ class Irrigation extends utils.Adapter {
       return;
     }
     if (obj.command === "listPlanValves" && obj.callback) {
-      const planIndex = (_h = obj.message) == null ? void 0 : _h._editPlan;
+      const planIndex = readPlanIndex(obj.message);
       const planValveIndexes = planIndex !== void 0 && planIndex >= 0 && planIndex < this.config2.plans.length ? this.config2.plans[planIndex].valveIndexes : [];
       const options = planValveIndexes.filter((i) => i !== import_types.NONE_SENTINEL).map((i) => {
         var _a2;
@@ -637,7 +641,7 @@ class Irrigation extends utils.Adapter {
       return;
     }
     if (obj.command === "listAvailableValves" && obj.callback) {
-      const planIndex = (_i = obj.message) == null ? void 0 : _i._editPlan;
+      const planIndex = readPlanIndex(obj.message);
       const planValveIndexes = planIndex !== void 0 && planIndex >= 0 && planIndex < this.config2.plans.length ? new Set(this.config2.plans[planIndex].valveIndexes) : /* @__PURE__ */ new Set();
       const options = this.config2.valves.map((v, i) => ({ label: `[${(0, import_types.formatValveNumber)(i)}] ${v.name || "unnamed"}`, value: i })).filter((opt) => !planValveIndexes.has(opt.value));
       this.sendTo(obj.from, obj.command, options, obj.callback);
@@ -645,8 +649,8 @@ class Irrigation extends utils.Adapter {
     }
     if (obj.command === "assignValvesToPlan" && obj.callback) {
       const msg = obj.message;
-      const planIndex = msg == null ? void 0 : msg._editPlan;
-      const selected = (_j = msg == null ? void 0 : msg.availableValves) != null ? _j : [];
+      const planIndex = readPlanIndex(msg);
+      const selected = (_g = msg == null ? void 0 : msg.availableValves) != null ? _g : [];
       if (planIndex === void 0 || planIndex < 0 || planIndex >= this.config2.plans.length) {
         return;
       }
@@ -664,8 +668,8 @@ class Irrigation extends utils.Adapter {
     }
     if (obj.command === "removeValvesFromPlan" && obj.callback) {
       const msg = obj.message;
-      const planIndex = msg == null ? void 0 : msg._editPlan;
-      const selected = new Set((_k = msg == null ? void 0 : msg.planValvesRefresh) != null ? _k : []);
+      const planIndex = readPlanIndex(msg);
+      const selected = new Set((_h = msg == null ? void 0 : msg.planValvesRefresh) != null ? _h : []);
       if (planIndex === void 0 || planIndex < 0 || planIndex >= this.config2.plans.length) {
         return;
       }
@@ -681,7 +685,7 @@ class Irrigation extends utils.Adapter {
       return;
     }
     if (obj.command === "addAllValvesToPlan" && obj.callback) {
-      const planIndex = (_l = obj.message) == null ? void 0 : _l._editPlan;
+      const planIndex = readPlanIndex(obj.message);
       if (planIndex === void 0 || planIndex < 0 || planIndex >= this.config2.plans.length) {
         return;
       }
@@ -694,7 +698,7 @@ class Irrigation extends utils.Adapter {
       return;
     }
     if (obj.command === "removeAllValvesFromPlan" && obj.callback) {
-      const planIndex = (_m = obj.message) == null ? void 0 : _m._editPlan;
+      const planIndex = readPlanIndex(obj.message);
       if (planIndex === void 0 || planIndex < 0 || planIndex >= this.config2.plans.length) {
         return;
       }
