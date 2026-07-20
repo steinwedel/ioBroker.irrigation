@@ -1,6 +1,5 @@
 # Changelog
-
-## **WORK IN PROGRESS**
+## 0.2.1 (2026-07-20)
 
 ### 0.2.0 (2026-07-20)
 * (Gerhard Steinwedel) **ENHANCED**: Zones removed — all zone properties (duration, enabled, flow rate, rain independence, etc.) moved directly to valves. Valves now operate independently with direct valve-index-based automation instead of zone-index-based
