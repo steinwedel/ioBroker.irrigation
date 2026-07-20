@@ -1,5 +1,10 @@
 # Changelog
 ## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **FIXED**: Plans tab sendTo buttons now correctly send field values to backend — `jsonData` templates explicitly interpolate required fields via `${JSON.stringify(data.fieldName ?? fallback)}` instead of relying on `alsoDependsOn` (which only controls re-trigger timing, not payload inclusion), fixing "noName" errors when adding plans and undefined `_editPlan`/`availableValves`/`planValvesRefresh` in all valve-assignment commands
+* (Gerhard Steinwedel) **FIXED**: Plan index validation now treats JSON `null` (sent when no plan is selected in dropdown) the same as `undefined` — added `readPlanIndex()` helper to prevent `null` from bypassing bounds checks due to JS numeric coercion
+* (Gerhard Steinwedel) **ENHANCED**: Added missing error-code translations for plan management (`noName`, `noSelection`, `lastPlan`) in admin UI i18n files (English + German)
+
+## **WORK IN PROGRESS**
 
 ## 0.2.7 (2026-07-20)
 * (Gerhard Steinwedel) **NEW**: AI-powered changelog generation script (`scripts/prepare-changelog.js`) now auto-generates "WORK IN PROGRESS" entry before each release by analyzing commits and diffs since the last version
