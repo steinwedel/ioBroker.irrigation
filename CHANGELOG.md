@@ -1,5 +1,7 @@
 # Changelog
 ## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **ENHANCED**: Plans tab in admin UI no longer shows a separate plan-name table — the "Selected plan" dropdown is now the single control for managing plans, with new "Add new plan" and "Delete selected plan" actions (`createPlan`/`deletePlan` message handlers)
+* (Gerhard Steinwedel) **FIXED**: ESLint now ignores the legacy `BW Automatik.js` javascript-adapter reference script (uses sandbox globals like `on`/`setState`/`schedule` that don't exist in this Node.js/TypeScript adapter) and a stray Prettier formatting issue in `config-defaults.ts` is fixed — `npm run lint` passes with 0 errors/warnings again
 
 ## 0.2.5 (2026-07-20)
 * (Gerhard Steinwedel) **FIXED**: A Gardena valve started from the Gardena app or from ioBroker could be immediately closed again — `AutomationEngine.recoverAfterRestart()` unconditionally called `stop()` on every configured valve on every single adapter start/restart, regardless of whether an automation run was actually interrupted. It now only stops the specific valves recorded in `automation.batchZones`, and only when the persisted `automation.running` state confirms a plan-driven run was genuinely in progress when the process last shut down. Added regression tests
