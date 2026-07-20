@@ -1,26 +1,28 @@
 /**
  * Unit tests for the pure/testable logic pieces of the irrigation adapter.
  * Focuses on functions that don't require a mocked ioBroker.Adapter instance,
- * per plan Phase 7 ("Unit-Tests für Valve-Controller, Automation, Scheduler").
+ * per plan Phase 7 ("Unit-Tests for Valve-Controller, Automation, Scheduler").
  */
 
 import { expect } from 'chai';
 import { buildBatches } from './lib/automation';
 import { parseDwdTemperature } from './lib/dwd';
 import { resolvePlanFromIcalTitle } from './lib/scheduler';
-import type { IZoneConfig } from './lib/types';
+import type { IValveConfig } from './lib/types';
 
-function makeZone(overrides: Partial<IZoneConfig> = {}): IZoneConfig {
+function makeValve(overrides: Partial<IValveConfig> = {}): IValveConfig {
     return {
-        name: 'Zone',
-        valveIndex: 0,
-        duration: 10,
+        name: 'Valve',
+        type: 'Generic',
+        stateId: '',
+        runFor: 600,
         enabled: true,
+        flowRateLpm: 0,
+        duration: 10,
         rainIndependent: false,
         moistureThreshold: 0,
         manualDuration: 10,
         flowSensorId: '',
-        flowRate: 0,
         groups: [],
         days: [],
         ...overrides,
@@ -28,44 +30,42 @@ function makeZone(overrides: Partial<IZoneConfig> = {}): IZoneConfig {
 }
 
 describe('automation.buildBatches', () => {
-    it('returns one zone per batch when pumpCapacity is 0 (sequential mode)', () => {
-        const zones = [makeZone({ duration: 5 }), makeZone({ duration: 10 }), makeZone({ duration: 3 })];
-        const batches = buildBatches([0, 1, 2], zones, 0);
+    it('returns one valve per batch when pumpCapacity is 0 (sequential mode)', () => {
+        const valves = [makeValve({ duration: 5 }), makeValve({ duration: 10 }), makeValve({ duration: 3 })];
+        const batches = buildBatches([0, 1, 2], valves, 0);
         expect(batches).to.deep.equal([[0], [1], [2]]);
     });
 
-    it('groups zones into parallel batches respecting pump capacity', () => {
-        const zones = [
-            makeZone({ duration: 10, flowRate: 10 }),
-            makeZone({ duration: 8, flowRate: 10 }),
-            makeZone({ duration: 5, flowRate: 15 }),
+    it('groups valves into parallel batches respecting pump capacity', () => {
+        const valves = [
+            makeValve({ duration: 10, flowRateLpm: 10 }),
+            makeValve({ duration: 8, flowRateLpm: 10 }),
+            makeValve({ duration: 5, flowRateLpm: 15 }),
         ];
-        // pumpCapacity 20: zone0+zone1 fit together (20), zone2 (15) needs its own batch
-        // because it does not fit into a batch that already has flowSum 20.
-        const batches = buildBatches([0, 1, 2], zones, 20);
+        const pumpCapacity = 20;
+        const batches = buildBatches([0, 1, 2], valves, pumpCapacity);
         const flatSorted = batches.map(b => [...b].sort());
-        // all zone indexes must appear exactly once across all batches
         const allIndexes = flatSorted.flat().sort();
         expect(allIndexes).to.deep.equal([0, 1, 2]);
     });
 
     it('never exceeds pump capacity within a single batch', () => {
-        const zones = [
-            makeZone({ duration: 10, flowRate: 12 }),
-            makeZone({ duration: 10, flowRate: 12 }),
-            makeZone({ duration: 10, flowRate: 12 }),
+        const valves = [
+            makeValve({ duration: 10, flowRateLpm: 12 }),
+            makeValve({ duration: 10, flowRateLpm: 12 }),
+            makeValve({ duration: 10, flowRateLpm: 12 }),
         ];
         const pumpCapacity = 20;
-        const batches = buildBatches([0, 1, 2], zones, pumpCapacity);
+        const batches = buildBatches([0, 1, 2], valves, pumpCapacity);
         for (const batch of batches) {
-            const flowSum = batch.reduce((sum, idx) => sum + zones[idx].flowRate, 0);
+            const flowSum = batch.reduce((sum, idx) => sum + valves[idx].flowRateLpm, 0);
             expect(flowSum).to.be.at.most(pumpCapacity);
         }
     });
 
-    it('puts a single zone in its own batch if its flow rate alone exceeds pump capacity', () => {
-        const zones = [makeZone({ duration: 10, flowRate: 50 })];
-        const batches = buildBatches([0], zones, 20);
+    it('puts a single valve in its own batch if its flow rate alone exceeds pump capacity', () => {
+        const valves = [makeValve({ duration: 10, flowRateLpm: 50 })];
+        const batches = buildBatches([0], valves, 20);
         expect(batches).to.deep.equal([[0]]);
     });
 });

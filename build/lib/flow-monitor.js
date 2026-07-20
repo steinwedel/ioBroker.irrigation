@@ -21,12 +21,13 @@ __export(flow_monitor_exports, {
   FlowMonitor: () => FlowMonitor
 });
 module.exports = __toCommonJS(flow_monitor_exports);
+var import_types = require("./types");
 const DEVIATION_THRESHOLD_PCT = 30;
 const CALIBRATION_DURATION_SECS = 120;
 class FlowMonitor {
   deps;
   subscribedIds = /* @__PURE__ */ new Map();
-  // stateId -> zoneIndex
+  // stateId -> valveIndex
   calibrationSamples = /* @__PURE__ */ new Map();
   calibrationActive = /* @__PURE__ */ new Set();
   calibrationTimers = /* @__PURE__ */ new Map();
@@ -42,8 +43,8 @@ class FlowMonitor {
     }
     this.subscribedIds.clear();
     const config = this.deps.getConfig();
-    for (let i = 0; i < config.zones.length; i++) {
-      const id = config.zones[i].flowSensorId;
+    for (let i = 0; i < config.valves.length; i++) {
+      const id = config.valves[i].flowSensorId;
       if (id) {
         await this.deps.adapter.subscribeForeignStatesAsync(id);
         this.subscribedIds.set(id, i);
@@ -52,36 +53,39 @@ class FlowMonitor {
   }
   async onForeignStateChange(id, state) {
     var _a;
-    const zoneIndex = this.subscribedIds.get(id);
-    if (zoneIndex === void 0) {
+    const valveIndex = this.subscribedIds.get(id);
+    if (valveIndex === void 0) {
       return false;
     }
     const flow = typeof (state == null ? void 0 : state.val) === "number" ? state.val : 0;
-    await this.deps.adapter.setStateAsync(`zones.zone_${zoneIndex}.flowActual`, { val: flow, ack: true });
-    if (this.calibrationActive.has(zoneIndex)) {
-      const samples = (_a = this.calibrationSamples.get(zoneIndex)) != null ? _a : [];
+    await this.deps.adapter.setStateAsync(`valves.valve_${(0, import_types.formatValveNumber)(valveIndex)}.flowActual`, {
+      val: flow,
+      ack: true
+    });
+    if (this.calibrationActive.has(valveIndex)) {
+      const samples = (_a = this.calibrationSamples.get(valveIndex)) != null ? _a : [];
       samples.push(flow);
-      this.calibrationSamples.set(zoneIndex, samples);
+      this.calibrationSamples.set(valveIndex, samples);
     } else {
-      await this.checkDeviation(zoneIndex, flow);
+      await this.checkDeviation(valveIndex, flow);
     }
-    if (!this.deps.isAnyZoneRunning() && flow > 0) {
-      await this.reportLeak(zoneIndex, flow);
+    if (!this.deps.isAnyValveRunning() && flow > 0) {
+      await this.reportLeak(valveIndex, flow);
     }
     return true;
   }
-  async checkDeviation(zoneIndex, actualFlow) {
+  async checkDeviation(valveIndex, actualFlow) {
     var _a, _b;
-    const expected = await this.getExpectedFlow(zoneIndex);
+    const expected = await this.getExpectedFlow(valveIndex);
     if (!expected || expected <= 0) {
       return;
     }
     const deviationPct = (actualFlow - expected) / expected * 100;
     if (Math.abs(deviationPct) > DEVIATION_THRESHOLD_PCT) {
       const config = this.deps.getConfig();
-      const zoneName = (_b = (_a = config.zones[zoneIndex]) == null ? void 0 : _a.name) != null ? _b : String(zoneIndex);
-      const message = deviationPct > 0 ? `Zone "${zoneName}": Durchfluss ${Math.round(deviationPct)}% \xFCber Erwartung (Rohrbruch?)` : `Zone "${zoneName}": Durchfluss ${Math.round(Math.abs(deviationPct))}% unter Erwartung (D\xFCsen verstopft?)`;
-      await this.deps.adapter.setStateAsync("watchdog.flowDeviationZone", { val: zoneIndex, ack: true });
+      const valveName = (_b = (_a = config.valves[valveIndex]) == null ? void 0 : _a.name) != null ? _b : String(valveIndex);
+      const message = deviationPct > 0 ? `Valve "${valveName}": Durchfluss ${Math.round(deviationPct)}% \xFCber Erwartung (Rohrbruch?)` : `Valve "${valveName}": Durchfluss ${Math.round(Math.abs(deviationPct))}% unter Erwartung (D\xFCsen verstopft?)`;
+      await this.deps.adapter.setStateAsync("watchdog.flowDeviationValve", { val: valveIndex, ack: true });
       await this.deps.adapter.setStateAsync("watchdog.flowDeviationPct", {
         val: Math.round(deviationPct),
         ack: true
@@ -89,13 +93,13 @@ class FlowMonitor {
       await this.reportIssue(message);
     }
   }
-  async reportLeak(zoneIndex, flow) {
+  async reportLeak(valveIndex, flow) {
     var _a, _b;
     await this.deps.adapter.setStateAsync("watchdog.flowActive", { val: true, ack: true });
     const config = this.deps.getConfig();
-    const zoneName = (_b = (_a = config.zones[zoneIndex]) == null ? void 0 : _a.name) != null ? _b : String(zoneIndex);
+    const valveName = (_b = (_a = config.valves[valveIndex]) == null ? void 0 : _a.name) != null ? _b : String(valveIndex);
     await this.reportIssue(
-      `Leck-Verdacht: Durchfluss ${flow}l/min an Sensor der Zone "${zoneName}", obwohl alle Ventile geschlossen sind.`
+      `Leck-Verdacht: Durchfluss ${flow}l/min an Sensor des Ventils "${valveName}", obwohl alle Ventile geschlossen sind.`
     );
   }
   async reportIssue(message) {
@@ -107,12 +111,14 @@ class FlowMonitor {
     await this.deps.adapter.setStateAsync("watchdog.issueCount", { val: count, ack: true });
     await this.deps.notifications.send("Bew\xE4sserung Watchdog", message);
   }
-  async getExpectedFlow(zoneIndex) {
-    const state = await this.deps.adapter.getStateAsync(`zones.zone_${zoneIndex}.flowExpected`);
+  async getExpectedFlow(valveIndex) {
+    const state = await this.deps.adapter.getStateAsync(
+      `valves.valve_${(0, import_types.formatValveNumber)(valveIndex)}.flowExpected`
+    );
     return typeof (state == null ? void 0 : state.val) === "number" ? state.val : 0;
   }
   /**
-   * Runs the calibration routine: opens the zone's valve for a fixed
+   * Runs the calibration routine: opens the valve for a fixed
    * duration, samples the flow sensor, and stores the average in the
    * persistent `flowExpected` runtime state (never in native config).
    *
@@ -120,41 +126,41 @@ class FlowMonitor {
    * valve via automation/valve controller; this method only manages the
    * sampling window and result persistence.
    *
-   * @param zoneIndex
+   * @param valveIndex
    * @param openValve
    * @param closeValve
    */
-  async startCalibration(zoneIndex, openValve, closeValve) {
-    if (this.calibrationActive.has(zoneIndex)) {
+  async startCalibration(valveIndex, openValve, closeValve) {
+    if (this.calibrationActive.has(valveIndex)) {
       return;
     }
-    this.calibrationActive.add(zoneIndex);
-    this.calibrationSamples.set(zoneIndex, []);
+    this.calibrationActive.add(valveIndex);
+    this.calibrationSamples.set(valveIndex, []);
     await openValve();
     const timer = this.deps.adapter.setTimeout(() => {
-      this.calibrationTimers.delete(zoneIndex);
-      this.finishCalibration(zoneIndex, closeValve).catch(
+      this.calibrationTimers.delete(valveIndex);
+      this.finishCalibration(valveIndex, closeValve).catch(
         (error) => this.deps.adapter.log.error(`Calibration failed: ${error.message}`)
       );
     }, CALIBRATION_DURATION_SECS * 1e3);
-    this.calibrationTimers.set(zoneIndex, timer);
+    this.calibrationTimers.set(valveIndex, timer);
   }
-  async finishCalibration(zoneIndex, closeValve) {
+  async finishCalibration(valveIndex, closeValve) {
     var _a;
     await closeValve();
-    const samples = (_a = this.calibrationSamples.get(zoneIndex)) != null ? _a : [];
-    this.calibrationActive.delete(zoneIndex);
-    this.calibrationSamples.delete(zoneIndex);
+    const samples = (_a = this.calibrationSamples.get(valveIndex)) != null ? _a : [];
+    this.calibrationActive.delete(valveIndex);
+    this.calibrationSamples.delete(valveIndex);
     if (samples.length === 0) {
-      this.deps.adapter.log.warn(`Calibration for zone ${zoneIndex} yielded no samples.`);
+      this.deps.adapter.log.warn(`Calibration for valve ${valveIndex} yielded no samples.`);
       return;
     }
     const average = samples.reduce((sum, v) => sum + v, 0) / samples.length;
-    await this.deps.adapter.setStateAsync(`zones.zone_${zoneIndex}.flowExpected`, {
+    await this.deps.adapter.setStateAsync(`valves.valve_${(0, import_types.formatValveNumber)(valveIndex)}.flowExpected`, {
       val: Math.round(average * 100) / 100,
       ack: true
     });
-    this.deps.adapter.log.info(`Calibration for zone ${zoneIndex} complete: ${average.toFixed(2)} l/min`);
+    this.deps.adapter.log.info(`Calibration for valve ${valveIndex} complete: ${average.toFixed(2)} l/min`);
   }
   /** Called on unload/onUnload to release any pending calibration timers. */
   destroy() {

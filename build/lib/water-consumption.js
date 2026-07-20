@@ -21,9 +21,10 @@ __export(water_consumption_exports, {
   WaterConsumptionTracker: () => WaterConsumptionTracker
 });
 module.exports = __toCommonJS(water_consumption_exports);
+var import_types = require("./types");
 class WaterConsumptionTracker {
   deps;
-  zoneStartedAt = /* @__PURE__ */ new Map();
+  valveStartedAt = /* @__PURE__ */ new Map();
   dayTotal = 0;
   weekTotal = 0;
   monthTotal = 0;
@@ -48,34 +49,34 @@ class WaterConsumptionTracker {
     this.grandTotal = typeof (total == null ? void 0 : total.val) === "number" ? total.val : 0;
   }
   /**
-   * Called by automation.ts when a zone's valve opens/closes.
+   * Called by automation.ts when a valve opens/closes.
    *
-   * @param zoneIndex
+   * @param valveIndex
    * @param flowing
    */
-  onZoneFlowChange(zoneIndex, flowing) {
+  onValveFlowChange(valveIndex, flowing) {
     var _a;
     if (!this.deps.getConfig().waterConsumption.enabled) {
       return;
     }
     if (flowing) {
-      this.zoneStartedAt.set(zoneIndex, Date.now());
+      this.valveStartedAt.set(valveIndex, Date.now());
     } else {
-      const startedAt = this.zoneStartedAt.get(zoneIndex);
+      const startedAt = this.valveStartedAt.get(valveIndex);
       if (startedAt === void 0) {
         return;
       }
-      this.zoneStartedAt.delete(zoneIndex);
+      this.valveStartedAt.delete(valveIndex);
       const elapsedMin = (Date.now() - startedAt) / 6e4;
       const config = this.deps.getConfig();
-      const zone = config.zones[zoneIndex];
-      const liters = elapsedMin * ((_a = zone == null ? void 0 : zone.flowRate) != null ? _a : 0);
-      this.recordConsumption(zoneIndex, liters).catch(
+      const valve = config.valves[valveIndex];
+      const liters = elapsedMin * ((_a = valve == null ? void 0 : valve.flowRateLpm) != null ? _a : 0);
+      this.recordConsumption(valveIndex, liters).catch(
         (error) => this.deps.adapter.log.error(`Failed to record water consumption: ${error.message}`)
       );
     }
   }
-  async recordConsumption(zoneIndex, liters) {
+  async recordConsumption(valveIndex, liters) {
     this.rolloverIfNeeded();
     this.dayTotal += liters;
     this.weekTotal += liters;
@@ -85,11 +86,11 @@ class WaterConsumptionTracker {
     await this.deps.adapter.setStateAsync("waterConsumption.week", { val: round2(this.weekTotal), ack: true });
     await this.deps.adapter.setStateAsync("waterConsumption.month", { val: round2(this.monthTotal), ack: true });
     await this.deps.adapter.setStateAsync("waterConsumption.total", { val: round2(this.grandTotal), ack: true });
-    const zoneId = `zones.zone_${zoneIndex}`;
-    const currentTotal = await this.deps.adapter.getStateAsync(`${zoneId}.waterTotal`);
+    const valveId = `valves.valve_${(0, import_types.formatValveNumber)(valveIndex)}`;
+    const currentTotal = await this.deps.adapter.getStateAsync(`${valveId}.waterTotal`);
     const newTotal = (typeof (currentTotal == null ? void 0 : currentTotal.val) === "number" ? currentTotal.val : 0) + liters;
-    await this.deps.adapter.setStateAsync(`${zoneId}.waterCurrent`, { val: round2(liters), ack: true });
-    await this.deps.adapter.setStateAsync(`${zoneId}.waterTotal`, { val: round2(newTotal), ack: true });
+    await this.deps.adapter.setStateAsync(`${valveId}.waterCurrent`, { val: round2(liters), ack: true });
+    await this.deps.adapter.setStateAsync(`${valveId}.waterTotal`, { val: round2(newTotal), ack: true });
   }
   rolloverIfNeeded() {
     const nowDay = (/* @__PURE__ */ new Date()).getDate();

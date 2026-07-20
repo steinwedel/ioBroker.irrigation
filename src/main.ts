@@ -9,7 +9,6 @@ import type { IrrigationNativeConfig, IValveConfig, ScanType } from './lib/types
 import { formatValveNumber } from './lib/types';
 import { createBaseStates, applyConfigToStates } from './lib/states';
 import { ValveController } from './lib/ventile';
-import { ZoneController } from './lib/zonen';
 import { AutomationEngine } from './lib/automation';
 import { Scheduler, resolvePlanFromIcalTitle } from './lib/scheduler';
 import { SensorManager } from './lib/sensors';
@@ -58,7 +57,6 @@ function valvesEqual(a: unknown, b: unknown): boolean {
 class Irrigation extends utils.Adapter {
     private config2!: IrrigationNativeConfig;
     private valves: ValveController[] = [];
-    private zones: ZoneController[] = [];
     private automation!: AutomationEngine;
     private scheduler!: Scheduler;
     private sensorManager!: SensorManager;
@@ -99,11 +97,6 @@ class Irrigation extends utils.Adapter {
             await valve.init();
         }
 
-        this.zones = this.config2.zones.map((zoneConfig, index) => new ZoneController(this, index, zoneConfig));
-        for (const zone of this.zones) {
-            await zone.init();
-        }
-
         this.notifications = new NotificationManager({ adapter: this, getConfig: () => this.config2 });
 
         this.sensorManager = new SensorManager({ adapter: this, getConfig: () => this.config2 });
@@ -116,7 +109,7 @@ class Irrigation extends utils.Adapter {
             adapter: this,
             getConfig: () => this.config2,
             notifications: this.notifications,
-            isAnyZoneRunning: () => this.valves.some(v => v.isRunning()),
+            isAnyValveRunning: () => this.valves.some(v => v.isRunning()),
         });
         await this.flowMonitor.init();
 
@@ -124,10 +117,9 @@ class Irrigation extends utils.Adapter {
             adapter: this,
             getConfig: () => this.config2,
             valves: this.valves,
-            zones: this.zones,
-            isZoneBlockedForAutoRun: zoneIndex => this.sensorManager.isZoneBlocked(zoneIndex),
+            isValveBlockedForAutoRun: valveIndex => this.sensorManager.isValveBlocked(valveIndex),
             isLegallyRestricted: () => this.dwd.isActive(),
-            onZoneFlowChange: (zoneIndex, flowing) => this.waterConsumption.onZoneFlowChange(zoneIndex, flowing),
+            onValveFlowChange: (valveIndex, flowing) => this.waterConsumption.onValveFlowChange(valveIndex, flowing),
         });
         this.automation.start();
         await this.automation.recoverAfterRestart();
@@ -153,8 +145,8 @@ class Irrigation extends utils.Adapter {
 
         // Subscribe to all our own automation/zone/valve control states
         this.subscribeStates('automation.*');
-        this.subscribeStates('zones.*.manualStart');
-        this.subscribeStates('zones.*.calibrateFlow');
+        this.subscribeStates('valves.*.manualStart');
+        this.subscribeStates('valves.*.calibrateFlow');
         this.subscribeStates('watchdog.testNotify');
         this.subscribeStates('valves.*.state');
         this.subscribeStates('valves.*.runFor');
@@ -493,22 +485,23 @@ class Irrigation extends utils.Adapter {
                 return;
         }
 
-        const zoneManualStartMatch = /^zones\.zone_(\d+)\.manualStart$/.exec(localId);
-        if (zoneManualStartMatch) {
+        const valveManualStartMatch = /^valves\.valve_(\d+)\.manualStart$/.exec(localId);
+        if (valveManualStartMatch) {
             await this.setStateAsync(id, { val: false, ack: true });
-            await this.automation.manualStartZone(parseInt(zoneManualStartMatch[1], 10));
+            const valveIndex = parseInt(valveManualStartMatch[1], 10);
+            await this.automation.manualStartValve(valveIndex);
             return;
         }
 
-        const zoneCalibrateMatch = /^zones\.zone_(\d+)\.calibrateFlow$/.exec(localId);
-        if (zoneCalibrateMatch) {
+        const valveCalibrateMatch = /^valves\.valve_(\d+)\.calibrateFlow$/.exec(localId);
+        if (valveCalibrateMatch) {
             await this.setStateAsync(id, { val: false, ack: true });
-            const zoneIndex = parseInt(zoneCalibrateMatch[1], 10);
-            const zone = this.config2.zones[zoneIndex];
-            if (zone && zone.valveIndex >= 0 && zone.valveIndex < this.valves.length) {
-                const valve = this.valves[zone.valveIndex];
+            const valveIndex = parseInt(valveCalibrateMatch[1], 10);
+            const valveConfig = this.config2.valves[valveIndex];
+            if (valveConfig && valveIndex >= 0 && valveIndex < this.valves.length) {
+                const valve = this.valves[valveIndex];
                 await this.flowMonitor.startCalibration(
-                    zoneIndex,
+                    valveIndex,
                     () => valve.start(120),
                     () => valve.stop(),
                 );

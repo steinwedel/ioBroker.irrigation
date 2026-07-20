@@ -3,13 +3,13 @@
 ## Projektkontext
 
 Du arbeitest an einem **ioBroker Bewässerungsadapter** (`ioBroker.irrigation`).  
-Der Adapter steuert Bewässerungszonen, Ventile und Bewässerungsprogramme auf Basis von Zeitplänen, Sensordaten und optional Wetterinformationen.
+Der Adapter steuert Ventile direkt und führt Bewässerungsprogramme auf Basis von Zeitplänen, Sensordaten und optional Wetterinformationen aus.
 
 **Kernfunktionen:**
-- Mehrere Bewässerungszonen mit individuellen Laufzeiten
+- Direkte Ventilsteuerung mit eigenen Laufzeiten, Pausen, Flussraten
 - Zeitgesteuerte und/oder sensorgesteuerte Bewässerungsprogramme
 - Integration von Regensensoren, Bodenfeuchtesensoren
-- Ventilsteuerung über ioBroker-States
+- Ventilsteuerung über ioBroker-States (Gardena, Homematic, Rainbird, Generic)
 - Wasserverbrauchs-Tracking
 - Optionale Wetter-API-Integration (Regenwahrscheinlichkeit, Temperatur)
 - Manuelle Überbrückung und Saison-Pausen
@@ -31,21 +31,25 @@ Diese Regeln stammen aus dem [ioBroker AI Developer Guide](https://github.com/Je
 
 ```text
 irrigation.0
-├── zones
-│   ├── zone1
-│   │   ├── active          (boolean, ack=true)
-│   │   ├── running         (boolean, ack=true)
-│   │   ├── duration        (number, ack=true)
-│   │   ├── remainingTime   (number, ack=true)
-│   │   ├── valve           (string, ack=true)
-│   │   └── waterConsumption (number, ack=true)
-│   └── zoneN ...
+├── valves
+│   ├── valve_000
+│   │   ├── state            (boolean, ack=true/read+write)
+│   │   ├── enabled          (boolean, ack=true)
+│   │   ├── duration         (number, ack=true)
+│   │   ├── remainingTime    (number, ack=true)
+│   │   ├── runFor           (number, ack=true)
+│   │   ├── flowRateLpm      (number, ack=true)
+│   │   ├── manualStart      (boolean, ack=false button)
+│   │   ├── calibrateFlow    (boolean, ack=false button)
+│   │   ├── waterCurrent     (number, ack=true)
+│   │   └── waterTotal       (number, ack=true)
+│   └── valve_NNN ...
 ├── programs
 │   ├── program1
 │   │   ├── active          (boolean, ack=true)
 │   │   ├── running         (boolean, ack=true)
 │   │   ├── nextRun         (string, ack=true)
-│   │   ├── zones           (string/JSON, ack=true)
+│   │   ├── valves          (string/JSON, ack=true)
 │   │   ├── startTime       (string, ack=true)
 │   │   └── weekdays        (array, ack=true)
 │   └── programN ...
@@ -58,7 +62,7 @@ irrigation.0
 ```
 
 **Regeln:**
-- Jedes Zwischenobjekt (`zones`, `zone1`, `programs`, etc.) explizit mit `setObjectNotExists` anlegen
+- Jedes Zwischenobjekt (`valves`, `valve_000`, `programs`, etc.) explizit mit `setObjectNotExists` anlegen
 - Objekt-IDs nur `A-Za-z0-9-_` — keine Sonderzeichen, Leerzeichen oder Umlaute
 - `device` → `channel` → `state` Hierarchie einhalten
 - `ack=true` für finale Werte (Sensorwerte, Status), `ack=false` für Kommandos
@@ -360,13 +364,18 @@ tests.integration(path.join(__dirname, '..'), {
 
 ## 5. Release & Changelog
 
-### README.md
-- Abschnitt `## **WORK IN PROGRESS**` für laufende Änderungen
-- Format: `- (author) **TYPE**: Description`
+### CHANGELOG.md
+- Wird **automatisch** vom `@alcalzone/release-script` verwaltet — Einträge **NUR** unter `## **WORK IN PROGRESS**` schreiben
+- Format: `* (author) **TYPE**: Description`
 - Types: `NEW`, `FIXED`, `ENHANCED`
+- Beim Release verschiebt das Script die WiP-Einträge in eine neue `### X.Y.Z (Datum)`-Sektion und leert den WiP-Bereich
+- Die `README.md` verlinkt nur auf `CHANGELOG.md`
 
 ### Release-Prozess
-- [AlCalzone release-script](https://github.com/AlCalzone/release-script) Standard
+- `npm run release patch` — Bugfixes (0.1.2 → 0.1.3)
+- `npm run release minor` — neue Features (0.1.x → 0.2.0)
+- `npm run release major` — breaking changes (0.x → 1.0.0)
+- Release-Script: [AlCalzone release-script](https://github.com/AlCalzone/release-script) (bereits in `.releaseconfig.json` konfiguriert)
 - Adapter Checker: https://www.iobroker.dev/adapter-check
 - Vor Stable: Forum-Thread im [Tester-Bereich](https://forum.iobroker.net/category/91/tester)
 

@@ -5,6 +5,18 @@ export interface ScanResult {
     errors: string[];
 }
 
+const VALVE_DEFAULTS = {
+    enabled: true,
+    flowRateLpm: 0,
+    duration: 10,
+    rainIndependent: false,
+    moistureThreshold: 0,
+    manualDuration: 10,
+    flowSensorId: '',
+    groups: [] as string[],
+    days: [] as number[],
+};
+
 /** Callback invoked with a short human-readable status while a scan is in progress. */
 export type ScanProgressCallback = (message: string) => void;
 
@@ -218,6 +230,7 @@ async function scanGardena(adapter: ioBroker.Adapter, instance: string, location
                     stateId: id,
                     allOffId: stopLookup.has(stopId) ? stopId : undefined,
                     runFor: 600,
+                    ...VALVE_DEFAULTS,
                 });
             });
             if (skippedPlaceholders > 0) {
@@ -308,6 +321,7 @@ async function scanHomematic(adapter: ioBroker.Adapter, instance?: string): Prom
                 type: 'Homematic',
                 stateId: memberId,
                 runFor: 600,
+                ...VALVE_DEFAULTS,
             });
         });
 
@@ -346,6 +360,7 @@ async function scanRainbird(adapter: ioBroker.Adapter, instance: string): Promis
                     stateId: basePath,
                     allOffId: stopExists ? stopId : undefined,
                     runFor: 600,
+                    ...VALVE_DEFAULTS,
                 });
             }
         }
@@ -425,6 +440,7 @@ async function scanGeneric(adapter: ioBroker.Adapter, instance?: string): Promis
                 type: 'Generic',
                 stateId,
                 runFor: 600,
+                ...VALVE_DEFAULTS,
             });
         });
 

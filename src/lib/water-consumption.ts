@@ -1,4 +1,4 @@
-import type { IrrigationNativeConfig } from './types';
+import { formatValveNumber, type IrrigationNativeConfig } from './types';
 
 export interface WaterConsumptionDeps {
     adapter: ioBroker.Adapter;
@@ -7,12 +7,12 @@ export interface WaterConsumptionDeps {
 
 /**
  * Tracks calculated (flowRate x runtime) and optionally sensor-based actual
- * water consumption per zone and in aggregate. See plan section
+ * water consumption per valve and in aggregate. See plan section
  * "Wasserverbrauch" and "Durchfluss-Überwachung"/"Durchfluss-Kalibrierung".
  */
 export class WaterConsumptionTracker {
     private readonly deps: WaterConsumptionDeps;
-    private zoneStartedAt = new Map<number, number>();
+    private valveStartedAt = new Map<number, number>();
     private dayTotal = 0;
     private weekTotal = 0;
     private monthTotal = 0;
@@ -40,34 +40,34 @@ export class WaterConsumptionTracker {
     }
 
     /**
-     * Called by automation.ts when a zone's valve opens/closes.
+     * Called by automation.ts when a valve opens/closes.
      *
-     * @param zoneIndex
+     * @param valveIndex
      * @param flowing
      */
-    public onZoneFlowChange(zoneIndex: number, flowing: boolean): void {
+    public onValveFlowChange(valveIndex: number, flowing: boolean): void {
         if (!this.deps.getConfig().waterConsumption.enabled) {
             return;
         }
         if (flowing) {
-            this.zoneStartedAt.set(zoneIndex, Date.now());
+            this.valveStartedAt.set(valveIndex, Date.now());
         } else {
-            const startedAt = this.zoneStartedAt.get(zoneIndex);
+            const startedAt = this.valveStartedAt.get(valveIndex);
             if (startedAt === undefined) {
                 return;
             }
-            this.zoneStartedAt.delete(zoneIndex);
+            this.valveStartedAt.delete(valveIndex);
             const elapsedMin = (Date.now() - startedAt) / 60000;
             const config = this.deps.getConfig();
-            const zone = config.zones[zoneIndex];
-            const liters = elapsedMin * (zone?.flowRate ?? 0);
-            this.recordConsumption(zoneIndex, liters).catch(error =>
+            const valve = config.valves[valveIndex];
+            const liters = elapsedMin * (valve?.flowRateLpm ?? 0);
+            this.recordConsumption(valveIndex, liters).catch(error =>
                 this.deps.adapter.log.error(`Failed to record water consumption: ${(error as Error).message}`),
             );
         }
     }
 
-    private async recordConsumption(zoneIndex: number, liters: number): Promise<void> {
+    private async recordConsumption(valveIndex: number, liters: number): Promise<void> {
         this.rolloverIfNeeded();
 
         this.dayTotal += liters;
@@ -80,11 +80,11 @@ export class WaterConsumptionTracker {
         await this.deps.adapter.setStateAsync('waterConsumption.month', { val: round2(this.monthTotal), ack: true });
         await this.deps.adapter.setStateAsync('waterConsumption.total', { val: round2(this.grandTotal), ack: true });
 
-        const zoneId = `zones.zone_${zoneIndex}`;
-        const currentTotal = await this.deps.adapter.getStateAsync(`${zoneId}.waterTotal`);
+        const valveId = `valves.valve_${formatValveNumber(valveIndex)}`;
+        const currentTotal = await this.deps.adapter.getStateAsync(`${valveId}.waterTotal`);
         const newTotal = (typeof currentTotal?.val === 'number' ? currentTotal.val : 0) + liters;
-        await this.deps.adapter.setStateAsync(`${zoneId}.waterCurrent`, { val: round2(liters), ack: true });
-        await this.deps.adapter.setStateAsync(`${zoneId}.waterTotal`, { val: round2(newTotal), ack: true });
+        await this.deps.adapter.setStateAsync(`${valveId}.waterCurrent`, { val: round2(liters), ack: true });
+        await this.deps.adapter.setStateAsync(`${valveId}.waterTotal`, { val: round2(newTotal), ack: true });
     }
 
     private rolloverIfNeeded(): void {

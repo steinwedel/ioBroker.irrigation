@@ -25,14 +25,13 @@ module.exports = __toCommonJS(config_defaults_exports);
 const DEFAULT_CONFIG = {
   expertMode: false,
   valves: [],
-  zones: [],
   plans: [{ name: "Alle", groups: [] }],
   scheduler: {
     autoMode: false,
     timerTimes: [],
     extensionFactor: 1,
     pumpCapacity: 0,
-    zonePause: 0,
+    valvePause: 0,
     seasonEnabled: false,
     seasonStart: 4,
     seasonEnd: 10,
@@ -74,33 +73,26 @@ const DEFAULT_CONFIG = {
   }
 };
 function normalizeConfig(config) {
-  var _a, _b, _c;
+  var _a, _b;
   return {
     expertMode: (_a = config.expertMode) != null ? _a : DEFAULT_CONFIG.expertMode,
     valves: ((_b = config.valves) != null ? _b : []).map((valve) => {
-      var _a2, _b2, _c2, _d;
+      var _a2, _b2, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n;
       return {
         name: (_a2 = valve.name) != null ? _a2 : "",
         type: (_b2 = valve.type) != null ? _b2 : "Generic",
-        stateId: (_c2 = valve.stateId) != null ? _c2 : "",
+        stateId: (_c = valve.stateId) != null ? _c : "",
         allOffId: valve.allOffId,
-        runFor: (_d = valve.runFor) != null ? _d : 600
-      };
-    }),
-    zones: ((_c = config.zones) != null ? _c : []).map((zone) => {
-      var _a2, _b2, _c2, _d, _e, _f, _g, _h, _i, _j, _k, _l;
-      return {
-        name: (_a2 = zone.name) != null ? _a2 : "",
-        valveIndex: (_b2 = zone.valveIndex) != null ? _b2 : -1,
-        duration: (_c2 = zone.duration) != null ? _c2 : 10,
-        enabled: (_d = zone.enabled) != null ? _d : true,
-        rainIndependent: (_e = zone.rainIndependent) != null ? _e : false,
-        moistureThreshold: (_f = zone.moistureThreshold) != null ? _f : 0,
-        manualDuration: (_h = (_g = zone.manualDuration) != null ? _g : zone.duration) != null ? _h : 10,
-        flowSensorId: (_i = zone.flowSensorId) != null ? _i : "",
-        flowRate: (_j = zone.flowRate) != null ? _j : 0,
-        groups: (_k = zone.groups) != null ? _k : [],
-        days: (_l = zone.days) != null ? _l : []
+        runFor: (_d = valve.runFor) != null ? _d : 600,
+        enabled: (_e = valve.enabled) != null ? _e : true,
+        flowRateLpm: (_f = valve.flowRateLpm) != null ? _f : 0,
+        duration: (_g = valve.duration) != null ? _g : 10,
+        rainIndependent: (_h = valve.rainIndependent) != null ? _h : false,
+        moistureThreshold: (_i = valve.moistureThreshold) != null ? _i : 0,
+        manualDuration: (_k = (_j = valve.manualDuration) != null ? _j : valve.duration) != null ? _k : 10,
+        flowSensorId: (_l = valve.flowSensorId) != null ? _l : "",
+        groups: (_m = valve.groups) != null ? _m : [],
+        days: (_n = valve.days) != null ? _n : []
       };
     }),
     plans: config.plans && config.plans.length > 0 ? config.plans : DEFAULT_CONFIG.plans,

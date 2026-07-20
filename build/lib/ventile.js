@@ -208,11 +208,156 @@ class ValveController {
       write: false,
       def: ""
     });
+    await this.ensureState("enabled", {
+      name: "Valve enabled",
+      type: "boolean",
+      role: "switch",
+      read: true,
+      write: true,
+      def: this.config.enabled
+    });
+    await this.ensureState("flowRateLpm", {
+      name: "Flow rate (l/min)",
+      type: "number",
+      role: "value",
+      unit: "l/min",
+      read: true,
+      write: false,
+      def: this.config.flowRateLpm
+    });
+    await this.ensureState("duration", {
+      name: "Scheduled duration (min)",
+      type: "number",
+      role: "level.timer",
+      unit: "min",
+      read: true,
+      write: true,
+      min: 1,
+      def: this.config.duration
+    });
+    await this.ensureState("rainIndependent", {
+      name: "Rain independent",
+      type: "boolean",
+      role: "switch",
+      read: true,
+      write: true,
+      def: this.config.rainIndependent
+    });
+    await this.ensureState("moistureThreshold", {
+      name: "Moisture threshold (%)",
+      type: "number",
+      role: "value",
+      unit: "%",
+      read: true,
+      write: true,
+      min: 0,
+      max: 100,
+      def: this.config.moistureThreshold
+    });
+    await this.ensureState("manualStart", {
+      name: "Start manually",
+      type: "boolean",
+      role: "button",
+      read: true,
+      write: true,
+      def: false
+    });
+    await this.ensureState("manualDuration", {
+      name: "Manual run duration (min)",
+      type: "number",
+      role: "level.timer",
+      unit: "min",
+      read: true,
+      write: true,
+      min: 1,
+      def: this.config.manualDuration
+    });
+    await this.ensureState("flowSensorId", {
+      name: "Flow sensor state id",
+      type: "string",
+      role: "text",
+      read: true,
+      write: true,
+      def: this.config.flowSensorId
+    });
+    await this.ensureState("flowExpected", {
+      name: "Expected flow (l/min)",
+      type: "number",
+      role: "value",
+      unit: "l/min",
+      read: true,
+      write: true,
+      def: 0
+    });
+    await this.ensureState("flowActual", {
+      name: "Actual flow (l/min)",
+      type: "number",
+      role: "value",
+      unit: "l/min",
+      read: true,
+      write: false,
+      def: 0
+    });
+    await this.ensureState("calibrateFlow", {
+      name: "Calibrate flow sensor",
+      type: "boolean",
+      role: "button",
+      read: true,
+      write: true,
+      def: false
+    });
+    await this.ensureState("groups", {
+      name: "Groups (JSON)",
+      type: "string",
+      role: "json",
+      read: true,
+      write: true,
+      def: JSON.stringify(this.config.groups)
+    });
+    await this.ensureState("days", {
+      name: "Weekdays (JSON)",
+      type: "string",
+      role: "list",
+      read: true,
+      write: true,
+      def: JSON.stringify(this.config.days)
+    });
+    await this.ensureState("waterCurrent", {
+      name: "Water last run (l)",
+      type: "number",
+      role: "value.fill",
+      read: true,
+      write: false,
+      def: 0
+    });
+    await this.ensureState("waterTotal", {
+      name: "Water total (l)",
+      type: "number",
+      role: "value.fill",
+      read: true,
+      write: false,
+      def: 0
+    });
     await this.adapter.setStateAsync(`${this.id}.name`, { val: this.config.name, ack: true });
     await this.adapter.setStateAsync(`${this.id}.type`, { val: this.config.type, ack: true });
     await this.adapter.setStateAsync(`${this.id}.stateId`, { val: this.config.stateId, ack: true });
     await this.adapter.setStateAsync(`${this.id}.allOffId`, { val: (_b = this.config.allOffId) != null ? _b : "", ack: true });
     await this.adapter.setStateAsync(`${this.id}.runFor`, { val: this.config.runFor, ack: true });
+    await this.adapter.setStateAsync(`${this.id}.enabled`, { val: this.config.enabled, ack: true });
+    await this.adapter.setStateAsync(`${this.id}.flowRateLpm`, { val: this.config.flowRateLpm, ack: true });
+    await this.adapter.setStateAsync(`${this.id}.duration`, { val: this.config.duration, ack: true });
+    await this.adapter.setStateAsync(`${this.id}.rainIndependent`, { val: this.config.rainIndependent, ack: true });
+    await this.adapter.setStateAsync(`${this.id}.moistureThreshold`, {
+      val: this.config.moistureThreshold,
+      ack: true
+    });
+    await this.adapter.setStateAsync(`${this.id}.manualDuration`, { val: this.config.manualDuration, ack: true });
+    await this.adapter.setStateAsync(`${this.id}.flowSensorId`, { val: this.config.flowSensorId, ack: true });
+    await this.adapter.setStateAsync(`${this.id}.groups`, {
+      val: JSON.stringify(this.config.groups),
+      ack: true
+    });
+    await this.adapter.setStateAsync(`${this.id}.days`, { val: JSON.stringify(this.config.days), ack: true });
     await this.subscribeStatus();
   }
   async ensureState(name, common) {
@@ -423,6 +568,9 @@ class ValveController {
    */
   async start(durationSecs) {
     var _a;
+    if (!this.config.enabled) {
+      return;
+    }
     this.clearTickTimer();
     const effectiveDurationSecs = typeof durationSecs === "number" && durationSecs > 0 ? durationSecs : this.manualRunForSecs;
     this.durationSecs = effectiveDurationSecs;
@@ -482,6 +630,9 @@ class ValveController {
   /** Stop this valve immediately. */
   async stop() {
     var _a;
+    if (!this.config.enabled) {
+      return;
+    }
     this.clearTickTimer();
     this.remainingSecs = 0;
     this.running = false;

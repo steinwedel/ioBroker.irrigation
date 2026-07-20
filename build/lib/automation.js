@@ -22,36 +22,36 @@ __export(automation_exports, {
   buildBatches: () => buildBatches
 });
 module.exports = __toCommonJS(automation_exports);
-function buildBatches(zoneIndexes, zones, pumpCapacity) {
+function buildBatches(valveIndexes, valves, pumpCapacity) {
   if (pumpCapacity <= 0) {
-    return zoneIndexes.map((idx) => [idx]);
+    return valveIndexes.map((idx) => [idx]);
   }
-  const sorted = [...zoneIndexes].sort((a, b) => zones[b].duration - zones[a].duration);
+  const sorted = [...valveIndexes].sort((a, b) => valves[b].duration - valves[a].duration);
   const batches = [];
-  for (const zoneIdx of sorted) {
-    const zone = zones[zoneIdx];
-    const flowRate = zone.flowRate || 0;
+  for (const valveIdx of sorted) {
+    const valve = valves[valveIdx];
+    const flowRate = valve.flowRateLpm || 0;
     let bestBatch;
     let bestIncrease = Infinity;
     for (const batch of batches) {
       if (batch.flowSum + flowRate > pumpCapacity) {
         continue;
       }
-      const increase = Math.max(0, zone.duration - batch.duration);
+      const increase = Math.max(0, valve.duration - batch.duration);
       if (increase < bestIncrease) {
         bestIncrease = increase;
         bestBatch = batch;
       }
     }
     if (bestBatch) {
-      bestBatch.zoneIdxs.push(zoneIdx);
+      bestBatch.valveIdxs.push(valveIdx);
       bestBatch.flowSum += flowRate;
-      bestBatch.duration = Math.max(bestBatch.duration, zone.duration);
+      bestBatch.duration = Math.max(bestBatch.duration, valve.duration);
     } else {
-      batches.push({ zoneIdxs: [zoneIdx], flowSum: flowRate, duration: zone.duration });
+      batches.push({ valveIdxs: [valveIdx], flowSum: flowRate, duration: valve.duration });
     }
   }
-  return batches.map((b) => b.zoneIdxs);
+  return batches.map((b) => b.valveIdxs);
 }
 class AutomationEngine {
   deps;
@@ -60,13 +60,14 @@ class AutomationEngine {
   activePlanName = null;
   batches = [];
   currentBatchIndex = -1;
-  runningZones = /* @__PURE__ */ new Set();
-  zoneEndsAt = /* @__PURE__ */ new Map();
-  zoneDurationSecs = /* @__PURE__ */ new Map();
+  runningValves = /* @__PURE__ */ new Set();
+  valveEndsAt = /* @__PURE__ */ new Map();
+  valveDurationSecs = /* @__PURE__ */ new Map();
   inBatchPause = false;
   batchPauseEndsAt = 0;
   totalDurationMin = 0;
   startedAtMs = 0;
+  valvePauseMs = 0;
   manualRun = null;
   wasAutomationPausedForManual = false;
   wasAutomationBatchIndexBeforeManual = -1;
@@ -111,7 +112,7 @@ class AutomationEngine {
     this.activePlanName = null;
     this.batches = [];
     this.currentBatchIndex = -1;
-    this.runningZones.clear();
+    this.runningValves.clear();
     this.manualRun = null;
     await this.publishStatus();
   }
@@ -127,7 +128,7 @@ class AutomationEngine {
    */
   async requestRun(planName, source) {
     if (this.manualRun) {
-      this.deps.adapter.log.warn(`Run request (${source}) ignored: manual zone run in progress.`);
+      this.deps.adapter.log.warn(`Run request (${source}) ignored: manual valve run in progress.`);
       return;
     }
     if (this.status !== "idle") {
@@ -149,21 +150,22 @@ class AutomationEngine {
       });
       return;
     }
-    const activeZoneIndexes = this.buildActiveZoneList(config, plan.groups);
-    if (activeZoneIndexes.length === 0) {
-      this.deps.adapter.log.warn(`No active zones for plan "${planName}" today.`);
+    const activeValveIndexes = this.buildActiveValveList(config, plan.groups);
+    if (activeValveIndexes.length === 0) {
+      this.deps.adapter.log.warn(`No active valves for plan "${planName}" today.`);
       await this.deps.adapter.setStateAsync("automation.status", {
-        val: `Mode: idle (keine aktiven Zonen heute f\xFCr Plan "${planName}")`,
+        val: `Mode: idle (keine aktiven Ventile heute f\xFCr Plan "${planName}")`,
         ack: true
       });
       return;
     }
     this.activePlanName = plan.name;
     await this.deps.adapter.setStateAsync("automation.planSelect", { val: plan.name, ack: true });
-    this.batches = buildBatches(activeZoneIndexes, config.zones, config.scheduler.pumpCapacity);
+    this.batches = buildBatches(activeValveIndexes, config.valves, config.scheduler.pumpCapacity);
     this.currentBatchIndex = -1;
     this.totalDurationMin = this.computeTotalDurationMin(config);
     this.startedAtMs = Date.now();
+    this.valvePauseMs = config.scheduler.valvePause * 60 * 1e3;
     if (this.deps.isLegallyRestricted()) {
       this.deps.adapter.log.warn(`Plan "${plan.name}" prepared but legal restriction is active - waiting.`);
       this.status = "paused";
@@ -175,31 +177,28 @@ class AutomationEngine {
     await this.startNextBatch();
   }
   /**
-   * Zones belonging to the plan's groups, filtered by enabled/day/sensors. See plan buildActiveBeete() equivalent.
+   * Valves belonging to the plan's groups, filtered by enabled/day/sensors.
    *
    * @param config
    * @param planGroups
    */
-  buildActiveZoneList(config, planGroups) {
+  buildActiveValveList(config, planGroups) {
     const weekday = (/* @__PURE__ */ new Date()).getDay();
     const result = [];
-    for (let i = 0; i < config.zones.length; i++) {
-      const zone = config.zones[i];
-      if (!zone.enabled) {
+    for (let i = 0; i < config.valves.length; i++) {
+      const valve = config.valves[i];
+      if (!valve.enabled) {
         continue;
       }
-      if (zone.valveIndex < 0 || zone.valveIndex >= config.valves.length) {
+      if (valve.days.length > 0 && !valve.days.includes(weekday)) {
         continue;
       }
-      if (zone.days.length > 0 && !zone.days.includes(weekday)) {
+      if (planGroups.length > 0 && !valve.groups.some((g) => planGroups.includes(g))) {
         continue;
       }
-      if (planGroups.length > 0 && !zone.groups.some((g) => planGroups.includes(g))) {
-        continue;
-      }
-      const blocked = this.deps.isZoneBlockedForAutoRun(i);
+      const blocked = this.deps.isValveBlockedForAutoRun(i);
       if (blocked.blocked) {
-        this.deps.adapter.log.debug(`Zone ${zone.name} skipped: ${blocked.reason}`);
+        this.deps.adapter.log.debug(`Valve ${valve.name} skipped: ${blocked.reason}`);
         continue;
       }
       result.push(i);
@@ -212,13 +211,13 @@ class AutomationEngine {
       const batchDuration = Math.max(...batch.map((idx) => this.effectiveDuration(config, idx)));
       total += batchDuration;
     }
-    if (config.scheduler.zonePause > 0 && this.batches.length > 1) {
-      total += config.scheduler.zonePause * (this.batches.length - 1);
+    if (config.scheduler.valvePause > 0 && this.batches.length > 1) {
+      total += config.scheduler.valvePause * (this.batches.length - 1);
     }
     return total;
   }
-  effectiveDuration(config, zoneIndex) {
-    return config.zones[zoneIndex].duration * config.scheduler.extensionFactor;
+  effectiveDuration(config, valveIndex) {
+    return config.valves[valveIndex].duration * config.scheduler.extensionFactor;
   }
   async startNextBatch() {
     var _a, _b;
@@ -229,15 +228,14 @@ class AutomationEngine {
     }
     const config = this.deps.getConfig();
     const batch = this.batches[this.currentBatchIndex];
-    this.runningZones = new Set(batch);
+    this.runningValves = new Set(batch);
     this.inBatchPause = false;
-    for (const zoneIndex of batch) {
-      const zone = config.zones[zoneIndex];
-      const durationSecs = Math.round(this.effectiveDuration(config, zoneIndex) * 60);
-      this.zoneDurationSecs.set(zoneIndex, durationSecs);
-      this.zoneEndsAt.set(zoneIndex, Date.now() + durationSecs * 1e3);
-      await this.deps.valves[zone.valveIndex].start(durationSecs);
-      (_b = (_a = this.deps).onZoneFlowChange) == null ? void 0 : _b.call(_a, zoneIndex, true);
+    for (const valveIndex of batch) {
+      const durationSecs = Math.round(this.effectiveDuration(config, valveIndex) * 60);
+      this.valveDurationSecs.set(valveIndex, durationSecs);
+      this.valveEndsAt.set(valveIndex, Date.now() + durationSecs * 1e3);
+      await this.deps.valves[valveIndex].start(durationSecs);
+      (_b = (_a = this.deps).onValveFlowChange) == null ? void 0 : _b.call(_a, valveIndex, true);
     }
     await this.deps.adapter.setStateAsync("automation.currentBatch", {
       val: this.currentBatchIndex + 1,
@@ -256,7 +254,7 @@ class AutomationEngine {
     this.activePlanName = null;
     this.batches = [];
     this.currentBatchIndex = -1;
-    this.runningZones.clear();
+    this.runningValves.clear();
     await this.deps.adapter.setStateAsync("automation.currentBatch", { val: 0, ack: true });
     await this.deps.adapter.setStateAsync("automation.batchZones", { val: "[]", ack: true });
     await this.publishStatus();
@@ -284,23 +282,23 @@ class AutomationEngine {
       }
       return;
     }
-    const stillRunning = [...this.runningZones].filter((idx) => {
+    const stillRunning = [...this.runningValves].filter((idx) => {
       var _a2;
-      return Date.now() < ((_a2 = this.zoneEndsAt.get(idx)) != null ? _a2 : 0);
+      return Date.now() < ((_a2 = this.valveEndsAt.get(idx)) != null ? _a2 : 0);
     });
-    if (stillRunning.length !== this.runningZones.size) {
-      for (const idx of this.runningZones) {
+    if (stillRunning.length !== this.runningValves.size) {
+      for (const idx of this.runningValves) {
         if (!stillRunning.includes(idx)) {
-          (_b = (_a = this.deps).onZoneFlowChange) == null ? void 0 : _b.call(_a, idx, false);
+          (_b = (_a = this.deps).onValveFlowChange) == null ? void 0 : _b.call(_a, idx, false);
         }
       }
-      this.runningZones = new Set(stillRunning);
+      this.runningValves = new Set(stillRunning);
     }
-    if (this.runningZones.size === 0) {
+    if (this.runningValves.size === 0) {
       const config = this.deps.getConfig();
-      if (config.scheduler.zonePause > 0 && this.currentBatchIndex < this.batches.length - 1) {
+      if (config.scheduler.valvePause > 0 && this.currentBatchIndex < this.batches.length - 1) {
         this.inBatchPause = true;
-        this.batchPauseEndsAt = Date.now() + config.scheduler.zonePause * 60 * 1e3;
+        this.batchPauseEndsAt = Date.now() + this.valvePauseMs;
         await this.publishStatus();
       } else {
         await this.startNextBatch();
@@ -321,12 +319,11 @@ class AutomationEngine {
     if (this.status === "idle") {
       return;
     }
-    for (const idx of this.runningZones) {
-      const config = this.deps.getConfig();
-      await this.deps.valves[config.zones[idx].valveIndex].stop();
-      (_b = (_a = this.deps).onZoneFlowChange) == null ? void 0 : _b.call(_a, idx, false);
+    for (const idx of this.runningValves) {
+      await this.deps.valves[idx].stop();
+      (_b = (_a = this.deps).onValveFlowChange) == null ? void 0 : _b.call(_a, idx, false);
     }
-    this.runningZones.clear();
+    this.runningValves.clear();
     await this.finishRun();
   }
   async pause() {
@@ -335,9 +332,8 @@ class AutomationEngine {
       return;
     }
     if (this.status === "running") {
-      for (const idx of this.runningZones) {
-        const config = this.deps.getConfig();
-        await this.deps.valves[config.zones[idx].valveIndex].stop();
+      for (const idx of this.runningValves) {
+        await this.deps.valves[idx].stop();
       }
       this.status = "paused";
       this.pauseReason = "manual";
@@ -349,10 +345,9 @@ class AutomationEngine {
       }
       this.status = "running";
       this.pauseReason = null;
-      const config = this.deps.getConfig();
-      for (const idx of this.runningZones) {
-        const remaining = Math.max(0, Math.round((((_a = this.zoneEndsAt.get(idx)) != null ? _a : 0) - Date.now()) / 1e3));
-        await this.deps.valves[config.zones[idx].valveIndex].start(remaining);
+      for (const idx of this.runningValves) {
+        const remaining = Math.max(0, Math.round((((_a = this.valveEndsAt.get(idx)) != null ? _a : 0) - Date.now()) / 1e3));
+        await this.deps.valves[idx].start(remaining);
       }
       await this.publishStatus();
     }
@@ -365,12 +360,11 @@ class AutomationEngine {
     if (this.status !== "running" && this.status !== "paused") {
       return;
     }
-    for (const idx of this.runningZones) {
-      const config = this.deps.getConfig();
-      await this.deps.valves[config.zones[idx].valveIndex].stop();
-      (_b = (_a = this.deps).onZoneFlowChange) == null ? void 0 : _b.call(_a, idx, false);
+    for (const idx of this.runningValves) {
+      await this.deps.valves[idx].stop();
+      (_b = (_a = this.deps).onValveFlowChange) == null ? void 0 : _b.call(_a, idx, false);
     }
-    this.runningZones.clear();
+    this.runningValves.clear();
     this.inBatchPause = false;
     if (this.status === "paused") {
       this.currentBatchIndex++;
@@ -387,12 +381,11 @@ class AutomationEngine {
     if (this.status !== "running" && this.status !== "paused") {
       return;
     }
-    for (const idx of this.runningZones) {
-      const config = this.deps.getConfig();
-      await this.deps.valves[config.zones[idx].valveIndex].stop();
-      (_b = (_a = this.deps).onZoneFlowChange) == null ? void 0 : _b.call(_a, idx, false);
+    for (const idx of this.runningValves) {
+      await this.deps.valves[idx].stop();
+      (_b = (_a = this.deps).onValveFlowChange) == null ? void 0 : _b.call(_a, idx, false);
     }
-    this.runningZones.clear();
+    this.runningValves.clear();
     this.inBatchPause = false;
     if (this.currentBatchIndex > 0) {
       this.currentBatchIndex -= 2;
@@ -407,34 +400,34 @@ class AutomationEngine {
     await this.startNextBatch();
   }
   // ------------------------------------------------------------------
-  // Manual single-zone runs
+  // Manual single-valve runs
   // ------------------------------------------------------------------
-  async manualStartZone(zoneIndex) {
+  async manualStartValve(valveIndex) {
     var _a, _b;
     if (this.manualRun) {
-      this.deps.adapter.log.warn("Manual zone start ignored: another manual run is already active.");
+      this.deps.adapter.log.warn("Manual valve start ignored: another manual run is already active.");
       return;
     }
     const config = this.deps.getConfig();
-    const zone = config.zones[zoneIndex];
-    if (!zone || zone.valveIndex < 0 || zone.valveIndex >= config.valves.length) {
-      this.deps.adapter.log.error(`Manual start for zone ${zoneIndex} failed: invalid valve reference.`);
+    const valve = config.valves[valveIndex];
+    if (!valve) {
+      this.deps.adapter.log.error(`Manual start for valve ${valveIndex} failed: valve not found.`);
       return;
     }
     this.wasAutomationPausedForManual = false;
     if (this.status === "running") {
-      for (const idx of this.runningZones) {
-        await this.deps.valves[config.zones[idx].valveIndex].stop();
+      for (const idx of this.runningValves) {
+        await this.deps.valves[idx].stop();
       }
       this.wasAutomationBatchIndexBeforeManual = this.currentBatchIndex;
       this.status = "paused";
       this.pauseReason = "manual";
       this.wasAutomationPausedForManual = true;
     }
-    const durationSecs = Math.round(zone.manualDuration * 60);
-    this.manualRun = { zoneIndex, endsAt: Date.now() + durationSecs * 1e3 };
-    await this.deps.valves[zone.valveIndex].start(durationSecs);
-    (_b = (_a = this.deps).onZoneFlowChange) == null ? void 0 : _b.call(_a, zoneIndex, true);
+    const durationSecs = Math.round(valve.manualDuration * 60);
+    this.manualRun = { valveIndex, endsAt: Date.now() + durationSecs * 1e3 };
+    await this.deps.valves[valveIndex].start(durationSecs);
+    (_b = (_a = this.deps).onValveFlowChange) == null ? void 0 : _b.call(_a, valveIndex, true);
     await this.publishStatus();
   }
   async finishManualRun() {
@@ -442,12 +435,8 @@ class AutomationEngine {
     if (!this.manualRun) {
       return;
     }
-    const config = this.deps.getConfig();
-    const zone = config.zones[this.manualRun.zoneIndex];
-    if (zone) {
-      await this.deps.valves[zone.valveIndex].stop();
-      (_b = (_a = this.deps).onZoneFlowChange) == null ? void 0 : _b.call(_a, this.manualRun.zoneIndex, false);
-    }
+    await this.deps.valves[this.manualRun.valveIndex].stop();
+    (_b = (_a = this.deps).onValveFlowChange) == null ? void 0 : _b.call(_a, this.manualRun.valveIndex, false);
     this.manualRun = null;
     if (this.wasAutomationPausedForManual) {
       this.status = "running";
@@ -463,12 +452,8 @@ class AutomationEngine {
     if (!this.manualRun) {
       return;
     }
-    const config = this.deps.getConfig();
-    const zone = config.zones[this.manualRun.zoneIndex];
-    if (zone) {
-      await this.deps.valves[zone.valveIndex].stop();
-      (_b = (_a = this.deps).onZoneFlowChange) == null ? void 0 : _b.call(_a, this.manualRun.zoneIndex, false);
-    }
+    await this.deps.valves[this.manualRun.valveIndex].stop();
+    (_b = (_a = this.deps).onValveFlowChange) == null ? void 0 : _b.call(_a, this.manualRun.valveIndex, false);
     this.manualRun = null;
     this.wasAutomationPausedForManual = false;
     await this.finishRun();
@@ -480,9 +465,8 @@ class AutomationEngine {
     var _a;
     if (active) {
       if (this.status === "running") {
-        for (const idx of this.runningZones) {
-          const config = this.deps.getConfig();
-          await this.deps.valves[config.zones[idx].valveIndex].stop();
+        for (const idx of this.runningValves) {
+          await this.deps.valves[idx].stop();
         }
         this.status = "paused";
         this.pauseReason = "legalRestriction";
@@ -498,13 +482,12 @@ class AutomationEngine {
           await this.startNextBatch();
         } else {
           this.status = "running";
-          const config = this.deps.getConfig();
-          for (const idx of this.runningZones) {
+          for (const idx of this.runningValves) {
             const remaining = Math.max(
               0,
-              Math.round((((_a = this.zoneEndsAt.get(idx)) != null ? _a : 0) - Date.now()) / 1e3)
+              Math.round((((_a = this.valveEndsAt.get(idx)) != null ? _a : 0) - Date.now()) / 1e3)
             );
-            await this.deps.valves[config.zones[idx].valveIndex].start(remaining);
+            await this.deps.valves[idx].start(remaining);
           }
           await this.publishStatus();
         }
@@ -519,9 +502,9 @@ class AutomationEngine {
     const config = this.deps.getConfig();
     let text = `Mode: ${this.status}`;
     if (this.manualRun) {
-      const zone = config.zones[this.manualRun.zoneIndex];
+      const valve = config.valves[this.manualRun.valveIndex];
       const remainingSecs = Math.max(0, Math.round((this.manualRun.endsAt - Date.now()) / 1e3));
-      text = `Mode: manual (${(_a = zone == null ? void 0 : zone.name) != null ? _a : this.manualRun.zoneIndex}, noch ${Math.ceil(remainingSecs / 60)}min)`;
+      text = `Mode: manual (${(_a = valve == null ? void 0 : valve.name) != null ? _a : this.manualRun.valveIndex}, noch ${Math.ceil(remainingSecs / 60)}min)`;
     } else if (this.status !== "idle" && this.activePlanName) {
       text += ` (Plan: ${this.activePlanName})`;
       if (this.pauseReason === "legalRestriction") {
@@ -530,16 +513,16 @@ class AutomationEngine {
       if (this.inBatchPause) {
         const remaining = Math.max(0, Math.round((this.batchPauseEndsAt - Date.now()) / 1e3 / 60));
         text += ` - Pause (Versickerung), noch ${remaining}min`;
-      } else if (this.runningZones.size > 0) {
-        const zoneNames = [...this.runningZones].map((idx) => {
+      } else if (this.runningValves.size > 0) {
+        const valveNames = [...this.runningValves].map((idx) => {
           var _a2, _b2, _c;
           const remaining = Math.max(
             0,
-            Math.round((((_a2 = this.zoneEndsAt.get(idx)) != null ? _a2 : 0) - Date.now()) / 1e3 / 60)
+            Math.round((((_a2 = this.valveEndsAt.get(idx)) != null ? _a2 : 0) - Date.now()) / 1e3 / 60)
           );
-          return `${(_c = (_b2 = config.zones[idx]) == null ? void 0 : _b2.name) != null ? _c : idx} (${remaining}min)`;
+          return `${(_c = (_b2 = config.valves[idx]) == null ? void 0 : _b2.name) != null ? _c : idx} (${remaining}min)`;
         }).join(", ");
-        text += ` - Batch ${this.currentBatchIndex + 1}/${this.batches.length}: ${zoneNames}`;
+        text += ` - Batch ${this.currentBatchIndex + 1}/${this.batches.length}: ${valveNames}`;
       }
     }
     await this.deps.adapter.setStateAsync("automation.status", { val: text, ack: true });
@@ -556,7 +539,7 @@ class AutomationEngine {
     await this.deps.adapter.setStateAsync("automation.totalDuration", { val: this.totalDurationMin, ack: true });
     await this.deps.adapter.setStateAsync("automation.activePlan", { val: (_b = this.activePlanName) != null ? _b : "", ack: true });
     await this.deps.adapter.setStateAsync("automation.currentZone", {
-      val: this.runningZones.size > 0 ? [...this.runningZones][0] : -1,
+      val: this.runningValves.size > 0 ? [...this.runningValves][0] : -1,
       ack: true
     });
   }

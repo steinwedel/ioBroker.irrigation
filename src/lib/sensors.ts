@@ -8,7 +8,7 @@ export interface SensorsDeps {
 /**
  * Subscribes to configured rain/soil-moisture/temperature sensor state ids
  * and mirrors their values into sensors.* states. Also exposes the
- * zone-blocking predicate used by automation.ts's buildActiveZoneList().
+ * valve-blocking predicate used by automation.ts's buildActiveZoneList().
  */
 export class SensorManager {
     private readonly deps: SensorsDeps;
@@ -75,26 +75,26 @@ export class SensorManager {
     /**
      * See plan behavior rules "Niederschlagsunabhängigkeit" and "Bodenfeuchte-Schwellwert".
      *
-     * @param zoneIndex
+     * @param valveIndex
      */
-    public isZoneBlocked(zoneIndex: number): { blocked: boolean; reason?: string } {
+    public isValveBlocked(valveIndex: number): { blocked: boolean; reason?: string } {
         const config = this.deps.getConfig();
-        const zone = config.zones[zoneIndex];
-        if (!zone) {
+        const valve = config.valves[valveIndex];
+        if (!valve) {
             return { blocked: false };
         }
 
-        if (config.sensors.rainId && this.rainState && !zone.rainIndependent) {
+        if (config.sensors.rainId && this.rainState && !valve.rainIndependent) {
             return { blocked: true, reason: 'rain detected' };
         }
         if (
             config.sensors.soilMoistureId &&
-            zone.moistureThreshold > 0 &&
-            this.soilMoistureState >= zone.moistureThreshold
+            valve.moistureThreshold > 0 &&
+            this.soilMoistureState >= valve.moistureThreshold
         ) {
             return {
                 blocked: true,
-                reason: `soil moisture ${this.soilMoistureState}% >= threshold ${zone.moistureThreshold}%`,
+                reason: `soil moisture ${this.soilMoistureState}% >= threshold ${valve.moistureThreshold}%`,
             };
         }
         return { blocked: false };

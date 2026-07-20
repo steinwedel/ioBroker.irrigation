@@ -1,7 +1,5 @@
 /**
  * Shared TypeScript interfaces for the irrigation adapter.
- * Mirrors the `native` configuration structure documented in
- * plans/irrigation-adapter-plan.md.
  */
 
 export type ValveType = 'Gardena' | 'Homematic' | 'Rainbird' | 'Generic';
@@ -35,25 +33,20 @@ export interface IValveConfig {
     allOffId?: string;
     /** Duration in seconds used when this valve is started manually via the "state" mirror state */
     runFor: number;
-}
-
-export interface IZoneConfig {
-    name: string;
-    /** Index into native.valves[] */
-    valveIndex: number;
+    /** Only an enabled valve can be started/stopped */
+    enabled: boolean;
+    /** Flow rate in liters per minute for water consumption calculation (0 = disabled) */
+    flowRateLpm: number;
     /** Scheduled duration in minutes */
     duration: number;
-    enabled: boolean;
     // --- expert fields (always present, neutral defaults when expert mode is off) ---
     rainIndependent: boolean;
     /** Percent, 0 = disabled */
     moistureThreshold: number;
-    /** Manual single-zone run duration in minutes */
+    /** Manual single-valve run duration in minutes */
     manualDuration: number;
     /** Optional flow sensor state id (liters/min or pulses) */
     flowSensorId: string;
-    /** l/min, used for calculated water consumption */
-    flowRate: number;
     groups: string[];
     /** 0=Sunday..6=Saturday, empty array = every day */
     days: number[];
@@ -61,7 +54,7 @@ export interface IZoneConfig {
 
 export interface IPlanConfig {
     name: string;
-    /** Zone groups to include. Empty = all zones (used by built-in "Alle" plan) */
+    /** Valve groups to include. Empty = all valves (used by built-in "Alle" plan) */
     groups: string[];
 }
 
@@ -72,8 +65,8 @@ export interface ISchedulerConfig {
     extensionFactor: number;
     /** l/min, 0 = sequential only, >0 = parallel batch optimization */
     pumpCapacity: number;
-    /** Minutes between batches/zones, 0 = disabled */
-    zonePause: number;
+    /** Minutes between batches/valves, 0 = disabled */
+    valvePause: number;
     seasonEnabled: boolean;
     seasonStart: number;
     seasonEnd: number;
@@ -122,7 +115,6 @@ export interface IWaterConsumptionConfig {
 export interface IrrigationNativeConfig {
     expertMode: boolean;
     valves: IValveConfig[];
-    zones: IZoneConfig[];
     plans: IPlanConfig[];
     scheduler: ISchedulerConfig;
     sensors: ISensorsConfig;
@@ -138,11 +130,10 @@ export type AutomationStatus = 'idle' | 'running' | 'paused';
 /** What caused the automation to be paused/blocked, for status text + resume logic */
 export type PauseReason = 'manual' | 'legalRestriction' | null;
 
-/** A batch of zone indexes that run in parallel */
+/** A batch of valve indexes that run in parallel */
 export type Batch = number[];
 
-export interface IActiveZoneRuntime {
-    zoneIndex: number;
+export interface IActiveValveRuntime {
     valveIndex: number;
     /** Effective duration in minutes for this run (already includes extensionFactor for automatic runs) */
     durationMinutes: number;

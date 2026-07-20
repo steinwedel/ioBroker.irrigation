@@ -21,6 +21,17 @@ __export(valvescanner_exports, {
   scanForValves: () => scanForValves
 });
 module.exports = __toCommonJS(valvescanner_exports);
+const VALVE_DEFAULTS = {
+  enabled: true,
+  flowRateLpm: 0,
+  duration: 10,
+  rainIndependent: false,
+  moistureThreshold: 0,
+  manualDuration: 10,
+  flowSensorId: "",
+  groups: [],
+  days: []
+};
 function nameToString(name, fallback) {
   var _a;
   if (!name) {
@@ -142,7 +153,8 @@ async function scanGardena(adapter, instance, locationId) {
           type: "Gardena",
           stateId: id,
           allOffId: stopLookup.has(stopId) ? stopId : void 0,
-          runFor: 600
+          runFor: 600,
+          ...VALVE_DEFAULTS
         });
       });
       if (skippedPlaceholders > 0) {
@@ -204,7 +216,8 @@ async function scanHomematic(adapter, instance) {
         name: nameToString((_b2 = memberObj == null ? void 0 : memberObj.common) == null ? void 0 : _b2.name, memberId),
         type: "Homematic",
         stateId: memberId,
-        runFor: 600
+        runFor: 600,
+        ...VALVE_DEFAULTS
       });
     });
     adapter.log.debug(`Homematic scan: valves found=${valves.length} errors=${errors.length}`);
@@ -233,7 +246,8 @@ async function scanRainbird(adapter, instance) {
           type: "Rainbird",
           stateId: basePath,
           allOffId: stopExists ? stopId : void 0,
-          runFor: 600
+          runFor: 600,
+          ...VALVE_DEFAULTS
         });
       }
     }
@@ -286,7 +300,8 @@ async function scanGeneric(adapter, instance) {
         name: nameToString((_a2 = memberObj == null ? void 0 : memberObj.common) == null ? void 0 : _a2.name, memberId),
         type: "Generic",
         stateId,
-        runFor: 600
+        runFor: 600,
+        ...VALVE_DEFAULTS
       });
     });
     adapter.log.debug(`Generic scan: valves found=${valves.length} errors=${errors.length}`);

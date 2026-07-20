@@ -1,6 +1,12 @@
 # Changelog
-## 0.1.2 (2026-07-20)
-* Changelog jetzt in CHANGELOG.md
+
+## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **ENHANCED**: Zones removed — all zone properties (duration, enabled, flow rate, rain independence, etc.) moved directly to valves. Valves now operate independently with direct valve-index-based automation instead of zone-index-based
+* (Gerhard Steinwedel) **NEW**: Valves now have `enabled` guard — disabled valves cannot be started/stopped
+* (Gerhard Steinwedel) **NEW**: Valves now have `flowRateLpm` (l/min) for water consumption calculation
+
+### 0.1.2 (2026-07-20)
+* (Gerhard Steinwedel) Changelog moved from README.md to CHANGELOG.md
 
 ### 0.1.1 (2026-07-20)
 * (Gerhard Steinwedel) **FIXED**: Rate limiter now enforces 1s minimum interval between requests to prevent parallel bursts reaching the Gardena API

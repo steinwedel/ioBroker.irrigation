@@ -77,21 +77,21 @@ class SensorManager {
   /**
    * See plan behavior rules "Niederschlagsunabhängigkeit" and "Bodenfeuchte-Schwellwert".
    *
-   * @param zoneIndex
+   * @param valveIndex
    */
-  isZoneBlocked(zoneIndex) {
+  isValveBlocked(valveIndex) {
     const config = this.deps.getConfig();
-    const zone = config.zones[zoneIndex];
-    if (!zone) {
+    const valve = config.valves[valveIndex];
+    if (!valve) {
       return { blocked: false };
     }
-    if (config.sensors.rainId && this.rainState && !zone.rainIndependent) {
+    if (config.sensors.rainId && this.rainState && !valve.rainIndependent) {
       return { blocked: true, reason: "rain detected" };
     }
-    if (config.sensors.soilMoistureId && zone.moistureThreshold > 0 && this.soilMoistureState >= zone.moistureThreshold) {
+    if (config.sensors.soilMoistureId && valve.moistureThreshold > 0 && this.soilMoistureState >= valve.moistureThreshold) {
       return {
         blocked: true,
-        reason: `soil moisture ${this.soilMoistureState}% >= threshold ${zone.moistureThreshold}%`
+        reason: `soil moisture ${this.soilMoistureState}% >= threshold ${valve.moistureThreshold}%`
       };
     }
     return { blocked: false };

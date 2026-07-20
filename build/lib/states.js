@@ -217,7 +217,7 @@ async function createBaseStates(adapter) {
     write: true,
     def: 10
   });
-  await setObj(adapter, "automation.zonePause", {
+  await setObj(adapter, "automation.valvePause", {
     name: "Pause between batches",
     type: "number",
     role: "value",
@@ -466,8 +466,8 @@ async function createBaseStates(adapter) {
     write: false,
     def: false
   });
-  await setObj(adapter, "watchdog.flowDeviationZone", {
-    name: "Zone with flow deviation",
+  await setObj(adapter, "watchdog.flowDeviationValve", {
+    name: "Valve with flow deviation",
     type: "number",
     role: "value",
     read: true,
@@ -540,7 +540,7 @@ async function applyConfigToStates(adapter, config) {
   await adapter.setStateAsync("automation.active", { val: config.scheduler.autoMode, ack: true });
   await adapter.setStateAsync("automation.extensionFactor", { val: config.scheduler.extensionFactor, ack: true });
   await adapter.setStateAsync("automation.pumpCapacity", { val: config.scheduler.pumpCapacity, ack: true });
-  await adapter.setStateAsync("automation.zonePause", { val: config.scheduler.zonePause, ack: true });
+  await adapter.setStateAsync("automation.valvePause", { val: config.scheduler.valvePause, ack: true });
   await adapter.setStateAsync("automation.seasonEnabled", { val: config.scheduler.seasonEnabled, ack: true });
   await adapter.setStateAsync("automation.seasonStart", { val: config.scheduler.seasonStart, ack: true });
   await adapter.setStateAsync("automation.seasonEnd", { val: config.scheduler.seasonEnd, ack: true });

@@ -2,20 +2,18 @@ import type { IrrigationNativeConfig } from './types';
 
 /**
  * Default configuration values. Used to defensively fill in missing fields
- * when the adapter is upgraded and new config fields are introduced
- * (see plan risk "io-package.json native muss stabil bleiben").
+ * when the adapter is upgraded and new config fields are introduced.
  */
 export const DEFAULT_CONFIG: IrrigationNativeConfig = {
     expertMode: false,
     valves: [],
-    zones: [],
     plans: [{ name: 'Alle', groups: [] }],
     scheduler: {
         autoMode: false,
         timerTimes: [],
         extensionFactor: 1,
         pumpCapacity: 0,
-        zonePause: 0,
+        valvePause: 0,
         seasonEnabled: false,
         seasonStart: 4,
         seasonEnd: 10,
@@ -72,19 +70,15 @@ export function normalizeConfig(config: Partial<IrrigationNativeConfig>): Irriga
             stateId: valve.stateId ?? '',
             allOffId: valve.allOffId,
             runFor: valve.runFor ?? 600,
-        })),
-        zones: (config.zones ?? []).map(zone => ({
-            name: zone.name ?? '',
-            valveIndex: zone.valveIndex ?? -1,
-            duration: zone.duration ?? 10,
-            enabled: zone.enabled ?? true,
-            rainIndependent: zone.rainIndependent ?? false,
-            moistureThreshold: zone.moistureThreshold ?? 0,
-            manualDuration: zone.manualDuration ?? zone.duration ?? 10,
-            flowSensorId: zone.flowSensorId ?? '',
-            flowRate: zone.flowRate ?? 0,
-            groups: zone.groups ?? [],
-            days: zone.days ?? [],
+            enabled: valve.enabled ?? true,
+            flowRateLpm: valve.flowRateLpm ?? 0,
+            duration: valve.duration ?? 10,
+            rainIndependent: valve.rainIndependent ?? false,
+            moistureThreshold: valve.moistureThreshold ?? 0,
+            manualDuration: valve.manualDuration ?? valve.duration ?? 10,
+            flowSensorId: valve.flowSensorId ?? '',
+            groups: valve.groups ?? [],
+            days: valve.days ?? [],
         })),
         plans: config.plans && config.plans.length > 0 ? config.plans : DEFAULT_CONFIG.plans,
         scheduler: { ...DEFAULT_CONFIG.scheduler, ...config.scheduler },
