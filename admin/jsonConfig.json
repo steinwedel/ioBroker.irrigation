@@ -231,7 +231,7 @@
             "items": {
                 "plans": {
                     "type": "table",
-                    "label": "Plans",
+                    "label": "Plan names",
                     "newLine": true,
                     "noDelete": false,
                     "items": [
@@ -239,51 +239,103 @@
                             "type": "text",
                             "attr": "name",
                             "title": "Name",
-                            "width": "45%"
-                        },
-                        {
-                            "type": "selectSendTo",
-                            "attr": "valveIndexes",
-                            "title": "Valves in plan",
-                            "width": "55%",
-                            "multiple": true,
-                            "command": "listValves",
-                            "jsonData": "{}"
+                            "width": "100%"
                         }
                     ]
                 },
-                "bulkActions": {
+                "planEditorHeader": {
                     "type": "header",
-                    "text": "Bulk actions"
+                    "text": "Valve assignment"
                 },
-                "addAllToAllPlans": {
-                    "type": "sendTo",
-                    "label": "Add all valves to every plan",
-                    "command": "addAllValvesToAllPlans",
+                "_editPlan": {
+                    "type": "selectSendTo",
+                    "label": "Plan to edit",
+                    "command": "listPlans",
                     "jsonData": "{}",
-                    "newLine": true,
+                    "doNotSave": true,
+                    "sm": 6,
+                    "md": 4,
+                    "lg": 3
+                },
+                "planValvesRefresh": {
+                    "type": "selectSendTo",
+                    "label": "Valves in selected plan",
+                    "multiple": true,
+                    "command": "listPlanValves",
+                    "jsonData": "{}",
+                    "alsoDependsOn": ["_editPlan"],
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6,
+                    "doNotSave": true
+                },
+                "availableValves": {
+                    "type": "selectSendTo",
+                    "label": "Available valves",
+                    "multiple": true,
+                    "command": "listAvailableValves",
+                    "jsonData": "{}",
+                    "alsoDependsOn": ["_editPlan"],
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6,
+                    "doNotSave": true
+                },
+                "planButtons": {
+                    "type": "header",
+                    "text": "Actions"
+                },
+                "assignSelected": {
+                    "type": "sendTo",
+                    "buttonText": "Assign selected valves",
+                    "label": "Assign selected to plan",
+                    "command": "assignValvesToPlan",
+                    "jsonData": "{}",
+                    "alsoDependsOn": ["_editPlan", "availableValves"],
+                    "variant": "contained",
+                    "icon": "add",
+                    "sm": 6,
+                    "md": 4,
+                    "lg": 3
+                },
+                "removeSelected": {
+                    "type": "sendTo",
+                    "buttonText": "Remove selected valves",
+                    "label": "Remove selected from plan",
+                    "command": "removeValvesFromPlan",
+                    "jsonData": "{}",
+                    "alsoDependsOn": ["_editPlan", "planValvesRefresh"],
+                    "variant": "contained",
+                    "icon": "delete",
+                    "sm": 6,
+                    "md": 4,
+                    "lg": 3
+                },
+                "addAllToPlan": {
+                    "type": "sendTo",
+                    "buttonText": "Add all valves",
+                    "label": "Add all valves to plan",
+                    "command": "addAllValvesToPlan",
+                    "jsonData": "{}",
+                    "alsoDependsOn": ["_editPlan"],
                     "variant": "outlined",
                     "icon": "add",
                     "sm": 6,
                     "md": 4,
                     "lg": 3
                 },
-                "clearAllPlans": {
+                "removeAllFromPlan": {
                     "type": "sendTo",
-                    "label": "Remove all valves from every plan",
-                    "command": "removeAllValvesFromAllPlans",
+                    "buttonText": "Remove all valves",
+                    "label": "Remove all valves from plan",
+                    "command": "removeAllValvesFromPlan",
                     "jsonData": "{}",
-                    "newLine": true,
+                    "alsoDependsOn": ["_editPlan"],
                     "variant": "outlined",
                     "icon": "delete",
                     "sm": 6,
                     "md": 4,
                     "lg": 3
-                },
-                "planInfo": {
-                    "type": "staticText",
-                    "label": "",
-                    "text": "Use the multi-select in the plans table to assign or remove individual valves. Use the buttons above for bulk operations."
                 }
             }
         },

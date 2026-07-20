@@ -223,7 +223,10 @@ export class AutomationEngine {
 
     /**
      * Valves assigned to the plan, filtered by enabled/day/sensors.
-     * Empty valveIndexes (default "Alle" plan) includes all valves.
+     * Empty valveIndexes (default "Alle" plan) includes all valves. A
+     * non-empty valveIndexes array containing no real valve index (e.g. the
+     * NONE_SENTINEL used by "remove all valves from plan") matches nothing,
+     * since real valve indices are always >= 0.
      *
      * @param config
      * @param plan

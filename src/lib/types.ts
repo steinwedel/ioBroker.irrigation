@@ -18,6 +18,15 @@ export function formatValveNumber(index: number): string {
 }
 
 /**
+ * Sentinel value used in `IPlanConfig.valveIndexes` to explicitly represent
+ * "no valves assigned", as opposed to an empty array which means "all
+ * valves" (see buildActiveValveList()). Real valve indices are always >= 0,
+ * so this value never collides with an actual valve index and matching it
+ * against `valveIndexes.includes(i)` for any real valve always fails.
+ */
+export const NONE_SENTINEL = -1;
+
+/**
  * Auto-discovery scan types. "Generic" additionally scans any adapter not
  * covered by a specific type. "All" runs every scan type (Gardena, Rainbird,
  * Homematic, Generic) in one go, without any adapter instance restriction.
@@ -53,7 +62,12 @@ export interface IValveConfig {
 
 export interface IPlanConfig {
     name: string;
-    /** Valve indexes to include in this plan */
+    /**
+     * Valve indexes to include in this plan. Empty array (the default "Alle"
+     * plan) means "all valves" - see buildActiveValveList(). To express "no
+     * valves" explicitly (e.g. "remove all valves from plan"), use
+     * [NONE_SENTINEL] rather than [] to avoid the "all valves" fallback.
+     */
     valveIndexes: number[];
 }
 

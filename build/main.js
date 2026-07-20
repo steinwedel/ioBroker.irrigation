@@ -134,12 +134,10 @@ class Irrigation extends utils.Adapter {
       ...valve,
       valveNumber: `valve_${(0, import_types.formatValveNumber)(index)}`
     }));
-    const needsValveMigration = rawValves.length !== migratedValves.length || rawValves.some((raw, i) => !raw.valveNumber);
+    const needsValveMigration = rawValves.length !== migratedValves.length || rawValves.some((raw) => !raw.valveNumber);
     if (needsValveMigration) {
       this.log.info("Migrating native.valves to include newly introduced fields (runFor, valveNumber).");
-      await this.extendForeignObjectAsync(`system.adapter.${this.namespace}`, {
-        native: { valves: migratedValves }
-      });
+      await this.writeNativeAsync({ valves: migratedValves });
     }
   }
   /**
@@ -345,17 +343,18 @@ class Irrigation extends utils.Adapter {
     }
   }
   onUnload(callback) {
-    var _a, _b, _c, _d, _e;
+    var _a, _b, _c, _d, _e, _f;
     try {
       if (this.rateLimiterPoll) {
         this.clearInterval(this.rateLimiterPoll);
         this.rateLimiterPoll = void 0;
       }
-      (_a = this.automation) == null ? void 0 : _a.destroy();
-      (_b = this.scheduler) == null ? void 0 : _b.destroy();
-      (_c = this.dwd) == null ? void 0 : _c.destroy();
-      (_d = this.weatherApi) == null ? void 0 : _d.destroy();
-      (_e = this.flowMonitor) == null ? void 0 : _e.destroy();
+      (_a = this.rateLimiter) == null ? void 0 : _a.destroy();
+      (_b = this.automation) == null ? void 0 : _b.destroy();
+      (_c = this.scheduler) == null ? void 0 : _c.destroy();
+      (_d = this.dwd) == null ? void 0 : _d.destroy();
+      (_e = this.weatherApi) == null ? void 0 : _e.destroy();
+      (_f = this.flowMonitor) == null ? void 0 : _f.destroy();
       for (const valve of this.valves) {
         valve.destroy();
       }
@@ -450,31 +449,36 @@ class Irrigation extends utils.Adapter {
     }
   }
   /**
-   * Writes `native.valves` directly to our own instance object instead of returning
-   * `{native, saveConfig: true}` via a sendTo response, which would pop up an extra
-   * "Save configuration?" confirmation dialog in the admin UI. Writing the object
-   * directly persists it immediately and triggers the usual adapter restart, without
-   * that extra dialog.
+   * Writes a partial `native` update directly to our own instance object instead of
+   * using extendForeignObjectAsync or returning `{native, saveConfig: true}` via a
+   * sendTo response (which would pop up an extra "Save configuration?" confirmation
+   * dialog in the admin UI). Writing the object directly persists it immediately and
+   * triggers the usual adapter restart, without that extra dialog.
    *
-   * Uses a full setForeignObjectAsync (read-modify-write) rather than
-   * extendForeignObjectAsync: extendObject's underlying deep-merge (node.extend)
-   * treats arrays as index-keyed maps, so merging a shorter (or empty) array into an
-   * existing longer array does not fully replace it - some stale elements would
-   * survive. A full read-modify-write always replaces the array outright.
+   * Uses a full read-modify-write (getForeignObjectAsync + setForeignObjectAsync)
+   * rather than extendForeignObjectAsync: extendObject's underlying deep-merge
+   * (node.extend) treats arrays as index-keyed maps, so merging a shorter (or
+   * differently-shaped) array/object into an existing one does not fully replace it -
+   * stale elements/fields would survive. That, in turn, can make the same "needs
+   * migration" check keep matching true on every restart (since the stale data never
+   * actually gets overwritten), causing the adapter to restart itself in a loop. A
+   * full read-modify-write always replaces the given top-level native keys outright.
    *
-   * @param valves
+   * @param partialNative
    */
-  async writeValvesToNative(valves) {
+  async writeNativeAsync(partialNative) {
     var _a;
     const instanceObj = await this.getForeignObjectAsync(`system.adapter.${this.namespace}`);
     if (instanceObj) {
-      instanceObj.native = (_a = instanceObj.native) != null ? _a : {};
-      instanceObj.native.valves = valves;
+      instanceObj.native = { ...(_a = instanceObj.native) != null ? _a : {}, ...partialNative };
       await this.setForeignObjectAsync(`system.adapter.${this.namespace}`, instanceObj);
     }
   }
+  async writeValvesToNative(valves) {
+    await this.writeNativeAsync({ valves });
+  }
   async onMessage(obj) {
-    var _a, _b;
+    var _a, _b, _c, _d, _e, _f, _g, _h;
     if (typeof obj !== "object" || !obj.command) {
       return;
     }
@@ -561,23 +565,109 @@ class Irrigation extends utils.Adapter {
       this.sendTo(obj.from, obj.command, options, obj.callback);
       return;
     }
+    if (obj.command === "listPlans" && obj.callback) {
+      const options = this.config2.plans.map((p, i) => ({
+        label: p.name || `Plan ${i}`,
+        value: i
+      }));
+      this.sendTo(obj.from, obj.command, options, obj.callback);
+      return;
+    }
+    if (obj.command === "listPlanValves" && obj.callback) {
+      const planIndex = (_c = obj.message) == null ? void 0 : _c._editPlan;
+      const planValveIndexes = planIndex !== void 0 && planIndex >= 0 && planIndex < this.config2.plans.length ? this.config2.plans[planIndex].valveIndexes : [];
+      const options = planValveIndexes.filter((i) => i !== import_types.NONE_SENTINEL).map((i) => {
+        var _a2;
+        return {
+          label: `[${(0, import_types.formatValveNumber)(i)}] ${((_a2 = this.config2.valves[i]) == null ? void 0 : _a2.name) || "unnamed"}`,
+          value: i
+        };
+      });
+      this.sendTo(obj.from, obj.command, options, obj.callback);
+      return;
+    }
+    if (obj.command === "listAvailableValves" && obj.callback) {
+      const planIndex = (_d = obj.message) == null ? void 0 : _d._editPlan;
+      const planValveIndexes = planIndex !== void 0 && planIndex >= 0 && planIndex < this.config2.plans.length ? new Set(this.config2.plans[planIndex].valveIndexes) : /* @__PURE__ */ new Set();
+      const options = this.config2.valves.map((v, i) => ({ label: `[${(0, import_types.formatValveNumber)(i)}] ${v.name || "unnamed"}`, value: i })).filter((opt) => !planValveIndexes.has(opt.value));
+      this.sendTo(obj.from, obj.command, options, obj.callback);
+      return;
+    }
+    if (obj.command === "assignValvesToPlan" && obj.callback) {
+      const msg = obj.message;
+      const planIndex = msg == null ? void 0 : msg._editPlan;
+      const selected = (_e = msg == null ? void 0 : msg.availableValves) != null ? _e : [];
+      if (planIndex === void 0 || planIndex < 0 || planIndex >= this.config2.plans.length) {
+        return;
+      }
+      const updatedPlans = this.config2.plans.map((p, i) => {
+        if (i !== planIndex) {
+          return p;
+        }
+        const merged = /* @__PURE__ */ new Set([...p.valveIndexes, ...selected]);
+        merged.delete(import_types.NONE_SENTINEL);
+        return { ...p, valveIndexes: [...merged].sort((a, b) => a - b) };
+      });
+      await this.writeNativeAsync({ plans: updatedPlans });
+      this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
+      return;
+    }
+    if (obj.command === "removeValvesFromPlan" && obj.callback) {
+      const msg = obj.message;
+      const planIndex = msg == null ? void 0 : msg._editPlan;
+      const selected = new Set((_f = msg == null ? void 0 : msg.planValvesRefresh) != null ? _f : []);
+      if (planIndex === void 0 || planIndex < 0 || planIndex >= this.config2.plans.length) {
+        return;
+      }
+      const updatedPlans = this.config2.plans.map((p, i) => {
+        if (i !== planIndex) {
+          return p;
+        }
+        const remaining = p.valveIndexes.filter((vi) => !selected.has(vi));
+        return { ...p, valveIndexes: remaining.length > 0 ? remaining : [import_types.NONE_SENTINEL] };
+      });
+      await this.writeNativeAsync({ plans: updatedPlans });
+      this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
+      return;
+    }
+    if (obj.command === "addAllValvesToPlan" && obj.callback) {
+      const planIndex = (_g = obj.message) == null ? void 0 : _g._editPlan;
+      if (planIndex === void 0 || planIndex < 0 || planIndex >= this.config2.plans.length) {
+        return;
+      }
+      const allValveIndexes = this.config2.valves.map((_, i) => i);
+      const updatedPlans = this.config2.plans.map(
+        (p, i) => i === planIndex ? { ...p, valveIndexes: [...allValveIndexes] } : p
+      );
+      await this.writeNativeAsync({ plans: updatedPlans });
+      this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
+      return;
+    }
+    if (obj.command === "removeAllValvesFromPlan" && obj.callback) {
+      const planIndex = (_h = obj.message) == null ? void 0 : _h._editPlan;
+      if (planIndex === void 0 || planIndex < 0 || planIndex >= this.config2.plans.length) {
+        return;
+      }
+      const updatedPlans = this.config2.plans.map(
+        (p, i) => i === planIndex ? { ...p, valveIndexes: [import_types.NONE_SENTINEL] } : p
+      );
+      await this.writeNativeAsync({ plans: updatedPlans });
+      this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
+      return;
+    }
     if (obj.command === "addAllValvesToAllPlans" && obj.callback) {
       const allValveIndexes = this.config2.valves.map((_, i) => i);
       const updatedPlans = this.config2.plans.map((p) => ({
         ...p,
         valveIndexes: [...allValveIndexes]
       }));
-      await this.extendForeignObjectAsync(`system.adapter.${this.namespace}`, {
-        native: { plans: updatedPlans }
-      });
+      await this.writeNativeAsync({ plans: updatedPlans });
       this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
       return;
     }
     if (obj.command === "removeAllValvesFromAllPlans" && obj.callback) {
-      const updatedPlans = this.config2.plans.map((p) => ({ ...p, valveIndexes: [] }));
-      await this.extendForeignObjectAsync(`system.adapter.${this.namespace}`, {
-        native: { plans: updatedPlans }
-      });
+      const updatedPlans = this.config2.plans.map((p) => ({ ...p, valveIndexes: [import_types.NONE_SENTINEL] }));
+      await this.writeNativeAsync({ plans: updatedPlans });
       this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
       return;
     }

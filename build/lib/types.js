@@ -18,14 +18,17 @@ var __copyProps = (to, from, except, desc) => {
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 var types_exports = {};
 __export(types_exports, {
+  NONE_SENTINEL: () => NONE_SENTINEL,
   formatValveNumber: () => formatValveNumber
 });
 module.exports = __toCommonJS(types_exports);
 function formatValveNumber(index) {
   return String(index).padStart(3, "0");
 }
+const NONE_SENTINEL = -1;
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
+  NONE_SENTINEL,
   formatValveNumber
 });
 //# sourceMappingURL=types.js.map
