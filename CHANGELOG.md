@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.2.9 (2026-07-20)
 *(No user-visible changes — only restored the "WORK IN PROGRESS" placeholder in CHANGELOG.md)
 
 ## 0.2.8 (2026-07-20)
