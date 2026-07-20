@@ -18,7 +18,12 @@ export default [
             'admin/admin.d.ts',
             'admin/blockly.js',
             '**/adapter-config.d.ts',
-            'widgets/**/*.js'
+            'widgets/**/*.js',
+            // Legacy ioBroker javascript-adapter script (predecessor of this adapter,
+            // kept for reference/migration purposes). Uses the javascript-adapter
+            // sandbox globals (on, setState, schedule, createState, ...) which are
+            // not part of this Node.js/TypeScript adapter and are not lintable here.
+            'BW Automatik.js'
         ],
     },
     {

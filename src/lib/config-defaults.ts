@@ -79,9 +79,10 @@ export function normalizeConfig(config: Partial<IrrigationNativeConfig>): Irriga
             flowSensorId: valve.flowSensorId ?? '',
             days: valve.days ?? [],
         })),
-        plans: (config.plans && config.plans.length > 0
-            ? config.plans.map(p => ({ name: p.name ?? '', valveIndexes: p.valveIndexes ?? [] }))
-            : DEFAULT_CONFIG.plans),
+        plans:
+            config.plans && config.plans.length > 0
+                ? config.plans.map(p => ({ name: p.name ?? '', valveIndexes: p.valveIndexes ?? [] }))
+                : DEFAULT_CONFIG.plans,
         scheduler: { ...DEFAULT_CONFIG.scheduler, ...config.scheduler },
         sensors: { ...DEFAULT_CONFIG.sensors, ...config.sensors },
         weather: { ...DEFAULT_CONFIG.weather, ...config.weather },

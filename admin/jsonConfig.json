@@ -229,34 +229,69 @@
             "type": "panel",
             "label": "Plans",
             "items": {
-                "plans": {
-                    "type": "table",
-                    "label": "Plan names",
-                    "newLine": true,
-                    "noDelete": false,
-                    "items": [
-                        {
-                            "type": "text",
-                            "attr": "name",
-                            "title": "Name",
-                            "width": "100%"
-                        }
-                    ]
-                },
                 "planEditorHeader": {
                     "type": "header",
-                    "text": "Valve assignment",
-                    "size": 4
+                    "text": "Manage plans",
+                    "size": 4,
+                    "newLine": true
                 },
                 "_editPlan": {
                     "type": "selectSendTo",
-                    "label": "Plan to edit",
+                    "label": "Selected plan",
                     "command": "listPlans",
                     "jsonData": "{}",
+                    "doNotSave": true,
+                    "newLine": true,
+                    "sm": 6,
+                    "md": 4,
+                    "lg": 3
+                },
+                "deletePlan": {
+                    "type": "sendTo",
+                    "label": "Delete selected plan",
+                    "command": "deletePlan",
+                    "jsonData": "{}",
+                    "alsoDependsOn": ["_editPlan"],
+                    "useNative": true,
+                    "icon": "delete",
+                    "color": "secondary",
+                    "confirm": {
+                        "text": "This deletes the selected plan and its valve assignment. This cannot be undone.",
+                        "title": "Delete plan?",
+                        "type": "warning",
+                        "ok": "Delete",
+                        "cancel": "Cancel"
+                    },
+                    "sm": 6,
+                    "md": 4,
+                    "lg": 3
+                },
+                "newPlanName": {
+                    "type": "text",
+                    "label": "New plan name",
+                    "newLine": true,
                     "doNotSave": true,
                     "sm": 6,
                     "md": 4,
                     "lg": 3
+                },
+                "addPlan": {
+                    "type": "sendTo",
+                    "label": "Add new plan",
+                    "command": "createPlan",
+                    "jsonData": "{}",
+                    "alsoDependsOn": ["newPlanName"],
+                    "useNative": true,
+                    "icon": "add",
+                    "variant": "contained",
+                    "sm": 6,
+                    "md": 4,
+                    "lg": 3
+                },
+                "planValvesHeader": {
+                    "type": "header",
+                    "text": "Valve assignment",
+                    "size": 4
                 },
                 "planValvesRefresh": {
                     "type": "selectSendTo",
@@ -265,6 +300,7 @@
                     "command": "listPlanValves",
                     "jsonData": "{}",
                     "alsoDependsOn": ["_editPlan"],
+                    "newLine": true,
                     "sm": 12,
                     "md": 6,
                     "lg": 6,
@@ -289,7 +325,6 @@
                 },
                 "assignSelected": {
                     "type": "sendTo",
-                    "buttonText": "Assign selected valves",
                     "label": "Assign selected to plan",
                     "command": "assignValvesToPlan",
                     "jsonData": "{}",
@@ -302,7 +337,6 @@
                 },
                 "removeSelected": {
                     "type": "sendTo",
-                    "buttonText": "Remove selected valves",
                     "label": "Remove selected from plan",
                     "command": "removeValvesFromPlan",
                     "jsonData": "{}",
@@ -315,7 +349,6 @@
                 },
                 "addAllToPlan": {
                     "type": "sendTo",
-                    "buttonText": "Add all valves",
                     "label": "Add all valves to plan",
                     "command": "addAllValvesToPlan",
                     "jsonData": "{}",
@@ -328,7 +361,6 @@
                 },
                 "removeAllFromPlan": {
                     "type": "sendTo",
-                    "buttonText": "Remove all valves",
                     "label": "Remove all valves from plan",
                     "command": "removeAllValvesFromPlan",
                     "jsonData": "{}",

@@ -629,6 +629,24 @@ class Irrigation extends utils.Adapter {
             return;
         }
 
+        if (obj.command === 'deleteValvesByStateId') {
+            const stateIds = (obj.message as { stateIds?: string[] } | undefined)?.stateIds ?? [];
+            const toRemove = new Set(stateIds);
+            const before = this.config2.valves.length;
+            const remaining = this.config2.valves.filter(v => !toRemove.has(v.stateId));
+            const removedCount = before - remaining.length;
+            this.log.info(`Removing ${removedCount} valve(s) by stateId from configuration`);
+
+            if (removedCount > 0) {
+                await this.writeValvesToNative(remaining);
+            }
+
+            if (obj.callback) {
+                this.sendTo(obj.from, obj.command, { removedCount }, obj.callback);
+            }
+            return;
+        }
+
         if (obj.command === 'send' && obj.callback) {
             this.sendTo(obj.from, obj.command, 'Message received', obj.callback);
         }
@@ -648,6 +666,43 @@ class Irrigation extends utils.Adapter {
                 value: i,
             }));
             this.sendTo(obj.from, obj.command, options, obj.callback);
+            return;
+        }
+
+        if (obj.command === 'createPlan' && obj.callback) {
+            const name = ((obj.message as Record<string, unknown>)?.newPlanName as string | undefined)?.trim();
+            if (!name) {
+                this.sendTo(obj.from, obj.command, { error: 'noName' }, obj.callback);
+                return;
+            }
+            const updatedPlans = [...this.config2.plans, { name, valveIndexes: [] }];
+            await this.writeNativeAsync({ plans: updatedPlans });
+            const newIndex = updatedPlans.length - 1;
+            this.log.info(`Created new plan "${name}"`);
+            this.sendTo(
+                obj.from,
+                obj.command,
+                { native: { plans: updatedPlans, _editPlan: newIndex, newPlanName: '' } },
+                obj.callback,
+            );
+            return;
+        }
+
+        if (obj.command === 'deletePlan' && obj.callback) {
+            const planIndex = (obj.message as Record<string, unknown>)?._editPlan as number | undefined;
+            if (planIndex === undefined || planIndex < 0 || planIndex >= this.config2.plans.length) {
+                this.sendTo(obj.from, obj.command, { error: 'noSelection' }, obj.callback);
+                return;
+            }
+            if (this.config2.plans.length <= 1) {
+                this.sendTo(obj.from, obj.command, { error: 'lastPlan' }, obj.callback);
+                return;
+            }
+            const removedName = this.config2.plans[planIndex].name;
+            const updatedPlans = this.config2.plans.filter((_, i) => i !== planIndex);
+            await this.writeNativeAsync({ plans: updatedPlans });
+            this.log.info(`Deleted plan "${removedName}"`);
+            this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans, _editPlan: 0 } }, obj.callback);
             return;
         }
 
