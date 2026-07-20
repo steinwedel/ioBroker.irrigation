@@ -1,6 +1,6 @@
 {
   "name": "iobroker.irrigation",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Controls irrigation zones, valves and watering schedules based on sensors and weather data",
   "author": {
     "name": "Gerhard Steinwedel",
