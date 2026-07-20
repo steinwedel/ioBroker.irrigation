@@ -1,290 +1,303 @@
 {
-    "common": {
-        "name": "irrigation",
-        "version": "0.0.8",
-        "news": {
-            "0.0.8": {
-                "en": "Valves table now shows the valve number and an editable manual run duration; fixed Gardena status source and Homematic stop/countdown",
-                "de": "Ventiltabelle zeigt jetzt die Ventilnummer und eine editierbare manuelle Laufzeit; Gardena-Statusquelle und Homematic Stop/Countdown korrigiert"
-            },
-            "0.0.7": {
-                "en": "Valve \"state\" is now writable to start/stop directly, regardless of underlying hardware",
-                "de": "Ventil-\"state\" ist jetzt beschreibbar, um unabhängig von der Hardware direkt zu starten/stoppen"
-            },
-            "0.0.6": {
-                "en": "Homematic valve discovery now uses the \"Bewässerung\" function enum",
-                "de": "Homematic-Ventilerkennung nutzt jetzt die Funktionskategorie \"Bewässerung\""
-            },
-            "0.0.2": {
-                "en": "Removed Location ID field from valve scan UI",
-                "de": "Location-ID-Feld aus Ventil-Scan-UI entfernt"
-            },
-            "0.0.1": {
-                "en": "initial release",
-                "de": "Erstveröffentlichung",
-                "ru": "Начальная версия",
-                "pt": "lançamento inicial",
-                "nl": "Eerste uitgave",
-                "fr": "Première version",
-                "it": "Versione iniziale",
-                "es": "Versión inicial",
-                "pl": "Pierwsze wydanie",
-                "uk": "Початкова версія",
-                "zh-cn": "首次出版"
-            }
-        },
-        "titleLang": {
-            "en": "Irrigation",
-            "de": "Bewässerung",
-            "ru": "Орошение",
-            "pt": "Irrigação",
-            "nl": "Irrigatie",
-            "fr": "Irrigation",
-            "it": "Irrigazione",
-            "es": "Riego",
-            "pl": "Nawadnianie",
-            "uk": "зрошення",
-            "zh-cn": "灌溉"
-        },
-        "desc": {
-            "en": "Controls irrigation zones, valves and watering schedules based on sensors and weather data",
-            "de": "Steuert Bewässerungszonen, Ventile und Bewässerungspläne basierend auf Sensoren und Wetterdaten",
-            "ru": "Управляет зонами орошения, клапанами и графиками полива на основе датчиков и погодных данных.",
-            "pt": "Controla zonas de irrigação, válvulas e cronogramas de irrigação com base em sensores e dados meteorológicos",
-            "nl": "Regelt irrigatiezones, kleppen en bewateringsschema's op basis van sensoren en weergegevens",
-            "fr": "Contrôle les zones d'irrigation, les vannes et les programmes d'arrosage en fonction de capteurs et de données météorologiques.",
-            "it": "Controlla le zone di irrigazione, le valvole e i programmi di irrigazione in base a sensori e dati meteorologici",
-            "es": "Controla zonas de riego, válvulas y programas de riego basados ​​en sensores y datos meteorológicos.",
-            "pl": "Kontroluje strefy nawadniania, zawory i harmonogramy nawadniania w oparciu o czujniki i dane pogodowe",
-            "uk": "Controls irrigation zones, valves and watering schedules based on sensors and weather data",
-            "zh-cn": "根据传感器和天气数据控制灌溉区、阀门和浇水时间表"
-        },
-        "authors": [
-            "Gerhard Steinwedel <dev@steinwedel.de>"
-        ],
-        "keywords": [
-            "irrigation",
-            "garden",
-            "watering",
-            "sprinkler",
-            "zones",
-            "valves",
-            "sensor",
-            "weather",
-            "smart home"
-        ],
-        "licenseInformation": {
-            "type": "free",
-            "license": "MIT"
-        },
-        "platform": "Javascript/Node.js",
-        "icon": "irrigation.png",
-        "enabled": true,
-        "extIcon": "https://raw.githubusercontent.com/steinwedel/ioBroker.irrigation/main/admin/irrigation.png",
-        "readme": "https://github.com/steinwedel/ioBroker.irrigation/blob/main/README.md",
-        "loglevel": "info",
-        "tier": 3,
-        "mode": "daemon",
-        "type": "garden",
-        "compact": true,
-        "connectionType": "local",
-        "dataSource": "poll",
-        "messagebox": true,
-        "supportedMessages": {
-            "custom": true
-        },
-        "adminUI": {
-            "config": "json"
-        },
-        "dependencies": [
-            {
-                "js-controller": ">=6.0.11"
-            }
-        ],
-        "globalDependencies": [
-            {
-                "admin": ">=7.0.23"
-            }
-        ]
+  "common": {
+    "name": "irrigation",
+    "version": "0.1.0",
+    "news": {
+      "0.1.0": {
+        "en": "**NEW**: Smartgarden API rate limiter — enforces 9/10s + 699/7d + 1s min-interval to prevent 504 bursts (Gardena API)\n**FIXED**: Gardena valves now count down every second (adapter-owned tick, synced with smartgarden's 60s push); auto-stop suppressed (device closes itself)",
+        "de": "**NEU**: Smartgarden API-Ratenbegrenzer – erzwingt ein Mindestintervall von 9/10 Sekunden + 699/7 Tagen + 1 Sekunde, um 504-Fehlerspitzen zu verhindern (Gardena API)\n**BEHOBEN**: Gardena-Ventile zählen jetzt jede Sekunde herunter (vom Adapter gesteuerter Tick, synchronisiert mit dem 60-Sekunden-Takt von Smartgarden); automatische Abschaltung deaktiviert (Gerät schließt sich selbst).",
+        "ru": "**НОВИНКА**: Ограничитель скорости запросов к API Smartgarden — устанавливает минимальный интервал 9/10 с + 699/7 дн + 1 с для предотвращения всплесков ошибок 504 (API Gardena)\n**ИСПРАВЛЕНО**: Клапаны Gardena теперь отсчитывают время каждую секунду (тик, принадлежащий адаптеру, синхронизирован с 60-секундным импульсом SmartGarden); автоматическая остановка отключена (устройство закрывается само).",
+        "pt": "**NOVO**: Limitador de taxa da API Smartgarden — impõe um intervalo mínimo de 9/10s + 699/7d + 1s para evitar rajadas de erros 504 (API Gardena)\n**CORRIGIDO**: As válvulas Gardena agora fazem a contagem regressiva a cada segundo (o sinal do adaptador é sincronizado com o alerta de 60 segundos do SmartGarden); o desligamento automático foi desativado (o dispositivo se fecha sozinho).",
+        "nl": "**NIEUW**: Smartgarden API-snelheidsbegrenzer — dwingt een minimuminterval van 9/10s + 699/7d + 1s af om 504-pieken te voorkomen (Gardena API)\n**OPGELOST**: Gardena-kleppen tellen nu elke seconde af (tik van de adapter, gesynchroniseerd met de drukknop van smartgarden van 60 seconden); automatische stop is uitgeschakeld (het apparaat sluit zichzelf).",
+        "fr": "**NOUVEAU** : Limiteur de débit de l’API Smartgarden — impose un intervalle minimum de 9/10 s + 699/7 j + 1 s pour éviter les pics d’erreurs 504 (API Gardena)\n**CORRIGÉ** : Les vannes Gardena décomptent désormais chaque seconde (tic-tac géré par l’adaptateur, synchronisé avec l’impulsion de 60 secondes de Smartgarden) ; l’arrêt automatique est désactivé (l’appareil se ferme automatiquement).",
+        "it": "**NOVITÀ**: Limitatore di frequenza API Smartgarden: impone un intervallo minimo di 9/10s + 699/7d + 1s per prevenire picchi di errori 504 (API Garden)\n**RISOLTO**: Le valvole Gardena ora contano alla rovescia ogni secondo (tick gestito dall'adattatore, sincronizzato con l'impulso di 60 secondi di smartgarden); arresto automatico disabilitato (il dispositivo si chiude da solo).",
+        "es": "**NUEVO**: Limitador de velocidad de la API de Smartgarden: aplica un intervalo mínimo de 9/10 s + 699/7 d + 1 s para evitar ráfagas 504 (API de Gardena).\n**CORREGIDO**: Las válvulas Gardena ahora cuentan hacia atrás cada segundo (ticket del adaptador, sincronizado con el pulso de 60 segundos de smartgarden); se ha desactivado la parada automática (el dispositivo se cierra solo).",
+        "pl": "**NOWOŚĆ**: Ogranicznik szybkości interfejsu API Smartgarden — wymusza minimalny interwał 9/10 s + 699/7 dni + 1 s, aby zapobiec serii 504 (API Gardena)\n**NAPRAWIONO**: Zawory Gardena teraz odliczają czas co sekundę (tykanie zależne od adaptera, zsynchronizowane z 60-sekundowym naciśnięciem smartgarden); wyłączone automatyczne zatrzymywanie (urządzenie zamyka się samo)",
+        "uk": "**НОВИНКА**: Обмежувач швидкості API Smartgarden — застосовує мінімальний інтервал 9/10 с + 699/7 днів + 1 с для запобігання спалахам 504 (API Gardena)\n**ВИПРАВЛЕНО**: Клапани Gardena тепер відраховуються щосекунди (тикетка, що належить адаптеру, синхронізована з натисканням 60 секунд у smartgarden); автоматична зупинка пригнічена (пристрій сам закривається)",
+        "zh-cn": "**新增**：Smartgarden API 速率限制器 — 强制执行 9/10 秒 + 699/7 天 + 1 秒最小间隔，以防止 504 突发请求（Gardena API）\n**已修复**：Gardena阀门现在每秒倒计时一次（适配器自带滴答声，与SmartGarden的60秒推送同步）；自动停止功能已禁用（设备会自动关闭）。"
+      },
+      "0.0.8": {
+        "en": "Valves table now shows the valve number and an editable manual run duration; fixed Gardena status source and Homematic stop/countdown",
+        "de": "Ventiltabelle zeigt jetzt die Ventilnummer und eine editierbare manuelle Laufzeit; Gardena-Statusquelle und Homematic Stop/Countdown korrigiert"
+      },
+      "0.0.7": {
+        "en": "Valve \"state\" is now writable to start/stop directly, regardless of underlying hardware",
+        "de": "Ventil-\"state\" ist jetzt beschreibbar, um unabhängig von der Hardware direkt zu starten/stoppen"
+      },
+      "0.0.6": {
+        "en": "Homematic valve discovery now uses the \"Bewässerung\" function enum",
+        "de": "Homematic-Ventilerkennung nutzt jetzt die Funktionskategorie \"Bewässerung\""
+      },
+      "0.0.2": {
+        "en": "Removed Location ID field from valve scan UI",
+        "de": "Location-ID-Feld aus Ventil-Scan-UI entfernt"
+      },
+      "0.0.1": {
+        "en": "initial release",
+        "de": "Erstveröffentlichung",
+        "ru": "Начальная версия",
+        "pt": "lançamento inicial",
+        "nl": "Eerste uitgave",
+        "fr": "Première version",
+        "it": "Versione iniziale",
+        "es": "Versión inicial",
+        "pl": "Pierwsze wydanie",
+        "uk": "Початкова версія",
+        "zh-cn": "首次出版"
+      }
     },
-    "native": {
-        "expertMode": false,
-        "valves": [],
-        "zones": [],
-        "plans": [
-            {
-                "name": "Alle",
-                "groups": []
-            }
-        ],
-        "scheduler": {
-            "autoMode": false,
-            "timerTimes": [],
-            "extensionFactor": 1,
-            "pumpCapacity": 0,
-            "zonePause": 0,
-            "seasonEnabled": false,
-            "seasonStart": 4,
-            "seasonEnd": 10,
-            "frostEnabled": false,
-            "frostMinTemp": 2,
-            "icalAdapterInstance": "",
-            "icalTriggerState": "",
-            "icalTitlePrefix": "Bewässerung"
-        },
-        "sensors": {
-            "rainId": "",
-            "soilMoistureId": "",
-            "temperatureId": ""
-        },
-        "weather": {
-            "enabled": false,
-            "apiType": "openweathermap",
-            "apiKey": "",
-            "latitude": 0,
-            "longitude": 0,
-            "pollInterval": 30
-        },
-        "legalRestriction": {
-            "enabled": false,
-            "stationId": "10338",
-            "monthStart": 6,
-            "monthEnd": 9,
-            "hourStart": 11,
-            "hourEnd": 17,
-            "minTemperature": 27,
-            "checkInterval": 10
-        },
-        "notifications": {
-            "pushoverInstance": "",
-            "telegramInstance": ""
-        },
-        "waterConsumption": {
-            "enabled": false
-        }
+    "titleLang": {
+      "en": "Irrigation",
+      "de": "Bewässerung",
+      "ru": "Орошение",
+      "pt": "Irrigação",
+      "nl": "Irrigatie",
+      "fr": "Irrigation",
+      "it": "Irrigazione",
+      "es": "Riego",
+      "pl": "Nawadnianie",
+      "uk": "зрошення",
+      "zh-cn": "灌溉"
     },
-    "encryptedNative": [
-        "weather.apiKey"
+    "desc": {
+      "en": "Controls irrigation zones, valves and watering schedules based on sensors and weather data",
+      "de": "Steuert Bewässerungszonen, Ventile und Bewässerungspläne basierend auf Sensoren und Wetterdaten",
+      "ru": "Управляет зонами орошения, клапанами и графиками полива на основе датчиков и погодных данных.",
+      "pt": "Controla zonas de irrigação, válvulas e cronogramas de irrigação com base em sensores e dados meteorológicos",
+      "nl": "Regelt irrigatiezones, kleppen en bewateringsschema's op basis van sensoren en weergegevens",
+      "fr": "Contrôle les zones d'irrigation, les vannes et les programmes d'arrosage en fonction de capteurs et de données météorologiques.",
+      "it": "Controlla le zone di irrigazione, le valvole e i programmi di irrigazione in base a sensori e dati meteorologici",
+      "es": "Controla zonas de riego, válvulas y programas de riego basados ​​en sensores y datos meteorológicos.",
+      "pl": "Kontroluje strefy nawadniania, zawory i harmonogramy nawadniania w oparciu o czujniki i dane pogodowe",
+      "uk": "Controls irrigation zones, valves and watering schedules based on sensors and weather data",
+      "zh-cn": "根据传感器和天气数据控制灌溉区、阀门和浇水时间表"
+    },
+    "authors": [
+      "Gerhard Steinwedel <dev@steinwedel.de>"
     ],
-    "protectedNative": [
-        "weather.apiKey"
+    "keywords": [
+      "irrigation",
+      "garden",
+      "watering",
+      "sprinkler",
+      "zones",
+      "valves",
+      "sensor",
+      "weather",
+      "smart home"
     ],
-    "objects": [],
-    "instanceObjects": [
-        {
-            "_id": "valves",
-            "type": "folder",
-            "common": {
-                "name": {
-                    "en": "Valves",
-                    "de": "Ventile"
-                }
-            },
-            "native": {}
-        },
-        {
-            "_id": "zones",
-            "type": "folder",
-            "common": {
-                "name": {
-                    "en": "Zones",
-                    "de": "Zonen"
-                }
-            },
-            "native": {}
-        },
-        {
-            "_id": "automation",
-            "type": "channel",
-            "common": {
-                "name": {
-                    "en": "Automation",
-                    "de": "Automatik"
-                }
-            },
-            "native": {}
-        },
-        {
-            "_id": "sensors",
-            "type": "channel",
-            "common": {
-                "name": {
-                    "en": "Sensors",
-                    "de": "Sensoren"
-                }
-            },
-            "native": {}
-        },
-        {
-            "_id": "weather",
-            "type": "channel",
-            "common": {
-                "name": {
-                    "en": "Weather",
-                    "de": "Wetter"
-                }
-            },
-            "native": {}
-        },
-        {
-            "_id": "legalRestriction",
-            "type": "channel",
-            "common": {
-                "name": {
-                    "en": "Legal restriction",
-                    "de": "Beregnungssperre"
-                }
-            },
-            "native": {}
-        },
-        {
-            "_id": "watchdog",
-            "type": "channel",
-            "common": {
-                "name": {
-                    "en": "Watchdog",
-                    "de": "Watchdog"
-                }
-            },
-            "native": {}
-        },
-        {
-            "_id": "waterConsumption",
-            "type": "channel",
-            "common": {
-                "name": {
-                    "en": "Water consumption",
-                    "de": "Wasserverbrauch"
-                }
-            },
-            "native": {}
-        },
-        {
-            "_id": "info",
-            "type": "channel",
-            "common": {
-                "name": {
-                    "en": "Information",
-                    "de": "Information"
-                }
-            },
-            "native": {}
-        },
-        {
-            "_id": "info.connection",
-            "type": "state",
-            "common": {
-                "role": "indicator.connected",
-                "name": {
-                    "en": "If connected to control system",
-                    "de": "Verbindung zum Steuerungssystem"
-                },
-                "type": "boolean",
-                "read": true,
-                "write": false,
-                "def": false
-            },
-            "native": {}
-        }
+    "licenseInformation": {
+      "type": "free",
+      "license": "MIT"
+    },
+    "platform": "Javascript/Node.js",
+    "icon": "irrigation.png",
+    "enabled": true,
+    "extIcon": "https://raw.githubusercontent.com/steinwedel/ioBroker.irrigation/main/admin/irrigation.png",
+    "readme": "https://github.com/steinwedel/ioBroker.irrigation/blob/main/README.md",
+    "loglevel": "info",
+    "tier": 3,
+    "mode": "daemon",
+    "type": "garden",
+    "compact": true,
+    "connectionType": "local",
+    "dataSource": "poll",
+    "messagebox": true,
+    "supportedMessages": {
+      "custom": true
+    },
+    "adminUI": {
+      "config": "json"
+    },
+    "dependencies": [
+      {
+        "js-controller": ">=6.0.11"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=7.0.23"
+      }
     ]
+  },
+  "native": {
+    "expertMode": false,
+    "valves": [],
+    "zones": [],
+    "plans": [
+      {
+        "name": "Alle",
+        "groups": []
+      }
+    ],
+    "scheduler": {
+      "autoMode": false,
+      "timerTimes": [],
+      "extensionFactor": 1,
+      "pumpCapacity": 0,
+      "zonePause": 0,
+      "seasonEnabled": false,
+      "seasonStart": 4,
+      "seasonEnd": 10,
+      "frostEnabled": false,
+      "frostMinTemp": 2,
+      "icalAdapterInstance": "",
+      "icalTriggerState": "",
+      "icalTitlePrefix": "Bewässerung"
+    },
+    "sensors": {
+      "rainId": "",
+      "soilMoistureId": "",
+      "temperatureId": ""
+    },
+    "weather": {
+      "enabled": false,
+      "apiType": "openweathermap",
+      "apiKey": "",
+      "latitude": 0,
+      "longitude": 0,
+      "pollInterval": 30
+    },
+    "legalRestriction": {
+      "enabled": false,
+      "stationId": "10338",
+      "monthStart": 6,
+      "monthEnd": 9,
+      "hourStart": 11,
+      "hourEnd": 17,
+      "minTemperature": 27,
+      "checkInterval": 10
+    },
+    "notifications": {
+      "pushoverInstance": "",
+      "telegramInstance": ""
+    },
+    "waterConsumption": {
+      "enabled": false
+    }
+  },
+  "encryptedNative": [
+    "weather.apiKey"
+  ],
+  "protectedNative": [
+    "weather.apiKey"
+  ],
+  "objects": [],
+  "instanceObjects": [
+    {
+      "_id": "valves",
+      "type": "folder",
+      "common": {
+        "name": {
+          "en": "Valves",
+          "de": "Ventile"
+        }
+      },
+      "native": {}
+    },
+    {
+      "_id": "zones",
+      "type": "folder",
+      "common": {
+        "name": {
+          "en": "Zones",
+          "de": "Zonen"
+        }
+      },
+      "native": {}
+    },
+    {
+      "_id": "automation",
+      "type": "channel",
+      "common": {
+        "name": {
+          "en": "Automation",
+          "de": "Automatik"
+        }
+      },
+      "native": {}
+    },
+    {
+      "_id": "sensors",
+      "type": "channel",
+      "common": {
+        "name": {
+          "en": "Sensors",
+          "de": "Sensoren"
+        }
+      },
+      "native": {}
+    },
+    {
+      "_id": "weather",
+      "type": "channel",
+      "common": {
+        "name": {
+          "en": "Weather",
+          "de": "Wetter"
+        }
+      },
+      "native": {}
+    },
+    {
+      "_id": "legalRestriction",
+      "type": "channel",
+      "common": {
+        "name": {
+          "en": "Legal restriction",
+          "de": "Beregnungssperre"
+        }
+      },
+      "native": {}
+    },
+    {
+      "_id": "watchdog",
+      "type": "channel",
+      "common": {
+        "name": {
+          "en": "Watchdog",
+          "de": "Watchdog"
+        }
+      },
+      "native": {}
+    },
+    {
+      "_id": "waterConsumption",
+      "type": "channel",
+      "common": {
+        "name": {
+          "en": "Water consumption",
+          "de": "Wasserverbrauch"
+        }
+      },
+      "native": {}
+    },
+    {
+      "_id": "info",
+      "type": "channel",
+      "common": {
+        "name": {
+          "en": "Information",
+          "de": "Information"
+        }
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.connection",
+      "type": "state",
+      "common": {
+        "role": "indicator.connected",
+        "name": {
+          "en": "If connected to control system",
+          "de": "Verbindung zum Steuerungssystem"
+        },
+        "type": "boolean",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    }
+  ]
 }
