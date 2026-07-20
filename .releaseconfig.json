@@ -4,9 +4,6 @@
         "license",
         "manual-review"
     ],
-    "changelog": {
-        "addPlaceholder": true
-    },
     "exec": {
         "before_commit": "npm run build"
     }
