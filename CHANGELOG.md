@@ -1,5 +1,4 @@
 # Changelog
-## **WORK IN PROGRESS**
 
 ## 0.2.6 (2026-07-20)
 * (Gerhard Steinwedel) **ENHANCED**: Plans tab in admin UI no longer shows a separate plan-name table — the "Selected plan" dropdown is now the single control for managing plans, with new "Add new plan" and "Delete selected plan" actions (`createPlan`/`deletePlan` message handlers)
