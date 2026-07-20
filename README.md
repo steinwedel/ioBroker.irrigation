@@ -270,7 +270,8 @@ When flow sensors are configured per zone:
 -->
 
 ### **WORK IN PROGRESS**
-* (Gerhard Steinwedel) Implemented core adapter: valves (Gardena/Homematic/Rainbird/Generic) with auto-discovery, zones, plans, sequential/parallel batch automation, scheduler (timer + iCal), sensors (rain/soil moisture/temperature), legal watering restriction (DWD), weather API, water consumption tracking, flow monitoring/calibration, notifications, and normal/expert admin UI
+* (Gerhard Steinwedel) **NEW**: Smartgarden API rate limiter — enforces 9/10s + 699/7d + 1s min-interval to prevent 504 bursts (Gardena API)
+* (Gerhard Steinwedel) **FIXED**: Gardena valves now count down every second (adapter-owned tick, synced with smartgarden's 60s push); auto-stop suppressed (device closes itself)
 
 ## License
 MIT License
