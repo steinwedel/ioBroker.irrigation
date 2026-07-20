@@ -21,6 +21,25 @@ import { scanForValves } from './lib/valvescanner';
 import { RateLimiter } from './lib/rate-limiter';
 
 /**
+ * Extracts the `_editPlan` plan index from a sendTo message payload.
+ *
+ * The admin UI's `jsonData` templates serialize a missing/never-selected
+ * dropdown value as JSON `null` (via `JSON.stringify(data._editPlan ?? null)`,
+ * see admin/jsonConfig.json) rather than omitting the key entirely, so this
+ * helper treats `null` the same as `undefined` - both mean "no plan
+ * selected". Without this, `null < 0` and `null >= length` both evaluate to
+ * `false` in JavaScript, which would let a `null` index slip past the
+ * `planIndex === undefined || planIndex < 0 || ...` checks used everywhere
+ * else and be treated as if it were a valid index.
+ *
+ * @param message
+ */
+function readPlanIndex(message: unknown): number | undefined {
+    const value = (message as Record<string, unknown> | undefined)?._editPlan;
+    return typeof value === 'number' ? value : undefined;
+}
+
+/**
  * Key-order-independent shallow equality check for two plain objects (e.g.
  * IValveConfig entries). Used instead of JSON.stringify comparison, since
  * JSON.stringify is sensitive to property insertion order and can report
@@ -689,7 +708,7 @@ class Irrigation extends utils.Adapter {
         }
 
         if (obj.command === 'deletePlan' && obj.callback) {
-            const planIndex = (obj.message as Record<string, unknown>)?._editPlan as number | undefined;
+            const planIndex = readPlanIndex(obj.message);
             if (planIndex === undefined || planIndex < 0 || planIndex >= this.config2.plans.length) {
                 this.sendTo(obj.from, obj.command, { error: 'noSelection' }, obj.callback);
                 return;
@@ -707,7 +726,7 @@ class Irrigation extends utils.Adapter {
         }
 
         if (obj.command === 'listPlanValves' && obj.callback) {
-            const planIndex = (obj.message as Record<string, unknown>)?._editPlan as number | undefined;
+            const planIndex = readPlanIndex(obj.message);
             const planValveIndexes =
                 planIndex !== undefined && planIndex >= 0 && planIndex < this.config2.plans.length
                     ? this.config2.plans[planIndex].valveIndexes
@@ -723,7 +742,7 @@ class Irrigation extends utils.Adapter {
         }
 
         if (obj.command === 'listAvailableValves' && obj.callback) {
-            const planIndex = (obj.message as Record<string, unknown>)?._editPlan as number | undefined;
+            const planIndex = readPlanIndex(obj.message);
             const planValveIndexes =
                 planIndex !== undefined && planIndex >= 0 && planIndex < this.config2.plans.length
                     ? new Set(this.config2.plans[planIndex].valveIndexes)
@@ -737,7 +756,7 @@ class Irrigation extends utils.Adapter {
 
         if (obj.command === 'assignValvesToPlan' && obj.callback) {
             const msg = obj.message as Record<string, unknown>;
-            const planIndex = msg?._editPlan as number | undefined;
+            const planIndex = readPlanIndex(msg);
             const selected = (msg?.availableValves as number[] | undefined) ?? [];
             if (planIndex === undefined || planIndex < 0 || planIndex >= this.config2.plans.length) {
                 return;
@@ -757,7 +776,7 @@ class Irrigation extends utils.Adapter {
 
         if (obj.command === 'removeValvesFromPlan' && obj.callback) {
             const msg = obj.message as Record<string, unknown>;
-            const planIndex = msg?._editPlan as number | undefined;
+            const planIndex = readPlanIndex(msg);
             const selected = new Set((msg?.planValvesRefresh as number[] | undefined) ?? []);
             if (planIndex === undefined || planIndex < 0 || planIndex >= this.config2.plans.length) {
                 return;
@@ -778,7 +797,7 @@ class Irrigation extends utils.Adapter {
         }
 
         if (obj.command === 'addAllValvesToPlan' && obj.callback) {
-            const planIndex = (obj.message as Record<string, unknown>)?._editPlan as number | undefined;
+            const planIndex = readPlanIndex(obj.message);
             if (planIndex === undefined || planIndex < 0 || planIndex >= this.config2.plans.length) {
                 return;
             }
@@ -792,7 +811,7 @@ class Irrigation extends utils.Adapter {
         }
 
         if (obj.command === 'removeAllValvesFromPlan' && obj.callback) {
-            const planIndex = (obj.message as Record<string, unknown>)?._editPlan as number | undefined;
+            const planIndex = readPlanIndex(obj.message);
             if (planIndex === undefined || planIndex < 0 || planIndex >= this.config2.plans.length) {
                 return;
             }

@@ -7,7 +7,7 @@
  *   1. Prüft, ob CHANGELOG.md bereits einen befüllten
  *      "## **WORK IN PROGRESS**"-Platzhalter enthält (das release-script
  *      verlangt zwingend genau diesen Marker, um den "nächste Version"-Block
- *      zu erkennen - siehe @alcalzone/release-script-plugin-changelog).
+ *      zu erkennen - siehe the `\@alcalzone/release-script-plugin-changelog` package.
  *   2. Falls der Platzhalter fehlt oder leer ist: sammelt alle Commits seit
  *      dem letzten Git-Tag (bzw. dem letzten Changelog-Versionseintrag),
  *      lässt daraus per LLM-API eine Changelog-Beschreibung im Projektformat
@@ -60,10 +60,7 @@ function loadDotEnv() {
         }
         const key = line.slice(0, eqIndex).trim();
         let value = line.slice(eqIndex + 1).trim();
-        if (
-            (value.startsWith('"') && value.endsWith('"')) ||
-            (value.startsWith("'") && value.endsWith("'"))
-        ) {
+        if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
             value = value.slice(1, -1);
         }
         if (key && process.env[key] === undefined) {
@@ -112,15 +109,7 @@ function getDiffSince(ref, maxChars = 12000) {
     try {
         // Exclude generated/build artifacts and lockfiles - they add noise
         // without giving the model useful signal for a changelog summary.
-        const diff = git([
-            'diff',
-            `${ref}..HEAD`,
-            '--',
-            '.',
-            ':!build',
-            ':!package-lock.json',
-            ':!*.map',
-        ]);
+        const diff = git(['diff', `${ref}..HEAD`, '--', '.', ':!build', ':!package-lock.json', ':!*.map']);
         return diff.length > maxChars ? `${diff.slice(0, maxChars)}\n... (truncated)` : diff;
     } catch {
         return '';
@@ -199,7 +188,9 @@ async function callOpenRouter(prompt) {
         }),
     });
     if (!response.ok) {
-        throw new Error(`OpenRouter API request failed: HTTP ${response.status} ${response.statusText} - ${await response.text()}`);
+        throw new Error(
+            `OpenRouter API request failed: HTTP ${response.status} ${response.statusText} - ${await response.text()}`,
+        );
     }
     const data = await response.json();
     return data.choices?.[0]?.message?.content?.trim();
@@ -220,7 +211,9 @@ async function callOpenAI(prompt) {
         }),
     });
     if (!response.ok) {
-        throw new Error(`OpenAI API request failed: HTTP ${response.status} ${response.statusText} - ${await response.text()}`);
+        throw new Error(
+            `OpenAI API request failed: HTTP ${response.status} ${response.statusText} - ${await response.text()}`,
+        );
     }
     const data = await response.json();
     return data.choices?.[0]?.message?.content?.trim();
@@ -242,7 +235,9 @@ async function callAnthropic(prompt) {
         }),
     });
     if (!response.ok) {
-        throw new Error(`Anthropic API request failed: HTTP ${response.status} ${response.statusText} - ${await response.text()}`);
+        throw new Error(
+            `Anthropic API request failed: HTTP ${response.status} ${response.statusText} - ${await response.text()}`,
+        );
     }
     const data = await response.json();
     return data.content?.[0]?.text?.trim();
