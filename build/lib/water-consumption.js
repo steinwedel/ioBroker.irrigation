@@ -21,7 +21,6 @@ __export(water_consumption_exports, {
   WaterConsumptionTracker: () => WaterConsumptionTracker
 });
 module.exports = __toCommonJS(water_consumption_exports);
-var import_types = require("./types");
 class WaterConsumptionTracker {
   deps;
   valveStartedAt = /* @__PURE__ */ new Map();
@@ -86,11 +85,6 @@ class WaterConsumptionTracker {
     await this.deps.adapter.setStateAsync("waterConsumption.week", { val: round2(this.weekTotal), ack: true });
     await this.deps.adapter.setStateAsync("waterConsumption.month", { val: round2(this.monthTotal), ack: true });
     await this.deps.adapter.setStateAsync("waterConsumption.total", { val: round2(this.grandTotal), ack: true });
-    const valveId = `valves.valve_${(0, import_types.formatValveNumber)(valveIndex)}`;
-    const currentTotal = await this.deps.adapter.getStateAsync(`${valveId}.waterTotal`);
-    const newTotal = (typeof (currentTotal == null ? void 0 : currentTotal.val) === "number" ? currentTotal.val : 0) + liters;
-    await this.deps.adapter.setStateAsync(`${valveId}.waterCurrent`, { val: round2(liters), ack: true });
-    await this.deps.adapter.setStateAsync(`${valveId}.waterTotal`, { val: round2(newTotal), ack: true });
   }
   rolloverIfNeeded() {
     const nowDay = (/* @__PURE__ */ new Date()).getDate();

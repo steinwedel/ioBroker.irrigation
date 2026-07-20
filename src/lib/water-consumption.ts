@@ -1,4 +1,4 @@
-import { formatValveNumber, type IrrigationNativeConfig } from './types';
+import type { IrrigationNativeConfig } from './types';
 
 export interface WaterConsumptionDeps {
     adapter: ioBroker.Adapter;
@@ -79,12 +79,6 @@ export class WaterConsumptionTracker {
         await this.deps.adapter.setStateAsync('waterConsumption.week', { val: round2(this.weekTotal), ack: true });
         await this.deps.adapter.setStateAsync('waterConsumption.month', { val: round2(this.monthTotal), ack: true });
         await this.deps.adapter.setStateAsync('waterConsumption.total', { val: round2(this.grandTotal), ack: true });
-
-        const valveId = `valves.valve_${formatValveNumber(valveIndex)}`;
-        const currentTotal = await this.deps.adapter.getStateAsync(`${valveId}.waterTotal`);
-        const newTotal = (typeof currentTotal?.val === 'number' ? currentTotal.val : 0) + liters;
-        await this.deps.adapter.setStateAsync(`${valveId}.waterCurrent`, { val: round2(liters), ack: true });
-        await this.deps.adapter.setStateAsync(`${valveId}.waterTotal`, { val: round2(newTotal), ack: true });
     }
 
     private rolloverIfNeeded(): void {

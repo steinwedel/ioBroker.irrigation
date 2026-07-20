@@ -301,32 +301,6 @@ export class ValveController {
             write: true,
             def: this.config.flowSensorId,
         });
-        await this.ensureState('flowExpected', {
-            name: 'Expected flow (l/min)',
-            type: 'number',
-            role: 'value',
-            unit: 'l/min',
-            read: true,
-            write: true,
-            def: 0,
-        });
-        await this.ensureState('flowActual', {
-            name: 'Actual flow (l/min)',
-            type: 'number',
-            role: 'value',
-            unit: 'l/min',
-            read: true,
-            write: false,
-            def: 0,
-        });
-        await this.ensureState('calibrateFlow', {
-            name: 'Calibrate flow sensor',
-            type: 'boolean',
-            role: 'button',
-            read: true,
-            write: true,
-            def: false,
-        });
         await this.ensureState('groups', {
             name: 'Groups (JSON)',
             type: 'string',
@@ -342,22 +316,6 @@ export class ValveController {
             read: true,
             write: true,
             def: JSON.stringify(this.config.days),
-        });
-        await this.ensureState('waterCurrent', {
-            name: 'Water last run (l)',
-            type: 'number',
-            role: 'value.fill',
-            read: true,
-            write: false,
-            def: 0,
-        });
-        await this.ensureState('waterTotal', {
-            name: 'Water total (l)',
-            type: 'number',
-            role: 'value.fill',
-            read: true,
-            write: false,
-            def: 0,
         });
 
         // Config-derived info states must always reflect the current config, even if

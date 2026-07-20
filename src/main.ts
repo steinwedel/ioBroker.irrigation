@@ -146,7 +146,6 @@ class Irrigation extends utils.Adapter {
         // Subscribe to all our own automation/zone/valve control states
         this.subscribeStates('automation.*');
         this.subscribeStates('valves.*.manualStart');
-        this.subscribeStates('valves.*.calibrateFlow');
         this.subscribeStates('watchdog.testNotify');
         this.subscribeStates('valves.*.state');
         this.subscribeStates('valves.*.runFor');
@@ -490,22 +489,6 @@ class Irrigation extends utils.Adapter {
             await this.setStateAsync(id, { val: false, ack: true });
             const valveIndex = parseInt(valveManualStartMatch[1], 10);
             await this.automation.manualStartValve(valveIndex);
-            return;
-        }
-
-        const valveCalibrateMatch = /^valves\.valve_(\d+)\.calibrateFlow$/.exec(localId);
-        if (valveCalibrateMatch) {
-            await this.setStateAsync(id, { val: false, ack: true });
-            const valveIndex = parseInt(valveCalibrateMatch[1], 10);
-            const valveConfig = this.config2.valves[valveIndex];
-            if (valveConfig && valveIndex >= 0 && valveIndex < this.valves.length) {
-                const valve = this.valves[valveIndex];
-                await this.flowMonitor.startCalibration(
-                    valveIndex,
-                    () => valve.start(120),
-                    () => valve.stop(),
-                );
-            }
             return;
         }
 
