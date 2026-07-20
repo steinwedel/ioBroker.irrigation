@@ -4,8 +4,6 @@
 * (Gerhard Steinwedel) **FIXED**: Plan index validation now treats JSON `null` (sent when no plan is selected in dropdown) the same as `undefined` — added `readPlanIndex()` helper to prevent `null` from bypassing bounds checks due to JS numeric coercion
 * (Gerhard Steinwedel) **ENHANCED**: Added missing error-code translations for plan management (`noName`, `noSelection`, `lastPlan`) in admin UI i18n files (English + German)
 
-## **WORK IN PROGRESS**
-
 ## 0.2.7 (2026-07-20)
 * (Gerhard Steinwedel) **NEW**: AI-powered changelog generation script (`scripts/prepare-changelog.js`) now auto-generates "WORK IN PROGRESS" entry before each release by analyzing commits and diffs since the last version
 * (Gerhard Steinwedel) **ENHANCED**: Plan management commands (`createPlan`/`deletePlan`) now compiled into build artifacts — version bumped to 0.2.6

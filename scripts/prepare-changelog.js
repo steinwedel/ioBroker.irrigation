@@ -120,6 +120,11 @@ function readChangelog() {
     return fs.readFileSync(CHANGELOG_PATH, 'utf8');
 }
 
+function countPlaceholders(changelog) {
+    const matches = changelog.match(new RegExp(PLACEHOLDER_REGEX.source, 'gm'));
+    return matches ? matches.length : 0;
+}
+
 function hasFilledPlaceholder(changelog) {
     const match = PLACEHOLDER_REGEX.exec(changelog);
     if (!match) {
@@ -287,6 +292,15 @@ async function main() {
     }
 
     const changelog = readChangelog();
+
+    const placeholderCount = countPlaceholders(changelog);
+    if (placeholderCount > 1) {
+        console.error(
+            `Found ${placeholderCount} "${PLACEHOLDER_LINE}" markers in CHANGELOG.md - there must be exactly one. ` +
+                'Remove the duplicate(s) manually (keep the one with content, if any) before running this script again.',
+        );
+        process.exit(1);
+    }
 
     if (hasFilledPlaceholder(changelog)) {
         console.log(`${PLACEHOLDER_LINE} already present with content - nothing to do.`);
