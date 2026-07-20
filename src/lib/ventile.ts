@@ -301,14 +301,6 @@ export class ValveController {
             write: true,
             def: this.config.flowSensorId,
         });
-        await this.ensureState('groups', {
-            name: 'Groups (JSON)',
-            type: 'string',
-            role: 'json',
-            read: true,
-            write: true,
-            def: JSON.stringify(this.config.groups),
-        });
         await this.ensureState('days', {
             name: 'Weekdays (JSON)',
             type: 'string',
@@ -337,10 +329,6 @@ export class ValveController {
         });
         await this.adapter.setStateAsync(`${this.id}.manualDuration`, { val: this.config.manualDuration, ack: true });
         await this.adapter.setStateAsync(`${this.id}.flowSensorId`, { val: this.config.flowSensorId, ack: true });
-        await this.adapter.setStateAsync(`${this.id}.groups`, {
-            val: JSON.stringify(this.config.groups),
-            ack: true,
-        });
         await this.adapter.setStateAsync(`${this.id}.days`, { val: JSON.stringify(this.config.days), ack: true });
 
         await this.subscribeStatus();

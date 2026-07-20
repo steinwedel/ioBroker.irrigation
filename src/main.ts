@@ -37,23 +37,6 @@ import { RateLimiter } from './lib/rate-limiter';
  * @param a
  * @param b
  */
-function valvesEqual(a: unknown, b: unknown): boolean {
-    if (a === b) {
-        return true;
-    }
-    if (typeof a !== 'object' || a === null || typeof b !== 'object' || b === null) {
-        return false;
-    }
-    const objA = a as Record<string, unknown>;
-    const objB = b as Record<string, unknown>;
-    const keysA = Object.keys(objA).filter(key => objA[key] !== undefined);
-    const keysB = Object.keys(objB).filter(key => objB[key] !== undefined);
-    if (keysA.length !== keysB.length) {
-        return false;
-    }
-    return keysA.every(key => objA[key] === objB[key]);
-}
-
 class Irrigation extends utils.Adapter {
     private config2!: IrrigationNativeConfig;
     private valves: ValveController[] = [];
@@ -164,14 +147,14 @@ class Irrigation extends utils.Adapter {
      * updating our own instance's `native` triggers an adapter restart.
      */
     private async migrateNativeConfig(): Promise<void> {
-        const rawValves = (this.config as unknown as { valves?: unknown[] }).valves ?? [];
+        const rawValves = (this.config as unknown as { valves?: Record<string, unknown>[] }).valves ?? [];
         const migratedValves = this.config2.valves.map((valve, index) => ({
             ...valve,
             valveNumber: `valve_${formatValveNumber(index)}`,
         }));
         const needsValveMigration =
             rawValves.length !== migratedValves.length ||
-            rawValves.some((raw, i) => !valvesEqual(raw, migratedValves[i]));
+            rawValves.some((raw, i) => !raw.valveNumber);
 
         if (needsValveMigration) {
             this.log.info('Migrating native.valves to include newly introduced fields (runFor, valveNumber).');
@@ -644,6 +627,37 @@ class Irrigation extends utils.Adapter {
 
         if (obj.command === 'send' && obj.callback) {
             this.sendTo(obj.from, obj.command, 'Message received', obj.callback);
+        }
+
+        if (obj.command === 'listValves' && obj.callback) {
+            const options = this.config2.valves.map((v, i) => ({
+                label: `[${formatValveNumber(i)}] ${v.name || 'unnamed'}`,
+                value: i,
+            }));
+            this.sendTo(obj.from, obj.command, options, obj.callback);
+            return;
+        }
+
+        if (obj.command === 'addAllValvesToAllPlans' && obj.callback) {
+            const allValveIndexes = this.config2.valves.map((_, i) => i);
+            const updatedPlans = this.config2.plans.map(p => ({
+                ...p,
+                valveIndexes: [...allValveIndexes],
+            }));
+            await this.extendForeignObjectAsync(`system.adapter.${this.namespace}`, {
+                native: { plans: updatedPlans },
+            });
+            this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
+            return;
+        }
+
+        if (obj.command === 'removeAllValvesFromAllPlans' && obj.callback) {
+            const updatedPlans = this.config2.plans.map(p => ({ ...p, valveIndexes: [] }));
+            await this.extendForeignObjectAsync(`system.adapter.${this.namespace}`, {
+                native: { plans: updatedPlans },
+            });
+            this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
+            return;
         }
     }
 }

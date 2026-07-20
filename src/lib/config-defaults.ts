@@ -7,7 +7,7 @@ import type { IrrigationNativeConfig } from './types';
 export const DEFAULT_CONFIG: IrrigationNativeConfig = {
     expertMode: false,
     valves: [],
-    plans: [{ name: 'Alle', groups: [] }],
+    plans: [{ name: 'Alle', valveIndexes: [] }],
     scheduler: {
         autoMode: false,
         timerTimes: [],
@@ -77,10 +77,11 @@ export function normalizeConfig(config: Partial<IrrigationNativeConfig>): Irriga
             moistureThreshold: valve.moistureThreshold ?? 0,
             manualDuration: valve.manualDuration ?? valve.duration ?? 10,
             flowSensorId: valve.flowSensorId ?? '',
-            groups: valve.groups ?? [],
             days: valve.days ?? [],
         })),
-        plans: config.plans && config.plans.length > 0 ? config.plans : DEFAULT_CONFIG.plans,
+        plans: (config.plans && config.plans.length > 0
+            ? config.plans.map(p => ({ name: p.name ?? '', valveIndexes: p.valveIndexes ?? [] }))
+            : DEFAULT_CONFIG.plans),
         scheduler: { ...DEFAULT_CONFIG.scheduler, ...config.scheduler },
         sensors: { ...DEFAULT_CONFIG.sensors, ...config.sensors },
         weather: { ...DEFAULT_CONFIG.weather, ...config.weather },

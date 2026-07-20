@@ -163,11 +163,10 @@
   "native": {
     "expertMode": false,
     "valves": [],
-    "zones": [],
     "plans": [
       {
         "name": "Alle",
-        "groups": []
+        "valveIndexes": []
       }
     ],
     "scheduler": {

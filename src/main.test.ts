@@ -23,7 +23,6 @@ function makeValve(overrides: Partial<IValveConfig> = {}): IValveConfig {
         moistureThreshold: 0,
         manualDuration: 10,
         flowSensorId: '',
-        groups: [],
         days: [],
         ...overrides,
     };

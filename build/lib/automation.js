@@ -150,7 +150,7 @@ class AutomationEngine {
       });
       return;
     }
-    const activeValveIndexes = this.buildActiveValveList(config, plan.groups);
+    const activeValveIndexes = this.buildActiveValveList(config, plan);
     if (activeValveIndexes.length === 0) {
       this.deps.adapter.log.warn(`No active valves for plan "${planName}" today.`);
       await this.deps.adapter.setStateAsync("automation.status", {
@@ -177,12 +177,14 @@ class AutomationEngine {
     await this.startNextBatch();
   }
   /**
-   * Valves belonging to the plan's groups, filtered by enabled/day/sensors.
+   * Valves assigned to the plan, filtered by enabled/day/sensors.
+   * Empty valveIndexes (default "Alle" plan) includes all valves.
    *
    * @param config
-   * @param planGroups
+   * @param plan
    */
-  buildActiveValveList(config, planGroups) {
+  buildActiveValveList(config, plan) {
+    const useAllValves = plan.valveIndexes.length === 0;
     const weekday = (/* @__PURE__ */ new Date()).getDay();
     const result = [];
     for (let i = 0; i < config.valves.length; i++) {
@@ -193,7 +195,7 @@ class AutomationEngine {
       if (valve.days.length > 0 && !valve.days.includes(weekday)) {
         continue;
       }
-      if (planGroups.length > 0 && !valve.groups.some((g) => planGroups.includes(g))) {
+      if (!useAllValves && !plan.valveIndexes.includes(i)) {
         continue;
       }
       const blocked = this.deps.isValveBlockedForAutoRun(i);

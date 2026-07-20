@@ -25,7 +25,7 @@ module.exports = __toCommonJS(config_defaults_exports);
 const DEFAULT_CONFIG = {
   expertMode: false,
   valves: [],
-  plans: [{ name: "Alle", groups: [] }],
+  plans: [{ name: "Alle", valveIndexes: [] }],
   scheduler: {
     autoMode: false,
     timerTimes: [],
@@ -77,7 +77,7 @@ function normalizeConfig(config) {
   return {
     expertMode: (_a = config.expertMode) != null ? _a : DEFAULT_CONFIG.expertMode,
     valves: ((_b = config.valves) != null ? _b : []).map((valve) => {
-      var _a2, _b2, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n;
+      var _a2, _b2, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m;
       return {
         name: (_a2 = valve.name) != null ? _a2 : "",
         type: (_b2 = valve.type) != null ? _b2 : "Generic",
@@ -91,11 +91,13 @@ function normalizeConfig(config) {
         moistureThreshold: (_i = valve.moistureThreshold) != null ? _i : 0,
         manualDuration: (_k = (_j = valve.manualDuration) != null ? _j : valve.duration) != null ? _k : 10,
         flowSensorId: (_l = valve.flowSensorId) != null ? _l : "",
-        groups: (_m = valve.groups) != null ? _m : [],
-        days: (_n = valve.days) != null ? _n : []
+        days: (_m = valve.days) != null ? _m : []
       };
     }),
-    plans: config.plans && config.plans.length > 0 ? config.plans : DEFAULT_CONFIG.plans,
+    plans: config.plans && config.plans.length > 0 ? config.plans.map((p) => {
+      var _a2, _b2;
+      return { name: (_a2 = p.name) != null ? _a2 : "", valveIndexes: (_b2 = p.valveIndexes) != null ? _b2 : [] };
+    }) : DEFAULT_CONFIG.plans,
     scheduler: { ...DEFAULT_CONFIG.scheduler, ...config.scheduler },
     sensors: { ...DEFAULT_CONFIG.sensors, ...config.sensors },
     weather: { ...DEFAULT_CONFIG.weather, ...config.weather },

@@ -233,20 +233,57 @@
                     "type": "table",
                     "label": "Plans",
                     "newLine": true,
+                    "noDelete": false,
                     "items": [
                         {
                             "type": "text",
                             "attr": "name",
                             "title": "Name",
-                            "width": "30%"
+                            "width": "45%"
                         },
                         {
-                            "type": "text",
-                            "attr": "groups",
-                            "title": "Groups (comma separated, empty = all zones)",
-                            "width": "70%"
+                            "type": "selectSendTo",
+                            "attr": "valveIndexes",
+                            "title": "Valves in plan",
+                            "width": "55%",
+                            "multiple": true,
+                            "command": "listValves",
+                            "jsonData": "{}"
                         }
                     ]
+                },
+                "bulkActions": {
+                    "type": "header",
+                    "text": "Bulk actions"
+                },
+                "addAllToAllPlans": {
+                    "type": "sendTo",
+                    "label": "Add all valves to every plan",
+                    "command": "addAllValvesToAllPlans",
+                    "jsonData": "{}",
+                    "newLine": true,
+                    "variant": "outlined",
+                    "icon": "add",
+                    "sm": 6,
+                    "md": 4,
+                    "lg": 3
+                },
+                "clearAllPlans": {
+                    "type": "sendTo",
+                    "label": "Remove all valves from every plan",
+                    "command": "removeAllValvesFromAllPlans",
+                    "jsonData": "{}",
+                    "newLine": true,
+                    "variant": "outlined",
+                    "icon": "delete",
+                    "sm": 6,
+                    "md": 4,
+                    "lg": 3
+                },
+                "planInfo": {
+                    "type": "staticText",
+                    "label": "",
+                    "text": "Use the multi-select in the plans table to assign or remove individual valves. Use the buttons above for bulk operations."
                 }
             }
         },

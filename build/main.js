@@ -36,22 +36,6 @@ var import_notifications = require("./lib/notifications");
 var import_flow_monitor = require("./lib/flow-monitor");
 var import_valvescanner = require("./lib/valvescanner");
 var import_rate_limiter = require("./lib/rate-limiter");
-function valvesEqual(a, b) {
-  if (a === b) {
-    return true;
-  }
-  if (typeof a !== "object" || a === null || typeof b !== "object" || b === null) {
-    return false;
-  }
-  const objA = a;
-  const objB = b;
-  const keysA = Object.keys(objA).filter((key) => objA[key] !== void 0);
-  const keysB = Object.keys(objB).filter((key) => objB[key] !== void 0);
-  if (keysA.length !== keysB.length) {
-    return false;
-  }
-  return keysA.every((key) => objA[key] === objB[key]);
-}
 class Irrigation extends utils.Adapter {
   config2;
   valves = [];
@@ -150,7 +134,7 @@ class Irrigation extends utils.Adapter {
       ...valve,
       valveNumber: `valve_${(0, import_types.formatValveNumber)(index)}`
     }));
-    const needsValveMigration = rawValves.length !== migratedValves.length || rawValves.some((raw, i) => !valvesEqual(raw, migratedValves[i]));
+    const needsValveMigration = rawValves.length !== migratedValves.length || rawValves.some((raw, i) => !raw.valveNumber);
     if (needsValveMigration) {
       this.log.info("Migrating native.valves to include newly introduced fields (runFor, valveNumber).");
       await this.extendForeignObjectAsync(`system.adapter.${this.namespace}`, {
@@ -568,6 +552,34 @@ class Irrigation extends utils.Adapter {
     }
     if (obj.command === "send" && obj.callback) {
       this.sendTo(obj.from, obj.command, "Message received", obj.callback);
+    }
+    if (obj.command === "listValves" && obj.callback) {
+      const options = this.config2.valves.map((v, i) => ({
+        label: `[${(0, import_types.formatValveNumber)(i)}] ${v.name || "unnamed"}`,
+        value: i
+      }));
+      this.sendTo(obj.from, obj.command, options, obj.callback);
+      return;
+    }
+    if (obj.command === "addAllValvesToAllPlans" && obj.callback) {
+      const allValveIndexes = this.config2.valves.map((_, i) => i);
+      const updatedPlans = this.config2.plans.map((p) => ({
+        ...p,
+        valveIndexes: [...allValveIndexes]
+      }));
+      await this.extendForeignObjectAsync(`system.adapter.${this.namespace}`, {
+        native: { plans: updatedPlans }
+      });
+      this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
+      return;
+    }
+    if (obj.command === "removeAllValvesFromAllPlans" && obj.callback) {
+      const updatedPlans = this.config2.plans.map((p) => ({ ...p, valveIndexes: [] }));
+      await this.extendForeignObjectAsync(`system.adapter.${this.namespace}`, {
+        native: { plans: updatedPlans }
+      });
+      this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
+      return;
     }
   }
 }

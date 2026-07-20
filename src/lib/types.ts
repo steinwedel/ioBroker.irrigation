@@ -47,15 +47,14 @@ export interface IValveConfig {
     manualDuration: number;
     /** Optional flow sensor state id (liters/min or pulses) */
     flowSensorId: string;
-    groups: string[];
     /** 0=Sunday..6=Saturday, empty array = every day */
     days: number[];
 }
 
 export interface IPlanConfig {
     name: string;
-    /** Valve groups to include. Empty = all valves (used by built-in "Alle" plan) */
-    groups: string[];
+    /** Valve indexes to include in this plan */
+    valveIndexes: number[];
 }
 
 export interface ISchedulerConfig {

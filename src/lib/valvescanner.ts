@@ -13,7 +13,6 @@ const VALVE_DEFAULTS = {
     moistureThreshold: 0,
     manualDuration: 10,
     flowSensorId: '',
-    groups: [] as string[],
     days: [] as number[],
 };
 
