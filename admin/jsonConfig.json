@@ -225,92 +225,6 @@
                 }
             }
         },
-        "_zonesTab": {
-            "type": "panel",
-            "label": "Zones",
-            "items": {
-                "zones": {
-                    "type": "table",
-                    "label": "Zones",
-                    "newLine": true,
-                    "items": [
-                        {
-                            "type": "text",
-                            "attr": "name",
-                            "title": "Name",
-                            "width": "20%"
-                        },
-                        {
-                            "type": "number",
-                            "attr": "valveIndex",
-                            "title": "Valve index",
-                            "width": "10%"
-                        },
-                        {
-                            "type": "number",
-                            "attr": "duration",
-                            "title": "Duration (min)",
-                            "width": "10%"
-                        },
-                        {
-                            "type": "checkbox",
-                            "attr": "enabled",
-                            "title": "Enabled",
-                            "width": "8%"
-                        },
-                        {
-                            "type": "checkbox",
-                            "attr": "rainIndependent",
-                            "title": "Rain independent",
-                            "width": "10%",
-                            "hidden": "!data.expertMode"
-                        },
-                        {
-                            "type": "number",
-                            "attr": "moistureThreshold",
-                            "title": "Moisture threshold (%)",
-                            "width": "10%",
-                            "hidden": "!data.expertMode"
-                        },
-                        {
-                            "type": "number",
-                            "attr": "manualDuration",
-                            "title": "Manual duration (min)",
-                            "width": "10%",
-                            "hidden": "!data.expertMode"
-                        },
-                        {
-                            "type": "objectId",
-                            "attr": "flowSensorId",
-                            "title": "Flow sensor state id",
-                            "width": "12%",
-                            "hidden": "!data.expertMode"
-                        },
-                        {
-                            "type": "number",
-                            "attr": "flowRate",
-                            "title": "Flow rate (l/min)",
-                            "width": "10%",
-                            "hidden": "!data.expertMode"
-                        },
-                        {
-                            "type": "text",
-                            "attr": "groups",
-                            "title": "Groups (comma separated)",
-                            "width": "10%",
-                            "hidden": "!data.expertMode"
-                        },
-                        {
-                            "type": "text",
-                            "attr": "days",
-                            "title": "Weekdays (0=Sun..6=Sat, comma separated)",
-                            "width": "10%",
-                            "hidden": "!data.expertMode"
-                        }
-                    ]
-                }
-            }
-        },
         "_plansTab": {
             "type": "panel",
             "label": "Plans",
@@ -385,7 +299,7 @@
                     "lg": 4,
                     "xl": 4
                 },
-                "scheduler.zonePause": {
+                "scheduler.valvePause": {
                     "type": "number",
                     "label": "Pause between batches (min)",
                     "min": 0,

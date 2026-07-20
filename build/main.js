@@ -79,6 +79,7 @@ class Irrigation extends utils.Adapter {
     this.config2 = (0, import_config_defaults.normalizeConfig)(this.config);
     await this.migrateNativeConfig();
     await this.cleanupStaleValveObjects();
+    await this.cleanupStaleZoneObjects();
     await (0, import_states.createBaseStates)(this);
     await (0, import_states.applyConfigToStates)(this, this.config2);
     this.rateLimiter = new import_rate_limiter.RateLimiter();
@@ -289,6 +290,16 @@ class Irrigation extends utils.Adapter {
           (error) => this.log.warn(`Failed to remove stale valve object "${id}": ${error.message}`)
         );
       }
+    }
+  }
+  /**
+   * Removes legacy zone objects (zones.*) — zones were removed in v0.2.0.
+   */
+  async cleanupStaleZoneObjects() {
+    try {
+      await this.delObjectAsync("zones", { recursive: true });
+      this.log.info("Removed legacy zone objects (zones removed in v0.2.0).");
+    } catch {
     }
   }
   async handleSchedulerTrigger(planName, source) {

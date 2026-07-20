@@ -83,6 +83,7 @@ class Irrigation extends utils.Adapter {
         this.config2 = normalizeConfig(this.config);
         await this.migrateNativeConfig();
         await this.cleanupStaleValveObjects();
+        await this.cleanupStaleZoneObjects();
 
         await createBaseStates(this);
         await applyConfigToStates(this, this.config2);
@@ -316,6 +317,18 @@ class Irrigation extends utils.Adapter {
                     this.log.warn(`Failed to remove stale valve object "${id}": ${(error as Error).message}`),
                 );
             }
+        }
+    }
+
+    /**
+     * Removes legacy zone objects (zones.*) — zones were removed in v0.2.0.
+     */
+    private async cleanupStaleZoneObjects(): Promise<void> {
+        try {
+            await this.delObjectAsync('zones', { recursive: true });
+            this.log.info('Removed legacy zone objects (zones removed in v0.2.0).');
+        } catch {
+            // zones channel may not exist — that's fine
         }
     }
 
