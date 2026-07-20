@@ -1,0 +1,726 @@
+{
+    "i18n": true,
+    "type": "tabs",
+    "items": {
+        "_expertModeTab": {
+            "type": "panel",
+            "label": "General",
+            "items": {
+                "expertMode": {
+                    "type": "checkbox",
+                    "label": "Expert mode",
+                    "help": "Show advanced options (sensors, weather, restrictions, notifications, flow monitoring, ...)",
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                }
+            }
+        },
+        "valvesTab": {
+            "type": "panel",
+            "label": "Valves",
+            "items": {
+                "autoDiscovery": {
+                    "type": "panel",
+                    "label": "Auto-Discovery",
+                    "collapsable": true,
+                    "newLine": true,
+                    "items": {
+                        "scanType": {
+                            "type": "select",
+                            "label": "System type to scan",
+                            "options": [
+                                { "label": "Gardena", "value": "Gardena" },
+                                { "label": "Homematic", "value": "Homematic" },
+                                { "label": "Rainbird", "value": "Rainbird" },
+                                { "label": "Generic (any adapter)", "value": "Generic" },
+                                { "label": "All", "value": "All" }
+                            ],
+                            "default": "All",
+                            "newLine": true,
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 4,
+                            "lg": 3,
+                            "xl": 3
+                        },
+                        "scanInstance": {
+                            "type": "instance",
+                            "label": "Adapter instance",
+                            "adapter": "smartgarden",
+                            "hidden": "data.scanType !== 'Gardena'",
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 4,
+                            "lg": 3,
+                            "xl": 3
+                        },
+                        "scanInstanceRainbird": {
+                            "type": "instance",
+                            "label": "Adapter instance",
+                            "adapter": "rainbird",
+                            "hidden": "data.scanType !== 'Rainbird'",
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 4,
+                            "lg": 3,
+                            "xl": 3
+                        },
+                        "scanInstanceHomematic": {
+                            "type": "instance",
+                            "label": "Adapter instance",
+                            "adapter": "hm-rpc",
+                            "allowDeactivate": true,
+                            "help": "Leave empty to scan all Homematic instances.",
+                            "hidden": "data.scanType !== 'Homematic'",
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 4,
+                            "lg": 3,
+                            "xl": 3
+                        },
+                        "_scanHomematicInfo": {
+                            "type": "staticText",
+                            "text": "Homematic discovery scans the \"Bewässerung\" function enum (enum.functions) for members with a switch state, optionally restricted to the selected adapter instance.",
+                            "hidden": "data.scanType !== 'Homematic'",
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 8,
+                            "lg": 6,
+                            "xl": 6
+                        },
+                        "_scanGenericInfo": {
+                            "type": "staticText",
+                            "text": "Generic discovery scans the \"Bewässerung\"/\"Irrigation\" function enum (enum.functions) for members with a switch state, across all adapters. Adapters with a dedicated scan type (Gardena, Rainbird, Homematic), the alias adapter and this irrigation adapter itself are always excluded.",
+                            "hidden": "data.scanType !== 'Generic'",
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 8,
+                            "lg": 6,
+                            "xl": 6
+                        },
+                        "_scanAllInfo": {
+                            "type": "staticText",
+                            "text": "Runs Gardena, Rainbird, Homematic and Generic discovery across all adapter instances in one go. The alias, admin and irrigation adapters are always excluded.",
+                            "hidden": "data.scanType !== 'All'",
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 8,
+                            "lg": 6,
+                            "xl": 6
+                        },
+                        "scanButton": {
+                            "type": "sendTo",
+                            "label": "Scan for valves",
+                            "command": "scanValves",
+                            "jsonData": "{\"type\": \"${data.scanType}\", \"instance\": \"${data.scanInstance}\", \"instanceRainbird\": \"${data.scanInstanceRainbird}\", \"instanceHomematic\": \"${data.scanInstanceHomematic}\"}",
+                            "useNative": true,
+                            "showProcess": true,
+                            "result": {
+                                "scanDone": "Scan finished: found and added %s new valve(s) (%s total)."
+                            },
+                            "error": {
+                                "scanErrors": "Scan finished with errors, see the log for details."
+                            },
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 4,
+                            "lg": 3,
+                            "xl": 3
+                        },
+                        "scanProgress": {
+                            "type": "state",
+                            "label": "Progress",
+                            "oid": "scan.progress",
+                            "control": "text",
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 8,
+                            "lg": 6,
+                            "xl": 6
+                        }
+                    }
+                },
+                "valves": {
+                    "type": "table",
+                    "label": "Valves",
+                    "newLine": true,
+                    "items": [
+                        {
+                            "type": "text",
+                            "attr": "valveNumber",
+                            "title": "Valve",
+                            "width": "8%",
+                            "readOnly": true,
+                            "sort": true
+                        },
+                        {
+                            "type": "text",
+                            "attr": "name",
+                            "title": "Name",
+                            "width": "24%",
+                            "sort": true
+                        },
+                        {
+                            "type": "select",
+                            "attr": "type",
+                            "title": "Type",
+                            "width": "14%",
+                            "sort": true,
+                            "options": [
+                                { "label": "Gardena", "value": "Gardena" },
+                                { "label": "Homematic", "value": "Homematic" },
+                                { "label": "Rainbird", "value": "Rainbird" },
+                                { "label": "Generic", "value": "Generic" }
+                            ]
+                        },
+                        {
+                            "type": "number",
+                            "attr": "runFor",
+                            "title": "Manual run duration (s)",
+                            "width": "12%",
+                            "min": 1,
+                            "default": 600,
+                            "sort": true
+                        },
+                        {
+                            "type": "objectId",
+                            "attr": "stateId",
+                            "title": "State id",
+                            "width": "30%",
+                            "sort": true
+                        },
+                        {
+                            "type": "objectId",
+                            "attr": "allOffId",
+                            "title": "All-off state id (Gardena/Rainbird)",
+                            "width": "12%",
+                            "hidden": "!data.expertMode"
+                        }
+                    ]
+                },
+                "deleteAllValves": {
+                    "type": "sendTo",
+                    "label": "Delete all valves",
+                    "command": "deleteAllValves",
+                    "icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0Ij48cGF0aCBkPSJNNiAxOWMwIDEuMS45IDIgMiAyaDhjMS4xIDAgMi0uOSAyLTJWN0g2djEyek0xOSA0aC0zLjVsLTEtMWgtNWwtMSAxSDV2MmgxNFY0eiIvPjwvc3ZnPg==",
+                    "color": "secondary",
+                    "useNative": true,
+                    "confirm": {
+                        "text": "This deletes all valves from the configuration. This cannot be undone.",
+                        "title": "Delete all valves?",
+                        "type": "warning",
+                        "ok": "Delete",
+                        "cancel": "Cancel"
+                    },
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 4,
+                    "lg": 3,
+                    "xl": 3
+                }
+            }
+        },
+        "_zonesTab": {
+            "type": "panel",
+            "label": "Zones",
+            "items": {
+                "zones": {
+                    "type": "table",
+                    "label": "Zones",
+                    "newLine": true,
+                    "items": [
+                        {
+                            "type": "text",
+                            "attr": "name",
+                            "title": "Name",
+                            "width": "20%"
+                        },
+                        {
+                            "type": "number",
+                            "attr": "valveIndex",
+                            "title": "Valve index",
+                            "width": "10%"
+                        },
+                        {
+                            "type": "number",
+                            "attr": "duration",
+                            "title": "Duration (min)",
+                            "width": "10%"
+                        },
+                        {
+                            "type": "checkbox",
+                            "attr": "enabled",
+                            "title": "Enabled",
+                            "width": "8%"
+                        },
+                        {
+                            "type": "checkbox",
+                            "attr": "rainIndependent",
+                            "title": "Rain independent",
+                            "width": "10%",
+                            "hidden": "!data.expertMode"
+                        },
+                        {
+                            "type": "number",
+                            "attr": "moistureThreshold",
+                            "title": "Moisture threshold (%)",
+                            "width": "10%",
+                            "hidden": "!data.expertMode"
+                        },
+                        {
+                            "type": "number",
+                            "attr": "manualDuration",
+                            "title": "Manual duration (min)",
+                            "width": "10%",
+                            "hidden": "!data.expertMode"
+                        },
+                        {
+                            "type": "objectId",
+                            "attr": "flowSensorId",
+                            "title": "Flow sensor state id",
+                            "width": "12%",
+                            "hidden": "!data.expertMode"
+                        },
+                        {
+                            "type": "number",
+                            "attr": "flowRate",
+                            "title": "Flow rate (l/min)",
+                            "width": "10%",
+                            "hidden": "!data.expertMode"
+                        },
+                        {
+                            "type": "text",
+                            "attr": "groups",
+                            "title": "Groups (comma separated)",
+                            "width": "10%",
+                            "hidden": "!data.expertMode"
+                        },
+                        {
+                            "type": "text",
+                            "attr": "days",
+                            "title": "Weekdays (0=Sun..6=Sat, comma separated)",
+                            "width": "10%",
+                            "hidden": "!data.expertMode"
+                        }
+                    ]
+                }
+            }
+        },
+        "_plansTab": {
+            "type": "panel",
+            "label": "Plans",
+            "items": {
+                "plans": {
+                    "type": "table",
+                    "label": "Plans",
+                    "newLine": true,
+                    "items": [
+                        {
+                            "type": "text",
+                            "attr": "name",
+                            "title": "Name",
+                            "width": "30%"
+                        },
+                        {
+                            "type": "text",
+                            "attr": "groups",
+                            "title": "Groups (comma separated, empty = all zones)",
+                            "width": "70%"
+                        }
+                    ]
+                }
+            }
+        },
+        "_controlTab": {
+            "type": "panel",
+            "label": "Control",
+            "items": {
+                "scheduler.autoMode": {
+                    "type": "checkbox",
+                    "label": "Automatic mode enabled",
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "scheduler.timerTimes": {
+                    "type": "chips",
+                    "label": "Timer times (HH:MM)",
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "scheduler.extensionFactor": {
+                    "type": "number",
+                    "label": "Duration extension factor",
+                    "min": 0.5,
+                    "max": 5,
+                    "step": 0.1,
+                    "newLine": true,
+                    "hidden": "!data.expertMode",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "scheduler.pumpCapacity": {
+                    "type": "number",
+                    "label": "Pump capacity (l/min, 0 = sequential only)",
+                    "min": 0,
+                    "hidden": "!data.expertMode",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "scheduler.zonePause": {
+                    "type": "number",
+                    "label": "Pause between batches (min)",
+                    "min": 0,
+                    "hidden": "!data.expertMode",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "scheduler.seasonEnabled": {
+                    "type": "checkbox",
+                    "label": "Season pause enabled",
+                    "newLine": true,
+                    "hidden": "!data.expertMode",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "scheduler.seasonStart": {
+                    "type": "number",
+                    "label": "Season start month",
+                    "min": 1,
+                    "max": 12,
+                    "hidden": "!data.expertMode",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "scheduler.seasonEnd": {
+                    "type": "number",
+                    "label": "Season end month",
+                    "min": 1,
+                    "max": 12,
+                    "hidden": "!data.expertMode",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "scheduler.frostEnabled": {
+                    "type": "checkbox",
+                    "label": "Frost protection enabled",
+                    "newLine": true,
+                    "hidden": "!data.expertMode",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "scheduler.frostMinTemp": {
+                    "type": "number",
+                    "label": "Frost protection minimum temperature (°C)",
+                    "hidden": "!data.expertMode",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "scheduler.icalAdapterInstance": {
+                    "type": "instance",
+                    "label": "iCal adapter instance",
+                    "adapter": "ical",
+                    "newLine": true,
+                    "hidden": "!data.expertMode",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "scheduler.icalTriggerState": {
+                    "type": "objectId",
+                    "label": "iCal trigger state id",
+                    "hidden": "!data.expertMode",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "scheduler.icalTitlePrefix": {
+                    "type": "text",
+                    "label": "iCal event title prefix",
+                    "hidden": "!data.expertMode",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                }
+            }
+        },
+        "_sensorsTab": {
+            "type": "panel",
+            "label": "Sensors",
+            "hidden": "!data.expertMode",
+            "items": {
+                "sensors.rainId": {
+                    "type": "objectId",
+                    "label": "Rain sensor state id",
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "sensors.soilMoistureId": {
+                    "type": "objectId",
+                    "label": "Soil moisture sensor state id",
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "sensors.temperatureId": {
+                    "type": "objectId",
+                    "label": "Temperature sensor state id",
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                }
+            }
+        },
+        "_weatherTab": {
+            "type": "panel",
+            "label": "Weather API",
+            "hidden": "!data.expertMode",
+            "items": {
+                "weather.enabled": {
+                    "type": "checkbox",
+                    "label": "Weather API enabled",
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "weather.apiType": {
+                    "type": "select",
+                    "label": "API type",
+                    "options": [{ "label": "OpenWeatherMap", "value": "openweathermap" }],
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "weather.apiKey": {
+                    "type": "password",
+                    "label": "API key",
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "weather.latitude": {
+                    "type": "number",
+                    "label": "Latitude",
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "weather.longitude": {
+                    "type": "number",
+                    "label": "Longitude",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "weather.pollInterval": {
+                    "type": "number",
+                    "label": "Poll interval (min)",
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                }
+            }
+        },
+        "_legalRestrictionTab": {
+            "type": "panel",
+            "label": "Legal restriction",
+            "hidden": "!data.expertMode",
+            "items": {
+                "legalRestriction.enabled": {
+                    "type": "checkbox",
+                    "label": "Legal restriction check enabled",
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "legalRestriction.stationId": {
+                    "type": "text",
+                    "label": "DWD station id",
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "legalRestriction.monthStart": {
+                    "type": "number",
+                    "label": "Restriction start month",
+                    "min": 1,
+                    "max": 12,
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "legalRestriction.monthEnd": {
+                    "type": "number",
+                    "label": "Restriction end month",
+                    "min": 1,
+                    "max": 12,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "legalRestriction.hourStart": {
+                    "type": "number",
+                    "label": "Restriction start hour",
+                    "min": 0,
+                    "max": 23,
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "legalRestriction.hourEnd": {
+                    "type": "number",
+                    "label": "Restriction end hour",
+                    "min": 0,
+                    "max": 23,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "legalRestriction.minTemperature": {
+                    "type": "number",
+                    "label": "Minimum temperature (°C)",
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "legalRestriction.checkInterval": {
+                    "type": "number",
+                    "label": "Check interval (min)",
+                    "min": 1,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                }
+            }
+        },
+        "_notificationsTab": {
+            "type": "panel",
+            "label": "Notifications",
+            "hidden": "!data.expertMode",
+            "items": {
+                "notifications.pushoverInstance": {
+                    "type": "instance",
+                    "label": "Pushover instance",
+                    "adapter": "pushover",
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "notifications.telegramInstance": {
+                    "type": "instance",
+                    "label": "Telegram instance",
+                    "adapter": "telegram",
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "waterConsumption.enabled": {
+                    "type": "checkbox",
+                    "label": "Water consumption tracking enabled",
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                }
+            }
+        }
+    }
+}
