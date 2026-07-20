@@ -69,9 +69,10 @@
     "test": "npm run test:ts && npm run test:package",
     "check": "tsc --noEmit",
     "lint": "eslint -c eslint.config.mjs .",
-    "translate": "translate-adapter",
-    "release": "release-script --addPlaceholder",
-    "dev-server": "dev-server"
+        "translate": "translate-adapter",
+        "release:prepare": "node scripts/prepare-changelog.js",
+        "release": "npm run release:prepare && release-script --addPlaceholder",
+        "dev-server": "dev-server"
   },
   "bugs": {
     "url": "https://github.com/steinwedel/ioBroker.irrigation/issues"
