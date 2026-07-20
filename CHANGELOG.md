@@ -1,6 +1,5 @@
 # Changelog
-
-## **WORK IN PROGRESS**
+## 0.1.2 (2026-07-20)
 * Changelog jetzt in CHANGELOG.md
 
 ### 0.1.1 (2026-07-20)
