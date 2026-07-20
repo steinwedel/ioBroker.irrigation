@@ -1,4 +1,7 @@
 # Changelog
+## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **NEW**: AI-powered changelog generation script (`scripts/prepare-changelog.js`) now auto-generates "WORK IN PROGRESS" entry before each release by analyzing commits and diffs since the last version
+* (Gerhard Steinwedel) **ENHANCED**: Plan management commands (`createPlan`/`deletePlan`) now compiled into build artifacts — version bumped to 0.2.6
 
 ## 0.2.6 (2026-07-20)
 * (Gerhard Steinwedel) **ENHANCED**: Plans tab in admin UI no longer shows a separate plan-name table — the "Selected plan" dropdown is now the single control for managing plans, with new "Add new plan" and "Delete selected plan" actions (`createPlan`/`deletePlan` message handlers)
