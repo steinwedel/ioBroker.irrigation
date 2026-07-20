@@ -1,6 +1,7 @@
 # Changelog
 
 ## **WORK IN PROGRESS**
+* Changelog jetzt in CHANGELOG.md
 
 ### 0.1.1 (2026-07-20)
 * (Gerhard Steinwedel) **FIXED**: Rate limiter now enforces 1s minimum interval between requests to prevent parallel bursts reaching the Gardena API
