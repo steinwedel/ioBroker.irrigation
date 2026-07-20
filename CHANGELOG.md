@@ -1,5 +1,8 @@
 # Changelog
 ## **WORK IN PROGRESS**
+*(No user-visible changes — only restored the "WORK IN PROGRESS" placeholder in CHANGELOG.md)*
+
+## **WORK IN PROGRESS**
 
 ## 0.2.8 (2026-07-20)
 * (Gerhard Steinwedel) **FIXED**: Plans tab sendTo buttons now correctly send field values to backend — `jsonData` templates explicitly interpolate required fields via `${JSON.stringify(data.fieldName ?? fallback)}` instead of relying on `alsoDependsOn` (which only controls re-trigger timing, not payload inclusion), fixing "noName" errors when adding plans and undefined `_editPlan`/`availableValves`/`planValvesRefresh` in all valve-assignment commands
