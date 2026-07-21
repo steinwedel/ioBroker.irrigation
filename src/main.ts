@@ -708,16 +708,23 @@ class Irrigation extends utils.Adapter {
             const updatedPlans = [...this.config2.plans, { name, valveIndexes: [] }];
             await this.writeNativeAsync({ plans: updatedPlans });
             this.log.info(`Created new plan "${name}"`);
-            // Only "plans" is sent here (not "_editPlan" as well) so the admin UI applies
-            // a single attribute change. The "Selected plan" dropdown's alsoDependsOn is
-            // set to "plans", so this alone is enough to trigger it to re-fetch its
-            // options with the new plan's name. Changing "plans" and "_editPlan" together
-            // would apply as two separate sequential React commits (the json-config
-            // framework's useNative handling awaits each attribute individually), which
-            // can start two overlapping/unordered option-list refetches in that dropdown
-            // and has been observed to leave it rendering with no options at all until the
-            // page is reloaded. The user has to reselect the new plan manually instead.
-            this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans, newPlanName: '' } }, obj.callback);
+            // Only "plans" is sent here - not "_editPlan" and not "newPlanName" - so the
+            // admin UI applies exactly one attribute change. The "Selected plan"
+            // dropdown's alsoDependsOn is set to "plans", so this alone is enough to
+            // trigger it to re-fetch its options with the new plan's name. The
+            // json-config framework's useNative handling applies a response's
+            // attributes with a sequential "for (const [attr, val] of
+            // Object.entries(...)) await this.onChangeAsync(attr, val)" loop, where each
+            // awaited call is a separate, fully committed React render (not batched).
+            // Returning two or more attributes together (even ones unrelated to
+            // _editPlan's own alsoDependsOn, like "newPlanName") still produces two
+            // sequential renders/commits, which has been observed to occasionally leave
+            // the "Selected plan" dropdown rendering with zero options until the page is
+            // reloaded - the framework's selectSendTo component has no cancellation or
+            // ordering guard for overlapping option-list refetches. The trade-off: the
+            // "New plan name" text field is no longer cleared automatically after adding
+            // a plan; the user has to clear it manually.
+            this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
             return;
         }
 
