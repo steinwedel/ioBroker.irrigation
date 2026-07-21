@@ -1,5 +1,6 @@
 # Changelog
 ## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **FIXED**: Admin UI 'Selected plan' dropdown no longer occasionally renders empty after creating a new plan — `createPlan` now returns only `plans` in its `useNative` response (not `newPlanName`), avoiding the sequential React render cycle that could trigger overlapping option-list refetches in the dropdown component. Trade-off: the 'New plan name' text field is no longer auto-cleared after adding a plan
 
 ## 0.2.11 (2026-07-21)
 * (Gerhard Steinwedel) **FIXED**: Admin UI plan dropdown now updates immediately after creating/deleting plans within the same request cycle — `writeNativeAsync()` now syncs `this.config2` in-memory right after persisting to the database, so `listPlans` (triggered by `alsoDependsOn` refetch) sees the just-written data instead of the stale startup snapshot, eliminating the race condition where the dropdown appeared empty until the js-controller's async adapter restart completed
