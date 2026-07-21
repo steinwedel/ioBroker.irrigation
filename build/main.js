@@ -603,7 +603,7 @@ class Irrigation extends utils.Adapter {
       const updatedPlans = [...this.config2.plans, { name, valveIndexes: [] }];
       await this.writeNativeAsync({ plans: updatedPlans });
       this.log.info(`Created new plan "${name}"`);
-      this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans, newPlanName: "" } }, obj.callback);
+      this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
       return;
     }
     if (obj.command === "deletePlan" && obj.callback) {
