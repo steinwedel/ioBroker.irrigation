@@ -137,6 +137,24 @@ function hasFilledPlaceholder(changelog) {
 }
 
 function insertPlaceholderWithBody(changelog, body) {
+    const existingMatch = PLACEHOLDER_REGEX.exec(changelog);
+    if (existingMatch) {
+        // An empty (or whitespace-only) placeholder already exists somewhere in the
+        // file - fill it in place instead of inserting a second marker above it,
+        // which would otherwise duplicate "## **WORK IN PROGRESS**" in the output.
+        // PLACEHOLDER_REGEX's trailing \s* is greedy and swallows any blank/
+        // whitespace-only lines already following the marker line, so anchor
+        // "before" right after the literal marker text (not the full match) to
+        // discard that existing whitespace instead of preserving it verbatim.
+        const afterMarkerText = existingMatch.index + PLACEHOLDER_LINE.length;
+        const afterWholeMatch = existingMatch.index + existingMatch[0].length;
+        const rest = changelog.slice(afterWholeMatch);
+        const nextHeadlineIndex = rest.search(/^## /m);
+        const after = (nextHeadlineIndex === -1 ? '' : rest.slice(nextHeadlineIndex)).replace(/^\n*/, '');
+        const before = changelog.slice(0, afterMarkerText).replace(/\n*$/, '\n');
+        return `${before}${body.trim()}\n\n${after}`;
+    }
+
     const headerMatch = /^# Changelog\s*\n/.exec(changelog);
     if (!headerMatch) {
         throw new Error('CHANGELOG.md does not start with "# Changelog" - cannot insert placeholder.');
