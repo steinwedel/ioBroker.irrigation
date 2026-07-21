@@ -16,7 +16,7 @@
  *
  * Das release-script überspringt die Online-Übersetzung, sobald der
  * News-Key der Zielversion bereits existiert (siehe
- * @alcalzone/release-script-plugin-iobroker/build/index.js:
+ * the `\@alcalzone/release-script-plugin-iobroker/build/index.js`:
  * `if (newVersion in ioPack.common.news) { ... not changing it }`).
  *
  * Verwendung (vor `npm run release <bump>` aufrufen):
@@ -80,17 +80,17 @@ function writeJson(filePath, data) {
     fs.writeFileSync(filePath, `${JSON.stringify(data, null, 4)}\n`);
 }
 
-/** Mirrors cleanChangelogForNews() from release-script-plugin-iobroker/build/tools.js */
+/**
+ * Mirrors cleanChangelogForNews() from release-script-plugin-iobroker/build/tools.js
+ *
+ * @param changelog
+ */
 function cleanChangelogForNews(changelog) {
     const changelogAuthorRegex = /^[ \t]*[*-][ \t]*\([\p{L}\p{M}0-9@\-_,;&+/ ]+\)[ \t]*/gimu;
     const changelogBulletPointTestRegex = /^[ \t]*[*-][ \t]*/;
     const changelogBulletPointReplaceRegex = new RegExp(changelogBulletPointTestRegex, 'mg');
 
-    changelog = changelog
-        .trim()
-        .replace(/\r\n/g, '\n')
-        .replace(/\r/g, '\n')
-        .replace(changelogAuthorRegex, '* ');
+    changelog = changelog.trim().replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(changelogAuthorRegex, '* ');
 
     const lines = changelog.split('\n');
     if (lines.every(line => !line || changelogBulletPointTestRegex.test(line))) {
@@ -132,7 +132,12 @@ ${textEN}
 """`;
 }
 
-/** Best-effort repair for near-valid JSON that has unescaped inner double quotes. */
+/**
+ * Best-effort repair for near-valid JSON that has unescaped inner double quotes.
+ *
+ * @param text
+ * @param keys
+ */
 function repairJsonWithUnescapedQuotes(text, keys) {
     // Try to fix the common failure mode: a value contains raw " characters
     // (e.g. "Selected plan") instead of \". Walk key by key and escape stray

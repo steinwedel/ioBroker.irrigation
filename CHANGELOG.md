@@ -1,4 +1,7 @@
 # Changelog
+## 0.2.14 (2026-07-21)
+* (Gerhard Steinwedel) **FIXED**: Admin UI "Selected plan" dropdown now correctly selects the newly created plan (or a valid remaining plan after deletion) instead of keeping the previous selection — `createPlan`/`deletePlan` now return `_editPlan` alongside `plans` in a single `useNative` response, since plans no longer live in native config (0.2.13) and `this.config2.plans` is updated synchronously before the response is sent, so combining both attributes in one response no longer risks the overlapping-refetch race that the two-step approach in 0.2.10/0.2.12 was working around
+
 ## 0.2.13 (2026-07-21)
 * (Gerhard Steinwedel) **ENHANCED**: Plans now stored in dedicated `automation.plansData` state instead of native config — adding/editing/deleting plans from the admin UI no longer restarts the adapter. Previously, writing to native config always triggered a full restart, causing the "Selected plan" dropdown to become empty during the restart window. Legacy plans are automatically migrated to the new state on first load. `automation.plansList` maintained for backward compatibility
 

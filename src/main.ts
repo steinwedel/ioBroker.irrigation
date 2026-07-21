@@ -782,6 +782,7 @@ class Irrigation extends utils.Adapter {
                 return;
             }
             const updatedPlans = [...this.config2.plans, { name, valveIndexes: [] }];
+            const newPlanIndex = updatedPlans.length - 1;
             await this.writePlansState(updatedPlans);
             this.log.info(`Created new plan "${name}"`);
             // writePlansState() persists to the automation.plansData state, not to
@@ -792,13 +793,24 @@ class Irrigation extends utils.Adapter {
             // client-side naming convention the json-config framework's ConfigSendto
             // component looks for to merge attributes into the live form state; it
             // has no effect on the adapter's real native config regardless of the
-            // key name used. Only "plans" is sent (not "_editPlan"/"newPlanName")
-            // so the admin UI applies a single attribute change per response - the
-            // "Selected plan" dropdown's alsoDependsOn: ["plans"] reacts to it and
-            // re-fetches its options with the new plan's name. The trade-off: the
-            // "New plan name" text field is no longer cleared automatically after
-            // adding a plan; the user has to clear it manually.
-            this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
+            // key name used.
+            // Both "plans" and "_editPlan" are sent together in a single response
+            // (unlike the two-step approach tried in 0.2.10/0.2.12, which avoided
+            // this to prevent overlapping refetches back when plans still lived in
+            // native config and every write triggered an adapter restart). Now that
+            // plans live in automation.plansData and this.config2.plans is already
+            // updated synchronously by writePlansState() above, a single merged
+            // response is safe: the "Selected plan" dropdown's
+            // alsoDependsOn: ["plans"] re-fetches its options via listPlans (which
+            // reads the already-updated this.config2.plans), and "_editPlan" is set
+            // here so the newly created plan is immediately selected instead of
+            // leaving the previous (or no) selection in place.
+            this.sendTo(
+                obj.from,
+                obj.command,
+                { native: { plans: updatedPlans, _editPlan: newPlanIndex } },
+                obj.callback,
+            );
             return;
         }
 
@@ -814,14 +826,22 @@ class Irrigation extends utils.Adapter {
             }
             const removedName = this.config2.plans[planIndex].name;
             const updatedPlans = this.config2.plans.filter((_, i) => i !== planIndex);
+            const nextSelectedIndex = Math.min(planIndex, updatedPlans.length - 1);
             await this.writePlansState(updatedPlans);
             this.log.info(`Deleted plan "${removedName}"`);
             // See the comment in the createPlan handler above: writePlansState() does
-            // not restart the adapter, and only "plans" is sent here (not "_editPlan")
-            // so the admin UI applies a single attribute change. The dropdown's
-            // previously selected index may now be out of range or point at a
-            // different plan; the user has to reselect.
-            this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
+            // not restart the adapter, and this.config2.plans is already updated
+            // synchronously, so it's safe to send "plans" and "_editPlan" together
+            // in one response. "_editPlan" is set to the plan that now occupies the
+            // deleted plan's position (or the new last plan, if the last plan was
+            // deleted) so the dropdown always keeps a valid selection instead of
+            // pointing at an out-of-range or stale index.
+            this.sendTo(
+                obj.from,
+                obj.command,
+                { native: { plans: updatedPlans, _editPlan: nextSelectedIndex } },
+                obj.callback,
+            );
             return;
         }
 

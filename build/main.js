@@ -669,9 +669,15 @@ class Irrigation extends utils.Adapter {
         return;
       }
       const updatedPlans = [...this.config2.plans, { name, valveIndexes: [] }];
+      const newPlanIndex = updatedPlans.length - 1;
       await this.writePlansState(updatedPlans);
       this.log.info(`Created new plan "${name}"`);
-      this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
+      this.sendTo(
+        obj.from,
+        obj.command,
+        { native: { plans: updatedPlans, _editPlan: newPlanIndex } },
+        obj.callback
+      );
       return;
     }
     if (obj.command === "deletePlan" && obj.callback) {
@@ -686,9 +692,15 @@ class Irrigation extends utils.Adapter {
       }
       const removedName = this.config2.plans[planIndex].name;
       const updatedPlans = this.config2.plans.filter((_, i) => i !== planIndex);
+      const nextSelectedIndex = Math.min(planIndex, updatedPlans.length - 1);
       await this.writePlansState(updatedPlans);
       this.log.info(`Deleted plan "${removedName}"`);
-      this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
+      this.sendTo(
+        obj.from,
+        obj.command,
+        { native: { plans: updatedPlans, _editPlan: nextSelectedIndex } },
+        obj.callback
+      );
       return;
     }
     if (obj.command === "listPlanValves" && obj.callback) {
