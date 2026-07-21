@@ -287,6 +287,15 @@
                     "jsonData": "{\"newPlanName\": ${JSON.stringify(data.newPlanName ?? '')}}",
                     "alsoDependsOn": ["newPlanName"],
                     "useNative": true,
+                    "disabled": "!data.newPlanName || !data.newPlanName.trim()",
+                    "confirm": {
+                        "text": "Create new plan \"${data.newPlanName}\"?",
+                        "title": "Add new plan?",
+                        "type": "info",
+                        "ok": "Create",
+                        "cancel": "Cancel",
+                        "alsoDependsOn": ["newPlanName"]
+                    },
                     "icon": "add",
                     "variant": "contained",
                     "error": {

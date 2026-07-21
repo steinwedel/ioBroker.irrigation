@@ -1,4 +1,7 @@
 # Changelog
+## 0.2.16 (2026-07-21)
+* (Gerhard Steinwedel) **ENHANCED**: "Add new plan" button is now disabled until a plan name is entered, and shows a confirmation dialog with the entered name before creating the plan — reduces the risk of creating a plan with an empty or unintended name. jsonConfig has no modal dialog type with a text input field (`confirm` only supports a static info/warning/error/none message without user input), so the "New plan name" text field next to the button remains the input mechanism; a full custom popup dialog would require building and maintaining a separate React admin component
+
 ## 0.2.15 (2026-07-21)
 * (Gerhard Steinwedel) **ENHANCED**: "Valves in selected plan" is now a real table (valve number, name, "In plan" checkbox) instead of two separate multi-select boxes with Assign/Remove buttons — click "Load valves for selected plan" after changing the plan selection to populate the table, tick/untick valves, then click "Apply valve assignment" to save. "Add all valves to plan"/"Remove all valves from plan" quick actions remain and now also refresh the table immediately. jsonConfig's `table` type cannot load rows dynamically via `sendTo` (only static `native` arrays), so the table is populated via `useNative` from an explicit "Load" button rather than automatically on plan change
 
