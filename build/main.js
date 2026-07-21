@@ -474,8 +474,10 @@ class Irrigation extends utils.Adapter {
     var _a;
     const instanceObj = await this.getForeignObjectAsync(`system.adapter.${this.namespace}`);
     if (instanceObj) {
-      instanceObj.native = { ...(_a = instanceObj.native) != null ? _a : {}, ...partialNative };
+      const mergedNative = { ...(_a = instanceObj.native) != null ? _a : {}, ...partialNative };
+      instanceObj.native = mergedNative;
       await this.setForeignObjectAsync(`system.adapter.${this.namespace}`, instanceObj);
+      this.config2 = (0, import_config_defaults.normalizeConfig)(mergedNative);
     }
   }
   async writeValvesToNative(valves) {
