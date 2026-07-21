@@ -1,5 +1,8 @@
 # Changelog
 ## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **FIXED**: Admin UI "Selected plan" dropdown now correctly shows plan names after creating/deleting plans instead of raw index numbers or becoming empty until page reload — added `alsoDependsOn: ["plans"]` to trigger option-list refetch, and changed `createPlan`/`deletePlan` handlers to return only `plans` (not `_editPlan`) in their `useNative` response to avoid two overlapping, unordered refetches that could leave the dropdown with zero options
+
+## **WORK IN PROGRESS**
 
 ## 0.2.9 (2026-07-20)
 *(No user-visible changes — only restored the "WORK IN PROGRESS" placeholder in CHANGELOG.md)
