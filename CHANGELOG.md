@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.2.13 (2026-07-21)
 * (Gerhard Steinwedel) **ENHANCED**: Plans now stored in dedicated `automation.plansData` state instead of native config — adding/editing/deleting plans from the admin UI no longer restarts the adapter. Previously, writing to native config always triggered a full restart, causing the "Selected plan" dropdown to become empty during the restart window. Legacy plans are automatically migrated to the new state on first load. `automation.plansList` maintained for backward compatibility
 
 ## 0.2.12 (2026-07-21)

@@ -1,6 +1,6 @@
 {
   "name": "iobroker.irrigation",
-  "version": "0.2.12",
+  "version": "0.2.13",
   "description": "Controls irrigation zones, valves and watering schedules based on sensors and weather data",
   "author": {
     "name": "Gerhard Steinwedel",
@@ -71,7 +71,8 @@
     "lint": "eslint -c eslint.config.mjs .",
     "translate": "translate-adapter",
     "release:prepare": "node scripts/prepare-changelog.js",
-    "release": "npm run release:prepare && release-script --addPlaceholder",
+    "release:translate-news": "node scripts/translate-news.js",
+    "release": "npm run release:prepare && node scripts/release-with-translation.js",
     "dev-server": "dev-server"
   },
   "bugs": {
