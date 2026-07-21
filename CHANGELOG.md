@@ -1,4 +1,6 @@
 # Changelog
+## **WORK IN PROGRESS**
+
 ## 0.2.11 (2026-07-21)
 * (Gerhard Steinwedel) **FIXED**: Admin UI plan dropdown now updates immediately after creating/deleting plans within the same request cycle — `writeNativeAsync()` now syncs `this.config2` in-memory right after persisting to the database, so `listPlans` (triggered by `alsoDependsOn` refetch) sees the just-written data instead of the stale startup snapshot, eliminating the race condition where the dropdown appeared empty until the js-controller's async adapter restart completed
 * (Gerhard Steinwedel) **FIXED**: Changelog preparation script no longer duplicates `## **WORK IN PROGRESS**` marker — `insertPlaceholderWithBody()` now detects and fills existing empty placeholders in place instead of always inserting a new marker line after `# Changelog`
