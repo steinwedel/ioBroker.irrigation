@@ -1,5 +1,7 @@
 # Changelog
 ## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **FIXED**: Admin UI plan dropdown now updates immediately after creating/deleting plans within the same request cycle — `writeNativeAsync()` now syncs `this.config2` in-memory right after persisting to the database, so `listPlans` (triggered by `alsoDependsOn` refetch) sees the just-written data instead of the stale startup snapshot, eliminating the race condition where the dropdown appeared empty until the js-controller's async adapter restart completed
+* (Gerhard Steinwedel) **FIXED**: Changelog preparation script no longer duplicates `## **WORK IN PROGRESS**` marker — `insertPlaceholderWithBody()` now detects and fills existing empty placeholders in place instead of always inserting a new marker line after `# Changelog`
 
 ## 0.2.10 (2026-07-21)
 * (Gerhard Steinwedel) **FIXED**: Admin UI "Selected plan" dropdown now correctly shows plan names after creating/deleting plans instead of raw index numbers or becoming empty until page reload — added `alsoDependsOn: ["plans"]` to trigger option-list refetch, and changed `createPlan`/`deletePlan` handlers to return only `plans` (not `_editPlan`) in their `useNative` response to avoid two overlapping, unordered refetches that could leave the dropdown with zero options
