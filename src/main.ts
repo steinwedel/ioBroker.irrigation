@@ -696,14 +696,17 @@ class Irrigation extends utils.Adapter {
             }
             const updatedPlans = [...this.config2.plans, { name, valveIndexes: [] }];
             await this.writeNativeAsync({ plans: updatedPlans });
-            const newIndex = updatedPlans.length - 1;
             this.log.info(`Created new plan "${name}"`);
-            this.sendTo(
-                obj.from,
-                obj.command,
-                { native: { plans: updatedPlans, _editPlan: newIndex, newPlanName: '' } },
-                obj.callback,
-            );
+            // Only "plans" is sent here (not "_editPlan" as well) so the admin UI applies
+            // a single attribute change. The "Selected plan" dropdown's alsoDependsOn is
+            // set to "plans", so this alone is enough to trigger it to re-fetch its
+            // options with the new plan's name. Changing "plans" and "_editPlan" together
+            // would apply as two separate sequential React commits (the json-config
+            // framework's useNative handling awaits each attribute individually), which
+            // can start two overlapping/unordered option-list refetches in that dropdown
+            // and has been observed to leave it rendering with no options at all until the
+            // page is reloaded. The user has to reselect the new plan manually instead.
+            this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans, newPlanName: '' } }, obj.callback);
             return;
         }
 
@@ -721,7 +724,11 @@ class Irrigation extends utils.Adapter {
             const updatedPlans = this.config2.plans.filter((_, i) => i !== planIndex);
             await this.writeNativeAsync({ plans: updatedPlans });
             this.log.info(`Deleted plan "${removedName}"`);
-            this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans, _editPlan: 0 } }, obj.callback);
+            // See the comment in the createPlan handler above: only "plans" is sent here,
+            // not "_editPlan", to avoid two overlapping option-list refetches in the
+            // "Selected plan" dropdown. The dropdown's previously selected index may now
+            // be out of range or point at a different plan; the user has to reselect.
+            this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
             return;
         }
 
