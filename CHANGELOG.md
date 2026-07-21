@@ -1,5 +1,6 @@
 # Changelog
 ## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **ENHANCED**: Plans now stored in dedicated `automation.plansData` state instead of native config — adding/editing/deleting plans from the admin UI no longer restarts the adapter. Previously, writing to native config always triggered a full restart, causing the "Selected plan" dropdown to become empty during the restart window. Legacy plans are automatically migrated to the new state on first load. `automation.plansList` maintained for backward compatibility
 
 ## 0.2.12 (2026-07-21)
 * (Gerhard Steinwedel) **FIXED**: Admin UI 'Selected plan' dropdown no longer occasionally renders empty after creating a new plan — `createPlan` now returns only `plans` in its `useNative` response (not `newPlanName`), avoiding the sequential React render cycle that could trigger overlapping option-list refetches in the dropdown component. Trade-off: the 'New plan name' text field is no longer auto-cleared after adding a plan
