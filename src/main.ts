@@ -845,72 +845,37 @@ class Irrigation extends utils.Adapter {
             return;
         }
 
-        if (obj.command === 'listPlanValves' && obj.callback) {
-            const planIndex = readPlanIndex(obj.message);
-            const planValveIndexes =
-                planIndex !== undefined && planIndex >= 0 && planIndex < this.config2.plans.length
-                    ? this.config2.plans[planIndex].valveIndexes
-                    : [];
-            const options = planValveIndexes
-                .filter(i => i !== NONE_SENTINEL)
-                .map(i => ({
-                    label: `[${formatValveNumber(i)}] ${this.config2.valves[i]?.name || 'unnamed'}`,
-                    value: i,
-                }));
-            this.sendTo(obj.from, obj.command, options, obj.callback);
-            return;
-        }
-
-        if (obj.command === 'listAvailableValves' && obj.callback) {
+        if (obj.command === 'loadPlanValveTable' && obj.callback) {
             const planIndex = readPlanIndex(obj.message);
             const planValveIndexes =
                 planIndex !== undefined && planIndex >= 0 && planIndex < this.config2.plans.length
                     ? new Set(this.config2.plans[planIndex].valveIndexes)
                     : new Set<number>();
-            const options = this.config2.valves
-                .map((v, i) => ({ label: `[${formatValveNumber(i)}] ${v.name || 'unnamed'}`, value: i }))
-                .filter(opt => !planValveIndexes.has(opt.value));
-            this.sendTo(obj.from, obj.command, options, obj.callback);
+            const planValveTable = this.config2.valves.map((v, i) => ({
+                valveNumber: formatValveNumber(i),
+                name: v.name || 'unnamed',
+                assigned: planValveIndexes.has(i),
+            }));
+            this.sendTo(obj.from, obj.command, { native: { planValveTable } }, obj.callback);
             return;
         }
 
-        if (obj.command === 'assignValvesToPlan' && obj.callback) {
+        if (obj.command === 'applyPlanValveTable' && obj.callback) {
             const msg = obj.message as Record<string, unknown>;
             const planIndex = readPlanIndex(msg);
-            const selected = (msg?.availableValves as number[] | undefined) ?? [];
             if (planIndex === undefined || planIndex < 0 || planIndex >= this.config2.plans.length) {
+                this.sendTo(obj.from, obj.command, { error: 'noSelection' }, obj.callback);
                 return;
             }
-            const updatedPlans = this.config2.plans.map((p, i) => {
-                if (i !== planIndex) {
-                    return p;
-                }
-                const merged = new Set([...p.valveIndexes, ...selected]);
-                merged.delete(NONE_SENTINEL);
-                return { ...p, valveIndexes: [...merged].sort((a, b) => a - b) };
-            });
-            await this.writePlansState(updatedPlans);
-            this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
-            return;
-        }
-
-        if (obj.command === 'removeValvesFromPlan' && obj.callback) {
-            const msg = obj.message as Record<string, unknown>;
-            const planIndex = readPlanIndex(msg);
-            const selected = new Set((msg?.planValvesRefresh as number[] | undefined) ?? []);
-            if (planIndex === undefined || planIndex < 0 || planIndex >= this.config2.plans.length) {
-                return;
-            }
-            const updatedPlans = this.config2.plans.map((p, i) => {
-                if (i !== planIndex) {
-                    return p;
-                }
-                // An empty valveIndexes array means "all valves" (see buildActiveValveList()),
-                // so falling through to [] here after removing the last real valve would
-                // silently re-include every valve instead of leaving the plan empty.
-                const remaining = p.valveIndexes.filter(vi => !selected.has(vi));
-                return { ...p, valveIndexes: remaining.length > 0 ? remaining : [NONE_SENTINEL] };
-            });
+            const rows = (msg?.planValveTable as Array<{ assigned?: boolean }> | undefined) ?? [];
+            const selectedIndexes = rows
+                .map((row, i) => (row?.assigned ? i : -1))
+                .filter(i => i >= 0 && i < this.config2.valves.length);
+            const updatedPlans = this.config2.plans.map((p, i) =>
+                i === planIndex
+                    ? { ...p, valveIndexes: selectedIndexes.length > 0 ? selectedIndexes : [NONE_SENTINEL] }
+                    : p,
+            );
             await this.writePlansState(updatedPlans);
             this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
             return;
@@ -926,7 +891,12 @@ class Irrigation extends utils.Adapter {
                 i === planIndex ? { ...p, valveIndexes: [...allValveIndexes] } : p,
             );
             await this.writePlansState(updatedPlans);
-            this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
+            const planValveTable = this.config2.valves.map((v, i) => ({
+                valveNumber: formatValveNumber(i),
+                name: v.name || 'unnamed',
+                assigned: true,
+            }));
+            this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans, planValveTable } }, obj.callback);
             return;
         }
 
@@ -939,7 +909,12 @@ class Irrigation extends utils.Adapter {
                 i === planIndex ? { ...p, valveIndexes: [NONE_SENTINEL] } : p,
             );
             await this.writePlansState(updatedPlans);
-            this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
+            const planValveTable = this.config2.valves.map((v, i) => ({
+                valveNumber: formatValveNumber(i),
+                name: v.name || 'unnamed',
+                assigned: false,
+            }));
+            this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans, planValveTable } }, obj.callback);
             return;
         }
 

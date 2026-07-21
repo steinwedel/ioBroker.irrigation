@@ -301,59 +301,82 @@
                     "text": "Valve assignment",
                     "size": 4
                 },
-                "planValvesRefresh": {
-                    "type": "selectSendTo",
-                    "label": "Valves in selected plan",
-                    "multiple": true,
-                    "command": "listPlanValves",
-                    "jsonData": "{\"_editPlan\": ${JSON.stringify(data._editPlan ?? null)}}",
-                    "alsoDependsOn": ["_editPlan"],
+                "planValvesHint": {
+                    "type": "staticText",
+                    "text": "After changing \"Selected plan\" above, click \"Load valves for selected plan\" to refresh the table below, tick/untick valves, then click \"Apply valve assignment\" to save.",
                     "newLine": true,
                     "sm": 12,
-                    "md": 6,
-                    "lg": 6,
-                    "doNotSave": true
+                    "md": 12,
+                    "lg": 8
                 },
-                "availableValves": {
-                    "type": "selectSendTo",
-                    "label": "Available valves",
-                    "multiple": true,
-                    "command": "listAvailableValves",
+                "loadPlanValveTable": {
+                    "type": "sendTo",
+                    "label": "Load valves for selected plan",
+                    "command": "loadPlanValveTable",
                     "jsonData": "{\"_editPlan\": ${JSON.stringify(data._editPlan ?? null)}}",
-                    "alsoDependsOn": ["_editPlan"],
+                    "useNative": true,
+                    "onLoaded": true,
+                    "icon": "refresh",
+                    "variant": "outlined",
+                    "newLine": true,
+                    "sm": 6,
+                    "md": 4,
+                    "lg": 3
+                },
+                "applyPlanValveTable": {
+                    "type": "sendTo",
+                    "label": "Apply valve assignment",
+                    "command": "applyPlanValveTable",
+                    "jsonData": "{\"_editPlan\": ${JSON.stringify(data._editPlan ?? null)}, \"planValveTable\": ${JSON.stringify(data.planValveTable ?? [])}}",
+                    "alsoDependsOn": ["_editPlan", "planValveTable"],
+                    "useNative": true,
+                    "icon": "save",
+                    "variant": "contained",
+                    "error": {
+                        "noSelection": "No plan selected."
+                    },
+                    "sm": 6,
+                    "md": 4,
+                    "lg": 3
+                },
+                "planValveTable": {
+                    "type": "table",
+                    "label": "Valves in selected plan",
+                    "newLine": true,
+                    "doNotSave": true,
                     "sm": 12,
-                    "md": 6,
-                    "lg": 6,
-                    "doNotSave": true
+                    "md": 12,
+                    "lg": 8,
+                    "items": [
+                        {
+                            "type": "text",
+                            "attr": "valveNumber",
+                            "title": "Valve",
+                            "width": "15%",
+                            "readOnly": true,
+                            "sort": true
+                        },
+                        {
+                            "type": "text",
+                            "attr": "name",
+                            "title": "Name",
+                            "width": "55%",
+                            "readOnly": true,
+                            "sort": true
+                        },
+                        {
+                            "type": "checkbox",
+                            "attr": "assigned",
+                            "title": "In plan",
+                            "width": "30%",
+                            "sort": true
+                        }
+                    ]
                 },
                 "planButtons": {
                     "type": "header",
-                    "text": "Actions",
+                    "text": "Quick actions",
                     "size": 4
-                },
-                "assignSelected": {
-                    "type": "sendTo",
-                    "label": "Assign selected to plan",
-                    "command": "assignValvesToPlan",
-                    "jsonData": "{\"_editPlan\": ${JSON.stringify(data._editPlan ?? null)}, \"availableValves\": ${JSON.stringify(data.availableValves ?? [])}}",
-                    "alsoDependsOn": ["_editPlan", "availableValves"],
-                    "variant": "contained",
-                    "icon": "add",
-                    "sm": 6,
-                    "md": 4,
-                    "lg": 3
-                },
-                "removeSelected": {
-                    "type": "sendTo",
-                    "label": "Remove selected from plan",
-                    "command": "removeValvesFromPlan",
-                    "jsonData": "{\"_editPlan\": ${JSON.stringify(data._editPlan ?? null)}, \"planValvesRefresh\": ${JSON.stringify(data.planValvesRefresh ?? [])}}",
-                    "alsoDependsOn": ["_editPlan", "planValvesRefresh"],
-                    "variant": "contained",
-                    "icon": "delete",
-                    "sm": 6,
-                    "md": 4,
-                    "lg": 3
                 },
                 "addAllToPlan": {
                     "type": "sendTo",
@@ -361,6 +384,7 @@
                     "command": "addAllValvesToPlan",
                     "jsonData": "{\"_editPlan\": ${JSON.stringify(data._editPlan ?? null)}}",
                     "alsoDependsOn": ["_editPlan"],
+                    "useNative": true,
                     "variant": "outlined",
                     "icon": "add",
                     "sm": 6,
@@ -373,6 +397,7 @@
                     "command": "removeAllValvesFromPlan",
                     "jsonData": "{\"_editPlan\": ${JSON.stringify(data._editPlan ?? null)}}",
                     "alsoDependsOn": ["_editPlan"],
+                    "useNative": true,
                     "variant": "outlined",
                     "icon": "delete",
                     "sm": 6,

@@ -1,4 +1,7 @@
 # Changelog
+## 0.2.15 (2026-07-21)
+* (Gerhard Steinwedel) **ENHANCED**: "Valves in selected plan" is now a real table (valve number, name, "In plan" checkbox) instead of two separate multi-select boxes with Assign/Remove buttons — click "Load valves for selected plan" after changing the plan selection to populate the table, tick/untick valves, then click "Apply valve assignment" to save. "Add all valves to plan"/"Remove all valves from plan" quick actions remain and now also refresh the table immediately. jsonConfig's `table` type cannot load rows dynamically via `sendTo` (only static `native` arrays), so the table is populated via `useNative` from an explicit "Load" button rather than automatically on plan change
+
 ## 0.2.14 (2026-07-21)
 * (Gerhard Steinwedel) **FIXED**: Admin UI "Selected plan" dropdown now correctly selects the newly created plan (or a valid remaining plan after deletion) instead of keeping the previous selection — `createPlan`/`deletePlan` now return `_editPlan` alongside `plans` in a single `useNative` response, since plans no longer live in native config (0.2.13) and `this.config2.plans` is updated synchronously before the response is sent, so combining both attributes in one response no longer risks the overlapping-refetch race that the two-step approach in 0.2.10/0.2.12 was working around
 
