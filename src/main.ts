@@ -537,8 +537,19 @@ class Irrigation extends utils.Adapter {
     private async writeNativeAsync(partialNative: Partial<IrrigationNativeConfig>): Promise<void> {
         const instanceObj = await this.getForeignObjectAsync(`system.adapter.${this.namespace}`);
         if (instanceObj) {
-            instanceObj.native = { ...(instanceObj.native ?? {}), ...partialNative };
+            const mergedNative = { ...(instanceObj.native ?? {}), ...partialNative };
+            instanceObj.native = mergedNative;
             await this.setForeignObjectAsync(`system.adapter.${this.namespace}`, instanceObj);
+            // Keep the in-memory config in sync immediately. this.config/this.config2 are
+            // otherwise only refreshed by a full adapter restart, which the js-controller
+            // triggers asynchronously (and not always instantly) after a native config
+            // write. Message handlers like listPlans run within the same adapter process
+            // right after this write returns and must see the just-written data straight
+            // away - without this, e.g. createPlan/deletePlan would keep reading the stale
+            // this.config2.plans snapshot from adapter startup until a restart happened to
+            // complete, which could make the "Selected plan" dropdown appear empty or
+            // outdated after adding/removing a plan.
+            this.config2 = normalizeConfig(mergedNative);
         }
     }
 
