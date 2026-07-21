@@ -240,6 +240,7 @@
                     "label": "Selected plan",
                     "command": "listPlans",
                     "jsonData": "{}",
+                    "alsoDependsOn": ["plans"],
                     "doNotSave": true,
                     "newLine": true,
                     "sm": 6,
