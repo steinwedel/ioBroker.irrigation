@@ -5,7 +5,7 @@
 
 import * as utils from '@iobroker/adapter-core';
 import { normalizeConfig } from './lib/config-defaults';
-import type { IrrigationNativeConfig, IValveConfig, ScanType } from './lib/types';
+import type { IPlanConfig, IrrigationNativeConfig, IValveConfig, ScanType } from './lib/types';
 import { formatValveNumber, NONE_SENTINEL } from './lib/types';
 import { createBaseStates, applyConfigToStates } from './lib/states';
 import { ValveController } from './lib/ventile';
@@ -88,6 +88,7 @@ class Irrigation extends utils.Adapter {
         await this.cleanupStaleZoneObjects();
 
         await createBaseStates(this);
+        await this.loadPlansState();
         await applyConfigToStates(this, this.config2);
 
         this.rateLimiter = new RateLimiter();
@@ -178,6 +179,81 @@ class Irrigation extends utils.Adapter {
             this.log.info('Migrating native.valves to include newly introduced fields (runFor, valveNumber).');
             await this.writeNativeAsync({ valves: migratedValves });
         }
+    }
+
+    /**
+     * Loads `plans` from the dedicated `automation.plansData` state into
+     * `this.config2.plans`, migrating the legacy `native.plans` value into
+     * that state once if the state doesn't hold anything useful yet.
+     *
+     * Plans are intentionally NOT stored in `native` config (unlike every
+     * other setting): the admin UI's Plans tab lets users add/delete plans
+     * and (re)assign valves via `sendTo` buttons while the settings dialog
+     * is open, and writing to native config always triggers a full adapter
+     * instance restart (this is unconditional js-controller behavior,
+     * regardless of write method). Restarting mid-edit breaks the "Selected
+     * plan" dropdown: its option list re-fetch can land in the brief window
+     * where `alive` is `false` during the restart, after which nothing
+     * re-triggers the fetch, leaving the dropdown empty until the page is
+     * reloaded. A plain adapter state write never restarts the adapter, so
+     * `plans` lives there instead. Must run after createBaseStates() (which
+     * creates `automation.plansData`) and before anything that reads
+     * `this.config2.plans`.
+     */
+    private async loadPlansState(): Promise<void> {
+        const plansState = await this.getStateAsync('automation.plansData');
+        const storedPlans = this.parsePlansState(plansState?.val);
+
+        if (storedPlans && storedPlans.length > 0) {
+            this.config2.plans = storedPlans;
+            return;
+        }
+
+        // No usable state yet - this is either a fresh install (config2.plans
+        // is already the normalized default "Alle" plan) or an existing
+        // installation upgrading from a version that stored plans in
+        // native.plans. Either way, seed the state from the current
+        // this.config2.plans (already normalized from native by
+        // normalizeConfig()) so it becomes the source of truth going forward.
+        this.log.info('Initializing automation.plansData state from existing configuration.');
+        await this.writePlansState(this.config2.plans);
+    }
+
+    private parsePlansState(raw: unknown): IPlanConfig[] | undefined {
+        if (typeof raw !== 'string' || !raw) {
+            return undefined;
+        }
+        try {
+            const parsed = JSON.parse(raw);
+            if (!Array.isArray(parsed)) {
+                return undefined;
+            }
+            return parsed.map((p: Partial<IPlanConfig>) => ({
+                name: p?.name ?? '',
+                valveIndexes: Array.isArray(p?.valveIndexes) ? p.valveIndexes : [],
+            }));
+        } catch (err) {
+            this.log.warn(`Failed to parse automation.plansData state, ignoring: ${(err as Error).message}`);
+            return undefined;
+        }
+    }
+
+    /**
+     * Persists `plans` to the `automation.plansData` state and refreshes
+     * `this.config2.plans` in-memory. Deliberately does NOT touch `native`
+     * config - see loadPlansState() for why. Also mirrors the plan names
+     * into automation.plansList (as before) so any external consumers of
+     * that JSON state keep working unchanged.
+     *
+     * @param plans
+     */
+    private async writePlansState(plans: IPlanConfig[]): Promise<void> {
+        this.config2.plans = plans;
+        await this.setStateAsync('automation.plansData', { val: JSON.stringify(plans), ack: true });
+        await this.setStateAsync('automation.plansList', {
+            val: JSON.stringify(plans.map(p => p.name)),
+            ack: true,
+        });
     }
 
     /**
@@ -706,24 +782,22 @@ class Irrigation extends utils.Adapter {
                 return;
             }
             const updatedPlans = [...this.config2.plans, { name, valveIndexes: [] }];
-            await this.writeNativeAsync({ plans: updatedPlans });
+            await this.writePlansState(updatedPlans);
             this.log.info(`Created new plan "${name}"`);
-            // Only "plans" is sent here - not "_editPlan" and not "newPlanName" - so the
-            // admin UI applies exactly one attribute change. The "Selected plan"
-            // dropdown's alsoDependsOn is set to "plans", so this alone is enough to
-            // trigger it to re-fetch its options with the new plan's name. The
-            // json-config framework's useNative handling applies a response's
-            // attributes with a sequential "for (const [attr, val] of
-            // Object.entries(...)) await this.onChangeAsync(attr, val)" loop, where each
-            // awaited call is a separate, fully committed React render (not batched).
-            // Returning two or more attributes together (even ones unrelated to
-            // _editPlan's own alsoDependsOn, like "newPlanName") still produces two
-            // sequential renders/commits, which has been observed to occasionally leave
-            // the "Selected plan" dropdown rendering with zero options until the page is
-            // reloaded - the framework's selectSendTo component has no cancellation or
-            // ordering guard for overlapping option-list refetches. The trade-off: the
-            // "New plan name" text field is no longer cleared automatically after adding
-            // a plan; the user has to clear it manually.
+            // writePlansState() persists to the automation.plansData state, not to
+            // native config, so this does NOT restart the adapter (see
+            // loadPlansState()'s doc comment for why plans live in a state instead
+            // of native.plans). The admin UI response below still uses the
+            // "native: {...}" + useNative:true wrapper - that's purely a
+            // client-side naming convention the json-config framework's ConfigSendto
+            // component looks for to merge attributes into the live form state; it
+            // has no effect on the adapter's real native config regardless of the
+            // key name used. Only "plans" is sent (not "_editPlan"/"newPlanName")
+            // so the admin UI applies a single attribute change per response - the
+            // "Selected plan" dropdown's alsoDependsOn: ["plans"] reacts to it and
+            // re-fetches its options with the new plan's name. The trade-off: the
+            // "New plan name" text field is no longer cleared automatically after
+            // adding a plan; the user has to clear it manually.
             this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
             return;
         }
@@ -740,12 +814,13 @@ class Irrigation extends utils.Adapter {
             }
             const removedName = this.config2.plans[planIndex].name;
             const updatedPlans = this.config2.plans.filter((_, i) => i !== planIndex);
-            await this.writeNativeAsync({ plans: updatedPlans });
+            await this.writePlansState(updatedPlans);
             this.log.info(`Deleted plan "${removedName}"`);
-            // See the comment in the createPlan handler above: only "plans" is sent here,
-            // not "_editPlan", to avoid two overlapping option-list refetches in the
-            // "Selected plan" dropdown. The dropdown's previously selected index may now
-            // be out of range or point at a different plan; the user has to reselect.
+            // See the comment in the createPlan handler above: writePlansState() does
+            // not restart the adapter, and only "plans" is sent here (not "_editPlan")
+            // so the admin UI applies a single attribute change. The dropdown's
+            // previously selected index may now be out of range or point at a
+            // different plan; the user has to reselect.
             this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
             return;
         }
@@ -794,7 +869,7 @@ class Irrigation extends utils.Adapter {
                 merged.delete(NONE_SENTINEL);
                 return { ...p, valveIndexes: [...merged].sort((a, b) => a - b) };
             });
-            await this.writeNativeAsync({ plans: updatedPlans });
+            await this.writePlansState(updatedPlans);
             this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
             return;
         }
@@ -816,7 +891,7 @@ class Irrigation extends utils.Adapter {
                 const remaining = p.valveIndexes.filter(vi => !selected.has(vi));
                 return { ...p, valveIndexes: remaining.length > 0 ? remaining : [NONE_SENTINEL] };
             });
-            await this.writeNativeAsync({ plans: updatedPlans });
+            await this.writePlansState(updatedPlans);
             this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
             return;
         }
@@ -830,7 +905,7 @@ class Irrigation extends utils.Adapter {
             const updatedPlans = this.config2.plans.map((p, i) =>
                 i === planIndex ? { ...p, valveIndexes: [...allValveIndexes] } : p,
             );
-            await this.writeNativeAsync({ plans: updatedPlans });
+            await this.writePlansState(updatedPlans);
             this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
             return;
         }
@@ -843,7 +918,7 @@ class Irrigation extends utils.Adapter {
             const updatedPlans = this.config2.plans.map((p, i) =>
                 i === planIndex ? { ...p, valveIndexes: [NONE_SENTINEL] } : p,
             );
-            await this.writeNativeAsync({ plans: updatedPlans });
+            await this.writePlansState(updatedPlans);
             this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
             return;
         }
@@ -854,14 +929,14 @@ class Irrigation extends utils.Adapter {
                 ...p,
                 valveIndexes: [...allValveIndexes],
             }));
-            await this.writeNativeAsync({ plans: updatedPlans });
+            await this.writePlansState(updatedPlans);
             this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
             return;
         }
 
         if (obj.command === 'removeAllValvesFromAllPlans' && obj.callback) {
             const updatedPlans = this.config2.plans.map(p => ({ ...p, valveIndexes: [NONE_SENTINEL] }));
-            await this.writeNativeAsync({ plans: updatedPlans });
+            await this.writePlansState(updatedPlans);
             this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
             return;
         }

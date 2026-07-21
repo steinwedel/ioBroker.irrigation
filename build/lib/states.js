@@ -251,6 +251,15 @@ async function createBaseStates(adapter) {
     write: false,
     def: "[]"
   });
+  await setObj(adapter, "automation.plansData", {
+    name: "Plan configuration (internal)",
+    desc: "Full plan configuration (name + assigned valve indexes per plan), stored here instead of in the adapter instance config so that adding/editing/deleting plans from the admin UI does not restart the adapter (writing native config always restarts the adapter instance). Not meant for external use - use automation.plansList for the plan names.",
+    type: "string",
+    role: "json",
+    read: true,
+    write: false,
+    def: "[]"
+  });
   await setObj(adapter, "sensors.rain", {
     name: "Rain detected",
     type: "boolean",
@@ -546,10 +555,6 @@ async function applyConfigToStates(adapter, config) {
   await adapter.setStateAsync("automation.seasonEnd", { val: config.scheduler.seasonEnd, ack: true });
   await adapter.setStateAsync("automation.frostEnabled", { val: config.scheduler.frostEnabled, ack: true });
   await adapter.setStateAsync("automation.frostMinTemp", { val: config.scheduler.frostMinTemp, ack: true });
-  await adapter.setStateAsync("automation.plansList", {
-    val: JSON.stringify(config.plans.map((p) => p.name)),
-    ack: true
-  });
   await adapter.setStateAsync("sensors.rainId", { val: config.sensors.rainId, ack: true });
   await adapter.setStateAsync("sensors.soilMoistureId", { val: config.sensors.soilMoistureId, ack: true });
   await adapter.setStateAsync("sensors.temperatureId", { val: config.sensors.temperatureId, ack: true });

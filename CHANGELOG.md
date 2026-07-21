@@ -1,4 +1,6 @@
 # Changelog
+## **WORK IN PROGRESS**
+
 ## 0.2.12 (2026-07-21)
 * (Gerhard Steinwedel) **FIXED**: Admin UI 'Selected plan' dropdown no longer occasionally renders empty after creating a new plan — `createPlan` now returns only `plans` in its `useNative` response (not `newPlanName`), avoiding the sequential React render cycle that could trigger overlapping option-list refetches in the dropdown component. Trade-off: the 'New plan name' text field is no longer auto-cleared after adding a plan
 

@@ -69,6 +69,7 @@ class Irrigation extends utils.Adapter {
     await this.cleanupStaleValveObjects();
     await this.cleanupStaleZoneObjects();
     await (0, import_states.createBaseStates)(this);
+    await this.loadPlansState();
     await (0, import_states.applyConfigToStates)(this, this.config2);
     this.rateLimiter = new import_rate_limiter.RateLimiter();
     await this.createRateLimitStates();
@@ -143,6 +144,73 @@ class Irrigation extends utils.Adapter {
       this.log.info("Migrating native.valves to include newly introduced fields (runFor, valveNumber).");
       await this.writeNativeAsync({ valves: migratedValves });
     }
+  }
+  /**
+   * Loads `plans` from the dedicated `automation.plansData` state into
+   * `this.config2.plans`, migrating the legacy `native.plans` value into
+   * that state once if the state doesn't hold anything useful yet.
+   *
+   * Plans are intentionally NOT stored in `native` config (unlike every
+   * other setting): the admin UI's Plans tab lets users add/delete plans
+   * and (re)assign valves via `sendTo` buttons while the settings dialog
+   * is open, and writing to native config always triggers a full adapter
+   * instance restart (this is unconditional js-controller behavior,
+   * regardless of write method). Restarting mid-edit breaks the "Selected
+   * plan" dropdown: its option list re-fetch can land in the brief window
+   * where `alive` is `false` during the restart, after which nothing
+   * re-triggers the fetch, leaving the dropdown empty until the page is
+   * reloaded. A plain adapter state write never restarts the adapter, so
+   * `plans` lives there instead. Must run after createBaseStates() (which
+   * creates `automation.plansData`) and before anything that reads
+   * `this.config2.plans`.
+   */
+  async loadPlansState() {
+    const plansState = await this.getStateAsync("automation.plansData");
+    const storedPlans = this.parsePlansState(plansState == null ? void 0 : plansState.val);
+    if (storedPlans && storedPlans.length > 0) {
+      this.config2.plans = storedPlans;
+      return;
+    }
+    this.log.info("Initializing automation.plansData state from existing configuration.");
+    await this.writePlansState(this.config2.plans);
+  }
+  parsePlansState(raw) {
+    if (typeof raw !== "string" || !raw) {
+      return void 0;
+    }
+    try {
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) {
+        return void 0;
+      }
+      return parsed.map((p) => {
+        var _a;
+        return {
+          name: (_a = p == null ? void 0 : p.name) != null ? _a : "",
+          valveIndexes: Array.isArray(p == null ? void 0 : p.valveIndexes) ? p.valveIndexes : []
+        };
+      });
+    } catch (err) {
+      this.log.warn(`Failed to parse automation.plansData state, ignoring: ${err.message}`);
+      return void 0;
+    }
+  }
+  /**
+   * Persists `plans` to the `automation.plansData` state and refreshes
+   * `this.config2.plans` in-memory. Deliberately does NOT touch `native`
+   * config - see loadPlansState() for why. Also mirrors the plan names
+   * into automation.plansList (as before) so any external consumers of
+   * that JSON state keep working unchanged.
+   *
+   * @param plans
+   */
+  async writePlansState(plans) {
+    this.config2.plans = plans;
+    await this.setStateAsync("automation.plansData", { val: JSON.stringify(plans), ack: true });
+    await this.setStateAsync("automation.plansList", {
+      val: JSON.stringify(plans.map((p) => p.name)),
+      ack: true
+    });
   }
   /**
    * Creates the smartgarden rate limit monitoring states.
@@ -601,7 +669,7 @@ class Irrigation extends utils.Adapter {
         return;
       }
       const updatedPlans = [...this.config2.plans, { name, valveIndexes: [] }];
-      await this.writeNativeAsync({ plans: updatedPlans });
+      await this.writePlansState(updatedPlans);
       this.log.info(`Created new plan "${name}"`);
       this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
       return;
@@ -618,7 +686,7 @@ class Irrigation extends utils.Adapter {
       }
       const removedName = this.config2.plans[planIndex].name;
       const updatedPlans = this.config2.plans.filter((_, i) => i !== planIndex);
-      await this.writeNativeAsync({ plans: updatedPlans });
+      await this.writePlansState(updatedPlans);
       this.log.info(`Deleted plan "${removedName}"`);
       this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
       return;
@@ -658,7 +726,7 @@ class Irrigation extends utils.Adapter {
         merged.delete(import_types.NONE_SENTINEL);
         return { ...p, valveIndexes: [...merged].sort((a, b) => a - b) };
       });
-      await this.writeNativeAsync({ plans: updatedPlans });
+      await this.writePlansState(updatedPlans);
       this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
       return;
     }
@@ -676,7 +744,7 @@ class Irrigation extends utils.Adapter {
         const remaining = p.valveIndexes.filter((vi) => !selected.has(vi));
         return { ...p, valveIndexes: remaining.length > 0 ? remaining : [import_types.NONE_SENTINEL] };
       });
-      await this.writeNativeAsync({ plans: updatedPlans });
+      await this.writePlansState(updatedPlans);
       this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
       return;
     }
@@ -689,7 +757,7 @@ class Irrigation extends utils.Adapter {
       const updatedPlans = this.config2.plans.map(
         (p, i) => i === planIndex ? { ...p, valveIndexes: [...allValveIndexes] } : p
       );
-      await this.writeNativeAsync({ plans: updatedPlans });
+      await this.writePlansState(updatedPlans);
       this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
       return;
     }
@@ -701,7 +769,7 @@ class Irrigation extends utils.Adapter {
       const updatedPlans = this.config2.plans.map(
         (p, i) => i === planIndex ? { ...p, valveIndexes: [import_types.NONE_SENTINEL] } : p
       );
-      await this.writeNativeAsync({ plans: updatedPlans });
+      await this.writePlansState(updatedPlans);
       this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
       return;
     }
@@ -711,13 +779,13 @@ class Irrigation extends utils.Adapter {
         ...p,
         valveIndexes: [...allValveIndexes]
       }));
-      await this.writeNativeAsync({ plans: updatedPlans });
+      await this.writePlansState(updatedPlans);
       this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
       return;
     }
     if (obj.command === "removeAllValvesFromAllPlans" && obj.callback) {
       const updatedPlans = this.config2.plans.map((p) => ({ ...p, valveIndexes: [import_types.NONE_SENTINEL] }));
-      await this.writeNativeAsync({ plans: updatedPlans });
+      await this.writePlansState(updatedPlans);
       this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
       return;
     }

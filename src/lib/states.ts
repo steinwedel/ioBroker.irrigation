@@ -236,6 +236,15 @@ export async function createBaseStates(adapter: ioBroker.Adapter): Promise<void>
         write: false,
         def: '[]',
     });
+    await setObj(adapter, 'automation.plansData', {
+        name: 'Plan configuration (internal)',
+        desc: 'Full plan configuration (name + assigned valve indexes per plan), stored here instead of in the adapter instance config so that adding/editing/deleting plans from the admin UI does not restart the adapter (writing native config always restarts the adapter instance). Not meant for external use - use automation.plansList for the plan names.',
+        type: 'string',
+        role: 'json',
+        read: true,
+        write: false,
+        def: '[]',
+    });
 
     // sensors
     await setObj(adapter, 'sensors.rain', {
@@ -549,10 +558,9 @@ export async function applyConfigToStates(adapter: ioBroker.Adapter, config: Irr
     await adapter.setStateAsync('automation.seasonEnd', { val: config.scheduler.seasonEnd, ack: true });
     await adapter.setStateAsync('automation.frostEnabled', { val: config.scheduler.frostEnabled, ack: true });
     await adapter.setStateAsync('automation.frostMinTemp', { val: config.scheduler.frostMinTemp, ack: true });
-    await adapter.setStateAsync('automation.plansList', {
-        val: JSON.stringify(config.plans.map(p => p.name)),
-        ack: true,
-    });
+    // automation.plansList / automation.plansData are maintained by
+    // Irrigation.loadPlansState()/writePlansState() in main.ts, not here -
+    // plans are no longer part of the native config this function reads from.
 
     await adapter.setStateAsync('sensors.rainId', { val: config.sensors.rainId, ack: true });
     await adapter.setStateAsync('sensors.soilMoistureId', { val: config.sensors.soilMoistureId, ack: true });
