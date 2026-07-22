@@ -79,19 +79,32 @@ export class DwdRestriction {
 
     private isWithinWindow(now: Date): boolean {
         const config = this.deps.getConfig().legalRestriction;
+        const hasDateRange = Boolean(config.startDate || config.endDate);
+        const hasTimeRange = Boolean(config.startTime || config.endTime);
         const startDate = parseAnnualDate(config.startDate);
         const endDate = parseAnnualDate(config.endDate);
         const startTime = parseTime(config.startTime);
         const endTime = parseTime(config.endTime);
-        if (startDate === undefined || endDate === undefined || startTime === undefined || endTime === undefined) {
+        if (
+            (hasDateRange && (startDate === undefined || endDate === undefined)) ||
+            (hasTimeRange && (startTime === undefined || endTime === undefined))
+        ) {
             return false;
         }
 
         const currentDate = annualDayOfYear(now.getMonth() + 1, now.getDate());
-        const current = currentDate * 24 * 60 + now.getHours() * 60 + now.getMinutes();
-        const start = startDate * 24 * 60 + startTime;
-        const end = endDate * 24 * 60 + endTime;
-        return start <= end ? current >= start && current <= end : current >= start || current <= end;
+        const currentTime = now.getHours() * 60 + now.getMinutes();
+        const isWithinDateRange =
+            !hasDateRange ||
+            (startDate! <= endDate!
+                ? currentDate >= startDate! && currentDate <= endDate!
+                : currentDate >= startDate! || currentDate <= endDate!);
+        const isWithinTimeRange =
+            !hasTimeRange ||
+            (startTime! <= endTime!
+                ? currentTime >= startTime! && currentTime <= endTime!
+                : currentTime >= startTime! || currentTime <= endTime!);
+        return isWithinDateRange && isWithinTimeRange;
     }
 
     public async check(): Promise<boolean> {

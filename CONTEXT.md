@@ -1,11 +1,11 @@
 # Context
 
 ## Current Task
-Die Beregnungssperre unterstützt validierte Jahresdaten und minutengenaue Zeiten.
+Die Beregnungssperre dokumentiert alle Quellen- und Fensterwechselwirkungen vollständig.
 
 ## Key Decisions
-- Daten werden im Format T.M und Zeiten im Format HH:MM gespeichert.
-- Bestehende Monats- und Stundenwerte werden beim Laden migriert.
+- Ohne Temperaturquelle ist die maximale Beregnungstemperatur deaktiviert.
+- Temperatur-, Datums- und Zeitbedingungen werden unabhängig ausgewertet.
 
 ## Next Steps
 - Übersetzungen und Validierung ausführen.

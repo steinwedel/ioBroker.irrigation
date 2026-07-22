@@ -176,19 +176,25 @@ Weather data is published to these states: `weather.temperature`, `weather.preci
 
 #### Tab: Legal Restriction (Expert)
 
-In Germany, municipalities may impose watering bans during heat waves. This adapter can check DWD (German Weather Service) data and pause watering automatically.
+In Germany, municipalities may impose watering bans during heat waves. This adapter can activate a watering restriction within a configured annual date range and daily time range. A restriction prevents automatic watering and pauses a running automatic program; it resumes automatically once the restriction is no longer active. Manual valve commands are unaffected.
 
 | Setting | Description |
 |---------|-------------|
-| Legal restriction check enabled | Enable/disable DWD-based restriction checking. |
-| DWD station | Select the local DWD weather station by name from the complete station list (default: Düsseldorf, ID 10400), or select "Keine Wetterstation" to apply the restriction throughout the configured time window without a temperature check. Selecting a DWD station clears the local temperature state. |
-| Local temperature state | Select a numeric ioBroker temperature state from the object tree to use it instead of the DWD station. Selecting a local state clears the DWD station. |
-| Restriction start/end date | Annual restriction range as `D.M`, e.g. `13.5`. Invalid calendar dates are rejected. |
-| Restriction start/end time | Daily restriction range as `HH:MM`, e.g. `15:10`. Invalid times are rejected. |
-| Minimum temperature (°C) | Temperature above which the restriction becomes active. |
-| Check interval (min) | How often the DWD data is polled. |
+| Legal restriction check enabled | Master switch for the complete restriction feature. When disabled, the restriction is always inactive. |
+| DWD station | Select one DWD station by name. This is one possible temperature source. Selecting a DWD station clears the local temperature state. |
+| Local temperature state | Select one numeric ioBroker state from the object tree. Its value in °C is used as the temperature source. Selecting a local state clears the DWD station. A local state has no DWD network request. |
+| Restriction start/end date | Optional annual range in `D.M` format, e.g. `13.5` to `30.9`. Both fields must contain valid calendar dates or both must be empty. If both are empty, the date condition applies all year. Ranges may cross New Year, e.g. `15.11` to `15.2`. |
+| Restriction start/end time | Optional daily range in `HH:MM` format, e.g. `15:10` to `18:00`. Both fields must contain valid times or both must be empty. If both are empty, the time condition applies all day. Ranges may cross midnight, e.g. `22:00` to `06:00`. |
+| Maximum irrigation temperature (°C) | Active only with a DWD station or local temperature state. At or above this temperature, the restriction becomes active while the date and time conditions apply. |
+| Check interval (min) | Polling interval for the configured temperature source and for evaluating date/time boundaries. A local temperature-state change is additionally evaluated immediately. |
 
-When a restriction is active, running automation is paused and resumes automatically once the conditions clear.
+### Restriction Decision Rules
+
+1. **Date and time are independent:** the restriction can apply only when both configured ranges match. Leaving either complete pair empty removes only that condition.
+2. **Temperature source is optional:** with a DWD station or local state, the restriction is active only when the temperature is at least the configured maximum irrigation temperature. With neither source selected, it is active throughout the matching date/time window, independent of temperature; the temperature field is disabled.
+3. **Sources are mutually exclusive:** configuring a DWD station removes the local state and configuring a local state removes the DWD station. Only the selected source is read.
+4. **Unavailable temperature values are safe:** if DWD data cannot be fetched or a configured local state has no valid numeric value, the adapter retains the previous restriction state rather than switching source or guessing a temperature.
+5. **Examples:** with `13.5`–`30.9`, `15:10`–`18:00`, and `27 °C`, automatic watering is blocked only in that annual daily window when the selected source reports `27 °C` or more. With both date fields and both time fields empty, and no temperature source, automatic watering is blocked continuously while the master switch is enabled.
 
 ---
 
