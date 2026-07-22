@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.2.24 (2026-07-22)
 * (Gerhard Steinwedel) **ENHANCED**: Added validated annual restriction dates and minute-precise start and end times
 
 ## 0.2.23 (2026-07-22)
