@@ -1,5 +1,7 @@
 # Changelog
 ## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **ENHANCED**: Rainbird valves on the same controller instance are now automatically prevented from running in parallel batches — a Rainbird controller can only physically open one station at a time, and the shared `stopIrrigation` command would otherwise interrupt all zones. Valves on different Rainbird controllers and non-Rainbird valves can still be batched together normally
+* (Gerhard Steinwedel) **ENHANCED**: The all-off state ID (master stop for Gardena/Rainbird controllers) is now detected and managed automatically — the manual configuration column has been removed from the admin UI. ValveController implements a safety check to prevent sending the controller-wide stop command while other zones on the same Rainbird controller are still running
 
 ## 0.2.18 (2026-07-22)
 * (Gerhard Steinwedel) **ENHANCED**: Reordered the "Valves in selected plan" table so the "In plan" checkbox is now the first column. Removed the "Add all valves to plan"/"Remove all valves from plan" quick action buttons — use the "In plan" checkbox column together with "Apply valve assignment" instead
