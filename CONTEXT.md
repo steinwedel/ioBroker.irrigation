@@ -1,11 +1,11 @@
 # Context
 
 ## Current Task
-Die Beregnungssperre dokumentiert alle Quellen- und Fensterwechselwirkungen vollständig.
+Enddatum und Endzeit der Beregnungssperre sind an die jeweiligen Startwerte gekoppelt.
 
 ## Key Decisions
-- Ohne Temperaturquelle ist die maximale Beregnungstemperatur deaktiviert.
+- Ohne Startwert ist das zugehörige Endfeld deaktiviert und wird geleert.
 - Temperatur-, Datums- und Zeitbedingungen werden unabhängig ausgewertet.
 
 ## Next Steps
-- Übersetzungen und Validierung ausführen.
+- Validierung ausführen.

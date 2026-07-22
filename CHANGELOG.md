@@ -1,4 +1,7 @@
 # Changelog
+## 0.2.26 (2026-07-22)
+* (Gerhard Steinwedel) **ENHANCED**: Disabled and cleared restriction end date/time until their start values are configured
+
 ## 0.2.25 (2026-07-22)
 * (Gerhard Steinwedel) **ENHANCED**: Disabled the maximum irrigation temperature without a configured temperature source
 * (Gerhard Steinwedel) **ENHANCED**: Made restriction date and time ranges independently optional
