@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.2.20 (2026-07-22)
 * (Gerhard Steinwedel) **ENHANCED**: Replaced the free-text DWD station ID with a station-name dropdown in the legal restriction settings
 
 ## 0.2.19 (2026-07-22)
