@@ -8,6 +8,31 @@ export interface DwdDeps {
 
 const DWD_URL_BASE = 'https://opendata.dwd.de/weather/weather_reports/poi/';
 
+function annualDayOfYear(month: number, day: number): number {
+    return Math.floor((Date.UTC(2000, month - 1, day) - Date.UTC(2000, 0, 1)) / 86_400_000);
+}
+
+function parseAnnualDate(value: string): number | undefined {
+    const match = /^([1-9]|[12]\d|3[01])\.([1-9]|1[0-2])$/.exec(value);
+    if (!match) {
+        return undefined;
+    }
+    const day = Number(match[1]);
+    const month = Number(match[2]);
+    if (day > new Date(2000, month, 0).getDate()) {
+        return undefined;
+    }
+    return annualDayOfYear(month, day);
+}
+
+function parseTime(value: string): number | undefined {
+    const match = /^(?:([01]\d|2[0-3])):([0-5]\d)$/.exec(value);
+    if (!match) {
+        return undefined;
+    }
+    return Number(match[1]) * 60 + Number(match[2]);
+}
+
 /**
  * Fetches the current temperature from the DWD POI CSV feed and evaluates
  * the "gesetzliche Beregnungssperre" rule. See plan section
@@ -54,15 +79,19 @@ export class DwdRestriction {
 
     private isWithinWindow(now: Date): boolean {
         const config = this.deps.getConfig().legalRestriction;
-        const month = now.getMonth() + 1;
-        const hour = now.getHours();
-        if (month < config.monthStart || month > config.monthEnd) {
+        const startDate = parseAnnualDate(config.startDate);
+        const endDate = parseAnnualDate(config.endDate);
+        const startTime = parseTime(config.startTime);
+        const endTime = parseTime(config.endTime);
+        if (startDate === undefined || endDate === undefined || startTime === undefined || endTime === undefined) {
             return false;
         }
-        if (hour < config.hourStart || hour >= config.hourEnd) {
-            return false;
-        }
-        return true;
+
+        const currentDate = annualDayOfYear(now.getMonth() + 1, now.getDate());
+        const current = currentDate * 24 * 60 + now.getHours() * 60 + now.getMinutes();
+        const start = startDate * 24 * 60 + startTime;
+        const end = endDate * 24 * 60 + endTime;
+        return start <= end ? current >= start && current <= end : current >= start || current <= end;
     }
 
     public async check(): Promise<boolean> {

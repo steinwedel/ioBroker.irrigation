@@ -58,10 +58,10 @@ const DEFAULT_CONFIG = {
     enabled: false,
     stationId: "10400",
     temperatureStateId: "",
-    monthStart: 6,
-    monthEnd: 9,
-    hourStart: 11,
-    hourEnd: 17,
+    startDate: "1.6",
+    endDate: "30.9",
+    startTime: "11:00",
+    endTime: "17:00",
     minTemperature: 27,
     checkInterval: 10
   },
@@ -74,25 +74,36 @@ const DEFAULT_CONFIG = {
   }
 };
 function normalizeConfig(config) {
-  var _a, _b;
+  var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n;
+  const legacyRestriction = config.legalRestriction;
+  const legacyStartMonth = (_a = legacyRestriction == null ? void 0 : legacyRestriction.monthStart) != null ? _a : 6;
+  const legacyEndMonth = (_b = legacyRestriction == null ? void 0 : legacyRestriction.monthEnd) != null ? _b : 9;
+  const legalRestriction = {
+    ...DEFAULT_CONFIG.legalRestriction,
+    ...config.legalRestriction,
+    startDate: (_d = (_c = config.legalRestriction) == null ? void 0 : _c.startDate) != null ? _d : `1.${legacyStartMonth}`,
+    endDate: (_f = (_e = config.legalRestriction) == null ? void 0 : _e.endDate) != null ? _f : `${new Date(2e3, legacyEndMonth, 0).getDate()}.${legacyEndMonth}`,
+    startTime: (_i = (_g = config.legalRestriction) == null ? void 0 : _g.startTime) != null ? _i : `${String((_h = legacyRestriction == null ? void 0 : legacyRestriction.hourStart) != null ? _h : 11).padStart(2, "0")}:00`,
+    endTime: (_l = (_j = config.legalRestriction) == null ? void 0 : _j.endTime) != null ? _l : `${String((_k = legacyRestriction == null ? void 0 : legacyRestriction.hourEnd) != null ? _k : 17).padStart(2, "0")}:00`
+  };
   return {
-    expertMode: (_a = config.expertMode) != null ? _a : DEFAULT_CONFIG.expertMode,
-    valves: ((_b = config.valves) != null ? _b : []).map((valve) => {
-      var _a2, _b2, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m;
+    expertMode: (_m = config.expertMode) != null ? _m : DEFAULT_CONFIG.expertMode,
+    valves: ((_n = config.valves) != null ? _n : []).map((valve) => {
+      var _a2, _b2, _c2, _d2, _e2, _f2, _g2, _h2, _i2, _j2, _k2, _l2, _m2;
       return {
         name: (_a2 = valve.name) != null ? _a2 : "",
         type: (_b2 = valve.type) != null ? _b2 : "Generic",
-        stateId: (_c = valve.stateId) != null ? _c : "",
+        stateId: (_c2 = valve.stateId) != null ? _c2 : "",
         allOffId: valve.allOffId,
-        runFor: (_d = valve.runFor) != null ? _d : 600,
-        enabled: (_e = valve.enabled) != null ? _e : true,
-        flowRateLpm: (_f = valve.flowRateLpm) != null ? _f : 0,
-        duration: (_g = valve.duration) != null ? _g : 10,
-        rainIndependent: (_h = valve.rainIndependent) != null ? _h : false,
-        moistureThreshold: (_i = valve.moistureThreshold) != null ? _i : 0,
-        manualDuration: (_k = (_j = valve.manualDuration) != null ? _j : valve.duration) != null ? _k : 10,
-        flowSensorId: (_l = valve.flowSensorId) != null ? _l : "",
-        days: (_m = valve.days) != null ? _m : []
+        runFor: (_d2 = valve.runFor) != null ? _d2 : 600,
+        enabled: (_e2 = valve.enabled) != null ? _e2 : true,
+        flowRateLpm: (_f2 = valve.flowRateLpm) != null ? _f2 : 0,
+        duration: (_g2 = valve.duration) != null ? _g2 : 10,
+        rainIndependent: (_h2 = valve.rainIndependent) != null ? _h2 : false,
+        moistureThreshold: (_i2 = valve.moistureThreshold) != null ? _i2 : 0,
+        manualDuration: (_k2 = (_j2 = valve.manualDuration) != null ? _j2 : valve.duration) != null ? _k2 : 10,
+        flowSensorId: (_l2 = valve.flowSensorId) != null ? _l2 : "",
+        days: (_m2 = valve.days) != null ? _m2 : []
       };
     }),
     plans: config.plans && config.plans.length > 0 ? config.plans.map((p) => {
@@ -102,7 +113,7 @@ function normalizeConfig(config) {
     scheduler: { ...DEFAULT_CONFIG.scheduler, ...config.scheduler },
     sensors: { ...DEFAULT_CONFIG.sensors, ...config.sensors },
     weather: { ...DEFAULT_CONFIG.weather, ...config.weather },
-    legalRestriction: { ...DEFAULT_CONFIG.legalRestriction, ...config.legalRestriction },
+    legalRestriction,
     notifications: { ...DEFAULT_CONFIG.notifications, ...config.notifications },
     waterConsumption: { ...DEFAULT_CONFIG.waterConsumption, ...config.waterConsumption }
   };

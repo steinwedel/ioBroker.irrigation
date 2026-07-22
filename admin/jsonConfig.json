@@ -680,11 +680,13 @@
                     "lg": 4,
                     "xl": 4
                 },
-                "legalRestriction.monthStart": {
-                    "type": "number",
-                    "label": "Restriction start month",
-                    "min": 1,
-                    "max": 12,
+                "legalRestriction.startDate": {
+                    "type": "text",
+                    "label": "Restriction start date",
+                    "placeholder": "13.5",
+                    "validator": "(() => { const match = /^([1-9]|[12]\\d|3[01])\\.([1-9]|1[0-2])$/.exec(data.legalRestriction?.startDate || ''); return !!match && Number(match[1]) <= new Date(2000, Number(match[2]), 0).getDate(); })()",
+                    "validatorErrorText": "Enter a valid date as D.M, e.g. 13.5.",
+                    "validatorNoSaveOnError": true,
                     "newLine": true,
                     "xs": 12,
                     "sm": 12,
@@ -692,22 +694,26 @@
                     "lg": 4,
                     "xl": 4
                 },
-                "legalRestriction.monthEnd": {
-                    "type": "number",
-                    "label": "Restriction end month",
-                    "min": 1,
-                    "max": 12,
+                "legalRestriction.endDate": {
+                    "type": "text",
+                    "label": "Restriction end date",
+                    "placeholder": "13.9",
+                    "validator": "(() => { const match = /^([1-9]|[12]\\d|3[01])\\.([1-9]|1[0-2])$/.exec(data.legalRestriction?.endDate || ''); return !!match && Number(match[1]) <= new Date(2000, Number(match[2]), 0).getDate(); })()",
+                    "validatorErrorText": "Enter a valid date as D.M, e.g. 13.9.",
+                    "validatorNoSaveOnError": true,
                     "xs": 12,
                     "sm": 12,
                     "md": 6,
                     "lg": 4,
                     "xl": 4
                 },
-                "legalRestriction.hourStart": {
-                    "type": "number",
-                    "label": "Restriction start hour",
-                    "min": 0,
-                    "max": 23,
+                "legalRestriction.startTime": {
+                    "type": "text",
+                    "label": "Restriction start time",
+                    "placeholder": "15:10",
+                    "validator": "/^(?:[01]\\d|2[0-3]):[0-5]\\d$/.test(data.legalRestriction?.startTime || '')",
+                    "validatorErrorText": "Enter a valid time as HH:MM, e.g. 15:10.",
+                    "validatorNoSaveOnError": true,
                     "newLine": true,
                     "xs": 12,
                     "sm": 12,
@@ -715,11 +721,13 @@
                     "lg": 4,
                     "xl": 4
                 },
-                "legalRestriction.hourEnd": {
-                    "type": "number",
-                    "label": "Restriction end hour",
-                    "min": 0,
-                    "max": 23,
+                "legalRestriction.endTime": {
+                    "type": "text",
+                    "label": "Restriction end time",
+                    "placeholder": "17:00",
+                    "validator": "/^(?:[01]\\d|2[0-3]):[0-5]\\d$/.test(data.legalRestriction?.endTime || '')",
+                    "validatorErrorText": "Enter a valid time as HH:MM, e.g. 17:00.",
+                    "validatorNoSaveOnError": true,
                     "xs": 12,
                     "sm": 12,
                     "md": 6,

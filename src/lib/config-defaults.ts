@@ -40,10 +40,10 @@ export const DEFAULT_CONFIG: IrrigationNativeConfig = {
         enabled: false,
         stationId: '10400',
         temperatureStateId: '',
-        monthStart: 6,
-        monthEnd: 9,
-        hourStart: 11,
-        hourEnd: 17,
+        startDate: '1.6',
+        endDate: '30.9',
+        startTime: '11:00',
+        endTime: '17:00',
         minTemperature: 27,
         checkInterval: 10,
     },
@@ -63,6 +63,26 @@ export const DEFAULT_CONFIG: IrrigationNativeConfig = {
  * @param config
  */
 export function normalizeConfig(config: Partial<IrrigationNativeConfig>): IrrigationNativeConfig {
+    const legacyRestriction = config.legalRestriction as
+        | (Partial<IrrigationNativeConfig['legalRestriction']> & {
+              monthStart?: number;
+              monthEnd?: number;
+              hourStart?: number;
+              hourEnd?: number;
+          })
+        | undefined;
+    const legacyStartMonth = legacyRestriction?.monthStart ?? 6;
+    const legacyEndMonth = legacyRestriction?.monthEnd ?? 9;
+    const legalRestriction = {
+        ...DEFAULT_CONFIG.legalRestriction,
+        ...config.legalRestriction,
+        startDate: config.legalRestriction?.startDate ?? `1.${legacyStartMonth}`,
+        endDate: config.legalRestriction?.endDate ?? `${new Date(2000, legacyEndMonth, 0).getDate()}.${legacyEndMonth}`,
+        startTime:
+            config.legalRestriction?.startTime ?? `${String(legacyRestriction?.hourStart ?? 11).padStart(2, '0')}:00`,
+        endTime: config.legalRestriction?.endTime ?? `${String(legacyRestriction?.hourEnd ?? 17).padStart(2, '0')}:00`,
+    };
+
     return {
         expertMode: config.expertMode ?? DEFAULT_CONFIG.expertMode,
         valves: (config.valves ?? []).map(valve => ({
@@ -87,7 +107,7 @@ export function normalizeConfig(config: Partial<IrrigationNativeConfig>): Irriga
         scheduler: { ...DEFAULT_CONFIG.scheduler, ...config.scheduler },
         sensors: { ...DEFAULT_CONFIG.sensors, ...config.sensors },
         weather: { ...DEFAULT_CONFIG.weather, ...config.weather },
-        legalRestriction: { ...DEFAULT_CONFIG.legalRestriction, ...config.legalRestriction },
+        legalRestriction,
         notifications: { ...DEFAULT_CONFIG.notifications, ...config.notifications },
         waterConsumption: { ...DEFAULT_CONFIG.waterConsumption, ...config.waterConsumption },
     };

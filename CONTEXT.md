@@ -1,11 +1,11 @@
 # Context
 
 ## Current Task
-DWD-Station und lokaler Temperatur-Datenpunkt schließen sich bei der Beregnungssperre gegenseitig aus.
+Die Beregnungssperre unterstützt validierte Jahresdaten und minutengenaue Zeiten.
 
 ## Key Decisions
-- Die Wahl einer Quelle löscht die andere direkt in der Admin-Konfiguration.
-- Ohne Temperaturquelle bleibt die Sperre im konfigurierten Zeitfenster aktiv.
+- Daten werden im Format T.M und Zeiten im Format HH:MM gespeichert.
+- Bestehende Monats- und Stundenwerte werden beim Laden migriert.
 
 ## Next Steps
-- Validierung ausführen.
+- Übersetzungen und Validierung ausführen.

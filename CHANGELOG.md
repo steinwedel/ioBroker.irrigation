@@ -1,4 +1,7 @@
 # Changelog
+## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **ENHANCED**: Added validated annual restriction dates and minute-precise start and end times
+
 ## 0.2.23 (2026-07-22)
 * (Gerhard Steinwedel) **ENHANCED**: Made DWD station and local temperature state selection mutually exclusive
 * (Gerhard Steinwedel) **NEW**: Added a selectable local temperature state as an alternative source for the legal restriction

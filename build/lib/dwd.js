@@ -23,6 +23,28 @@ __export(dwd_exports, {
 });
 module.exports = __toCommonJS(dwd_exports);
 const DWD_URL_BASE = "https://opendata.dwd.de/weather/weather_reports/poi/";
+function annualDayOfYear(month, day) {
+  return Math.floor((Date.UTC(2e3, month - 1, day) - Date.UTC(2e3, 0, 1)) / 864e5);
+}
+function parseAnnualDate(value) {
+  const match = /^([1-9]|[12]\d|3[01])\.([1-9]|1[0-2])$/.exec(value);
+  if (!match) {
+    return void 0;
+  }
+  const day = Number(match[1]);
+  const month = Number(match[2]);
+  if (day > new Date(2e3, month, 0).getDate()) {
+    return void 0;
+  }
+  return annualDayOfYear(month, day);
+}
+function parseTime(value) {
+  const match = /^(?:([01]\d|2[0-3])):([0-5]\d)$/.exec(value);
+  if (!match) {
+    return void 0;
+  }
+  return Number(match[1]) * 60 + Number(match[2]);
+}
 class DwdRestriction {
   deps;
   checkTimer;
@@ -58,15 +80,18 @@ class DwdRestriction {
   }
   isWithinWindow(now) {
     const config = this.deps.getConfig().legalRestriction;
-    const month = now.getMonth() + 1;
-    const hour = now.getHours();
-    if (month < config.monthStart || month > config.monthEnd) {
+    const startDate = parseAnnualDate(config.startDate);
+    const endDate = parseAnnualDate(config.endDate);
+    const startTime = parseTime(config.startTime);
+    const endTime = parseTime(config.endTime);
+    if (startDate === void 0 || endDate === void 0 || startTime === void 0 || endTime === void 0) {
       return false;
     }
-    if (hour < config.hourStart || hour >= config.hourEnd) {
-      return false;
-    }
-    return true;
+    const currentDate = annualDayOfYear(now.getMonth() + 1, now.getDate());
+    const current = currentDate * 24 * 60 + now.getHours() * 60 + now.getMinutes();
+    const start = startDate * 24 * 60 + startTime;
+    const end = endDate * 24 * 60 + endTime;
+    return start <= end ? current >= start && current <= end : current >= start || current <= end;
   }
   async check() {
     const config = this.deps.getConfig();
