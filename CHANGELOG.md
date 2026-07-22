@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.2.21 (2026-07-22)
 * (Gerhard Steinwedel) **ENHANCED**: Added all DWD POI weather stations to the legal restriction station dropdown
 
 ## 0.2.20 (2026-07-22)
