@@ -34,6 +34,27 @@ function gardenaValveBasePath(durationValueId: string): string {
 }
 
 /**
+ * Derives the Rainbird adapter instance namespace (e.g. "rainbird.0") from a
+ * valve's `stateId`, which is the per-station base path written by
+ * scanRainbird(), e.g. "rainbird.0.device.stations.1" -> "rainbird.0".
+ * Returns undefined if the id does not look like a Rainbird station path,
+ * so callers can safely skip the same-controller check rather than
+ * mismatching unrelated instances against each other.
+ *
+ * Exported for buildBatches() in automation.ts, which uses this to keep
+ * zones of the same Rainbird controller out of the same parallel batch (a
+ * Rainbird controller can only physically open one station at a time, and
+ * stop() commands the whole controller via `allOffId`/"stopIrrigation"
+ * rather than a single zone - see the comment on otherSiblingRainbirdValveRunning()).
+ *
+ * @param stateId
+ */
+export function rainbirdInstanceOf(stateId: string): string | undefined {
+    const match = /^(.+?)\.device\.stations\./.exec(stateId);
+    return match?.[1];
+}
+
+/**
  * Controls a single valve, abstracting away the differences between
  * Gardena, Homematic, Rainbird and Generic systems.
  *
@@ -45,6 +66,16 @@ export class ValveController {
     private readonly index: number;
     private config: IValveConfig;
     private readonly rateLimiter: RateLimiter | undefined;
+    /**
+     * Returns all valve controllers of the adapter (including this one), used
+     * by stop() to check whether another Rainbird zone on the same
+     * controller is still running before firing the shared `allOffId`
+     * (`stopIrrigation`) command - which otherwise would stop every zone on
+     * that Rainbird controller, not just this one. Provided as a getter
+     * rather than a direct array reference since `main.ts` builds the full
+     * `ValveController[]` list only after constructing each instance.
+     */
+    private readonly getAllValves: () => ValveController[];
     /**
      * 1s tick used to count down remainingTime for adapter-owned timer types
      * (Homematic/Generic). This is the single source of truth for the
@@ -99,11 +130,18 @@ export class ValveController {
      */
     private commandChain: Promise<void> = Promise.resolve();
 
-    public constructor(adapter: ioBroker.Adapter, index: number, config: IValveConfig, rateLimiter?: RateLimiter) {
+    public constructor(
+        adapter: ioBroker.Adapter,
+        index: number,
+        config: IValveConfig,
+        rateLimiter?: RateLimiter,
+        getAllValves?: () => ValveController[],
+    ) {
         this.adapter = adapter;
         this.index = index;
         this.config = config;
         this.rateLimiter = rateLimiter;
+        this.getAllValves = getAllValves ?? (() => [this]);
         this.manualRunForSecs = config.runFor;
     }
 
@@ -661,6 +699,29 @@ export class ValveController {
         }
     }
 
+    /**
+     * True if another *enabled, currently running* Rainbird valve on the
+     * same Rainbird controller instance as this valve exists. Used by
+     * stop() to decide whether firing the shared `allOffId`
+     * ("stopIrrigation") command is safe - that command stops every zone on
+     * the controller, so it must be suppressed while a sibling zone (e.g.
+     * from a parallel pump-capacity batch, or a manual single-valve run
+     * started while automation is running) still needs to keep watering.
+     */
+    private otherSiblingRainbirdValveRunning(): boolean {
+        const instance = rainbirdInstanceOf(this.config.stateId);
+        if (!instance) {
+            return false;
+        }
+        return this.getAllValves().some(
+            other =>
+                other !== this &&
+                other.running &&
+                other.config.type === 'Rainbird' &&
+                rainbirdInstanceOf(other.config.stateId) === instance,
+        );
+    }
+
     /** Stop this valve immediately. */
     public async stop(): Promise<void> {
         if (!this.config.enabled) {
@@ -676,7 +737,7 @@ export class ValveController {
                     await this.adapter.setForeignStateAsync(this.config.stateId, 'STOP_UNTIL_NEXT_TASK');
                     break;
                 case 'Rainbird':
-                    if (this.config.allOffId) {
+                    if (this.config.allOffId && !this.otherSiblingRainbirdValveRunning()) {
                         await this.adapter.setForeignStateAsync(this.config.allOffId, true);
                     }
                     break;

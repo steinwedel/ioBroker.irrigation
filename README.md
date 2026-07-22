@@ -70,11 +70,12 @@ Add entries to the table directly:
 
 | Column | Description |
 |--------|-------------|
-| Name | A descriptive name for the valve (e.g. "Front lawn", "Hedge"). |
+| Display name | A descriptive name for the valve (e.g. "Front lawn", "Hedge"). |
 | Type | Valve type: **Gardena** (smartgarden), **Homematic**, **Rainbird**, or **Generic** (any writable boolean state). |
-| Manual run duration (s) | How long the valve runs when started manually (in seconds, default 600 = 10 min). |
+| Target run duration (s) | How long the valve runs when started manually (in seconds, default 600 = 10 min). |
 | State id | The ioBroker state ID that controls the valve (on/off). For Gardena this is the `duration_value` state. |
-| All-off state id | Expert only — a master stop state that shuts down all valves at once (Gardena: `stop_all_valves_i`, Rainbird: `stopIrrigation`). |
+
+The all-off state (a master stop that shuts down all valves on the same controller at once, e.g. Gardena's `stop_all_valves_i` or Rainbird's `stopIrrigation`) is detected and stored automatically by **Scan for valves** and is not shown as a column - it is applied internally when needed and does not require manual configuration.
 
 - **Delete all valves** removes all entries with a confirmation prompt.
 

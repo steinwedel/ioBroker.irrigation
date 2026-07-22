@@ -1,4 +1,6 @@
 # Changelog
+## **WORK IN PROGRESS**
+
 ## 0.2.18 (2026-07-22)
 * (Gerhard Steinwedel) **ENHANCED**: Reordered the "Valves in selected plan" table so the "In plan" checkbox is now the first column. Removed the "Add all valves to plan"/"Remove all valves from plan" quick action buttons — use the "In plan" checkbox column together with "Apply valve assignment" instead
 

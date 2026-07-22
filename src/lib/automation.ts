@@ -1,5 +1,6 @@
 import type { IrrigationNativeConfig, IValveConfig, IPlanConfig, AutomationStatus, PauseReason, Batch } from './types';
 import type { ValveController } from './ventile';
+import { rainbirdInstanceOf } from './ventile';
 
 export interface AutomationDeps {
     adapter: ioBroker.Adapter;
@@ -27,6 +28,18 @@ export interface AutomationDeps {
  * placed into the existing batch whose total duration would grow the least
  * while staying within pumpCapacity, otherwise a new batch is created.
  *
+ * Rainbird valves are additionally constrained to never share a batch with
+ * another Rainbird valve of the *same* controller instance, regardless of
+ * pumpCapacity: a Rainbird controller can only physically open one station
+ * at a time, and ValveController.stop() commands the whole controller via
+ * the shared `allOffId` ("stopIrrigation"), not a single zone - see
+ * otherSiblingRainbirdValveRunning() in ventile.ts. Running two zones of the
+ * same controller "in parallel" would therefore either not actually open
+ * both stations, or have the first zone's stop() cut off the second zone's
+ * still-running station. Rainbird valves on *different* controller
+ * instances, and non-Rainbird valves, are unaffected and can still be
+ * batched together normally.
+ *
  * @param valveIndexes
  * @param valves
  * @param pumpCapacity
@@ -43,18 +56,24 @@ export function buildBatches(valveIndexes: number[], valves: IValveConfig[], pum
         valveIdxs: number[];
         flowSum: number;
         duration: number;
+        /** Rainbird controller instances (e.g. "rainbird.0") already occupied in this batch */
+        rainbirdInstances: Set<string>;
     }
     const batches: WorkingBatch[] = [];
 
     for (const valveIdx of sorted) {
         const valve = valves[valveIdx];
         const flowRate = valve.flowRateLpm || 0;
+        const rainbirdInstance = valve.type === 'Rainbird' ? rainbirdInstanceOf(valve.stateId) : undefined;
 
         let bestBatch: WorkingBatch | undefined;
         let bestIncrease = Infinity;
 
         for (const batch of batches) {
             if (batch.flowSum + flowRate > pumpCapacity) {
+                continue;
+            }
+            if (rainbirdInstance && batch.rainbirdInstances.has(rainbirdInstance)) {
                 continue;
             }
             const increase = Math.max(0, valve.duration - batch.duration);
@@ -68,8 +87,16 @@ export function buildBatches(valveIndexes: number[], valves: IValveConfig[], pum
             bestBatch.valveIdxs.push(valveIdx);
             bestBatch.flowSum += flowRate;
             bestBatch.duration = Math.max(bestBatch.duration, valve.duration);
+            if (rainbirdInstance) {
+                bestBatch.rainbirdInstances.add(rainbirdInstance);
+            }
         } else {
-            batches.push({ valveIdxs: [valveIdx], flowSum: flowRate, duration: valve.duration });
+            batches.push({
+                valveIdxs: [valveIdx],
+                flowSum: flowRate,
+                duration: valve.duration,
+                rainbirdInstances: rainbirdInstance ? new Set([rainbirdInstance]) : new Set(),
+            });
         }
     }
 

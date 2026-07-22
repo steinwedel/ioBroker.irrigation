@@ -9,6 +9,7 @@ import { AutomationEngine, buildBatches } from './lib/automation';
 import { parseDwdTemperature } from './lib/dwd';
 import { resolvePlanFromIcalTitle } from './lib/scheduler';
 import { parsePlanValveTableRows } from './lib/types';
+import { ValveController } from './lib/ventile';
 import type { AutomationDeps } from './lib/automation';
 import type { IrrigationNativeConfig, IValveConfig } from './lib/types';
 
@@ -68,6 +69,181 @@ describe('automation.buildBatches', () => {
         const valves = [makeValve({ duration: 10, flowRateLpm: 50 })];
         const batches = buildBatches([0], valves, 20);
         expect(batches).to.deep.equal([[0]]);
+    });
+
+    it('never puts two Rainbird valves of the same controller instance in the same batch', () => {
+        const valves = [
+            makeValve({ type: 'Rainbird', stateId: 'rainbird.0.device.stations.1', duration: 10, flowRateLpm: 0 }),
+            makeValve({ type: 'Rainbird', stateId: 'rainbird.0.device.stations.2', duration: 8, flowRateLpm: 0 }),
+            makeValve({ type: 'Rainbird', stateId: 'rainbird.0.device.stations.3', duration: 5, flowRateLpm: 0 }),
+        ];
+        const pumpCapacity = 100;
+        const batches = buildBatches([0, 1, 2], valves, pumpCapacity);
+        expect(batches).to.deep.equal([[0], [1], [2]]);
+    });
+
+    it('still allows batching Rainbird valves from different controller instances together', () => {
+        const valves = [
+            makeValve({ type: 'Rainbird', stateId: 'rainbird.0.device.stations.1', duration: 10, flowRateLpm: 0 }),
+            makeValve({ type: 'Rainbird', stateId: 'rainbird.1.device.stations.1', duration: 8, flowRateLpm: 0 }),
+        ];
+        const pumpCapacity = 100;
+        const batches = buildBatches([0, 1], valves, pumpCapacity);
+        expect(batches).to.deep.equal([[0, 1]]);
+    });
+
+    it('still allows batching a Rainbird valve together with a non-Rainbird valve', () => {
+        const valves = [
+            makeValve({ type: 'Rainbird', stateId: 'rainbird.0.device.stations.1', duration: 10, flowRateLpm: 0 }),
+            makeValve({ type: 'Generic', stateId: 'irrigation.0.foo', duration: 8, flowRateLpm: 0 }),
+        ];
+        const pumpCapacity = 100;
+        const batches = buildBatches([0, 1], valves, pumpCapacity);
+        expect(batches).to.deep.equal([[0, 1]]);
+    });
+});
+
+/**
+ * Regression tests for the Rainbird `allOffId` ("stopIrrigation") guard in
+ * ValveController.stop(). A Rainbird controller only exposes a single,
+ * controller-wide stop command - there is no per-zone stop - so stop()
+ * fires it to close the zone being stopped. Without the guard this would
+ * also cut off any *other* zone of the same controller that is still
+ * supposed to be running (e.g. a shorter-duration zone from the same
+ * parallel pump-capacity batch, or a manual single-valve run started while
+ * automation is paused/running). These tests lock in that the command is
+ * only sent when no sibling zone of the same controller instance is still
+ * running, while remaining unaffected for zones on different controllers
+ * and for non-Rainbird valve types.
+ */
+describe('ValveController Rainbird allOffId guard', () => {
+    function makeFakeAdapter(): ioBroker.Adapter {
+        const foreignStates = new Map<string, unknown>();
+        const fake = {
+            setForeignStateAsync: (id: string, val: unknown) => {
+                foreignStates.set(id, val);
+                return Promise.resolve();
+            },
+            setStateAsync: () => Promise.resolve(),
+            log: { debug: () => undefined, info: () => undefined, warn: () => undefined, error: () => undefined },
+            foreignStates,
+        };
+        return fake as unknown as ioBroker.Adapter;
+    }
+
+    function rainbirdValve(overrides: Partial<IValveConfig> = {}): IValveConfig {
+        return makeValve({
+            type: 'Rainbird',
+            allOffId: 'rainbird.0.device.commands.stopIrrigation',
+            ...overrides,
+        });
+    }
+
+    it('fires allOffId when stopping the only running Rainbird valve on the controller', async () => {
+        const adapter = makeFakeAdapter();
+        // getAllValves is bound via the constructor default (() => [this]) here,
+        // which is equivalent to main.ts's `() => this.valves` for a single valve.
+        const valveA = new ValveController(adapter, 0, rainbirdValve({ stateId: 'rainbird.0.device.stations.1' }));
+        await valveA.start(60);
+        await valveA.stop();
+        expect((adapter as unknown as { foreignStates: Map<string, unknown> }).foreignStates.get(
+            'rainbird.0.device.commands.stopIrrigation',
+        )).to.equal(true);
+    });
+
+    it('suppresses allOffId when another zone of the same Rainbird controller is still running', async () => {
+        const adapter = makeFakeAdapter();
+        let valveA!: ValveController;
+        let valveB!: ValveController;
+        const getAllValves = (): ValveController[] => [valveA, valveB];
+        valveA = new ValveController(
+            adapter,
+            0,
+            rainbirdValve({ stateId: 'rainbird.0.device.stations.1' }),
+            undefined,
+            getAllValves,
+        );
+        valveB = new ValveController(
+            adapter,
+            1,
+            rainbirdValve({ stateId: 'rainbird.0.device.stations.2' }),
+            undefined,
+            getAllValves,
+        );
+
+        await valveA.start(60);
+        await valveB.start(120);
+        // Zone A finishes first while zone B (same controller) is still running.
+        await valveA.stop();
+
+        expect(
+            (adapter as unknown as { foreignStates: Map<string, unknown> }).foreignStates.has(
+                'rainbird.0.device.commands.stopIrrigation',
+            ),
+        ).to.equal(false);
+    });
+
+    it('fires allOffId once no other zone of the same controller is running anymore', async () => {
+        const adapter = makeFakeAdapter();
+        let valveA!: ValveController;
+        let valveB!: ValveController;
+        const getAllValves = (): ValveController[] => [valveA, valveB];
+        valveA = new ValveController(
+            adapter,
+            0,
+            rainbirdValve({ stateId: 'rainbird.0.device.stations.1' }),
+            undefined,
+            getAllValves,
+        );
+        valveB = new ValveController(
+            adapter,
+            1,
+            rainbirdValve({ stateId: 'rainbird.0.device.stations.2' }),
+            undefined,
+            getAllValves,
+        );
+
+        await valveA.start(60);
+        await valveB.start(120);
+        await valveA.stop();
+        await valveB.stop(); // last zone on this controller - now safe to send the shared stop
+
+        expect(
+            (adapter as unknown as { foreignStates: Map<string, unknown> }).foreignStates.get(
+                'rainbird.0.device.commands.stopIrrigation',
+            ),
+        ).to.equal(true);
+    });
+
+    it('does not suppress allOffId for a sibling valve on a different Rainbird controller instance', async () => {
+        const adapter = makeFakeAdapter();
+        let valveA!: ValveController;
+        let valveB!: ValveController;
+        const getAllValves = (): ValveController[] => [valveA, valveB];
+        valveA = new ValveController(
+            adapter,
+            0,
+            rainbirdValve({ stateId: 'rainbird.0.device.stations.1', allOffId: 'rainbird.0.device.commands.stopIrrigation' }),
+            undefined,
+            getAllValves,
+        );
+        valveB = new ValveController(
+            adapter,
+            1,
+            rainbirdValve({ stateId: 'rainbird.1.device.stations.1', allOffId: 'rainbird.1.device.commands.stopIrrigation' }),
+            undefined,
+            getAllValves,
+        );
+
+        await valveA.start(60);
+        await valveB.start(120);
+        await valveA.stop();
+
+        expect(
+            (adapter as unknown as { foreignStates: Map<string, unknown> }).foreignStates.get(
+                'rainbird.0.device.commands.stopIrrigation',
+            ),
+        ).to.equal(true);
     });
 });
 

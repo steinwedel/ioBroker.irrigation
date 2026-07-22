@@ -160,7 +160,7 @@
                         {
                             "type": "text",
                             "attr": "name",
-                            "title": "Name",
+                            "title": "Display name",
                             "width": "24%",
                             "sort": true
                         },
@@ -180,7 +180,7 @@
                         {
                             "type": "number",
                             "attr": "runFor",
-                            "title": "Manual run duration (s)",
+                            "title": "Target run duration (s)",
                             "width": "12%",
                             "min": 1,
                             "default": 600,
@@ -192,13 +192,6 @@
                             "title": "State id",
                             "width": "30%",
                             "sort": true
-                        },
-                        {
-                            "type": "objectId",
-                            "attr": "allOffId",
-                            "title": "All-off state id (Gardena/Rainbird)",
-                            "width": "12%",
-                            "hidden": "!data.expertMode"
                         }
                     ]
                 },
