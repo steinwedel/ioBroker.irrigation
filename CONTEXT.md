@@ -1,11 +1,11 @@
 # Context
 
 ## Current Task
-DWD-Station in der Beregnungssperre als Klartext-Dropdown umgesetzt.
+Alle DWD-POI-Stationen stehen im Dropdown der Beregnungssperre bereit.
 
 ## Key Decisions
-- Die gespeicherte DWD-Station-ID bleibt unverändert kompatibel.
-- Das Dropdown enthält bundesweit gebräuchliche DWD-Stationen mit Klartextnamen.
+- Die Stationen basieren auf dem offiziellen DWD-MOSMIX-Katalog.
+- Die gespeicherte WMO-ID bleibt mit der DWD-POI-Abfrage kompatibel.
 
 ## Next Steps
-- Übersetzungen und Codequalität prüfen.
+- Validierung ausführen.

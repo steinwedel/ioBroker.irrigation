@@ -146,30 +146,32 @@ describe('ValveController Rainbird allOffId guard', () => {
         const valveA = new ValveController(adapter, 0, rainbirdValve({ stateId: 'rainbird.0.device.stations.1' }));
         await valveA.start(60);
         await valveA.stop();
-        expect((adapter as unknown as { foreignStates: Map<string, unknown> }).foreignStates.get(
-            'rainbird.0.device.commands.stopIrrigation',
-        )).to.equal(true);
+        expect(
+            (adapter as unknown as { foreignStates: Map<string, unknown> }).foreignStates.get(
+                'rainbird.0.device.commands.stopIrrigation',
+            ),
+        ).to.equal(true);
     });
 
     it('suppresses allOffId when another zone of the same Rainbird controller is still running', async () => {
         const adapter = makeFakeAdapter();
-        let valveA!: ValveController;
-        let valveB!: ValveController;
-        const getAllValves = (): ValveController[] => [valveA, valveB];
-        valveA = new ValveController(
+        const valves: ValveController[] = [];
+        const getAllValves = (): ValveController[] => valves;
+        const valveA = new ValveController(
             adapter,
             0,
             rainbirdValve({ stateId: 'rainbird.0.device.stations.1' }),
             undefined,
             getAllValves,
         );
-        valveB = new ValveController(
+        const valveB = new ValveController(
             adapter,
             1,
             rainbirdValve({ stateId: 'rainbird.0.device.stations.2' }),
             undefined,
             getAllValves,
         );
+        valves.push(valveA, valveB);
 
         await valveA.start(60);
         await valveB.start(120);
@@ -185,23 +187,23 @@ describe('ValveController Rainbird allOffId guard', () => {
 
     it('fires allOffId once no other zone of the same controller is running anymore', async () => {
         const adapter = makeFakeAdapter();
-        let valveA!: ValveController;
-        let valveB!: ValveController;
-        const getAllValves = (): ValveController[] => [valveA, valveB];
-        valveA = new ValveController(
+        const valves: ValveController[] = [];
+        const getAllValves = (): ValveController[] => valves;
+        const valveA = new ValveController(
             adapter,
             0,
             rainbirdValve({ stateId: 'rainbird.0.device.stations.1' }),
             undefined,
             getAllValves,
         );
-        valveB = new ValveController(
+        const valveB = new ValveController(
             adapter,
             1,
             rainbirdValve({ stateId: 'rainbird.0.device.stations.2' }),
             undefined,
             getAllValves,
         );
+        valves.push(valveA, valveB);
 
         await valveA.start(60);
         await valveB.start(120);
@@ -217,23 +219,29 @@ describe('ValveController Rainbird allOffId guard', () => {
 
     it('does not suppress allOffId for a sibling valve on a different Rainbird controller instance', async () => {
         const adapter = makeFakeAdapter();
-        let valveA!: ValveController;
-        let valveB!: ValveController;
-        const getAllValves = (): ValveController[] => [valveA, valveB];
-        valveA = new ValveController(
+        const valves: ValveController[] = [];
+        const getAllValves = (): ValveController[] => valves;
+        const valveA = new ValveController(
             adapter,
             0,
-            rainbirdValve({ stateId: 'rainbird.0.device.stations.1', allOffId: 'rainbird.0.device.commands.stopIrrigation' }),
+            rainbirdValve({
+                stateId: 'rainbird.0.device.stations.1',
+                allOffId: 'rainbird.0.device.commands.stopIrrigation',
+            }),
             undefined,
             getAllValves,
         );
-        valveB = new ValveController(
+        const valveB = new ValveController(
             adapter,
             1,
-            rainbirdValve({ stateId: 'rainbird.1.device.stations.1', allOffId: 'rainbird.1.device.commands.stopIrrigation' }),
+            rainbirdValve({
+                stateId: 'rainbird.1.device.stations.1',
+                allOffId: 'rainbird.1.device.commands.stopIrrigation',
+            }),
             undefined,
             getAllValves,
         );
+        valves.push(valveA, valveB);
 
         await valveA.start(60);
         await valveB.start(120);

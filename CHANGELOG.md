@@ -1,4 +1,7 @@
 # Changelog
+## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **ENHANCED**: Added all DWD POI weather stations to the legal restriction station dropdown
+
 ## 0.2.20 (2026-07-22)
 * (Gerhard Steinwedel) **ENHANCED**: Replaced the free-text DWD station ID with a station-name dropdown in the legal restriction settings
 

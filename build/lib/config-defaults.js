@@ -56,7 +56,7 @@ const DEFAULT_CONFIG = {
   },
   legalRestriction: {
     enabled: false,
-    stationId: "10338",
+    stationId: "10400",
     monthStart: 6,
     monthEnd: 9,
     hourStart: 11,

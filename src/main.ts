@@ -13,6 +13,7 @@ import { AutomationEngine } from './lib/automation';
 import { Scheduler, resolvePlanFromIcalTitle } from './lib/scheduler';
 import { SensorManager } from './lib/sensors';
 import { DwdRestriction } from './lib/dwd';
+import { DWD_POI_STATIONS } from './lib/dwd-poi-stations';
 import { WaterConsumptionTracker } from './lib/water-consumption';
 import { WeatherApi } from './lib/weather-api';
 import { NotificationManager } from './lib/notifications';
@@ -95,8 +96,7 @@ class Irrigation extends utils.Adapter {
         await this.createRateLimitStates();
 
         this.valves = this.config2.valves.map(
-            (valveConfig, index) =>
-                new ValveController(this, index, valveConfig, this.rateLimiter, () => this.valves),
+            (valveConfig, index) => new ValveController(this, index, valveConfig, this.rateLimiter, () => this.valves),
         );
         for (const valve of this.valves) {
             await valve.init();
@@ -773,6 +773,11 @@ class Irrigation extends utils.Adapter {
                 value: i,
             }));
             this.sendTo(obj.from, obj.command, options, obj.callback);
+            return;
+        }
+
+        if (obj.command === 'listDwdStations' && obj.callback) {
+            this.sendTo(obj.from, obj.command, DWD_POI_STATIONS, obj.callback);
             return;
         }
 

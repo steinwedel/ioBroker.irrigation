@@ -30,6 +30,7 @@ var import_automation = require("./lib/automation");
 var import_scheduler = require("./lib/scheduler");
 var import_sensors = require("./lib/sensors");
 var import_dwd = require("./lib/dwd");
+var import_dwd_poi_stations = require("./lib/dwd-poi-stations");
 var import_water_consumption = require("./lib/water-consumption");
 var import_weather_api = require("./lib/weather-api");
 var import_notifications = require("./lib/notifications");
@@ -660,6 +661,10 @@ class Irrigation extends utils.Adapter {
         value: i
       }));
       this.sendTo(obj.from, obj.command, options, obj.callback);
+      return;
+    }
+    if (obj.command === "listDwdStations" && obj.callback) {
+      this.sendTo(obj.from, obj.command, import_dwd_poi_stations.DWD_POI_STATIONS, obj.callback);
       return;
     }
     if (obj.command === "createPlan" && obj.callback) {

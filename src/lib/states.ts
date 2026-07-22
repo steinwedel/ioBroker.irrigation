@@ -366,7 +366,7 @@ export async function createBaseStates(adapter: ioBroker.Adapter): Promise<void>
         role: 'text',
         read: true,
         write: false,
-        def: '10338',
+        def: '10400',
     });
     await setObj(adapter, 'legalRestriction.monthStart', {
         name: 'Restriction start month',
