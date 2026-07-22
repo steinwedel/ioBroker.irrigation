@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.2.25 (2026-07-22)
 * (Gerhard Steinwedel) **ENHANCED**: Disabled the maximum irrigation temperature without a configured temperature source
 * (Gerhard Steinwedel) **ENHANCED**: Made restriction date and time ranges independently optional
 * (Gerhard Steinwedel) **FIXED**: Validated annual dates such as 1.6 in the admin configuration
