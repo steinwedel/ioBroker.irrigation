@@ -359,6 +359,13 @@
                     "lg": 8,
                     "items": [
                         {
+                            "type": "checkbox",
+                            "attr": "assigned",
+                            "title": "In plan",
+                            "width": "15%",
+                            "sort": true
+                        },
+                        {
                             "type": "text",
                             "attr": "valveNumber",
                             "title": "Valve",
@@ -370,49 +377,11 @@
                             "type": "text",
                             "attr": "name",
                             "title": "Name",
-                            "width": "55%",
+                            "width": "70%",
                             "readOnly": true,
-                            "sort": true
-                        },
-                        {
-                            "type": "checkbox",
-                            "attr": "assigned",
-                            "title": "In plan",
-                            "width": "30%",
                             "sort": true
                         }
                     ]
-                },
-                "planButtons": {
-                    "type": "header",
-                    "text": "Quick actions",
-                    "size": 4
-                },
-                "addAllToPlan": {
-                    "type": "sendTo",
-                    "label": "Add all valves to plan",
-                    "command": "addAllValvesToPlan",
-                    "jsonData": "{\"_editPlan\": ${JSON.stringify(data._editPlan ?? null)}}",
-                    "alsoDependsOn": ["_editPlan"],
-                    "useNative": true,
-                    "variant": "outlined",
-                    "icon": "add",
-                    "sm": 6,
-                    "md": 4,
-                    "lg": 3
-                },
-                "removeAllFromPlan": {
-                    "type": "sendTo",
-                    "label": "Remove all valves from plan",
-                    "command": "removeAllValvesFromPlan",
-                    "jsonData": "{\"_editPlan\": ${JSON.stringify(data._editPlan ?? null)}}",
-                    "alsoDependsOn": ["_editPlan"],
-                    "useNative": true,
-                    "variant": "outlined",
-                    "icon": "delete",
-                    "sm": 6,
-                    "md": 4,
-                    "lg": 3
                 }
             }
         },

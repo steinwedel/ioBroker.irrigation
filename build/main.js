@@ -730,41 +730,6 @@ class Irrigation extends utils.Adapter {
       this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
       return;
     }
-    if (obj.command === "addAllValvesToPlan" && obj.callback) {
-      const planIndex = readPlanIndex(obj.message);
-      if (planIndex === void 0 || planIndex < 0 || planIndex >= this.config2.plans.length) {
-        return;
-      }
-      const allValveIndexes = this.config2.valves.map((_, i) => i);
-      const updatedPlans = this.config2.plans.map(
-        (p, i) => i === planIndex ? { ...p, valveIndexes: [...allValveIndexes] } : p
-      );
-      await this.writePlansState(updatedPlans);
-      const planValveTable = this.config2.valves.map((v, i) => ({
-        valveNumber: (0, import_types.formatValveNumber)(i),
-        name: v.name || "unnamed",
-        assigned: true
-      }));
-      this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans, planValveTable } }, obj.callback);
-      return;
-    }
-    if (obj.command === "removeAllValvesFromPlan" && obj.callback) {
-      const planIndex = readPlanIndex(obj.message);
-      if (planIndex === void 0 || planIndex < 0 || planIndex >= this.config2.plans.length) {
-        return;
-      }
-      const updatedPlans = this.config2.plans.map(
-        (p, i) => i === planIndex ? { ...p, valveIndexes: [import_types.NONE_SENTINEL] } : p
-      );
-      await this.writePlansState(updatedPlans);
-      const planValveTable = this.config2.valves.map((v, i) => ({
-        valveNumber: (0, import_types.formatValveNumber)(i),
-        name: v.name || "unnamed",
-        assigned: false
-      }));
-      this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans, planValveTable } }, obj.callback);
-      return;
-    }
     if (obj.command === "addAllValvesToAllPlans" && obj.callback) {
       const allValveIndexes = this.config2.valves.map((_, i) => i);
       const updatedPlans = this.config2.plans.map((p) => ({

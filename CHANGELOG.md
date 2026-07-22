@@ -1,4 +1,7 @@
 # Changelog
+## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **ENHANCED**: Reordered the "Valves in selected plan" table so the "In plan" checkbox is now the first column. Removed the "Add all valves to plan"/"Remove all valves from plan" quick action buttons — use the "In plan" checkbox column together with "Apply valve assignment" instead
+
 ## 0.2.17 (2026-07-22)
 * (Gerhard Steinwedel) **FIXED**: "Apply valve assignment" in the Plans tab now correctly maps table rows back to their real valve indexes via the stable `valveNumber` column instead of the row's position in the table — the "Valves in selected plan" table allowed sorting/reordering rows (e.g. by clicking the "Name" column header), and after such a reorder the old position-based mapping silently assigned the wrong valves to the plan. The table no longer allows adding, deleting, or manually reordering rows (`noDelete: true`) to keep row identity stable; sorting by column remains possible and safe since matching is now done via `valveNumber`
 
