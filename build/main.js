@@ -664,7 +664,12 @@ class Irrigation extends utils.Adapter {
       return;
     }
     if (obj.command === "listDwdStations" && obj.callback) {
-      this.sendTo(obj.from, obj.command, import_dwd_poi_stations.DWD_POI_STATIONS, obj.callback);
+      this.sendTo(
+        obj.from,
+        obj.command,
+        [{ label: "Keine Wetterstation", value: "" }, ...import_dwd_poi_stations.DWD_POI_STATIONS],
+        obj.callback
+      );
       return;
     }
     if (obj.command === "createPlan" && obj.callback) {

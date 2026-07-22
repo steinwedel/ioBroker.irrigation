@@ -78,6 +78,10 @@ class DwdRestriction {
       await this.apply(false);
       return false;
     }
+    if (!config.legalRestriction.stationId.trim()) {
+      await this.apply(true);
+      return true;
+    }
     const temp = await this.fetchTemperature(config.legalRestriction.stationId);
     if (temp === null) {
       return this.active;
