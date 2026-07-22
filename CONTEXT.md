@@ -1,11 +1,11 @@
 # Context
 
 ## Current Task
-Die Beregnungssperre kann ohne DWD-Station temperaturunabhängig verwendet werden.
+DWD-Station und lokaler Temperatur-Datenpunkt schließen sich bei der Beregnungssperre gegenseitig aus.
 
 ## Key Decisions
-- Ohne Stationsauswahl ist die Sperre während des konfigurierten Monats- und Zeitfensters aktiv.
-- Die Stationen basieren auf dem offiziellen DWD-MOSMIX-Katalog.
+- Die Wahl einer Quelle löscht die andere direkt in der Admin-Konfiguration.
+- Ohne Temperaturquelle bleibt die Sperre im konfigurierten Zeitfenster aktiv.
 
 ## Next Steps
-- Keine.
+- Validierung ausführen.

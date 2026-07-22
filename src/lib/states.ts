@@ -368,6 +368,14 @@ export async function createBaseStates(adapter: ioBroker.Adapter): Promise<void>
         write: false,
         def: '10400',
     });
+    await setObj(adapter, 'legalRestriction.temperatureStateId', {
+        name: 'Local temperature state id',
+        type: 'string',
+        role: 'text',
+        read: true,
+        write: false,
+        def: '',
+    });
     await setObj(adapter, 'legalRestriction.monthStart', {
         name: 'Restriction start month',
         type: 'number',
@@ -410,7 +418,7 @@ export async function createBaseStates(adapter: ioBroker.Adapter): Promise<void>
         def: 27,
     });
     await setObj(adapter, 'legalRestriction.currentTemp', {
-        name: 'Last fetched DWD temperature',
+        name: 'Last checked restriction temperature',
         type: 'number',
         role: 'value.temperature',
         unit: '°C',
@@ -419,7 +427,7 @@ export async function createBaseStates(adapter: ioBroker.Adapter): Promise<void>
         def: 0,
     });
     await setObj(adapter, 'legalRestriction.currentTempTs', {
-        name: 'Timestamp of last DWD fetch',
+        name: 'Timestamp of last temperature check',
         type: 'number',
         role: 'value.time',
         read: true,
@@ -427,7 +435,7 @@ export async function createBaseStates(adapter: ioBroker.Adapter): Promise<void>
         def: 0,
     });
     await setObj(adapter, 'legalRestriction.lastCheckError', {
-        name: 'Last DWD fetch error',
+        name: 'Last temperature check error',
         type: 'string',
         role: 'text',
         read: true,
@@ -570,6 +578,10 @@ export async function applyConfigToStates(adapter: ioBroker.Adapter, config: Irr
 
     await adapter.setStateAsync('legalRestriction.enabled', { val: config.legalRestriction.enabled, ack: true });
     await adapter.setStateAsync('legalRestriction.stationId', { val: config.legalRestriction.stationId, ack: true });
+    await adapter.setStateAsync('legalRestriction.temperatureStateId', {
+        val: config.legalRestriction.temperatureStateId,
+        ack: true,
+    });
     await adapter.setStateAsync('legalRestriction.monthStart', { val: config.legalRestriction.monthStart, ack: true });
     await adapter.setStateAsync('legalRestriction.monthEnd', { val: config.legalRestriction.monthEnd, ack: true });
     await adapter.setStateAsync('legalRestriction.hourStart', { val: config.legalRestriction.hourStart, ack: true });

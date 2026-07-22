@@ -39,6 +39,7 @@ export const DEFAULT_CONFIG: IrrigationNativeConfig = {
     legalRestriction: {
         enabled: false,
         stationId: '10400',
+        temperatureStateId: '',
         monthStart: 6,
         monthEnd: 9,
         hourStart: 11,

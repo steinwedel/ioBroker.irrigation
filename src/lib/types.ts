@@ -133,6 +133,7 @@ export interface IWeatherConfig {
 export interface ILegalRestrictionConfig {
     enabled: boolean;
     stationId: string;
+    temperatureStateId: string;
     monthStart: number;
     monthEnd: number;
     hourStart: number;

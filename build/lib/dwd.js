@@ -78,15 +78,41 @@ class DwdRestriction {
       await this.apply(false);
       return false;
     }
+    const temperatureStateId = config.legalRestriction.temperatureStateId.trim();
+    if (temperatureStateId) {
+      const temp2 = await this.fetchLocalTemperature(temperatureStateId);
+      return this.applyTemperature(temp2);
+    }
     if (!config.legalRestriction.stationId.trim()) {
       await this.apply(true);
       return true;
     }
     const temp = await this.fetchTemperature(config.legalRestriction.stationId);
+    return this.applyTemperature(temp);
+  }
+  async onForeignStateChange(id, state) {
+    const config = this.deps.getConfig();
+    if (id !== config.legalRestriction.temperatureStateId.trim()) {
+      return false;
+    }
+    if (!config.legalRestriction.enabled || !this.isWithinWindow(/* @__PURE__ */ new Date())) {
+      await this.apply(false);
+      return true;
+    }
+    const temp = typeof (state == null ? void 0 : state.val) === "number" && Number.isFinite(state.val) ? state.val : null;
+    if (temp === null) {
+      await this.recordTemperatureError("Local temperature state has no valid numeric value");
+      return true;
+    }
+    await this.recordTemperature(temp);
+    await this.apply(temp >= config.legalRestriction.minTemperature);
+    return true;
+  }
+  async applyTemperature(temp) {
     if (temp === null) {
       return this.active;
     }
-    const restricted = temp >= config.legalRestriction.minTemperature;
+    const restricted = temp >= this.deps.getConfig().legalRestriction.minTemperature;
     await this.apply(restricted);
     return restricted;
   }
@@ -96,6 +122,22 @@ class DwdRestriction {
     await this.deps.adapter.setStateAsync("legalRestriction.active", { val: restricted, ack: true });
     if (restricted !== wasActive) {
       await this.deps.onRestrictionChanged(restricted);
+    }
+  }
+  async fetchLocalTemperature(stateId) {
+    try {
+      const state = await this.deps.adapter.getForeignStateAsync(stateId);
+      const temp = typeof (state == null ? void 0 : state.val) === "number" && Number.isFinite(state.val) ? state.val : null;
+      if (temp === null) {
+        throw new Error("Local temperature state has no valid numeric value");
+      }
+      await this.recordTemperature(temp);
+      return temp;
+    } catch (error) {
+      const message = error.message;
+      this.deps.adapter.log.warn(`Local temperature read failed: ${message}`);
+      await this.recordTemperatureError(message);
+      return null;
     }
   }
   async fetchTemperature(stationId) {
@@ -109,16 +151,22 @@ class DwdRestriction {
       if (temp === null) {
         throw new Error("Temperature column not found or unparsable in DWD CSV");
       }
-      await this.deps.adapter.setStateAsync("legalRestriction.currentTemp", { val: temp, ack: true });
-      await this.deps.adapter.setStateAsync("legalRestriction.currentTempTs", { val: Date.now(), ack: true });
-      await this.deps.adapter.setStateAsync("legalRestriction.lastCheckError", { val: "", ack: true });
+      await this.recordTemperature(temp);
       return temp;
     } catch (error) {
       const message = error.message;
       this.deps.adapter.log.warn(`DWD temperature fetch failed: ${message}`);
-      await this.deps.adapter.setStateAsync("legalRestriction.lastCheckError", { val: message, ack: true });
+      await this.recordTemperatureError(message);
       return null;
     }
+  }
+  async recordTemperature(temp) {
+    await this.deps.adapter.setStateAsync("legalRestriction.currentTemp", { val: temp, ack: true });
+    await this.deps.adapter.setStateAsync("legalRestriction.currentTempTs", { val: Date.now(), ack: true });
+    await this.deps.adapter.setStateAsync("legalRestriction.lastCheckError", { val: "", ack: true });
+  }
+  async recordTemperatureError(message) {
+    await this.deps.adapter.setStateAsync("legalRestriction.lastCheckError", { val: message, ack: true });
   }
 }
 function parseDwdTemperature(csv) {

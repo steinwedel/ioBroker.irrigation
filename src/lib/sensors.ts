@@ -32,7 +32,13 @@ export class SensorManager {
         this.subscribedIds = [];
 
         const config = this.deps.getConfig();
-        for (const id of [config.sensors.rainId, config.sensors.soilMoistureId, config.sensors.temperatureId]) {
+        const stateIds = new Set([
+            config.sensors.rainId,
+            config.sensors.soilMoistureId,
+            config.sensors.temperatureId,
+            config.legalRestriction.temperatureStateId,
+        ]);
+        for (const id of stateIds) {
             if (id) {
                 await this.deps.adapter.subscribeForeignStatesAsync(id);
                 this.subscribedIds.push(id);

@@ -434,6 +434,7 @@ describe('automation.recoverAfterRestart', () => {
             legalRestriction: {
                 enabled: false,
                 stationId: '',
+                temperatureStateId: '',
                 monthStart: 6,
                 monthEnd: 9,
                 hourStart: 11,

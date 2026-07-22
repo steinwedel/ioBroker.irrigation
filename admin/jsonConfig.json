@@ -652,6 +652,27 @@
                     "label": "DWD station",
                     "command": "listDwdStations",
                     "jsonData": "{}",
+                    "onChange": {
+                        "alsoDependsOn": ["legalRestriction.temperatureStateId"],
+                        "calculateFunc": "data.legalRestriction?.temperatureStateId ? '' : data.legalRestriction?.stationId",
+                        "ignoreOwnChanges": true
+                    },
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "legalRestriction.temperatureStateId": {
+                    "type": "objectId",
+                    "label": "Local temperature state",
+                    "help": "If selected, this state is used instead of the DWD station.",
+                    "onChange": {
+                        "alsoDependsOn": ["legalRestriction.stationId"],
+                        "calculateFunc": "data.legalRestriction?.stationId ? '' : data.legalRestriction?.temperatureStateId",
+                        "ignoreOwnChanges": true
+                    },
                     "newLine": true,
                     "xs": 12,
                     "sm": 12,
