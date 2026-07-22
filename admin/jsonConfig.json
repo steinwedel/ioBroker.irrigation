@@ -353,6 +353,7 @@
                     "label": "Valves in selected plan",
                     "newLine": true,
                     "doNotSave": true,
+                    "noDelete": true,
                     "sm": 12,
                     "md": 12,
                     "lg": 8,

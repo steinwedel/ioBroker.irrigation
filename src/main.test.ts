@@ -8,6 +8,7 @@ import { expect } from 'chai';
 import { AutomationEngine, buildBatches } from './lib/automation';
 import { parseDwdTemperature } from './lib/dwd';
 import { resolvePlanFromIcalTitle } from './lib/scheduler';
+import { parsePlanValveTableRows } from './lib/types';
 import type { AutomationDeps } from './lib/automation';
 import type { IrrigationNativeConfig, IValveConfig } from './lib/types';
 
@@ -94,6 +95,62 @@ describe('dwd.parseDwdTemperature', () => {
     it('returns null when the data value is "---"', () => {
         const csv = ['Desc', 'Unit', 'Datum;Zeit;Temperatur (2m)', '13.07.2026;12:00;---'].join('\n');
         expect(parseDwdTemperature(csv)).to.equal(null);
+    });
+});
+
+/**
+ * Regression tests for parsePlanValveTableRows(), the "Apply valve
+ * assignment" handler's row->valve-index mapping for the Plans tab's
+ * "Valves in selected plan" table. It used to interpret a row's position in
+ * the `planValveTable` array as the real valve index directly, which broke
+ * as soon as the admin UI's `table` component reordered rows (e.g. by
+ * sorting a column) - after a reorder, row position no longer matched
+ * `this.config2.valves` order, so the wrong valves ended up assigned to the
+ * plan (this was the reported "wrong valves shown/assigned after selecting
+ * a plan" bug). The fix matches each row back to its real valve index via
+ * the unique, stable `valveNumber` field instead of the row's position.
+ */
+describe('main.parsePlanValveTableRows', () => {
+    it('maps rows to valve indexes via valveNumber when rows are in natural order', () => {
+        const rows = [
+            { valveNumber: '000', assigned: false },
+            { valveNumber: '001', assigned: true },
+            { valveNumber: '002', assigned: false },
+            { valveNumber: '003', assigned: true },
+        ];
+        expect(parsePlanValveTableRows(rows, 4)).to.deep.equal([1, 3]);
+    });
+
+    it('still returns the correct valve indexes after rows have been reordered (e.g. by sorting a column)', () => {
+        // Same 4 valves as above, but the UI table has been sorted/reordered so
+        // row position no longer matches valve index order. The old
+        // position-based logic would have returned [0, 2] here (the row
+        // positions of the checked rows) instead of the real valve indexes.
+        const rows = [
+            { valveNumber: '003', assigned: true },
+            { valveNumber: '000', assigned: false },
+            { valveNumber: '002', assigned: false },
+            { valveNumber: '001', assigned: true },
+        ];
+        expect(parsePlanValveTableRows(rows, 4)).to.deep.equal([3, 1]);
+    });
+
+    it('ignores rows with an out-of-range or malformed valveNumber', () => {
+        const rows = [
+            { valveNumber: '000', assigned: true },
+            { valveNumber: '999', assigned: true },
+            { valveNumber: 'abc', assigned: true },
+            { valveNumber: undefined, assigned: true },
+        ];
+        expect(parsePlanValveTableRows(rows, 4)).to.deep.equal([0]);
+    });
+
+    it('returns an empty array when no row is assigned', () => {
+        const rows = [
+            { valveNumber: '000', assigned: false },
+            { valveNumber: '001', assigned: false },
+        ];
+        expect(parsePlanValveTableRows(rows, 2)).to.deep.equal([]);
     });
 });
 

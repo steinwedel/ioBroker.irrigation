@@ -18,6 +18,31 @@ export function formatValveNumber(index: number): string {
 }
 
 /**
+ * Converts the admin UI's `planValveTable` rows (as sent back by the
+ * "Apply valve assignment" button) into the list of assigned valve indexes.
+ *
+ * Rows are matched back to real valve indexes via the unique, stable
+ * `valveNumber` field (e.g. "007" -> 7) rather than the row's position in
+ * the array. The admin UI's `table` component allows reordering/deleting
+ * rows (sortable columns, move up/down, delete-row buttons), so after such
+ * an interaction the row order no longer matches `this.config2.valves`
+ * order - using the row index directly would silently assign the wrong
+ * valves to the plan.
+ *
+ * @param rows
+ * @param valveCount
+ */
+export function parsePlanValveTableRows(
+    rows: Array<{ valveNumber?: string; assigned?: boolean }>,
+    valveCount: number,
+): number[] {
+    return rows
+        .filter(row => row?.assigned)
+        .map(row => Number.parseInt(row.valveNumber ?? '', 10))
+        .filter(i => Number.isInteger(i) && i >= 0 && i < valveCount);
+}
+
+/**
  * Sentinel value used in `IPlanConfig.valveIndexes` to explicitly represent
  * "no valves assigned", as opposed to an empty array which means "all
  * valves" (see buildActiveValveList()). Real valve indices are always >= 0,

@@ -722,7 +722,7 @@ class Irrigation extends utils.Adapter {
         return;
       }
       const rows = (_g = msg == null ? void 0 : msg.planValveTable) != null ? _g : [];
-      const selectedIndexes = rows.map((row, i) => (row == null ? void 0 : row.assigned) ? i : -1).filter((i) => i >= 0 && i < this.config2.valves.length);
+      const selectedIndexes = (0, import_types.parsePlanValveTableRows)(rows, this.config2.valves.length);
       const updatedPlans = this.config2.plans.map(
         (p, i) => i === planIndex ? { ...p, valveIndexes: selectedIndexes.length > 0 ? selectedIndexes : [import_types.NONE_SENTINEL] } : p
       );

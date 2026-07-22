@@ -6,7 +6,7 @@
 import * as utils from '@iobroker/adapter-core';
 import { normalizeConfig } from './lib/config-defaults';
 import type { IPlanConfig, IrrigationNativeConfig, IValveConfig, ScanType } from './lib/types';
-import { formatValveNumber, NONE_SENTINEL } from './lib/types';
+import { formatValveNumber, NONE_SENTINEL, parsePlanValveTableRows } from './lib/types';
 import { createBaseStates, applyConfigToStates } from './lib/states';
 import { ValveController } from './lib/ventile';
 import { AutomationEngine } from './lib/automation';
@@ -867,10 +867,8 @@ class Irrigation extends utils.Adapter {
                 this.sendTo(obj.from, obj.command, { error: 'noSelection' }, obj.callback);
                 return;
             }
-            const rows = (msg?.planValveTable as Array<{ assigned?: boolean }> | undefined) ?? [];
-            const selectedIndexes = rows
-                .map((row, i) => (row?.assigned ? i : -1))
-                .filter(i => i >= 0 && i < this.config2.valves.length);
+            const rows = (msg?.planValveTable as Array<{ valveNumber?: string; assigned?: boolean }> | undefined) ?? [];
+            const selectedIndexes = parsePlanValveTableRows(rows, this.config2.valves.length);
             const updatedPlans = this.config2.plans.map((p, i) =>
                 i === planIndex
                     ? { ...p, valveIndexes: selectedIndexes.length > 0 ? selectedIndexes : [NONE_SENTINEL] }
