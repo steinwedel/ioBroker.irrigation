@@ -18,7 +18,8 @@ var __copyProps = (to, from, except, desc) => {
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 var ventile_exports = {};
 __export(ventile_exports, {
-  ValveController: () => ValveController
+  ValveController: () => ValveController,
+  rainbirdInstanceOf: () => rainbirdInstanceOf
 });
 module.exports = __toCommonJS(ventile_exports);
 var import_types = require("./types");
@@ -36,11 +37,25 @@ function parseGardenaLeftoverMinutes(val) {
 function gardenaValveBasePath(durationValueId) {
   return durationValueId.replace(/\.duration_value$/, "");
 }
+function rainbirdInstanceOf(stateId) {
+  const match = /^(.+?)\.device\.stations\./.exec(stateId);
+  return match == null ? void 0 : match[1];
+}
 class ValveController {
   adapter;
   index;
   config;
   rateLimiter;
+  /**
+   * Returns all valve controllers of the adapter (including this one), used
+   * by stop() to check whether another Rainbird zone on the same
+   * controller is still running before firing the shared `allOffId`
+   * (`stopIrrigation`) command - which otherwise would stop every zone on
+   * that Rainbird controller, not just this one. Provided as a getter
+   * rather than a direct array reference since `main.ts` builds the full
+   * `ValveController[]` list only after constructing each instance.
+   */
+  getAllValves;
   /**
    * 1s tick used to count down remainingTime for adapter-owned timer types
    * (Homematic/Generic). This is the single source of truth for the
@@ -94,11 +109,12 @@ class ValveController {
    * via a different pair of racing callers than the original bug.
    */
   commandChain = Promise.resolve();
-  constructor(adapter, index, config, rateLimiter) {
+  constructor(adapter, index, config, rateLimiter, getAllValves) {
     this.adapter = adapter;
     this.index = index;
     this.config = config;
     this.rateLimiter = rateLimiter;
+    this.getAllValves = getAllValves != null ? getAllValves : (() => [this]);
     this.manualRunForSecs = config.runFor;
   }
   get id() {
@@ -573,6 +589,24 @@ class ValveController {
       await this.adapter.setStateAsync(`${this.id}.errorLast`, { val: message, ack: true });
     }
   }
+  /**
+   * True if another *enabled, currently running* Rainbird valve on the
+   * same Rainbird controller instance as this valve exists. Used by
+   * stop() to decide whether firing the shared `allOffId`
+   * ("stopIrrigation") command is safe - that command stops every zone on
+   * the controller, so it must be suppressed while a sibling zone (e.g.
+   * from a parallel pump-capacity batch, or a manual single-valve run
+   * started while automation is running) still needs to keep watering.
+   */
+  otherSiblingRainbirdValveRunning() {
+    const instance = rainbirdInstanceOf(this.config.stateId);
+    if (!instance) {
+      return false;
+    }
+    return this.getAllValves().some(
+      (other) => other !== this && other.running && other.config.type === "Rainbird" && rainbirdInstanceOf(other.config.stateId) === instance
+    );
+  }
   /** Stop this valve immediately. */
   async stop() {
     var _a;
@@ -589,7 +623,7 @@ class ValveController {
           await this.adapter.setForeignStateAsync(this.config.stateId, "STOP_UNTIL_NEXT_TASK");
           break;
         case "Rainbird":
-          if (this.config.allOffId) {
+          if (this.config.allOffId && !this.otherSiblingRainbirdValveRunning()) {
             await this.adapter.setForeignStateAsync(this.config.allOffId, true);
           }
           break;
@@ -665,6 +699,7 @@ class ValveController {
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  ValveController
+  ValveController,
+  rainbirdInstanceOf
 });
 //# sourceMappingURL=ventile.js.map

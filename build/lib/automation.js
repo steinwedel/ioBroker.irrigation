@@ -22,6 +22,7 @@ __export(automation_exports, {
   buildBatches: () => buildBatches
 });
 module.exports = __toCommonJS(automation_exports);
+var import_ventile = require("./ventile");
 function buildBatches(valveIndexes, valves, pumpCapacity) {
   if (pumpCapacity <= 0) {
     return valveIndexes.map((idx) => [idx]);
@@ -31,10 +32,14 @@ function buildBatches(valveIndexes, valves, pumpCapacity) {
   for (const valveIdx of sorted) {
     const valve = valves[valveIdx];
     const flowRate = valve.flowRateLpm || 0;
+    const rainbirdInstance = valve.type === "Rainbird" ? (0, import_ventile.rainbirdInstanceOf)(valve.stateId) : void 0;
     let bestBatch;
     let bestIncrease = Infinity;
     for (const batch of batches) {
       if (batch.flowSum + flowRate > pumpCapacity) {
+        continue;
+      }
+      if (rainbirdInstance && batch.rainbirdInstances.has(rainbirdInstance)) {
         continue;
       }
       const increase = Math.max(0, valve.duration - batch.duration);
@@ -47,8 +52,16 @@ function buildBatches(valveIndexes, valves, pumpCapacity) {
       bestBatch.valveIdxs.push(valveIdx);
       bestBatch.flowSum += flowRate;
       bestBatch.duration = Math.max(bestBatch.duration, valve.duration);
+      if (rainbirdInstance) {
+        bestBatch.rainbirdInstances.add(rainbirdInstance);
+      }
     } else {
-      batches.push({ valveIdxs: [valveIdx], flowSum: flowRate, duration: valve.duration });
+      batches.push({
+        valveIdxs: [valveIdx],
+        flowSum: flowRate,
+        duration: valve.duration,
+        rainbirdInstances: rainbirdInstance ? /* @__PURE__ */ new Set([rainbirdInstance]) : /* @__PURE__ */ new Set()
+      });
     }
   }
   return batches.map((b) => b.valveIdxs);
