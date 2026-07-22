@@ -1,11 +1,11 @@
 # Context
 
 ## Current Task
-Alle DWD-POI-Stationen stehen im Dropdown der Beregnungssperre bereit.
+Die Beregnungssperre kann ohne DWD-Station temperaturunabhängig verwendet werden.
 
 ## Key Decisions
+- Ohne Stationsauswahl ist die Sperre während des konfigurierten Monats- und Zeitfensters aktiv.
 - Die Stationen basieren auf dem offiziellen DWD-MOSMIX-Katalog.
-- Die gespeicherte WMO-ID bleibt mit der DWD-POI-Abfrage kompatibel.
 
 ## Next Steps
-- Validierung ausführen.
+- Keine.

@@ -77,6 +77,11 @@ export class DwdRestriction {
             return false;
         }
 
+        if (!config.legalRestriction.stationId.trim()) {
+            await this.apply(true);
+            return true;
+        }
+
         const temp = await this.fetchTemperature(config.legalRestriction.stationId);
         if (temp === null) {
             // keep previous state on fetch failure, see plan risk "DWD-API"

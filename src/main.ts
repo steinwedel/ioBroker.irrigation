@@ -777,7 +777,12 @@ class Irrigation extends utils.Adapter {
         }
 
         if (obj.command === 'listDwdStations' && obj.callback) {
-            this.sendTo(obj.from, obj.command, DWD_POI_STATIONS, obj.callback);
+            this.sendTo(
+                obj.from,
+                obj.command,
+                [{ label: 'Keine Wetterstation', value: '' }, ...DWD_POI_STATIONS],
+                obj.callback,
+            );
             return;
         }
 

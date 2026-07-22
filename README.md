@@ -181,7 +181,7 @@ In Germany, municipalities may impose watering bans during heat waves. This adap
 | Setting | Description |
 |---------|-------------|
 | Legal restriction check enabled | Enable/disable DWD-based restriction checking. |
-| DWD station | Select the local DWD weather station by name from the complete station list (default: Düsseldorf, ID 10400). |
+| DWD station | Select the local DWD weather station by name from the complete station list (default: Düsseldorf, ID 10400), or select "Keine Wetterstation" to apply the restriction throughout the configured time window without a temperature check. |
 | Restriction start/end month | Months during which restrictions can apply. |
 | Restriction start/end hour | Time window during which temperature is checked. |
 | Minimum temperature (°C) | Temperature above which the restriction becomes active. |
