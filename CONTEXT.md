@@ -1,11 +1,11 @@
 # Context
 
 ## Current Task
-Die einheitliche Bewässerungsdauer ist in der Ventiltabelle sichtbar und editierbar.
+Die Plan-Ventiltabelle zeigt die laufende Ausführungsposition.
 
 ## Key Decisions
-- `duration` in Minuten gilt für direkte und geplante Ventilstarts.
-- Bestehende `runFor`-Konfigurationen werden beim Start migriert und entfernt.
+- Die statische Spalte aktualisiert sich beim Verschieben per Tabellenpfeil.
+- Bei Pumpenkapazität 0 wird die gespeicherte Zeilenreihenfolge ausgeführt.
 
 ## Next Steps
-- Übersetzungen und Validierung ausführen.
+- Validierung ausführen.

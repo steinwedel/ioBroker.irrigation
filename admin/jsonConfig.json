@@ -367,6 +367,13 @@
                     "lg": 8,
                     "items": [
                         {
+                            "type": "staticText",
+                            "attr": "_position",
+                            "title": "Execution order",
+                            "text": "${arrayIndex + 1}",
+                            "width": "10%"
+                        },
+                        {
                             "type": "checkbox",
                             "attr": "assigned",
                             "title": "In plan",
@@ -385,7 +392,7 @@
                             "type": "text",
                             "attr": "name",
                             "title": "Name",
-                            "width": "70%",
+                            "width": "60%",
                             "readOnly": true,
                             "sort": true
                         }

@@ -1,4 +1,7 @@
 # Changelog
+## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **ENHANCED**: Added visible sequential execution positions to the plan valve table
+
 ## 0.2.33 (2026-07-23)
 * (Gerhard Steinwedel) **FIXED**: Restored the unified watering duration in the valve table
 
