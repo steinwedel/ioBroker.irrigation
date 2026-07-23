@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.2.27 (2026-07-23)
 * (Gerhard Steinwedel) **NEW**: Added selectable direct plan starts through ioBroker states
 
 ## 0.2.26 (2026-07-22)

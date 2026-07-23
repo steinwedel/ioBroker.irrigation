@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.2.26",
+    "version": "0.2.27",
     "news": {
+      "0.2.27": {
+        "en": "**NEW**: Added selectable direct plan starts through ioBroker states",
+        "de": "**NEU**: Auswählbare direkte Planstarts über ioBroker-Zustände hinzugefügt",
+        "ru": "**НОВОЕ**: Добавлена возможность выбора прямого запуска планов через состояния ioBroker",
+        "pt": "**NOVO**: Adicionado início direto de planos selecionáveis através de estados do ioBroker",
+        "nl": "**NIEUW**: Selecteerbare directe planstarts toegevoegd via ioBroker states",
+        "fr": "**NOUVEAU**: Ajout de démarrages de plans directs sélectionnables via les états ioBroker",
+        "it": "**NOVITÀ**: Aggiunti avvii diretti di piani selezionabili tramite stati ioBroker",
+        "es": "**NUEVO**: Añadidos inicios directos de planes seleccionables a través de estados de ioBroker",
+        "pl": "**NOWOŚĆ**: Dodano możliwość wyboru bezpośredniego uruchamiania planów przez stany ioBroker",
+        "uk": "**НОВЕ**: Додано можливість вибору прямого запуску планів через стани ioBroker",
+        "zh-cn": "**新功能**：通过 ioBroker 状态添加了可选择的直接计划启动"
+      },
       "0.2.26": {
         "en": "**ENHANCED**: Disabled and cleared restriction end date/time until their start values are configured",
         "de": "**VERBESSERT**: Enddatum/-zeit der Einschränkung deaktiviert und gelöscht, bis die Startwerte konfiguriert sind",
@@ -80,19 +93,6 @@
         "pl": "**ULEPSZONE**: Dodano wszystkie stacje pogodowe DWD POI do listy rozwijanej stacji z ograniczeniami prawnymi",
         "uk": "**ПОКРАЩЕНО**: Додано всі метеостанції DWD POI до випадаючого списку станцій з юридичними обмеженнями",
         "zh-cn": "**增强**：已将所有 DWD POI 气象站添加到法律限制站点下拉列表中"
-      },
-      "0.2.20": {
-        "en": "**ENHANCED**: Replaced the free-text DWD station ID with a station-name dropdown in the legal restriction settings",
-        "de": "**VERBESSERT**: Die Freitext-Eingabe der DWD-Stations-ID wurde in den Einstellungen für gesetzliche Beschränkungen durch ein Dropdown-Menü mit Stationsnamen ersetzt",
-        "ru": "**УЛУЧШЕНО**: Текстовое поле для ID станции DWD заменено на выпадающий список с названиями станций в настройках законодательных ограничений",
-        "pt": "**MELHORADO**: Substituído o campo de texto livre para ID da estação DWD por um menu suspenso com nomes de estações nas configurações de restrições legais",
-        "nl": "**VERBETERD**: Het vrije tekstveld voor DWD-station-ID is vervangen door een dropdown met stationnamen in de instellingen voor wettelijke beperkingen",
-        "fr": "**AMÉLIORÉ**: Le champ de texte libre pour l'ID de station DWD a été remplacé par un menu déroulant avec les noms de stations dans les paramètres de restrictions légales",
-        "it": "**MIGLIORATO**: Sostituito il campo di testo libero per l'ID stazione DWD con un menu a discesa con i nomi delle stazioni nelle impostazioni delle restrizioni legali",
-        "es": "**MEJORADO**: Reemplazado el campo de texto libre para el ID de estación DWD por un menú desplegable con nombres de estaciones en la configuración de restricciones legales",
-        "pl": "**ULEPSZONE**: Zastąpiono pole tekstowe dla ID stacji DWD rozwijaną listą z nazwami stacji w ustawieniach ograniczeń prawnych",
-        "uk": "**ПОКРАЩЕНО**: Текстове поле для ID станції DWD замінено на випадаючий список з назвами станцій у налаштуваннях законодавчих обмежень",
-        "zh-cn": "**增强**：在法律限制设置中，将自由文本的 DWD 站点 ID 替换为站点名称下拉菜单"
       }
     },
     "titleLang": {
