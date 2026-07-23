@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.2.30",
+    "version": "0.2.31",
     "news": {
+      "0.2.31": {
+        "en": "**FIXED**: Enabled native table arrow buttons to order sequential plan valves",
+        "de": "**BEHOBEN**: Native Tabellen-Pfeil-Schaltflächen aktiviert, um sequentielle Planventile zu sortieren",
+        "ru": "**ИСПРАВЛЕНО**: Включены нативные кнопки со стрелками в таблице для упорядочивания последовательных клапанов плана",
+        "pt": "**CORRIGIDO**: Botões de seta da tabela nativa habilitados para ordenar válvulas de plano sequenciais",
+        "nl": "**OPGELOST**: Natieve tabel pijlknoppen ingeschakeld om sequentiële planventielen te ordenen",
+        "fr": "**CORRIGÉ**: Activation des boutons fléchés natifs du tableau pour ordonner les vannes de plan séquentielles",
+        "it": "**RISOLTO**: Abilitati i pulsanti freccia nativi della tabella per ordinare le valvole del piano sequenziali",
+        "es": "**SOLUCIONADO**: Habilitados los botones de flecha nativos de la tabla para ordenar las válvulas de plan secuenciales",
+        "pl": "**NAPRAWIONO**: Włączono natywne przyciski strzałek tabeli do porządkowania sekwencyjnych zaworów planu",
+        "uk": "**ВИПРАВЛЕНО**: Увімкнено нативні кнопки зі стрілками таблиці для впорядкування послідовних клапанів плану",
+        "zh-cn": "**已修复**：启用原生表格箭头按钮以排序顺序计划阀门"
+      },
       "0.2.30": {
         "en": "**ENHANCED**: Added configurable valve order for sequential watering plans",
         "de": "**VERBESSERT**: Konfigurierbare Ventilreihenfolge für sequentielle Bewässerungspläne hinzugefügt",
@@ -80,19 +93,6 @@
         "pl": "**ULEPSZONE**: Wyłączono maksymalną temperaturę nawadniania bez skonfigurowanego źródła temperatury\n**ULEPSZONE**: Zakresy dat i godzin ograniczeń uczyniono niezależnie opcjonalnymi\n**NAPRAWIONO**: Zwalidowano daty roczne takie jak 1.6 w konfiguracji administratora",
         "uk": "**ПОКРАЩЕНО**: Вимкнено максимальну температуру зрошення без налаштованого джерела температури\n**ПОКРАЩЕНО**: Діапазони дат і часу обмежень зроблено незалежно опціональними\n**ВИПРАВЛЕНО**: Валідовано річні дати, такі як 1.6, у конфігурації адміністратора",
         "zh-cn": "**增强**：在没有配置温度源的情况下禁用了最大灌溉温度\n**增强**：使限制日期和时间范围可独立设为可选\n**修复**：在管理员配置中验证了如 1.6 这样的年度日期"
-      },
-      "0.2.24": {
-        "en": "**ENHANCED**: Added validated annual restriction dates and minute-precise start and end times",
-        "de": "**VERBESSERT**: Validierte jährliche Einschränkungsdaten und minutengenaue Start- und Endzeiten hinzugefügt",
-        "ru": "**УЛУЧШЕНО**: Добавлены проверенные даты годовых ограничений и точное до минуты время начала и окончания",
-        "pt": "**MELHORADO**: Adicionadas datas de restrição anual validadas e horários de início e término precisos ao minuto",
-        "nl": "**VERBETERD**: Gevalideerde jaarlijkse beperkingsdatums en minuutprecieze start- en eindtijden toegevoegd",
-        "fr": "**AMÉLIORÉ**: Ajout de dates de restriction annuelles validées et d'heures de début et de fin précises à la minute",
-        "it": "**MIGLIORATO**: Aggiunte date di restrizione annuali convalidate e orari di inizio e fine precisi al minuto",
-        "es": "**MEJORADO**: Se agregaron fechas de restricción anual validadas y horarios de inicio y finalización precisos al minuto",
-        "pl": "**ULEPSZONE**: Dodano zwalidowane daty ograniczeń rocznych oraz dokładne co do minuty czasy rozpoczęcia i zakończenia",
-        "uk": "**ПОКРАЩЕНО**: Додано перевірені дати річних обмежень та точний до хвилини час початку та завершення",
-        "zh-cn": "**增强**：添加了经过验证的年度限制日期以及精确到分钟的开始和结束时间"
       }
     },
     "titleLang": {

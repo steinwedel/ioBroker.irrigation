@@ -30,7 +30,7 @@ function parsePlanValveTableRows(rows, valveCount) {
   return rows.filter((row) => row == null ? void 0 : row.assigned).map((row) => {
     var _a;
     return Number.parseInt((_a = row.valveNumber) != null ? _a : "", 10);
-  }).filter((i) => Number.isInteger(i) && i >= 0 && i < valveCount);
+  }).filter((index) => Number.isInteger(index) && index >= 0 && index < valveCount);
 }
 const NONE_SENTINEL = -1;
 // Annotate the CommonJS export names for ESM import in node:

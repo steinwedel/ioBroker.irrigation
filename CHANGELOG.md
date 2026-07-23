@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.2.31 (2026-07-23)
 * (Gerhard Steinwedel) **FIXED**: Enabled native table arrow buttons to order sequential plan valves
 
 ## 0.2.30 (2026-07-23)
