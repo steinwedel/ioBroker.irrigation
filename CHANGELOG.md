@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.2.29 (2026-07-23)
 * (Gerhard Steinwedel) **NEW**: Added temperature-controlled automatic plan duration adjustment
 * (Gerhard Steinwedel) **FIXED**: Reset automation duration states when stopping a run
 

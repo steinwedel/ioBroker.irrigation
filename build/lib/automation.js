@@ -226,16 +226,6 @@ class AutomationEngine {
     this.status = "running";
     await this.startNextBatch();
   }
-  /**
-   * Valves assigned to the plan, filtered by enabled/day/sensors.
-   * Empty valveIndexes (default "Alle" plan) includes all valves. A
-   * non-empty valveIndexes array containing no real valve index (e.g. the
-   * NONE_SENTINEL used by "remove all valves from plan") matches nothing,
-   * since real valve indices are always >= 0.
-   *
-   * @param config
-   * @param plan
-   */
   async updateTemperatureAdjustmentFactor(config) {
     this.temperatureAdjustmentFactor = 1;
     if (!config.scheduler.temperatureAdjustmentEnabled || !config.scheduler.temperatureAdjustmentStateId) {

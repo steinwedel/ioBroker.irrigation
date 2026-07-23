@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.2.28",
+    "version": "0.2.29",
     "news": {
+      "0.2.29": {
+        "en": "**NEW**: Added temperature-controlled automatic plan duration adjustment\n**FIXED**: Reset automation duration states when stopping a run",
+        "de": "**NEU**: Temperaturgesteuerte automatische Anpassung der Plandauer hinzugefügt\n**BEHOBEN**: Automatisierungsdauer-Zustände werden beim Stoppen eines Durchlaufs zurückgesetzt",
+        "ru": "**НОВОЕ**: Добавлена автоматическая регулировка длительности плана в зависимости от температуры\n**ИСПРАВЛЕНО**: Сброс состояний длительности автоматизации при остановке выполнения",
+        "pt": "**NOVO**: Adicionado ajuste automático da duração do plano controlado por temperatura\n**CORRIGIDO**: Redefinição dos estados de duração da automação ao parar uma execução",
+        "nl": "**NIEUW**: Temperatuurgestuurde automatische aanpassing van planduur toegevoegd\n**OPGELOST**: Automatiseringsduurstatussen worden gereset bij het stoppen van een run",
+        "fr": "**NOUVEAU** : Ajout de l'ajustement automatique de la durée du plan contrôlé par la température\n**CORRIGÉ** : Réinitialisation des états de durée d'automatisation lors de l'arrêt d'une exécution",
+        "it": "**NOVITÀ**: Aggiunto regolazione automatica della durata del piano controllata dalla temperatura\n**RISOLTO**: Ripristino degli stati di durata dell'automazione quando si interrompe un'esecuzione",
+        "es": "**NUEVO**: Añadido ajuste automático de la duración del plan controlado por temperatura\n**CORREGIDO**: Restablecimiento de los estados de duración de la automatización al detener una ejecución",
+        "pl": "**NOWOŚĆ**: Dodano automatyczne dostosowanie czasu trwania planu sterowane temperaturą\n**NAPRAWIONO**: Resetowanie stanów czasu trwania automatyzacji podczas zatrzymywania uruchomienia",
+        "uk": "**НОВЕ**: Додано автоматичне регулювання тривалості плану з контролем температури\n**ВИПРАВЛЕНО**: Скидання станів тривалості автоматизації при зупинці виконання",
+        "zh-cn": "**新增**：添加了温度控制的自动计划持续时间调整\n**修复**：停止运行时重置自动化持续时间状态"
+      },
       "0.2.28": {
         "en": "**NEW**: Added Hydrawise valve control and auto-discovery through ioBroker.hydrawise\n**ENHANCED**: Documented all ioBroker adapter data points and their usage in the README\n**ENHANCED**: Published automation duration states as seconds instead of time-formatted minutes",
         "de": "**NEU**: Hydrawise-Ventilsteuerung und automatische Erkennung über ioBroker.hydrawise hinzugefügt **VERBESSERT**: Alle ioBroker-Adapter-Datenpunkte und deren Verwendung in der README dokumentiert **VERBESSERT**: Automatisierungsdauer-Zustände werden nun als Sekunden statt als zeitformatierte Minuten veröffentlicht",
@@ -80,19 +93,6 @@
         "pl": "**ULEPSZONE**: Wybór stacji DWD i lokalnego stanu temperatury został uczyniony wzajemnie wykluczającym się\n**NOWE**: Dodano wybieralny lokalny stan temperatury jako alternatywne źródło dla ograniczenia prawnego",
         "uk": "**ПОКРАЩЕНО**: Вибір станції DWD та локального стану температури зроблено взаємовиключними\n**НОВЕ**: Додано вибір локального стану температури як альтернативного джерела для законодавчого обмеження",
         "zh-cn": "**增强**：使 DWD 站点和本地温度状态选择互斥\n**新增**：添加了可选的本地温度状态作为法律限制的替代来源"
-      },
-      "0.2.22": {
-        "en": "**ENHANCED**: Added an option to apply the legal restriction without a DWD temperature check",
-        "de": "**VERBESSERT**: Option hinzugefügt, um die gesetzliche Beschränkung ohne DWD-Temperaturprüfung anzuwenden",
-        "ru": "**УЛУЧШЕНО**: Добавлена опция применения законодательного ограничения без проверки температуры DWD",
-        "pt": "**MELHORADO**: Adicionada uma opção para aplicar a restrição legal sem verificação de temperatura do DWD",
-        "nl": "**VERBETERD**: Optie toegevoegd om de wettelijke beperking toe te passen zonder DWD-temperatuurcontrole",
-        "fr": "**AMÉLIORÉ**: Ajout d'une option pour appliquer la restriction légale sans vérification de température DWD",
-        "it": "**MIGLIORATO**: Aggiunta un'opzione per applicare la restrizione legale senza controllo della temperatura DWD",
-        "es": "**MEJORADO**: Se agregó una opción para aplicar la restricción legal sin verificación de temperatura del DWD",
-        "pl": "**ULEPSZONE**: Dodano opcję stosowania ograniczenia prawnego bez sprawdzania temperatury DWD",
-        "uk": "**ПОКРАЩЕНО**: Додано опцію застосування законодавчого обмеження без перевірки температури DWD",
-        "zh-cn": "**增强**：添加了无需 DWD 温度检查即可应用法律限制的选项"
       }
     },
     "titleLang": {
