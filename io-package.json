@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.2.37",
+    "version": "0.2.38",
     "news": {
+      "0.2.38": {
+        "en": "**ENHANCED**: Combined plan creation and renaming into one plan-name input",
+        "de": "**VERBESSERT**: Planerstellung und Umbenennung in einem Plannamens-Eingabefeld kombiniert",
+        "ru": "**УЛУЧШЕНО**: Создание и переименование плана объединены в одно поле ввода имени плана",
+        "pt": "**MELHORADO**: Criação e renomeação de plano combinadas em um único campo de entrada de nome de plano",
+        "nl": "**VERBETERD**: Plannen aanmaken en hernoemen gecombineerd in één plannaam-invoerveld",
+        "fr": "**AMÉLIORÉ**: Création et renommage de plan combinés en un seul champ de saisie de nom de plan",
+        "it": "**MIGLIORATO**: Creazione e ridenominazione del piano combinate in un unico campo di inserimento del nome del piano",
+        "es": "**MEJORADO**: Creación y cambio de nombre de plan combinados en un único campo de entrada de nombre de plan",
+        "pl": "**ULEPSZONE**: Tworzenie i zmiana nazwy planu połączone w jedno pole wprowadzania nazwy planu",
+        "uk": "**ПОКРАЩЕНО**: Створення та перейменування плану об'єднано в одне поле введення назви плану",
+        "zh-cn": "**增强**：将计划创建和重命名合并到一个计划名称输入框中"
+      },
       "0.2.37": {
         "en": "**NEW**: Added plan renaming with name validation in the plan editor",
         "de": "**NEU**: Umbenennung von Plänen mit Namensvalidierung im Plan-Editor hinzugefügt",
@@ -80,19 +93,6 @@
         "pl": "**ULEPSZONE**: Ujednolicony czas trwania podlewania bezpośredniego i zaplanowanego zaworu",
         "uk": "**ПОКРАЩЕНО**: Уніфікована тривалість прямого та запланованого поливу клапана",
         "zh-cn": "**增强**：统一直接和计划阀门浇水持续时间"
-      },
-      "0.2.31": {
-        "en": "**FIXED**: Enabled native table arrow buttons to order sequential plan valves",
-        "de": "**BEHOBEN**: Native Tabellen-Pfeil-Schaltflächen aktiviert, um sequentielle Planventile zu sortieren",
-        "ru": "**ИСПРАВЛЕНО**: Включены нативные кнопки со стрелками в таблице для упорядочивания последовательных клапанов плана",
-        "pt": "**CORRIGIDO**: Botões de seta da tabela nativa habilitados para ordenar válvulas de plano sequenciais",
-        "nl": "**OPGELOST**: Natieve tabel pijlknoppen ingeschakeld om sequentiële planventielen te ordenen",
-        "fr": "**CORRIGÉ**: Activation des boutons fléchés natifs du tableau pour ordonner les vannes de plan séquentielles",
-        "it": "**RISOLTO**: Abilitati i pulsanti freccia nativi della tabella per ordinare le valvole del piano sequenziali",
-        "es": "**SOLUCIONADO**: Habilitados los botones de flecha nativos de la tabla para ordenar las válvulas de plan secuenciales",
-        "pl": "**NAPRAWIONO**: Włączono natywne przyciski strzałek tabeli do porządkowania sekwencyjnych zaworów planu",
-        "uk": "**ВИПРАВЛЕНО**: Увімкнено нативні кнопки зі стрілками таблиці для впорядкування послідовних клапанів плану",
-        "zh-cn": "**已修复**：启用原生表格箭头按钮以排序顺序计划阀门"
       }
     },
     "titleLang": {

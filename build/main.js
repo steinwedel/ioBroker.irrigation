@@ -692,7 +692,7 @@ class Irrigation extends utils.Adapter {
       return;
     }
     if (obj.command === "createPlan" && obj.callback) {
-      const name = (_g = (_f = obj.message) == null ? void 0 : _f.newPlanName) == null ? void 0 : _g.trim();
+      const name = (_g = (_f = obj.message) == null ? void 0 : _f.planName) == null ? void 0 : _g.trim();
       if (!name) {
         this.sendTo(obj.from, obj.command, { error: "noName" }, obj.callback);
         return;
@@ -711,7 +711,7 @@ class Irrigation extends utils.Adapter {
     }
     if (obj.command === "renamePlan" && obj.callback) {
       const planIndex = readPlanIndex(obj.message);
-      const name = (_i = (_h = obj.message) == null ? void 0 : _h.renamePlanName) == null ? void 0 : _i.trim();
+      const name = (_i = (_h = obj.message) == null ? void 0 : _h.planName) == null ? void 0 : _i.trim();
       if (planIndex === void 0 || planIndex < 0 || planIndex >= this.config2.plans.length) {
         this.sendTo(obj.from, obj.command, { error: "noSelection" }, obj.callback);
         return;
@@ -725,14 +725,16 @@ class Irrigation extends utils.Adapter {
         return;
       }
       const oldName = this.config2.plans[planIndex].name;
-      const updatedPlans = this.config2.plans.map((plan, index) => index === planIndex ? { ...plan, name } : plan);
+      const updatedPlans = this.config2.plans.map(
+        (plan, index) => index === planIndex ? { ...plan, name } : plan
+      );
       await this.writePlansState(updatedPlans);
       const selectedPlan = await this.getStateAsync("automation.planSelect");
       if ((selectedPlan == null ? void 0 : selectedPlan.val) === oldName) {
         await this.setStateAsync("automation.planSelect", { val: name, ack: true });
       }
       this.log.info(`Renamed plan "${oldName}" to "${name}"`);
-      this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans, _editPlan: planIndex, renamePlanName: "" } }, obj.callback);
+      this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans, _editPlan: planIndex } }, obj.callback);
       return;
     }
     if (obj.command === "deletePlan" && obj.callback) {
