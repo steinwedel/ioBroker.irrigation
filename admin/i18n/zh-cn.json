@@ -113,6 +113,7 @@
     "Valves": "阀门",
     "Valves in selected plan": "所选计划中的阀门",
     "Water consumption tracking enabled": "启用耗水量跟踪",
+    "Watering duration (min)": "浇水时间（分钟）",
     "Weather API": "天气API",
     "Weather API enabled": "天气 API 已启用",
     "Weekdays (0=Sun..6=Sat, comma separated)": "工作日（0=周日..6=周六，逗号分隔）",

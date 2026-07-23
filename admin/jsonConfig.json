@@ -193,6 +193,15 @@
                             ]
                         },
                         {
+                            "type": "number",
+                            "attr": "duration",
+                            "title": "Watering duration (min)",
+                            "width": "16%",
+                            "min": 1,
+                            "default": 10,
+                            "sort": true
+                        },
+                        {
                             "type": "objectId",
                             "attr": "stateId",
                             "title": "State id",

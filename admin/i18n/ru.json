@@ -113,6 +113,7 @@
     "Valves": "Клапаны",
     "Valves in selected plan": "Клапаны в выбранном плане",
     "Water consumption tracking enabled": "Отслеживание потребления воды включено",
+    "Watering duration (min)": "Продолжительность полива (мин)",
     "Weather API": "API погоды",
     "Weather API enabled": "Погода API включена",
     "Weekdays (0=Sun..6=Sat, comma separated)": "Будние дни (0=Вс..6=Сб, через запятую)",
