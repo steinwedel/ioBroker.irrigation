@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.2.37 (2026-07-23)
 * (Gerhard Steinwedel) **NEW**: Added plan renaming with name validation in the plan editor
 
 ## 0.2.36 (2026-07-23)

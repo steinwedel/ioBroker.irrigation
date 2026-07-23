@@ -569,7 +569,7 @@ class Irrigation extends utils.Adapter {
     await this.writeNativeAsync({ valves });
   }
   async onMessage(obj) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k;
     if (typeof obj !== "object" || !obj.command) {
       return;
     }
@@ -709,6 +709,32 @@ class Irrigation extends utils.Adapter {
       );
       return;
     }
+    if (obj.command === "renamePlan" && obj.callback) {
+      const planIndex = readPlanIndex(obj.message);
+      const name = (_i = (_h = obj.message) == null ? void 0 : _h.renamePlanName) == null ? void 0 : _i.trim();
+      if (planIndex === void 0 || planIndex < 0 || planIndex >= this.config2.plans.length) {
+        this.sendTo(obj.from, obj.command, { error: "noSelection" }, obj.callback);
+        return;
+      }
+      if (!name) {
+        this.sendTo(obj.from, obj.command, { error: "noName" }, obj.callback);
+        return;
+      }
+      if (this.config2.plans.some((plan, index) => index !== planIndex && plan.name === name)) {
+        this.sendTo(obj.from, obj.command, { error: "nameExists" }, obj.callback);
+        return;
+      }
+      const oldName = this.config2.plans[planIndex].name;
+      const updatedPlans = this.config2.plans.map((plan, index) => index === planIndex ? { ...plan, name } : plan);
+      await this.writePlansState(updatedPlans);
+      const selectedPlan = await this.getStateAsync("automation.planSelect");
+      if ((selectedPlan == null ? void 0 : selectedPlan.val) === oldName) {
+        await this.setStateAsync("automation.planSelect", { val: name, ack: true });
+      }
+      this.log.info(`Renamed plan "${oldName}" to "${name}"`);
+      this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans, _editPlan: planIndex, renamePlanName: "" } }, obj.callback);
+      return;
+    }
     if (obj.command === "deletePlan" && obj.callback) {
       const planIndex = readPlanIndex(obj.message);
       if (planIndex === void 0 || planIndex < 0 || planIndex >= this.config2.plans.length) {
@@ -736,7 +762,7 @@ class Irrigation extends utils.Adapter {
       const planIndex = readPlanIndex(obj.message);
       const plan = planIndex !== void 0 && planIndex >= 0 && planIndex < this.config2.plans.length ? this.config2.plans[planIndex] : void 0;
       const allValveIndexes = this.config2.valves.map((_, index) => index);
-      const assignedIndexes = plan && plan.valveIndexes.length === 0 ? allValveIndexes : ((_h = plan == null ? void 0 : plan.valveIndexes) != null ? _h : []).filter((index) => index >= 0 && index < this.config2.valves.length);
+      const assignedIndexes = plan && plan.valveIndexes.length === 0 ? allValveIndexes : ((_j = plan == null ? void 0 : plan.valveIndexes) != null ? _j : []).filter((index) => index >= 0 && index < this.config2.valves.length);
       const assignedSet = new Set(assignedIndexes);
       const orderedIndexes = [...assignedIndexes, ...allValveIndexes.filter((index) => !assignedSet.has(index))];
       const planValveTable = orderedIndexes.map((index, executionOrder) => ({
@@ -755,7 +781,7 @@ class Irrigation extends utils.Adapter {
         this.sendTo(obj.from, obj.command, { error: "noSelection" }, obj.callback);
         return;
       }
-      const rows = (_i = msg == null ? void 0 : msg.planValveTable) != null ? _i : [];
+      const rows = (_k = msg == null ? void 0 : msg.planValveTable) != null ? _k : [];
       const selectedIndexes = (0, import_types.parsePlanValveTableRows)(rows, this.config2.valves.length);
       const updatedPlans = this.config2.plans.map(
         (p, i) => i === planIndex ? { ...p, valveIndexes: selectedIndexes.length > 0 ? selectedIndexes : [import_types.NONE_SENTINEL] } : p

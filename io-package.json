@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.2.36",
+    "version": "0.2.37",
     "news": {
+      "0.2.37": {
+        "en": "**NEW**: Added plan renaming with name validation in the plan editor",
+        "de": "**NEU**: Umbenennung von Plänen mit Namensvalidierung im Plan-Editor hinzugefügt",
+        "ru": "**НОВОЕ**: Добавлено переименование планов с проверкой имени в редакторе планов",
+        "pt": "**NOVO**: Adicionada renomeação de planos com validação de nome no editor de planos",
+        "nl": "**NIEUW**: Hernoemen van plannen met naamvalidatie toegevoegd in de planeditor",
+        "fr": "**NOUVEAU**: Ajout du renommage des plans avec validation du nom dans l'éditeur de plans",
+        "it": "**NOVITÀ**: Aggiunta la ridenominazione dei piani con validazione del nome nell'editor dei piani",
+        "es": "**NUEVO**: Se agregó el cambio de nombre de planes con validación de nombre en el editor de planes",
+        "pl": "**NOWOŚĆ**: Dodano zmianę nazwy planów z walidacją nazwy w edytorze planów",
+        "uk": "**НОВЕ**: Додано перейменування планів з перевіркою імені в редакторі планів",
+        "zh-cn": "**新功能**：在计划编辑器中添加了带名称验证的计划重命名功能"
+      },
       "0.2.36": {
         "en": "**ENHANCED**: Renamed plan valve table column header from \"Execution order\" to \"Number\" with localized translations for all supported languages",
         "de": "**VERBESSERT**: Spaltenüberschrift der Planventiltabelle von \"Ausführungsreihenfolge\" in \"Nummer\" umbenannt mit lokalisierten Übersetzungen für alle unterstützten Sprachen",
@@ -80,19 +93,6 @@
         "pl": "**NAPRAWIONO**: Włączono natywne przyciski strzałek tabeli do porządkowania sekwencyjnych zaworów planu",
         "uk": "**ВИПРАВЛЕНО**: Увімкнено нативні кнопки зі стрілками таблиці для впорядкування послідовних клапанів плану",
         "zh-cn": "**已修复**：启用原生表格箭头按钮以排序顺序计划阀门"
-      },
-      "0.2.30": {
-        "en": "**ENHANCED**: Added configurable valve order for sequential watering plans",
-        "de": "**VERBESSERT**: Konfigurierbare Ventilreihenfolge für sequentielle Bewässerungspläne hinzugefügt",
-        "ru": "**УЛУЧШЕНО**: Добавлен настраиваемый порядок клапанов для последовательных планов полива",
-        "pt": "**MELHORADO**: Adicionada ordem configurável de válvulas para planos de rega sequenciais",
-        "nl": "**VERBETERD**: Configureerbare klep volgorde toegevoegd voor sequentiële bewateringsplannen",
-        "fr": "**AMÉLIORÉ**: Ajout de l'ordre configurable des vannes pour les plans d'arrosage séquentiels",
-        "it": "**MIGLIORATO**: Aggiunto ordine configurabile delle valvole per i piani di irrigazione sequenziali",
-        "es": "**MEJORADO**: Añadido orden configurable de válvulas para planes de riego secuenciales",
-        "pl": "**ULEPSZONE**: Dodano konfigurowalną kolejność zaworów dla sekwencyjnych planów nawadniania",
-        "uk": "**ПОКРАЩЕНО**: Додано налаштовуваний порядок клапанів для послідовних планів поливу",
-        "zh-cn": "**增强**：为顺序浇水计划添加了可配置的阀门顺序"
       }
     },
     "titleLang": {
