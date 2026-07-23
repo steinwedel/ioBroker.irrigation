@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.2.33 (2026-07-23)
 * (Gerhard Steinwedel) **FIXED**: Restored the unified watering duration in the valve table
 
 ## 0.2.32 (2026-07-23)

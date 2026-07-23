@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.2.32",
+    "version": "0.2.33",
     "news": {
+      "0.2.33": {
+        "en": "**FIXED**: Restored the unified watering duration in the valve table",
+        "de": "**BEHOBEN**: Die einheitliche Bewässerungsdauer in der Ventiltabelle wurde wiederhergestellt",
+        "ru": "**ИСПРАВЛЕНО**: Восстановлена единая продолжительность полива в таблице клапанов",
+        "pt": "**CORRIGIDO**: Restaurada a duração unificada de rega na tabela de válvulas",
+        "nl": "**OPGELOST**: De uniforme bewateringsduur in de klepptabel is hersteld",
+        "fr": "**CORRIGÉ**: Restauration de la durée d'arrosage unifiée dans le tableau des vannes",
+        "it": "**RISOLTO**: Ripristinata la durata unificata dell'irrigazione nella tabella delle valvole",
+        "es": "**SOLUCIONADO**: Restaurada la duración unificada de riego en la tabla de válvulas",
+        "pl": "**NAPRAWIONO**: Przywrócono ujednolicony czas podlewania w tabeli zaworów",
+        "uk": "**ВИПРАВЛЕНО**: Відновлено уніфіковану тривалість поливу в таблиці клапанів",
+        "zh-cn": "**已修复**：恢复了阀门表中的统一浇水持续时间"
+      },
       "0.2.32": {
         "en": "**ENHANCED**: Unified direct and planned valve watering duration",
         "de": "**VERBESSERT**: Einheitliche Bewässerungsdauer für direkte und geplante Ventilbewässerung",
@@ -80,19 +93,6 @@
         "pl": "**NOWOŚĆ**: Dodano możliwość wyboru bezpośredniego uruchamiania planów przez stany ioBroker",
         "uk": "**НОВЕ**: Додано можливість вибору прямого запуску планів через стани ioBroker",
         "zh-cn": "**新功能**：通过 ioBroker 状态添加了可选择的直接计划启动"
-      },
-      "0.2.26": {
-        "en": "**ENHANCED**: Disabled and cleared restriction end date/time until their start values are configured",
-        "de": "**VERBESSERT**: Enddatum/-zeit der Einschränkung deaktiviert und gelöscht, bis die Startwerte konfiguriert sind",
-        "ru": "**УЛУЧШЕНО**: Дата/время окончания ограничения отключены и очищены до тех пор, пока не будут настроены их начальные значения",
-        "pt": "**MELHORADO**: Data/hora de término da restrição desativadas e limpas até que seus valores de início sejam configurados",
-        "nl": "**VERBETERD**: Einddatum/-tijd van beperking uitgeschakeld en gewist totdat hun startwaarden zijn geconfigureerd",
-        "fr": "**AMÉLIORÉ**: Date/heure de fin de restriction désactivées et effacées jusqu'à ce que leurs valeurs de début soient configurées",
-        "it": "**MIGLIORATO**: Data/ora di fine restrizione disabilitate e cancellate finché non vengono configurati i relativi valori di inizio",
-        "es": "**MEJORADO**: Fecha/hora de finalización de restricción deshabilitadas y borradas hasta que se configuren sus valores de inicio",
-        "pl": "**ULEPSZONE**: Data/godzina zakończenia ograniczenia wyłączone i wyczyszczone do momentu skonfigurowania ich wartości początkowych",
-        "uk": "**ПОКРАЩЕНО**: Дата/час завершення обмеження вимкнено та очищено, доки не буде налаштовано їхні початкові значення",
-        "zh-cn": "**增强**：限制结束日期/时间已禁用并清除，直到配置其开始值为止"
       }
     },
     "titleLang": {
