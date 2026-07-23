@@ -1,5 +1,6 @@
 # Changelog
 ## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **ENHANCED**: Renamed plan valve table column header from "Execution order" to "Number" with localized translations for all supported languages
 
 ## 0.2.35 (2026-07-23)
 * (Gerhard Steinwedel) **FIXED**: Added a compatible visible sequential execution-order column to the plan valve table
