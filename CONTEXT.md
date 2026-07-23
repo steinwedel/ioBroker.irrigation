@@ -1,11 +1,11 @@
 # Context
 
 ## Current Task
-Die Ventilreihenfolge wird pro Plan zuverlässig gespeichert und sofort zurückgeladen.
+Planventile werden über dedizierte Pfeil-Schaltflächen dauerhaft sortiert.
 
 ## Key Decisions
-- Die temporäre Tabelle verwendet ein reaktives `_planValveTable`-Feld.
-- Nach dem Anwenden liefert der Adapter die gespeicherte Reihenfolge erneut an die Tabelle.
+- Die Tabelle hat keine Add/Delete-Aktionen, weil alle Ventile angezeigt werden.
+- Jede Verschiebeaktion speichert und lädt die Planreihenfolge sofort neu.
 
 ## Next Steps
-- Validierung ausführen.
+- Übersetzungen und Validierung ausführen.

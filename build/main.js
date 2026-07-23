@@ -568,19 +568,26 @@ class Irrigation extends utils.Adapter {
   async writeValvesToNative(valves) {
     await this.writeNativeAsync({ valves });
   }
-  getPlanValveTable(planIndex) {
+  getPlanValveIndexes(planIndex) {
     var _a;
     const plan = planIndex !== void 0 && planIndex >= 0 && planIndex < this.config2.plans.length ? this.config2.plans[planIndex] : void 0;
     const allValveIndexes = this.config2.valves.map((_, index) => index);
-    const assignedIndexes = plan && plan.valveIndexes.length === 0 ? allValveIndexes : ((_a = plan == null ? void 0 : plan.valveIndexes) != null ? _a : []).filter((index) => index >= 0 && index < this.config2.valves.length);
+    return plan && plan.valveIndexes.length === 0 ? allValveIndexes : ((_a = plan == null ? void 0 : plan.valveIndexes) != null ? _a : []).filter((index) => index >= 0 && index < this.config2.valves.length);
+  }
+  getPlanValveTable(planIndex) {
+    const allValveIndexes = this.config2.valves.map((_, index) => index);
+    const assignedIndexes = this.getPlanValveIndexes(planIndex);
     const assignedSet = new Set(assignedIndexes);
     const orderedIndexes = [...assignedIndexes, ...allValveIndexes.filter((index) => !assignedSet.has(index))];
-    return orderedIndexes.map((index, executionOrder) => ({
-      valveNumber: (0, import_types.formatValveNumber)(index),
-      name: this.config2.valves[index].name || "unnamed",
-      assigned: assignedSet.has(index),
-      executionOrder: executionOrder + 1
-    }));
+    return orderedIndexes.map((index, executionOrder) => {
+      const assigned = assignedSet.has(index);
+      return {
+        valveNumber: (0, import_types.formatValveNumber)(index),
+        name: this.config2.valves[index].name || "unnamed",
+        assigned,
+        executionOrder: assigned ? executionOrder + 1 : 0
+      };
+    });
   }
   async onMessage(obj) {
     var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
@@ -696,6 +703,15 @@ class Irrigation extends utils.Adapter {
       this.sendTo(obj.from, obj.command, options, obj.callback);
       return;
     }
+    if (obj.command === "listPlanValves" && obj.callback) {
+      const planIndex = readPlanIndex(obj.message);
+      const options = this.getPlanValveIndexes(planIndex).map((valveIndex, executionOrder) => ({
+        label: `${executionOrder + 1}. ${this.config2.valves[valveIndex].name || `Valve ${valveIndex + 1}`}`,
+        value: valveIndex
+      }));
+      this.sendTo(obj.from, obj.command, options, obj.callback);
+      return;
+    }
     if (obj.command === "listDwdStations" && obj.callback) {
       this.sendTo(
         obj.from,
@@ -770,6 +786,35 @@ class Irrigation extends utils.Adapter {
         obj.from,
         obj.command,
         { native: { plans: updatedPlans, _editPlan: nextSelectedIndex } },
+        obj.callback
+      );
+      return;
+    }
+    if (obj.command === "movePlanValve" && obj.callback) {
+      const message = obj.message;
+      const planIndex = readPlanIndex(message);
+      const valveIndex = typeof message.valveIndex === "number" ? message.valveIndex : Number(message.valveIndex);
+      const direction = message.direction;
+      if (planIndex === void 0 || planIndex < 0 || planIndex >= this.config2.plans.length || !Number.isInteger(valveIndex) || direction !== "up" && direction !== "down") {
+        this.sendTo(obj.from, obj.command, { error: "noSelection" }, obj.callback);
+        return;
+      }
+      const valveIndexes = this.getPlanValveIndexes(planIndex);
+      const currentIndex = valveIndexes.indexOf(valveIndex);
+      const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+      if (currentIndex < 0 || targetIndex < 0 || targetIndex >= valveIndexes.length) {
+        this.sendTo(obj.from, obj.command, { native: { _planValveTable: this.getPlanValveTable(planIndex) } }, obj.callback);
+        return;
+      }
+      [valveIndexes[currentIndex], valveIndexes[targetIndex]] = [valveIndexes[targetIndex], valveIndexes[currentIndex]];
+      const updatedPlans = this.config2.plans.map(
+        (plan, index) => index === planIndex ? { ...plan, valveIndexes } : plan
+      );
+      await this.writePlansState(updatedPlans);
+      this.sendTo(
+        obj.from,
+        obj.command,
+        { native: { plans: updatedPlans, _planValveTable: this.getPlanValveTable(planIndex) } },
         obj.callback
       );
       return;

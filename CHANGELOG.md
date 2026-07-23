@@ -1,4 +1,7 @@
 # Changelog
+## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **FIXED**: Added dedicated persistent move controls for ordered plan valves
+
 ## 0.2.39 (2026-07-23)
 * (Gerhard Steinwedel) **FIXED**: Persisted and reloaded the valve order of each plan reliably
 

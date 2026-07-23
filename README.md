@@ -114,7 +114,7 @@ Plans group zones by tags for combined watering runs. When a plan is triggered, 
 
 The built-in default plan **"Alle"** (all zones) has empty groups and therefore always waters every enabled zone. Use the single **Plan name** field to enter a name, then select **Add new plan** or **Rename selected plan** and confirm the dialog. Plan names must be unique.
 
-For sequential operation (`Pump capacity` = `0`), open **Valve assignment** for a plan. The read-only **Execution order** column shows the running position in which the valves are processed. Use the table's up/down arrow buttons, then click **Apply valve assignment**. The updated, persisted order is loaded back into the table immediately. With parallel batching enabled, valves are grouped by pump capacity and duration instead, so the configured order is not guaranteed.
+For sequential operation (`Pump capacity` = `0`), open **Valve assignment** for a plan and apply its selected valves. The read-only **Number** column shows the execution position (`0` means not assigned to the plan). Select an assigned valve in **Valve to move** and use **Move valve up** or **Move valve down**; each action immediately persists and reloads the order. The table has no add/delete buttons because it always shows every configured valve. With parallel batching enabled, valves are grouped by pump capacity and duration instead, so the configured order is not guaranteed.
 
 **Example:** Zone "Rasen vorne" has groups `Lawn`, Zone "Hecke" has groups `Hedge`, Zone "Beet" has groups `Beds,Lawn`. A plan with groups `Lawn` would water "Rasen vorne" and "Beet" but not "Hecke".
 

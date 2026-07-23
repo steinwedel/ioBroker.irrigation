@@ -651,29 +651,36 @@ class Irrigation extends utils.Adapter {
         await this.writeNativeAsync({ valves });
     }
 
+    private getPlanValveIndexes(planIndex: number | undefined): number[] {
+        const plan =
+            planIndex !== undefined && planIndex >= 0 && planIndex < this.config2.plans.length
+                ? this.config2.plans[planIndex]
+                : undefined;
+        const allValveIndexes = this.config2.valves.map((_, index) => index);
+        return plan && plan.valveIndexes.length === 0
+            ? allValveIndexes
+            : (plan?.valveIndexes ?? []).filter(index => index >= 0 && index < this.config2.valves.length);
+    }
+
     private getPlanValveTable(planIndex: number | undefined): Array<{
         valveNumber: string;
         name: string;
         assigned: boolean;
         executionOrder: number;
     }> {
-        const plan =
-            planIndex !== undefined && planIndex >= 0 && planIndex < this.config2.plans.length
-                ? this.config2.plans[planIndex]
-                : undefined;
         const allValveIndexes = this.config2.valves.map((_, index) => index);
-        const assignedIndexes =
-            plan && plan.valveIndexes.length === 0
-                ? allValveIndexes
-                : (plan?.valveIndexes ?? []).filter(index => index >= 0 && index < this.config2.valves.length);
+        const assignedIndexes = this.getPlanValveIndexes(planIndex);
         const assignedSet = new Set(assignedIndexes);
         const orderedIndexes = [...assignedIndexes, ...allValveIndexes.filter(index => !assignedSet.has(index))];
-        return orderedIndexes.map((index, executionOrder) => ({
-            valveNumber: formatValveNumber(index),
-            name: this.config2.valves[index].name || 'unnamed',
-            assigned: assignedSet.has(index),
-            executionOrder: executionOrder + 1,
-        }));
+        return orderedIndexes.map((index, executionOrder) => {
+            const assigned = assignedSet.has(index);
+            return {
+                valveNumber: formatValveNumber(index),
+                name: this.config2.valves[index].name || 'unnamed',
+                assigned,
+                executionOrder: assigned ? executionOrder + 1 : 0,
+            };
+        });
     }
 
     private async onMessage(obj: ioBroker.Message): Promise<void> {
@@ -822,6 +829,16 @@ class Irrigation extends utils.Adapter {
             return;
         }
 
+        if (obj.command === 'listPlanValves' && obj.callback) {
+            const planIndex = readPlanIndex(obj.message);
+            const options = this.getPlanValveIndexes(planIndex).map((valveIndex, executionOrder) => ({
+                label: `${executionOrder + 1}. ${this.config2.valves[valveIndex].name || `Valve ${valveIndex + 1}`}`,
+                value: valveIndex,
+            }));
+            this.sendTo(obj.from, obj.command, options, obj.callback);
+            return;
+        }
+
         if (obj.command === 'listDwdStations' && obj.callback) {
             this.sendTo(
                 obj.from,
@@ -926,6 +943,50 @@ class Irrigation extends utils.Adapter {
                 obj.from,
                 obj.command,
                 { native: { plans: updatedPlans, _editPlan: nextSelectedIndex } },
+                obj.callback,
+            );
+            return;
+        }
+
+        if (obj.command === 'movePlanValve' && obj.callback) {
+            const message = obj.message as Record<string, unknown>;
+            const planIndex = readPlanIndex(message);
+            const valveIndex = typeof message.valveIndex === 'number' ? message.valveIndex : Number(message.valveIndex);
+            const direction = message.direction;
+            if (
+                planIndex === undefined ||
+                planIndex < 0 ||
+                planIndex >= this.config2.plans.length ||
+                !Number.isInteger(valveIndex) ||
+                (direction !== 'up' && direction !== 'down')
+            ) {
+                this.sendTo(obj.from, obj.command, { error: 'noSelection' }, obj.callback);
+                return;
+            }
+            const valveIndexes = this.getPlanValveIndexes(planIndex);
+            const currentIndex = valveIndexes.indexOf(valveIndex);
+            const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+            if (currentIndex < 0 || targetIndex < 0 || targetIndex >= valveIndexes.length) {
+                this.sendTo(
+                    obj.from,
+                    obj.command,
+                    { native: { _planValveTable: this.getPlanValveTable(planIndex) } },
+                    obj.callback,
+                );
+                return;
+            }
+            [valveIndexes[currentIndex], valveIndexes[targetIndex]] = [
+                valveIndexes[targetIndex],
+                valveIndexes[currentIndex],
+            ];
+            const updatedPlans = this.config2.plans.map((plan, index) =>
+                index === planIndex ? { ...plan, valveIndexes } : plan,
+            );
+            await this.writePlansState(updatedPlans);
+            this.sendTo(
+                obj.from,
+                obj.command,
+                { native: { plans: updatedPlans, _planValveTable: this.getPlanValveTable(planIndex) } },
                 obj.callback,
             );
             return;
