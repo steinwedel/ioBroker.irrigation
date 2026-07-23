@@ -91,21 +91,22 @@ function normalizeConfig(config) {
   return {
     expertMode: (_m = config.expertMode) != null ? _m : DEFAULT_CONFIG.expertMode,
     valves: ((_n = config.valves) != null ? _n : []).map((valve) => {
-      var _a2, _b2, _c2, _d2, _e2, _f2, _g2, _h2, _i2, _j2, _k2, _l2, _m2;
+      var _a2, _b2, _c2, _d2, _e2, _f2, _g2, _h2, _i2, _j2, _k2;
+      const legacyRunFor = valve.runFor;
+      const duration = (_a2 = valve.duration) != null ? _a2 : legacyRunFor !== void 0 ? legacyRunFor / 60 : 10;
       return {
-        name: (_a2 = valve.name) != null ? _a2 : "",
-        type: (_b2 = valve.type) != null ? _b2 : "Generic",
-        stateId: (_c2 = valve.stateId) != null ? _c2 : "",
+        name: (_b2 = valve.name) != null ? _b2 : "",
+        type: (_c2 = valve.type) != null ? _c2 : "Generic",
+        stateId: (_d2 = valve.stateId) != null ? _d2 : "",
         allOffId: valve.allOffId,
-        runFor: (_d2 = valve.runFor) != null ? _d2 : 600,
         enabled: (_e2 = valve.enabled) != null ? _e2 : true,
         flowRateLpm: (_f2 = valve.flowRateLpm) != null ? _f2 : 0,
-        duration: (_g2 = valve.duration) != null ? _g2 : 10,
-        rainIndependent: (_h2 = valve.rainIndependent) != null ? _h2 : false,
-        moistureThreshold: (_i2 = valve.moistureThreshold) != null ? _i2 : 0,
-        manualDuration: (_k2 = (_j2 = valve.manualDuration) != null ? _j2 : valve.duration) != null ? _k2 : 10,
-        flowSensorId: (_l2 = valve.flowSensorId) != null ? _l2 : "",
-        days: (_m2 = valve.days) != null ? _m2 : []
+        duration,
+        rainIndependent: (_g2 = valve.rainIndependent) != null ? _g2 : false,
+        moistureThreshold: (_h2 = valve.moistureThreshold) != null ? _h2 : 0,
+        manualDuration: (_i2 = valve.manualDuration) != null ? _i2 : duration,
+        flowSensorId: (_j2 = valve.flowSensorId) != null ? _j2 : "",
+        days: (_k2 = valve.days) != null ? _k2 : []
       };
     }),
     plans: config.plans && config.plans.length > 0 ? config.plans.map((p) => {

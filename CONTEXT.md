@@ -1,11 +1,11 @@
 # Context
 
 ## Current Task
-Die Ventilreihenfolge eines Plans wird über native Tabellenpfeile konfiguriert.
+Direkte und geplante Ventilstarts verwenden dieselbe Bewässerungsdauer.
 
 ## Key Decisions
-- `noDelete: false` aktiviert die Hoch-/Runter-Pfeile der JSONConfig-Tabelle.
-- Bei Pumpenkapazität 0 wird die gespeicherte Zeilenreihenfolge ausgeführt.
+- `duration` in Minuten ersetzt den alten separaten `runFor`-Wert.
+- Bestehende `runFor`-Konfigurationen werden beim Start migriert und entfernt.
 
 ## Next Steps
-- Übersetzungen und Validierung ausführen.
+- Validierung ausführen.

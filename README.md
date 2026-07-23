@@ -258,21 +258,20 @@ All IDs below are relative to the adapter instance, e.g. `<instance>` is normall
 
 #### `valves.valve_NNN` (one channel per configured valve)
 
-`NNN` is a zero-based, three-digit index, e.g. `valves.valve_000`. Configuration-derived states are mirrored at startup. Use `state`, `runFor`, `manualStart`, and `manualDuration` for operational control; edit the adapter configuration for durable configuration changes.
+`NNN` is a zero-based, three-digit index, e.g. `valves.valve_000`. Configuration-derived states are mirrored at startup. Use `state`, `duration`, `manualStart`, and `manualDuration` for operational control; edit the adapter configuration for durable configuration changes.
 
 | Suffix | Type / access | Meaning and use |
 |---|---|---|
 | `.name` | string, R/W | Display name of the valve. |
 | `.type`, `.stateId`, `.allOffId` | string, R | Configured valve type, underlying adapter state, and optional Rainbird all-off command state. |
-| `.state` | boolean, R/W | Direct valve control. Write `true` to run for `.runFor` seconds; write `false` to stop. It also reports actual valve activity. |
-| `.runFor` | number, seconds, R/W | Duration used by a direct `.state=true` command. |
+| `.state` | boolean, R/W | Direct valve control. Write `true` to run for `.duration` minutes; write `false` to stop. It also reports actual valve activity. |
 | `.remainingTime` | number, seconds, R | Remaining runtime of the valve. |
 | `.timestampStart` | number, Unix milliseconds, R | Start timestamp of the most recent/active valve run. |
 | `.online` | boolean, R | Reachability indicator, initially `true`. |
 | `.errorLast` | string, R | Most recent start or stop error; cleared after a successful start. |
 | `.enabled` | boolean, R/W | Configured enabled flag used for automatic plans. |
 | `.flowRateLpm` | number, `l/min`, R | Configured flow rate used for batching and water-consumption calculation. |
-| `.duration` | number, `min`, R/W | Planned automatic watering duration before applying `extensionFactor`. |
+| `.duration` | number, `min`, R/W | Unified valve watering duration. It is used by automatic plans before applying adjustment factors and by direct `.state=true` starts. |
 | `.rainIndependent` | boolean, R/W | When `true`, rain detection does not skip this valve. |
 | `.moistureThreshold` | number, `%`, R/W | Automatic watering is skipped when configured soil moisture is at or above this threshold; `0` disables the condition. |
 | `.manualStart` | boolean button, R/W | Write `true` to start this valve for `.manualDuration` minutes. Resets to `false`. |

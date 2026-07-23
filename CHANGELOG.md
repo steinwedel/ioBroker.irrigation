@@ -1,4 +1,7 @@
 # Changelog
+## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **ENHANCED**: Unified direct and planned valve watering duration
+
 ## 0.2.31 (2026-07-23)
 * (Gerhard Steinwedel) **FIXED**: Enabled native table arrow buttons to order sequential plan valves
 

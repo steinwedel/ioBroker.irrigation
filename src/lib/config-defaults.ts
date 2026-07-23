@@ -87,21 +87,25 @@ export function normalizeConfig(config: Partial<IrrigationNativeConfig>): Irriga
 
     return {
         expertMode: config.expertMode ?? DEFAULT_CONFIG.expertMode,
-        valves: (config.valves ?? []).map(valve => ({
-            name: valve.name ?? '',
-            type: valve.type ?? 'Generic',
-            stateId: valve.stateId ?? '',
-            allOffId: valve.allOffId,
-            runFor: valve.runFor ?? 600,
-            enabled: valve.enabled ?? true,
-            flowRateLpm: valve.flowRateLpm ?? 0,
-            duration: valve.duration ?? 10,
-            rainIndependent: valve.rainIndependent ?? false,
-            moistureThreshold: valve.moistureThreshold ?? 0,
-            manualDuration: valve.manualDuration ?? valve.duration ?? 10,
-            flowSensorId: valve.flowSensorId ?? '',
-            days: valve.days ?? [],
-        })),
+        valves: (config.valves ?? []).map(valve => {
+            const legacyRunFor = (valve as Partial<IrrigationNativeConfig['valves'][number]> & { runFor?: number })
+                .runFor;
+            const duration = valve.duration ?? (legacyRunFor !== undefined ? legacyRunFor / 60 : 10);
+            return {
+                name: valve.name ?? '',
+                type: valve.type ?? 'Generic',
+                stateId: valve.stateId ?? '',
+                allOffId: valve.allOffId,
+                enabled: valve.enabled ?? true,
+                flowRateLpm: valve.flowRateLpm ?? 0,
+                duration,
+                rainIndependent: valve.rainIndependent ?? false,
+                moistureThreshold: valve.moistureThreshold ?? 0,
+                manualDuration: valve.manualDuration ?? duration,
+                flowSensorId: valve.flowSensorId ?? '',
+                days: valve.days ?? [],
+            };
+        }),
         plans:
             config.plans && config.plans.length > 0
                 ? config.plans.map(p => ({ name: p.name ?? '', valveIndexes: p.valveIndexes ?? [] }))

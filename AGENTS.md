@@ -37,7 +37,6 @@ irrigation.0
 │   │   ├── enabled          (boolean, ack=true)
 │   │   ├── duration         (number, ack=true)
 │   │   ├── remainingTime    (number, ack=true)
-│   │   ├── runFor           (number, ack=true)
 │   │   ├── flowRateLpm      (number, ack=true)
 │   │   ├── manualStart      (boolean, ack=false button)
 │   │   ├── calibrateFlow    (boolean, ack=false button)

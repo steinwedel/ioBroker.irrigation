@@ -152,9 +152,9 @@ class Irrigation extends utils.Adapter {
         // Subscribe to all our own automation/zone/valve control states
         this.subscribeStates('automation.*');
         this.subscribeStates('valves.*.manualStart');
+        this.subscribeStates('valves.*.duration');
         this.subscribeStates('watchdog.testNotify');
         this.subscribeStates('valves.*.state');
-        this.subscribeStates('valves.*.runFor');
 
         await this.setStateAsync('info.connection', { val: true, ack: true });
 
@@ -162,7 +162,7 @@ class Irrigation extends utils.Adapter {
     }
 
     /**
-     * Persists newly introduced/normalized config fields (e.g. IValveConfig.runFor)
+     * Persists newly introduced or migrated valve config fields.
      * plus a display-only "valveNumber" (e.g. "valve_2") back into `native` so the
      * admin config table shows real, editable/readable values for existing entries
      * instead of blanks. Only writes when something actually changed, since
@@ -175,10 +175,10 @@ class Irrigation extends utils.Adapter {
             valveNumber: `valve_${formatValveNumber(index)}`,
         }));
         const needsValveMigration =
-            rawValves.length !== migratedValves.length || rawValves.some(raw => !raw.valveNumber);
+            rawValves.length !== migratedValves.length || rawValves.some(raw => !raw.valveNumber || 'runFor' in raw);
 
         if (needsValveMigration) {
-            this.log.info('Migrating native.valves to include newly introduced fields (runFor, valveNumber).');
+            this.log.info('Migrating native.valves to remove runFor and include valveNumber.');
             await this.writeNativeAsync({ valves: migratedValves });
         }
     }

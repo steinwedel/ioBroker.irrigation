@@ -230,7 +230,6 @@ async function scanGardena(adapter: ioBroker.Adapter, instance: string, location
                     type: 'Gardena',
                     stateId: id,
                     allOffId: stopLookup.has(stopId) ? stopId : undefined,
-                    runFor: 600,
                     ...VALVE_DEFAULTS,
                 });
             });
@@ -350,7 +349,6 @@ async function scanHomematic(adapter: ioBroker.Adapter, instance?: string): Prom
                 name: nameToString(memberObj?.common?.name, memberId),
                 type: 'Homematic',
                 stateId: memberId,
-                runFor: 600,
                 ...VALVE_DEFAULTS,
             });
         });
@@ -389,7 +387,6 @@ async function scanRainbird(adapter: ioBroker.Adapter, instance: string): Promis
                     type: 'Rainbird',
                     stateId: basePath,
                     allOffId: stopExists ? stopId : undefined,
-                    runFor: 600,
                     ...VALVE_DEFAULTS,
                 });
             }
@@ -417,7 +414,6 @@ async function scanHydrawise(adapter: ioBroker.Adapter, instance: string): Promi
                     name: nameToString(zoneObjects[index]?.common?.name, basePath),
                     type: 'Hydrawise',
                     stateId: id,
-                    runFor: 600,
                     ...VALVE_DEFAULTS,
                 });
             });
@@ -497,7 +493,6 @@ async function scanGeneric(adapter: ioBroker.Adapter, instance?: string): Promis
                 name: nameToString(memberObj?.common?.name, memberId),
                 type: 'Generic',
                 stateId,
-                runFor: 600,
                 ...VALVE_DEFAULTS,
             });
         });

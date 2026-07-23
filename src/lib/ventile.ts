@@ -90,8 +90,6 @@ export class ValveController {
     private startedAt = 0;
     private durationSecs = 0;
     private remainingSecs = 0;
-    /** Duration used when the valve is started manually via the "state" mirror state */
-    private manualRunForSecs: number;
     /**
      * Counts "state" echoes written by setRunningState() that this instance
      * is still expecting to see come back through onOwnStateChange(). Used
@@ -146,7 +144,6 @@ export class ValveController {
         this.config = config;
         this.rateLimiter = rateLimiter;
         this.getAllValves = getAllValves ?? (() => [this]);
-        this.manualRunForSecs = config.runFor;
     }
 
     public get id(): string {
@@ -209,16 +206,7 @@ export class ValveController {
         // Migration: "state" used to be read-only (write: false). setObjectNotExistsAsync
         // above does not update existing objects, so force the permission change here.
         await this.adapter.extendObjectAsync(`${this.id}.state`, { common: { write: true } });
-        await this.ensureState('runFor', {
-            name: 'Duration for manual start via "state" (seconds)',
-            type: 'number',
-            role: 'level.timer',
-            unit: 's',
-            read: true,
-            write: true,
-            min: 1,
-            def: this.config.runFor,
-        });
+        await this.adapter.delObjectAsync(`${this.id}.runFor`).catch(() => undefined);
         await this.ensureState('remainingTime', {
             name: 'Remaining time (seconds)',
             type: 'number',
@@ -360,7 +348,6 @@ export class ValveController {
         await this.adapter.setStateAsync(`${this.id}.type`, { val: this.config.type, ack: true });
         await this.adapter.setStateAsync(`${this.id}.stateId`, { val: this.config.stateId, ack: true });
         await this.adapter.setStateAsync(`${this.id}.allOffId`, { val: this.config.allOffId ?? '', ack: true });
-        await this.adapter.setStateAsync(`${this.id}.runFor`, { val: this.config.runFor, ack: true });
         await this.adapter.setStateAsync(`${this.id}.enabled`, { val: this.config.enabled, ack: true });
         await this.adapter.setStateAsync(`${this.id}.flowRateLpm`, { val: this.config.flowRateLpm, ack: true });
         await this.adapter.setStateAsync(`${this.id}.duration`, { val: this.config.duration, ack: true });
@@ -501,7 +488,7 @@ export class ValveController {
      * this adapter). These types have no device-internal timer/remaining-time
      * feedback, so if we detect an external "on" while we were not already
      * tracking a run, we must start our own countdown here too: default to
-     * "runFor" seconds, arm the adapter-owned auto-stop, and tick down
+     * the configured duration, arm the adapter-owned auto-stop, and tick down
      * remainingTime, exactly like a start() triggered from within the adapter.
      *
      * @param hardwareOn
@@ -515,11 +502,12 @@ export class ValveController {
                 return;
             }
             this.clearTickTimer();
-            this.durationSecs = this.manualRunForSecs;
-            this.remainingSecs = this.manualRunForSecs;
+            const durationSecs = Math.round(this.config.duration * 60);
+            this.durationSecs = durationSecs;
+            this.remainingSecs = durationSecs;
             this.startedAt = Date.now();
             this.scheduleTick();
-            await this.setRunningState(true, this.manualRunForSecs);
+            await this.setRunningState(true, durationSecs);
             await this.adapter.setStateAsync(`${this.id}.timestampStart`, { val: this.startedAt, ack: true });
         } else {
             this.clearTickTimer();
@@ -530,7 +518,7 @@ export class ValveController {
 
     /**
      * Handles a command on one of this valve's own states, i.e. a manual
-     * start/stop via the "state" mirror state, or an update of the "runFor"
+     * start/stop via the "state" mirror state, or an update of the duration
      * manual-start duration. Returns true if the change was consumed (belongs
      * to this valve).
      *
@@ -602,10 +590,10 @@ export class ValveController {
         if (state.ack) {
             return false;
         }
-        if (id === `${this.id}.runFor`) {
-            const seconds = typeof state.val === 'number' ? state.val : this.manualRunForSecs;
-            this.manualRunForSecs = Math.max(1, Math.round(seconds));
-            await this.adapter.setStateAsync(id, { val: this.manualRunForSecs, ack: true });
+        if (id === `${this.id}.duration`) {
+            const duration = typeof state.val === 'number' ? state.val : this.config.duration;
+            this.config.duration = Math.max(1, duration);
+            await this.adapter.setStateAsync(id, { val: this.config.duration, ack: true });
             return true;
         }
         return false;
@@ -632,7 +620,7 @@ export class ValveController {
      * For Homematic/Generic the adapter must schedule the stop itself and
      * count down remainingTime every second.
      *
-     * @param durationSecs Duration in seconds. Defaults to the "runFor" state when omitted.
+     * @param durationSecs Duration in seconds. Defaults to the configured duration when omitted.
      */
     public async start(durationSecs?: number): Promise<void> {
         if (!this.config.enabled) {
@@ -640,7 +628,7 @@ export class ValveController {
         }
         this.clearTickTimer();
         const effectiveDurationSecs =
-            typeof durationSecs === 'number' && durationSecs > 0 ? durationSecs : this.manualRunForSecs;
+            typeof durationSecs === 'number' && durationSecs > 0 ? durationSecs : Math.round(this.config.duration * 60);
         this.durationSecs = effectiveDurationSecs;
         this.remainingSecs = effectiveDurationSecs;
         this.startedAt = Date.now();

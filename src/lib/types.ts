@@ -65,8 +65,6 @@ export interface IValveConfig {
     stateId: string;
     /** Only used for Gardena (stop_all_valves_i) and Rainbird (stopIrrigation) */
     allOffId?: string;
-    /** Duration in seconds used when this valve is started manually via the "state" mirror state */
-    runFor: number;
     /** Only an enabled valve can be started/stopped */
     enabled: boolean;
     /** Flow rate in liters per minute for water consumption calculation (0 = disabled) */

@@ -18,7 +18,6 @@ function makeValve(overrides: Partial<IValveConfig> = {}): IValveConfig {
         name: 'Valve',
         type: 'Generic',
         stateId: '',
-        runFor: 600,
         enabled: true,
         flowRateLpm: 0,
         duration: 10,

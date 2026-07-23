@@ -154,7 +154,6 @@ async function scanGardena(adapter, instance, locationId) {
           type: "Gardena",
           stateId: id,
           allOffId: stopLookup.has(stopId) ? stopId : void 0,
-          runFor: 600,
           ...VALVE_DEFAULTS
         });
       });
@@ -235,7 +234,6 @@ async function scanHomematic(adapter, instance) {
         name: nameToString((_b2 = memberObj == null ? void 0 : memberObj.common) == null ? void 0 : _b2.name, memberId),
         type: "Homematic",
         stateId: memberId,
-        runFor: 600,
         ...VALVE_DEFAULTS
       });
     });
@@ -265,7 +263,6 @@ async function scanRainbird(adapter, instance) {
           type: "Rainbird",
           stateId: basePath,
           allOffId: stopExists ? stopId : void 0,
-          runFor: 600,
           ...VALVE_DEFAULTS
         });
       }
@@ -293,7 +290,6 @@ async function scanHydrawise(adapter, instance) {
           name: nameToString((_b = (_a = zoneObjects[index]) == null ? void 0 : _a.common) == null ? void 0 : _b.name, basePath),
           type: "Hydrawise",
           stateId: id,
-          runFor: 600,
           ...VALVE_DEFAULTS
         });
       });
@@ -347,7 +343,6 @@ async function scanGeneric(adapter, instance) {
         name: nameToString((_a2 = memberObj == null ? void 0 : memberObj.common) == null ? void 0 : _a2.name, memberId),
         type: "Generic",
         stateId,
-        runFor: 600,
         ...VALVE_DEFAULTS
       });
     });
