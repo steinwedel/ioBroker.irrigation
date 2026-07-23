@@ -1,4 +1,7 @@
 # Changelog
+## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **FIXED**: Updated plan execution numbers immediately after moving table rows
+
 ## 0.2.42 (2026-07-23)
 * (Gerhard Steinwedel) **FIXED**: Refreshed valve names from the object tree during scans and corrected plan numbering
 

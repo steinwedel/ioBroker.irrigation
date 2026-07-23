@@ -394,12 +394,12 @@
                     "lg": 8,
                     "items": [
                         {
-                            "type": "number",
-                            "attr": "executionOrder",
+                            "type": "staticText",
+                            "attr": "_rowPosition",
                             "title": "Number",
-                            "width": "10%",
-                            "readOnly": true,
-                            "sort": true
+                            "text": "${arrayIndex + 1}",
+                            "noTranslation": true,
+                            "width": "10%"
                         },
                         {
                             "type": "checkbox",

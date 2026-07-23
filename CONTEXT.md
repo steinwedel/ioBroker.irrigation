@@ -1,11 +1,11 @@
 # Context
 
 ## Current Task
-Ventilnamen werden beim Scan aus dem Objektbaum aktualisiert; Plannummern sind fortlaufend.
+Die Nummerierung der Planventile aktualisiert sich unmittelbar nach dem Verschieben.
 
 ## Key Decisions
+- Die Nummer wird dynamisch aus der aktuellen Tabellenposition berechnet.
 - Bereits bekannte Ventile erhalten den erkannten Objektbaum-Namen beim Scan.
-- Die Nummernspalte zeigt die einbasierte Tabellenposition aller Ventile.
 
 ## Next Steps
 - Validierung ausführen.
