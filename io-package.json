@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.2.38",
+    "version": "0.2.39",
     "news": {
+      "0.2.39": {
+        "en": "**FIXED**: Persisted and reloaded the valve order of each plan reliably",
+        "de": "**BEHOBEN**: Die Ventilreihenfolge jedes Plans wird nun zuverlässig gespeichert und neu geladen",
+        "ru": "**ИСПРАВЛЕНО**: Порядок клапанов каждого плана теперь надежно сохраняется и перезагружается",
+        "pt": "**CORRIGIDO**: A ordem das válvulas de cada plano é agora persistida e recarregada de forma confiável",
+        "nl": "**OPGELOST**: De volgorde van de kleppen van elk plan wordt nu betrouwbaar opgeslagen en herladen",
+        "fr": "**CORRIGÉ**: L'ordre des vannes de chaque plan est désormais enregistré et rechargé de manière fiable",
+        "it": "**RISOLTO**: L'ordine delle valvole di ogni piano viene ora salvato e ricaricato in modo affidabile",
+        "es": "**SOLUCIONADO**: El orden de las válvulas de cada plan se guarda y recarga de forma fiable",
+        "pl": "**NAPRAWIONO**: Kolejność zaworów każdego planu jest teraz niezawodnie zapisywana i wczytywana",
+        "uk": "**ВИПРАВЛЕНО**: Порядок клапанів кожного плану тепер надійно зберігається та перезавантажується",
+        "zh-cn": "**已修复**: 现在可靠地保存和重新加载每个计划的阀门顺序"
+      },
       "0.2.38": {
         "en": "**ENHANCED**: Combined plan creation and renaming into one plan-name input",
         "de": "**VERBESSERT**: Planerstellung und Umbenennung in einem Plannamens-Eingabefeld kombiniert",
@@ -80,19 +93,6 @@
         "pl": "**NAPRAWIONO**: Przywrócono ujednolicony czas podlewania w tabeli zaworów",
         "uk": "**ВИПРАВЛЕНО**: Відновлено уніфіковану тривалість поливу в таблиці клапанів",
         "zh-cn": "**已修复**：恢复了阀门表中的统一浇水持续时间"
-      },
-      "0.2.32": {
-        "en": "**ENHANCED**: Unified direct and planned valve watering duration",
-        "de": "**VERBESSERT**: Einheitliche Bewässerungsdauer für direkte und geplante Ventilbewässerung",
-        "ru": "**УЛУЧШЕНО**: Унифицированная продолжительность полива для прямого и запланированного управления клапанами",
-        "pt": "**MELHORADO**: Duração unificada de rega direta e programada da válvula",
-        "nl": "**VERBETERD**: Uniforme directe en geplande klep bewateringsduur",
-        "fr": "**AMÉLIORÉ**: Durée d'arrosage unifiée pour les vannes directes et planifiées",
-        "it": "**MIGLIORATO**: Durata unificata dell'irrigazione diretta e pianificata della valvola",
-        "es": "**MEJORADO**: Duración unificada de riego directo y programado de la válvula",
-        "pl": "**ULEPSZONE**: Ujednolicony czas trwania podlewania bezpośredniego i zaplanowanego zaworu",
-        "uk": "**ПОКРАЩЕНО**: Уніфікована тривалість прямого та запланованого поливу клапана",
-        "zh-cn": "**增强**：统一直接和计划阀门浇水持续时间"
       }
     },
     "titleLang": {

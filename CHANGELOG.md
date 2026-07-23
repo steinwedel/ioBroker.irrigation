@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.2.39 (2026-07-23)
 * (Gerhard Steinwedel) **FIXED**: Persisted and reloaded the valve order of each plan reliably
 
 ## 0.2.38 (2026-07-23)
