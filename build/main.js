@@ -170,6 +170,7 @@ class Irrigation extends utils.Adapter {
     const storedPlans = this.parsePlansState(plansState == null ? void 0 : plansState.val);
     if (storedPlans && storedPlans.length > 0) {
       this.config2.plans = storedPlans;
+      await this.publishPlanNames(storedPlans);
       return;
     }
     this.log.info("Initializing automation.plansData state from existing configuration.");
@@ -208,10 +209,14 @@ class Irrigation extends utils.Adapter {
   async writePlansState(plans) {
     this.config2.plans = plans;
     await this.setStateAsync("automation.plansData", { val: JSON.stringify(plans), ack: true });
-    await this.setStateAsync("automation.plansList", {
-      val: JSON.stringify(plans.map((p) => p.name)),
-      ack: true
-    });
+    await this.publishPlanNames(plans);
+  }
+  async publishPlanNames(plans) {
+    const planNames = plans.map((plan) => plan.name);
+    const states = Object.fromEntries(planNames.map((planName) => [planName, planName]));
+    await this.setStateAsync("automation.plansList", { val: JSON.stringify(planNames), ack: true });
+    await this.extendObjectAsync("automation.planSelect", { common: { states } });
+    await this.extendObjectAsync("automation.startPlan", { common: { states } });
   }
   /**
    * Creates the smartgarden rate limit monitoring states.
@@ -479,6 +484,14 @@ class Irrigation extends utils.Adapter {
         await this.setStateAsync(id, { val: false, ack: true });
         await this.automation.requestRun((_b = (_a = this.config2.plans[0]) == null ? void 0 : _a.name) != null ? _b : "Alle", "manual-button");
         return;
+      case "automation.startPlan": {
+        const planName = typeof state.val === "string" ? state.val.trim() : "";
+        await this.setStateAsync(id, { val: "", ack: true });
+        if (planName) {
+          await this.automation.requestRun(planName, "manual-button");
+        }
+        return;
+      }
       case "automation.stop":
         await this.setStateAsync(id, { val: false, ack: true });
         await this.automation.stop();

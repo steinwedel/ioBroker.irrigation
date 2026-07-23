@@ -1,4 +1,7 @@
 # Changelog
+## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **NEW**: Added selectable direct plan starts through ioBroker states
+
 ## 0.2.26 (2026-07-22)
 * (Gerhard Steinwedel) **ENHANCED**: Disabled and cleared restriction end date/time until their start values are configured
 

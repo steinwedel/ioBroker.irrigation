@@ -48,6 +48,14 @@ export async function createBaseStates(adapter: ioBroker.Adapter): Promise<void>
         write: true,
         def: false,
     });
+    await setObj(adapter, 'automation.startPlan', {
+        name: 'Start selected plan',
+        type: 'string',
+        role: 'text',
+        read: true,
+        write: true,
+        def: '',
+    });
     await setObj(adapter, 'automation.stop', {
         name: 'Stop automation',
         type: 'boolean',

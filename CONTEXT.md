@@ -1,11 +1,11 @@
 # Context
 
 ## Current Task
-Enddatum und Endzeit der Beregnungssperre sind an die jeweiligen Startwerte gekoppelt.
+Ein bestimmter Bewässerungsplan kann direkt über einen ioBroker-State gestartet werden.
 
 ## Key Decisions
-- Ohne Startwert ist das zugehörige Endfeld deaktiviert und wird geleert.
-- Temperatur-, Datums- und Zeitbedingungen werden unabhängig ausgewertet.
+- `automation.plansList` stellt die verfügbaren Plannamen als JSON bereit.
+- `automation.startPlan` bietet dieselben Namen als auswählbare Werte und startet den gewählten Plan.
 
 ## Next Steps
 - Validierung ausführen.

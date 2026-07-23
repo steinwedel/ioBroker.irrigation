@@ -207,6 +207,7 @@ class Irrigation extends utils.Adapter {
 
         if (storedPlans && storedPlans.length > 0) {
             this.config2.plans = storedPlans;
+            await this.publishPlanNames(storedPlans);
             return;
         }
 
@@ -251,10 +252,15 @@ class Irrigation extends utils.Adapter {
     private async writePlansState(plans: IPlanConfig[]): Promise<void> {
         this.config2.plans = plans;
         await this.setStateAsync('automation.plansData', { val: JSON.stringify(plans), ack: true });
-        await this.setStateAsync('automation.plansList', {
-            val: JSON.stringify(plans.map(p => p.name)),
-            ack: true,
-        });
+        await this.publishPlanNames(plans);
+    }
+
+    private async publishPlanNames(plans: IPlanConfig[]): Promise<void> {
+        const planNames = plans.map(plan => plan.name);
+        const states = Object.fromEntries(planNames.map(planName => [planName, planName]));
+        await this.setStateAsync('automation.plansList', { val: JSON.stringify(planNames), ack: true });
+        await this.extendObjectAsync('automation.planSelect', { common: { states } });
+        await this.extendObjectAsync('automation.startPlan', { common: { states } });
     }
 
     /**
@@ -549,6 +555,14 @@ class Irrigation extends utils.Adapter {
                 await this.setStateAsync(id, { val: false, ack: true });
                 await this.automation.requestRun(this.config2.plans[0]?.name ?? 'Alle', 'manual-button');
                 return;
+            case 'automation.startPlan': {
+                const planName = typeof state.val === 'string' ? state.val.trim() : '';
+                await this.setStateAsync(id, { val: '', ack: true });
+                if (planName) {
+                    await this.automation.requestRun(planName, 'manual-button');
+                }
+                return;
+            }
             case 'automation.stop':
                 await this.setStateAsync(id, { val: false, ack: true });
                 await this.automation.stop();

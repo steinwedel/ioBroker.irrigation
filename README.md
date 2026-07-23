@@ -223,7 +223,9 @@ You can manually start a zone at any time, regardless of the automatic schedule 
 
 #### Manual Plan Watering
 
-To run a complete plan manually, set `irrigation.0.control.manualStart` to `true`. This runs the first plan in the Plans table immediately, respecting all sensor checks and batching rules.
+Plan names are published as JSON in `irrigation.0.automation.plansList`. To start a specific plan directly, write its exact name to `irrigation.0.automation.startPlan`; the state exposes the current plan names as selectable values in the ioBroker object view and resets to an empty string after handling the command. For example, writing `Rasen` starts the plan named `Rasen`.
+
+`irrigation.0.automation.start` remains available and starts the first plan in the Plans table. Both start methods respect sensor checks, legal restrictions, batching rules, and do nothing while another automation run is active.
 
 #### Flow Monitoring and Leak Detection
 
