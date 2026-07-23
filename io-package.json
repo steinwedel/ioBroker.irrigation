@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.2.42",
+    "version": "0.2.43",
     "news": {
+      "0.2.43": {
+        "en": "**FIXED**: Updated plan execution numbers immediately after moving table rows",
+        "de": "**BEHOBEN**: Planausführungsnummern werden jetzt sofort nach dem Verschieben von Tabellenzeilen aktualisiert",
+        "ru": "**ИСПРАВЛЕНО**: Номера выполнения плана теперь обновляются сразу после перемещения строк таблицы",
+        "pt": "**CORRIGIDO**: Números de execução do plano atualizados imediatamente após mover linhas da tabela",
+        "nl": "**OPGELOST**: Planuitvoeringsnummers worden nu direct bijgewerkt na het verplaatsen van tabelrijen",
+        "fr": "**CORRIGÉ**: Les numéros d'exécution du plan sont maintenant mis à jour immédiatement après le déplacement des lignes du tableau",
+        "it": "**RISOLTO**: I numeri di esecuzione del piano vengono ora aggiornati immediatamente dopo lo spostamento delle righe della tabella",
+        "es": "**SOLUCIONADO**: Los números de ejecución del plan se actualizan inmediatamente después de mover filas de la tabla",
+        "pl": "**NAPRAWIONO**: Numery wykonania planu są teraz aktualizowane natychmiast po przesunięciu wierszy tabeli",
+        "uk": "**ВИПРАВЛЕНО**: Номери виконання плану тепер оновлюються одразу після переміщення рядків таблиці",
+        "zh-cn": "**已修复**：移动表格行后立即更新计划执行编号"
+      },
       "0.2.42": {
         "en": "**FIXED**: Refreshed valve names from the object tree during scans and corrected plan numbering",
         "de": "**BEHOBEN**: Ventilnamen aus dem Objektbaum während der Scans aktualisiert und Plannummerierung korrigiert",
@@ -80,19 +93,6 @@
         "pl": "**NOWOŚĆ**: Dodano zmianę nazwy planów z walidacją nazwy w edytorze planów",
         "uk": "**НОВЕ**: Додано перейменування планів з перевіркою імені в редакторі планів",
         "zh-cn": "**新功能**：在计划编辑器中添加了带名称验证的计划重命名功能"
-      },
-      "0.2.36": {
-        "en": "**ENHANCED**: Renamed plan valve table column header from \"Execution order\" to \"Number\" with localized translations for all supported languages",
-        "de": "**VERBESSERT**: Spaltenüberschrift der Planventiltabelle von \"Ausführungsreihenfolge\" in \"Nummer\" umbenannt mit lokalisierten Übersetzungen für alle unterstützten Sprachen",
-        "ru": "**УЛУЧШЕНО**: Заголовок столбца таблицы клапанов плана переименован с \"Порядок выполнения\" на \"Номер\" с локализованными переводами для всех поддерживаемых языков",
-        "pt": "**MELHORADO**: Cabeçalho da coluna da tabela de válvulas do plano renomeado de \"Ordem de execução\" para \"Número\" com traduções localizadas para todos os idiomas suportados",
-        "nl": "**VERBETERD**: Kolomkop van de plankleptabel hernoemd van \"Uitvoeringsvolgorde\" naar \"Nummer\" met gelokaliseerde vertalingen voor alle ondersteunde talen",
-        "fr": "**AMÉLIORÉ**: En-tête de colonne du tableau des vannes du plan renommé de \"Ordre d'exécution\" à \"Numéro\" avec des traductions localisées pour toutes les langues prises en charge",
-        "it": "**MIGLIORATO**: Intestazione della colonna della tabella delle valvole del piano rinominata da \"Ordine di esecuzione\" a \"Numero\" con traduzioni localizzate per tutte le lingue supportate",
-        "es": "**MEJORADO**: Encabezado de columna de la tabla de válvulas del plan renombrado de \"Orden de ejecución\" a \"Número\" con traducciones localizadas para todos los idiomas compatibles",
-        "pl": "**ULEPSZONE**: Nagłówek kolumny tabeli zaworów planu zmieniony z \"Kolejność wykonania\" na \"Numer\" z zlokalizowanymi tłumaczeniami dla wszystkich obsługiwanych języków",
-        "uk": "**ПОКРАЩЕНО**: Заголовок стовпця таблиці клапанів плану перейменовано з \"Порядок виконання\" на \"Номер\" з локалізованими перекладами для всіх підтримуваних мов",
-        "zh-cn": "**增强**：将计划阀门表列标题从\"执行顺序\"重命名为\"编号\"，并为所有支持的语言提供本地化翻译"
       }
     },
     "titleLang": {
