@@ -1,4 +1,7 @@
 # Changelog
+## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **ENHANCED**: Added configurable valve order for sequential watering plans
+
 ## 0.2.29 (2026-07-23)
 * (Gerhard Steinwedel) **NEW**: Added temperature-controlled automatic plan duration adjustment
 * (Gerhard Steinwedel) **FIXED**: Reset automation duration states when stopping a run

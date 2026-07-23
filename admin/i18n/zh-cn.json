@@ -7,6 +7,7 @@
     "Add valves manually or use auto-discovery for Gardena/Homematic/Rainbird systems.": "手动添加阀门或使用 Gardena/Homematic/Rainbird 系统的自动发现功能。",
     "Adjusts automatic plan durations by 7% per °C relative to 20 °C.": "相对于 20 °C，每 °C 将自动计划持续时间调整 7%。",
     "After changing \"Selected plan\" above, click \"Load valves for selected plan\" to refresh the table below, tick/untick valves, then click \"Apply valve assignment\" to save.": "更改上面的“选定计划”后，单击“加载选定计划的阀门”刷新下表，勾选/取消勾选阀门，然后单击“应用阀门分配”进行保存。",
+    "After changing \"Selected plan\" above, click \"Load valves for selected plan\" to refresh the table below. Tick/untick valves and use the move up/down controls to set their order. Click \"Apply valve assignment\" to save. The order is used when the pump capacity is 0 (sequential watering).": "更改上面的“选定计划”后，单击“加载选定计划的阀门”以刷新下表。勾选/取消勾选阀门并使用向上/向下移动控件来设置其顺序。单击“应用阀门分配”进行保存。该顺序在水泵容量为0时使用（顺序浇水）。",
     "All": "全部",
     "Apply valve assignment": "Apply valve assignment",
     "Auto-Discovery": "自动发现",

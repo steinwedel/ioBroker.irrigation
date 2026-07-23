@@ -1,11 +1,11 @@
 # Context
 
 ## Current Task
-Automatische Planlaufzeiten können temperaturgesteuert angepasst werden.
+Die Reihenfolge der Ventile eines Plans ist für die sequentielle Bewässerung konfigurierbar.
 
 ## Key Decisions
-- Ein ausgewählter Temperatur-Datenpunkt ist Voraussetzung für die Aktivierung.
-- Der Faktor `1.07^(T - 20)` wird einmal beim Planstart bestimmt.
+- Die Ventilzuordnungstabelle speichert die Reihenfolge der aktivierten Zeilen.
+- Bei Pumpenkapazität 0 wird diese Reihenfolge direkt ausgeführt.
 
 ## Next Steps
 - Übersetzungen und Validierung ausführen.

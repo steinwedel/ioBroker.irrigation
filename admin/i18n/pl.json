@@ -7,6 +7,7 @@
     "Add valves manually or use auto-discovery for Gardena/Homematic/Rainbird systems.": "Dodaj zawory ręcznie lub użyj automatycznego wykrywania w systemach Gardena/Homematic/Rainbird.",
     "Adjusts automatic plan durations by 7% per °C relative to 20 °C.": "Dostosowuje czas trwania planu automatycznego o 7% na każdy °C w stosunku do 20 °C.",
     "After changing \"Selected plan\" above, click \"Load valves for selected plan\" to refresh the table below, tick/untick valves, then click \"Apply valve assignment\" to save.": "Po zmianie „Wybranego planu” powyżej kliknij „Załaduj zawory dla wybranego planu”, aby odświeżyć poniższą tabelę, zaznacz/odznacz zawory, a następnie kliknij „Zastosuj przypisanie zaworów”, aby zapisać.",
+    "After changing \"Selected plan\" above, click \"Load valves for selected plan\" to refresh the table below. Tick/untick valves and use the move up/down controls to set their order. Click \"Apply valve assignment\" to save. The order is used when the pump capacity is 0 (sequential watering).": "Po zmianie powyższej opcji „Wybrany plan” kliknij „Załaduj zawory dla wybranego planu”, aby odświeżyć poniższą tabelę. Zaznacz/odznacz zawory i użyj elementów sterujących przesuwaniem w górę/w dół, aby ustawić ich kolejność. Kliknij „Zastosuj przypisanie zaworu”, aby zapisać. Kolejność stosowana jest, gdy wydajność pompy wynosi 0 (nawadnianie sekwencyjne).",
     "All": "Wszystko",
     "Apply valve assignment": "Zastosuj przypisanie zaworu",
     "Auto-Discovery": "Automatyczne wykrywanie",

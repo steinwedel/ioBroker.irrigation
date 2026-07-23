@@ -7,6 +7,7 @@
     "Add valves manually or use auto-discovery for Gardena/Homematic/Rainbird systems.": "Ventile manuell hinzufügen oder Auto-Discovery für Gardena/Homematic/Rainbird nutzen.",
     "Adjusts automatic plan durations by 7% per °C relative to 20 °C.": "Passt die Dauer automatischer Pläne um 7 % pro °C bezogen auf 20 °C an.",
     "After changing \"Selected plan\" above, click \"Load valves for selected plan\" to refresh the table below, tick/untick valves, then click \"Apply valve assignment\" to save.": "Nach dem Ändern von \"Ausgewählter Plan\" oben auf \"Ventile für ausgewählten Plan laden\" klicken, um die Tabelle unten zu aktualisieren, Ventile an-/abwählen und dann auf \"Ventilzuordnung übernehmen\" klicken, um zu speichern.",
+    "After changing \"Selected plan\" above, click \"Load valves for selected plan\" to refresh the table below. Tick/untick valves and use the move up/down controls to set their order. Click \"Apply valve assignment\" to save. The order is used when the pump capacity is 0 (sequential watering).": "Nach dem Ändern von \"Ausgewählter Plan\" oben auf \"Ventile für ausgewählten Plan laden\" klicken, um die Tabelle unten zu aktualisieren. Ventile an-/abwählen und mit den Hoch-/Runter-Schaltflächen die Reihenfolge festlegen. Zum Speichern auf \"Ventilzuordnung übernehmen\" klicken. Die Reihenfolge wird bei einer Pumpenkapazität von 0 (sequentielle Bewässerung) verwendet.",
     "All": "Alle",
     "Apply valve assignment": "Ventilzuordnung übernehmen",
     "Auto-Discovery": "Auto-Discovery",

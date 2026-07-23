@@ -312,25 +312,28 @@ export class AutomationEngine {
 
     private buildActiveValveList(config: IrrigationNativeConfig, plan: IPlanConfig): number[] {
         const useAllValves = plan.valveIndexes.length === 0;
+        const requestedIndexes = useAllValves ? config.valves.map((_, index) => index) : plan.valveIndexes;
         const weekday = new Date().getDay();
         const result: number[] = [];
-        for (let i = 0; i < config.valves.length; i++) {
-            const valve = config.valves[i];
-            if (!valve.enabled) {
+        const seenIndexes = new Set<number>();
+        for (const index of requestedIndexes) {
+            if (seenIndexes.has(index)) {
+                continue;
+            }
+            seenIndexes.add(index);
+            const valve = config.valves[index];
+            if (!valve || !valve.enabled) {
                 continue;
             }
             if (valve.days.length > 0 && !valve.days.includes(weekday)) {
                 continue;
             }
-            if (!useAllValves && !plan.valveIndexes.includes(i)) {
-                continue;
-            }
-            const blocked = this.deps.isValveBlockedForAutoRun(i);
+            const blocked = this.deps.isValveBlockedForAutoRun(index);
             if (blocked.blocked) {
                 this.deps.adapter.log.debug(`Valve ${valve.name} skipped: ${blocked.reason}`);
                 continue;
             }
-            result.push(i);
+            result.push(index);
         }
         return result;
     }
