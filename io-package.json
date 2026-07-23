@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.2.29",
+    "version": "0.2.30",
     "news": {
+      "0.2.30": {
+        "en": "**ENHANCED**: Added configurable valve order for sequential watering plans",
+        "de": "**VERBESSERT**: Konfigurierbare Ventilreihenfolge für sequentielle Bewässerungspläne hinzugefügt",
+        "ru": "**УЛУЧШЕНО**: Добавлен настраиваемый порядок клапанов для последовательных планов полива",
+        "pt": "**MELHORADO**: Adicionada ordem configurável de válvulas para planos de rega sequenciais",
+        "nl": "**VERBETERD**: Configureerbare klep volgorde toegevoegd voor sequentiële bewateringsplannen",
+        "fr": "**AMÉLIORÉ**: Ajout de l'ordre configurable des vannes pour les plans d'arrosage séquentiels",
+        "it": "**MIGLIORATO**: Aggiunto ordine configurabile delle valvole per i piani di irrigazione sequenziali",
+        "es": "**MEJORADO**: Añadido orden configurable de válvulas para planes de riego secuenciales",
+        "pl": "**ULEPSZONE**: Dodano konfigurowalną kolejność zaworów dla sekwencyjnych planów nawadniania",
+        "uk": "**ПОКРАЩЕНО**: Додано налаштовуваний порядок клапанів для послідовних планів поливу",
+        "zh-cn": "**增强**：为顺序浇水计划添加了可配置的阀门顺序"
+      },
       "0.2.29": {
         "en": "**NEW**: Added temperature-controlled automatic plan duration adjustment\n**FIXED**: Reset automation duration states when stopping a run",
         "de": "**NEU**: Temperaturgesteuerte automatische Anpassung der Plandauer hinzugefügt\n**BEHOBEN**: Automatisierungsdauer-Zustände werden beim Stoppen eines Durchlaufs zurückgesetzt",
@@ -80,19 +93,6 @@
         "pl": "**ULEPSZONE**: Dodano zwalidowane daty ograniczeń rocznych oraz dokładne co do minuty czasy rozpoczęcia i zakończenia",
         "uk": "**ПОКРАЩЕНО**: Додано перевірені дати річних обмежень та точний до хвилини час початку та завершення",
         "zh-cn": "**增强**：添加了经过验证的年度限制日期以及精确到分钟的开始和结束时间"
-      },
-      "0.2.23": {
-        "en": "**ENHANCED**: Made DWD station and local temperature state selection mutually exclusive\n**NEW**: Added a selectable local temperature state as an alternative source for the legal restriction",
-        "de": "**VERBESSERT**: Auswahl von DWD-Station und lokalem Temperaturzustand wurde gegenseitig ausschließend gemacht\n**NEU**: Auswählbarer lokaler Temperaturzustand als alternative Quelle für die gesetzliche Beschränkung hinzugefügt",
-        "ru": "**УЛУЧШЕНО**: Выбор станции DWD и локального состояния температуры сделаны взаимоисключающими\n**НОВОЕ**: Добавлено выбираемое локальное состояние температуры в качестве альтернативного источника для законодательного ограничения",
-        "pt": "**MELHORADO**: A seleção da estação DWD e do estado de temperatura local foram tornadas mutuamente exclusivas\n**NOVO**: Adicionado um estado de temperatura local selecionável como fonte alternativa para a restrição legal",
-        "nl": "**VERBETERD**: Selectie van DWD-station en lokale temperatuurstatus zijn wederzijds uitsluitend gemaakt\n**NIEUW**: Selecteerbare lokale temperatuurstatus toegevoegd als alternatieve bron voor de wettelijke beperking",
-        "fr": "**AMÉLIORÉ**: La sélection de la station DWD et de l'état de température local a été rendue mutuellement exclusive\n**NOUVEAU**: Ajout d'un état de température local sélectionnable comme source alternative pour la restriction légale",
-        "it": "**MIGLIORATO**: La selezione della stazione DWD e dello stato di temperatura locale è stata resa mutualmente esclusiva\n**NUOVO**: Aggiunto uno stato di temperatura locale selezionabile come fonte alternativa per la restrizione legale",
-        "es": "**MEJORADO**: La selección de estación DWD y estado de temperatura local se hicieron mutuamente excluyentes\n**NUEVO**: Se agregó un estado de temperatura local seleccionable como fuente alternativa para la restricción legal",
-        "pl": "**ULEPSZONE**: Wybór stacji DWD i lokalnego stanu temperatury został uczyniony wzajemnie wykluczającym się\n**NOWE**: Dodano wybieralny lokalny stan temperatury jako alternatywne źródło dla ograniczenia prawnego",
-        "uk": "**ПОКРАЩЕНО**: Вибір станції DWD та локального стану температури зроблено взаємовиключними\n**НОВЕ**: Додано вибір локального стану температури як альтернативного джерела для законодавчого обмеження",
-        "zh-cn": "**增强**：使 DWD 站点和本地温度状态选择互斥\n**新增**：添加了可选的本地温度状态作为法律限制的替代来源"
       }
     },
     "titleLang": {

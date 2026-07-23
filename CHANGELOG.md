@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.2.30 (2026-07-23)
 * (Gerhard Steinwedel) **ENHANCED**: Added configurable valve order for sequential watering plans
 
 ## 0.2.29 (2026-07-23)

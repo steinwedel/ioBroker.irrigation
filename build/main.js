@@ -569,7 +569,7 @@ class Irrigation extends utils.Adapter {
     await this.writeNativeAsync({ valves });
   }
   async onMessage(obj) {
-    var _a, _b, _c, _d, _e, _f, _g, _h;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i;
     if (typeof obj !== "object" || !obj.command) {
       return;
     }
@@ -734,11 +734,15 @@ class Irrigation extends utils.Adapter {
     }
     if (obj.command === "loadPlanValveTable" && obj.callback) {
       const planIndex = readPlanIndex(obj.message);
-      const planValveIndexes = planIndex !== void 0 && planIndex >= 0 && planIndex < this.config2.plans.length ? new Set(this.config2.plans[planIndex].valveIndexes) : /* @__PURE__ */ new Set();
-      const planValveTable = this.config2.valves.map((v, i) => ({
-        valveNumber: (0, import_types.formatValveNumber)(i),
-        name: v.name || "unnamed",
-        assigned: planValveIndexes.has(i)
+      const plan = planIndex !== void 0 && planIndex >= 0 && planIndex < this.config2.plans.length ? this.config2.plans[planIndex] : void 0;
+      const allValveIndexes = this.config2.valves.map((_, index) => index);
+      const assignedIndexes = plan && plan.valveIndexes.length === 0 ? allValveIndexes : ((_h = plan == null ? void 0 : plan.valveIndexes) != null ? _h : []).filter((index) => index >= 0 && index < this.config2.valves.length);
+      const assignedSet = new Set(assignedIndexes);
+      const orderedIndexes = [...assignedIndexes, ...allValveIndexes.filter((index) => !assignedSet.has(index))];
+      const planValveTable = orderedIndexes.map((index) => ({
+        valveNumber: (0, import_types.formatValveNumber)(index),
+        name: this.config2.valves[index].name || "unnamed",
+        assigned: assignedSet.has(index)
       }));
       this.sendTo(obj.from, obj.command, { native: { planValveTable } }, obj.callback);
       return;
@@ -750,7 +754,7 @@ class Irrigation extends utils.Adapter {
         this.sendTo(obj.from, obj.command, { error: "noSelection" }, obj.callback);
         return;
       }
-      const rows = (_h = msg == null ? void 0 : msg.planValveTable) != null ? _h : [];
+      const rows = (_i = msg == null ? void 0 : msg.planValveTable) != null ? _i : [];
       const selectedIndexes = (0, import_types.parsePlanValveTableRows)(rows, this.config2.valves.length);
       const updatedPlans = this.config2.plans.map(
         (p, i) => i === planIndex ? { ...p, valveIndexes: selectedIndexes.length > 0 ? selectedIndexes : [import_types.NONE_SENTINEL] } : p
