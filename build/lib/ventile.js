@@ -348,7 +348,9 @@ class ValveController {
           await this.adapter.subscribeForeignStatesAsync(`${this.config.stateId}.remaining`);
           break;
         case "Hydrawise":
-          await this.adapter.subscribeForeignStatesAsync(`${hydrawiseZoneBasePath(this.config.stateId)}.time`);
+          await this.adapter.subscribeForeignStatesAsync(
+            `${hydrawiseZoneBasePath(this.config.stateId)}.time`
+          );
           break;
         case "Generic":
           await this.adapter.subscribeForeignStatesAsync(this.config.stateId);
@@ -644,7 +646,10 @@ class ValveController {
           }
           break;
         case "Hydrawise":
-          await this.adapter.setForeignStateAsync(`${hydrawiseZoneBasePath(this.config.stateId)}.stopZone`, true);
+          await this.adapter.setForeignStateAsync(
+            `${hydrawiseZoneBasePath(this.config.stateId)}.stopZone`,
+            true
+          );
           break;
         case "Homematic":
           await this.adapter.setForeignStateAsync(`${this.config.stateId}.ON_TIME`, 0);

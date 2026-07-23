@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.2.28 (2026-07-23)
 * (Gerhard Steinwedel) **NEW**: Added Hydrawise valve control and auto-discovery through ioBroker.hydrawise
 * (Gerhard Steinwedel) **ENHANCED**: Documented all ioBroker adapter data points and their usage in the README
 * (Gerhard Steinwedel) **ENHANCED**: Published automation duration states as seconds instead of time-formatted minutes

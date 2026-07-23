@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.2.27",
+    "version": "0.2.28",
     "news": {
+      "0.2.28": {
+        "en": "**NEW**: Added Hydrawise valve control and auto-discovery through ioBroker.hydrawise\n**ENHANCED**: Documented all ioBroker adapter data points and their usage in the README\n**ENHANCED**: Published automation duration states as seconds instead of time-formatted minutes",
+        "de": "**NEU**: Hydrawise-Ventilsteuerung und automatische Erkennung über ioBroker.hydrawise hinzugefügt **VERBESSERT**: Alle ioBroker-Adapter-Datenpunkte und deren Verwendung in der README dokumentiert **VERBESSERT**: Automatisierungsdauer-Zustände werden nun als Sekunden statt als zeitformatierte Minuten veröffentlicht",
+        "ru": "**НОВОЕ**: Добавлено управление клапанами Hydrawise и автоматическое обнаружение через ioBroker.hydrawise **УЛУЧШЕНО**: Документированы все точки данных адаптера ioBroker и их использование в README **УЛУЧШЕНО**: Состояния длительности автоматизации публикуются в секундах вместо форматированных минут",
+        "pt": "**NOVO**: Adicionado controle de válvulas Hydrawise e descoberta automática através do ioBroker.hydrawise **MELHORADO**: Documentados todos os pontos de dados do adaptador ioBroker e seu uso no README **MELHORADO**: Estados de duração de automação publicados como segundos em vez de minutos formatados",
+        "nl": "**NIEUW**: Hydrawise-klep besturing en automatische detectie toegevoegd via ioBroker.hydrawise **VERBETERD**: Alle ioBroker-adapter datapunten en hun gebruik gedocumenteerd in de README **VERBETERD**: Automatiseringsduur-statussen gepubliceerd als seconden in plaats van tijdgeformatteerde minuten",
+        "fr": "**NOUVEAU** : Ajout du contrôle des vannes Hydrawise et de la découverte automatique via ioBroker.hydrawise **AMÉLIORÉ** : Documentation de tous les points de données de l'adaptateur ioBroker et de leur utilisation dans le README **AMÉLIORÉ** : États de durée d'automatisation publiés en secondes au lieu de minutes formatées",
+        "it": "**NOVITÀ**: Aggiunto controllo valvole Hydrawise e rilevamento automatico tramite ioBroker.hydrawise **MIGLIORATO**: Documentati tutti i punti dati dell'adattatore ioBroker e il loro utilizzo nel README **MIGLIORATO**: Stati di durata automazione pubblicati come secondi anziché minuti formattati",
+        "es": "**NUEVO**: Añadido control de válvulas Hydrawise y descubrimiento automático a través de ioBroker.hydrawise **MEJORADO**: Documentados todos los puntos de datos del adaptador ioBroker y su uso en el README **MEJORADO**: Estados de duración de automatización publicados como segundos en lugar de minutos formateados",
+        "pl": "**NOWOŚĆ**: Dodano sterowanie zaworami Hydrawise i automatyczne wykrywanie przez ioBroker.hydrawise **ULEPSZONO**: Udokumentowano wszystkie punkty danych adaptera ioBroker i ich zastosowanie w README **ULEPSZONO**: Stany czasu trwania automatyzacji publikowane jako sekundy zamiast sformatowanych minut",
+        "uk": "**НОВЕ**: Додано керування клапанами Hydrawise та автоматичне виявлення через ioBroker.hydrawise **ПОКРАЩЕНО**: Задокументовано всі точки даних адаптера ioBroker та їх використання в README **ПОКРАЩЕНО**: Стани тривалості автоматизації публікуються в секундах замість форматованих хвилин",
+        "zh-cn": "**新增**：通过 ioBroker.hydrawise 添加了 Hydrawise 阀门控制和自动发现功能 **增强**：在 README 中记录了所有 ioBroker 适配器数据点及其用法 **增强**：自动化持续时间状态以秒为单位发布，而不是格式化的分钟"
+      },
       "0.2.27": {
         "en": "**NEW**: Added selectable direct plan starts through ioBroker states",
         "de": "**NEU**: Auswählbare direkte Planstarts über ioBroker-Zustände hinzugefügt",
@@ -80,19 +93,6 @@
         "pl": "**ULEPSZONE**: Dodano opcję stosowania ograniczenia prawnego bez sprawdzania temperatury DWD",
         "uk": "**ПОКРАЩЕНО**: Додано опцію застосування законодавчого обмеження без перевірки температури DWD",
         "zh-cn": "**增强**：添加了无需 DWD 温度检查即可应用法律限制的选项"
-      },
-      "0.2.21": {
-        "en": "**ENHANCED**: Added all DWD POI weather stations to the legal restriction station dropdown",
-        "de": "**VERBESSERT**: Alle DWD-POI-Wetterstationen wurden zur Dropdown-Liste der rechtlichen Einschränkungsstationen hinzugefügt",
-        "ru": "**УЛУЧШЕНО**: Все метеостанции DWD POI добавлены в выпадающий список станций с правовыми ограничениями",
-        "pt": "**MELHORADO**: Adicionadas todas as estações meteorológicas DWD POI ao menu suspenso de estações com restrições legais",
-        "nl": "**VERBETERD**: Alle DWD POI-weerstations toegevoegd aan de vervolgkeuzelijst voor wettelijke beperkingsstations",
-        "fr": "**AMÉLIORÉ**: Ajout de toutes les stations météorologiques DWD POI à la liste déroulante des stations soumises à restrictions légales",
-        "it": "**MIGLIORATO**: Aggiunte tutte le stazioni meteorologiche DWD POI al menu a discesa delle stazioni con restrizioni legali",
-        "es": "**MEJORADO**: Se agregaron todas las estaciones meteorológicas DWD POI al menú desplegable de estaciones con restricciones legales",
-        "pl": "**ULEPSZONE**: Dodano wszystkie stacje pogodowe DWD POI do listy rozwijanej stacji z ograniczeniami prawnymi",
-        "uk": "**ПОКРАЩЕНО**: Додано всі метеостанції DWD POI до випадаючого списку станцій з юридичними обмеженнями",
-        "zh-cn": "**增强**：已将所有 DWD POI 气象站添加到法律限制站点下拉列表中"
       }
     },
     "titleLang": {
