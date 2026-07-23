@@ -39,7 +39,7 @@ export function parsePlanValveTableRows(
     return rows
         .filter(row => row?.assigned)
         .map(row => Number.parseInt(row.valveNumber ?? '', 10))
-        .filter(i => Number.isInteger(i) && i >= 0 && i < valveCount);
+        .filter(index => Number.isInteger(index) && index >= 0 && index < valveCount);
 }
 
 /**

@@ -1,11 +1,11 @@
 # Context
 
 ## Current Task
-Die Reihenfolge der Ventile eines Plans ist für die sequentielle Bewässerung konfigurierbar.
+Die Ventilreihenfolge eines Plans wird über native Tabellenpfeile konfiguriert.
 
 ## Key Decisions
-- Die Ventilzuordnungstabelle speichert die Reihenfolge der aktivierten Zeilen.
-- Bei Pumpenkapazität 0 wird diese Reihenfolge direkt ausgeführt.
+- `noDelete: false` aktiviert die Hoch-/Runter-Pfeile der JSONConfig-Tabelle.
+- Bei Pumpenkapazität 0 wird die gespeicherte Zeilenreihenfolge ausgeführt.
 
 ## Next Steps
 - Übersetzungen und Validierung ausführen.

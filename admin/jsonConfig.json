@@ -320,7 +320,7 @@
                 },
                 "planValvesHint": {
                     "type": "staticText",
-                    "text": "After changing \"Selected plan\" above, click \"Load valves for selected plan\" to refresh the table below. Tick/untick valves and use the move up/down controls to set their order. Click \"Apply valve assignment\" to save. The order is used when the pump capacity is 0 (sequential watering).",
+                    "text": "After changing \"Selected plan\" above, click \"Load valves for selected plan\" to refresh the table below. Tick/untick valves and use the up/down arrow buttons to set their order. Click \"Apply valve assignment\" to save. The order is used when the pump capacity is 0 (sequential watering).",
                     "newLine": true,
                     "sm": 12,
                     "md": 12,
@@ -361,7 +361,7 @@
                     "label": "Valves in selected plan",
                     "newLine": true,
                     "doNotSave": true,
-                    "noDelete": true,
+                    "noDelete": false,
                     "sm": 12,
                     "md": 12,
                     "lg": 8,
