@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.2.34",
+    "version": "0.2.35",
     "news": {
+      "0.2.35": {
+        "en": "**FIXED**: Added a compatible visible sequential execution-order column to the plan valve table",
+        "de": "**BEHOBEN**: Eine kompatible, sichtbare Spalte für die sequenzielle Ausführungsreihenfolge wurde zur Planventiltabelle hinzugefügt",
+        "ru": "**ИСПРАВЛЕНО**: Добавлен совместимый видимый столбец последовательного порядка выполнения в таблицу клапанов плана",
+        "pt": "**CORRIGIDO**: Adicionada uma coluna de ordem de execução sequencial compatível e visível à tabela de válvulas do plano",
+        "nl": "**OPGELOST**: Een compatibele zichtbare kolom voor sequentiële uitvoeringsvolgorde toegevoegd aan de plankleptabel",
+        "fr": "**CORRIGÉ** : Ajout d'une colonne d'ordre d'exécution séquentiel compatible et visible au tableau des vannes du plan",
+        "it": "**RISOLTO**: Aggiunta una colonna visibile compatibile per l'ordine di esecuzione sequenziale alla tabella delle valvole del piano",
+        "es": "**CORREGIDO**: Se agregó una columna de orden de ejecución secuencial compatible y visible a la tabla de válvulas del plan",
+        "pl": "**NAPRAWIONO**: Dodano kompatybilną, widoczną kolumnę kolejności sekwencyjnego wykonywania do tabeli zaworów planu",
+        "uk": "**ВИПРАВЛЕНО**: Додано сумісний видимий стовпець послідовного порядку виконання до таблиці клапанів плану",
+        "zh-cn": "**已修复**：在计划阀门表中添加了兼容的可见顺序执行顺序列"
+      },
       "0.2.34": {
         "en": "**ENHANCED**: Added visible sequential execution positions to the plan valve table",
         "de": "**VERBESSERT**: Sichtbare sequentielle Ausführungspositionen zur Planventil-Tabelle hinzugefügt",
@@ -80,19 +93,6 @@
         "pl": "**NOWOŚĆ**: Dodano automatyczne dostosowanie czasu trwania planu sterowane temperaturą\n**NAPRAWIONO**: Resetowanie stanów czasu trwania automatyzacji podczas zatrzymywania uruchomienia",
         "uk": "**НОВЕ**: Додано автоматичне регулювання тривалості плану з контролем температури\n**ВИПРАВЛЕНО**: Скидання станів тривалості автоматизації при зупинці виконання",
         "zh-cn": "**新增**：添加了温度控制的自动计划持续时间调整\n**修复**：停止运行时重置自动化持续时间状态"
-      },
-      "0.2.28": {
-        "en": "**NEW**: Added Hydrawise valve control and auto-discovery through ioBroker.hydrawise\n**ENHANCED**: Documented all ioBroker adapter data points and their usage in the README\n**ENHANCED**: Published automation duration states as seconds instead of time-formatted minutes",
-        "de": "**NEU**: Hydrawise-Ventilsteuerung und automatische Erkennung über ioBroker.hydrawise hinzugefügt **VERBESSERT**: Alle ioBroker-Adapter-Datenpunkte und deren Verwendung in der README dokumentiert **VERBESSERT**: Automatisierungsdauer-Zustände werden nun als Sekunden statt als zeitformatierte Minuten veröffentlicht",
-        "ru": "**НОВОЕ**: Добавлено управление клапанами Hydrawise и автоматическое обнаружение через ioBroker.hydrawise **УЛУЧШЕНО**: Документированы все точки данных адаптера ioBroker и их использование в README **УЛУЧШЕНО**: Состояния длительности автоматизации публикуются в секундах вместо форматированных минут",
-        "pt": "**NOVO**: Adicionado controle de válvulas Hydrawise e descoberta automática através do ioBroker.hydrawise **MELHORADO**: Documentados todos os pontos de dados do adaptador ioBroker e seu uso no README **MELHORADO**: Estados de duração de automação publicados como segundos em vez de minutos formatados",
-        "nl": "**NIEUW**: Hydrawise-klep besturing en automatische detectie toegevoegd via ioBroker.hydrawise **VERBETERD**: Alle ioBroker-adapter datapunten en hun gebruik gedocumenteerd in de README **VERBETERD**: Automatiseringsduur-statussen gepubliceerd als seconden in plaats van tijdgeformatteerde minuten",
-        "fr": "**NOUVEAU** : Ajout du contrôle des vannes Hydrawise et de la découverte automatique via ioBroker.hydrawise **AMÉLIORÉ** : Documentation de tous les points de données de l'adaptateur ioBroker et de leur utilisation dans le README **AMÉLIORÉ** : États de durée d'automatisation publiés en secondes au lieu de minutes formatées",
-        "it": "**NOVITÀ**: Aggiunto controllo valvole Hydrawise e rilevamento automatico tramite ioBroker.hydrawise **MIGLIORATO**: Documentati tutti i punti dati dell'adattatore ioBroker e il loro utilizzo nel README **MIGLIORATO**: Stati di durata automazione pubblicati come secondi anziché minuti formattati",
-        "es": "**NUEVO**: Añadido control de válvulas Hydrawise y descubrimiento automático a través de ioBroker.hydrawise **MEJORADO**: Documentados todos los puntos de datos del adaptador ioBroker y su uso en el README **MEJORADO**: Estados de duración de automatización publicados como segundos en lugar de minutos formateados",
-        "pl": "**NOWOŚĆ**: Dodano sterowanie zaworami Hydrawise i automatyczne wykrywanie przez ioBroker.hydrawise **ULEPSZONO**: Udokumentowano wszystkie punkty danych adaptera ioBroker i ich zastosowanie w README **ULEPSZONO**: Stany czasu trwania automatyzacji publikowane jako sekundy zamiast sformatowanych minut",
-        "uk": "**НОВЕ**: Додано керування клапанами Hydrawise та автоматичне виявлення через ioBroker.hydrawise **ПОКРАЩЕНО**: Задокументовано всі точки даних адаптера ioBroker та їх використання в README **ПОКРАЩЕНО**: Стани тривалості автоматизації публікуються в секундах замість форматованих хвилин",
-        "zh-cn": "**新增**：通过 ioBroker.hydrawise 添加了 Hydrawise 阀门控制和自动发现功能 **增强**：在 README 中记录了所有 ioBroker 适配器数据点及其用法 **增强**：自动化持续时间状态以秒为单位发布，而不是格式化的分钟"
       }
     },
     "titleLang": {
