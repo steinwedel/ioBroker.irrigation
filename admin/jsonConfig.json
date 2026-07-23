@@ -369,7 +369,7 @@
                         {
                             "type": "text",
                             "attr": "executionOrder",
-                            "title": "Execution order",
+                            "title": "Number",
                             "width": "10%",
                             "readOnly": true
                         },
