@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.2.39",
+    "version": "0.2.40",
     "news": {
+      "0.2.40": {
+        "en": "**FIXED**: Added dedicated persistent move controls for ordered plan valves",
+        "de": "**BEHOBEN**: Dedizierte persistente Bewegungssteuerungen für geordnete Planventile hinzugefügt",
+        "ru": "**ИСПРАВЛЕНО**: Добавлены выделенные постоянные элементы управления перемещением для клапанов упорядоченного плана",
+        "pt": "**CORRIGIDO**: Adicionados controles de movimento persistentes dedicados para válvulas de plano ordenado",
+        "nl": "**OPGELOST**: Toegewijde persistente bewegingsbesturingen toegevoegd voor geordende planventielen",
+        "fr": "**CORRIGÉ**: Ajout de commandes de déplacement persistantes dédiées pour les vannes de plan ordonné",
+        "it": "**RISOLTO**: Aggiunti controlli di movimento persistenti dedicati per le valvole del piano ordinato",
+        "es": "**CORREGIDO**: Se agregaron controles de movimiento persistentes dedicados para válvulas de plan ordenado",
+        "pl": "**NAPRAWIONO**: Dodano dedykowane trwałe sterowanie ruchem dla zaworów planu uporządkowanego",
+        "uk": "**ВИПРАВЛЕНО**: Додано спеціальні постійні елементи керування переміщенням для клапанів упорядкованого плану",
+        "zh-cn": "**已修复**：为有序计划阀门添加了专用的持久移动控制"
+      },
       "0.2.39": {
         "en": "**FIXED**: Persisted and reloaded the valve order of each plan reliably",
         "de": "**BEHOBEN**: Die Ventilreihenfolge jedes Plans wird nun zuverlässig gespeichert und neu geladen",
@@ -80,19 +93,6 @@
         "pl": "**ULEPSZONE**: Dodano widoczne pozycje sekwencyjnego wykonania do tabeli zaworów planu",
         "uk": "**ПОКРАЩЕНО**: Додано видимі позиції послідовного виконання до таблиці клапанів плану",
         "zh-cn": "**增强**：在计划阀门表中添加了可见的顺序执行位置"
-      },
-      "0.2.33": {
-        "en": "**FIXED**: Restored the unified watering duration in the valve table",
-        "de": "**BEHOBEN**: Die einheitliche Bewässerungsdauer in der Ventiltabelle wurde wiederhergestellt",
-        "ru": "**ИСПРАВЛЕНО**: Восстановлена единая продолжительность полива в таблице клапанов",
-        "pt": "**CORRIGIDO**: Restaurada a duração unificada de rega na tabela de válvulas",
-        "nl": "**OPGELOST**: De uniforme bewateringsduur in de klepptabel is hersteld",
-        "fr": "**CORRIGÉ**: Restauration de la durée d'arrosage unifiée dans le tableau des vannes",
-        "it": "**RISOLTO**: Ripristinata la durata unificata dell'irrigazione nella tabella delle valvole",
-        "es": "**SOLUCIONADO**: Restaurada la duración unificada de riego en la tabla de válvulas",
-        "pl": "**NAPRAWIONO**: Przywrócono ujednolicony czas podlewania w tabeli zaworów",
-        "uk": "**ВИПРАВЛЕНО**: Відновлено уніфіковану тривалість поливу в таблиці клапанів",
-        "zh-cn": "**已修复**：恢复了阀门表中的统一浇水持续时间"
       }
     },
     "titleLang": {

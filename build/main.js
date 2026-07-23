@@ -803,10 +803,18 @@ class Irrigation extends utils.Adapter {
       const currentIndex = valveIndexes.indexOf(valveIndex);
       const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
       if (currentIndex < 0 || targetIndex < 0 || targetIndex >= valveIndexes.length) {
-        this.sendTo(obj.from, obj.command, { native: { _planValveTable: this.getPlanValveTable(planIndex) } }, obj.callback);
+        this.sendTo(
+          obj.from,
+          obj.command,
+          { native: { _planValveTable: this.getPlanValveTable(planIndex) } },
+          obj.callback
+        );
         return;
       }
-      [valveIndexes[currentIndex], valveIndexes[targetIndex]] = [valveIndexes[targetIndex], valveIndexes[currentIndex]];
+      [valveIndexes[currentIndex], valveIndexes[targetIndex]] = [
+        valveIndexes[targetIndex],
+        valveIndexes[currentIndex]
+      ];
       const updatedPlans = this.config2.plans.map(
         (plan, index) => index === planIndex ? { ...plan, valveIndexes } : plan
       );
