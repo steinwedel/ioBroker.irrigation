@@ -651,6 +651,31 @@ class Irrigation extends utils.Adapter {
         await this.writeNativeAsync({ valves });
     }
 
+    private getPlanValveTable(planIndex: number | undefined): Array<{
+        valveNumber: string;
+        name: string;
+        assigned: boolean;
+        executionOrder: number;
+    }> {
+        const plan =
+            planIndex !== undefined && planIndex >= 0 && planIndex < this.config2.plans.length
+                ? this.config2.plans[planIndex]
+                : undefined;
+        const allValveIndexes = this.config2.valves.map((_, index) => index);
+        const assignedIndexes =
+            plan && plan.valveIndexes.length === 0
+                ? allValveIndexes
+                : (plan?.valveIndexes ?? []).filter(index => index >= 0 && index < this.config2.valves.length);
+        const assignedSet = new Set(assignedIndexes);
+        const orderedIndexes = [...assignedIndexes, ...allValveIndexes.filter(index => !assignedSet.has(index))];
+        return orderedIndexes.map((index, executionOrder) => ({
+            valveNumber: formatValveNumber(index),
+            name: this.config2.valves[index].name || 'unnamed',
+            assigned: assignedSet.has(index),
+            executionOrder: executionOrder + 1,
+        }));
+    }
+
     private async onMessage(obj: ioBroker.Message): Promise<void> {
         if (typeof obj !== 'object' || !obj.command) {
             return;
@@ -908,24 +933,12 @@ class Irrigation extends utils.Adapter {
 
         if (obj.command === 'loadPlanValveTable' && obj.callback) {
             const planIndex = readPlanIndex(obj.message);
-            const plan =
-                planIndex !== undefined && planIndex >= 0 && planIndex < this.config2.plans.length
-                    ? this.config2.plans[planIndex]
-                    : undefined;
-            const allValveIndexes = this.config2.valves.map((_, index) => index);
-            const assignedIndexes =
-                plan && plan.valveIndexes.length === 0
-                    ? allValveIndexes
-                    : (plan?.valveIndexes ?? []).filter(index => index >= 0 && index < this.config2.valves.length);
-            const assignedSet = new Set(assignedIndexes);
-            const orderedIndexes = [...assignedIndexes, ...allValveIndexes.filter(index => !assignedSet.has(index))];
-            const planValveTable = orderedIndexes.map((index, executionOrder) => ({
-                valveNumber: formatValveNumber(index),
-                name: this.config2.valves[index].name || 'unnamed',
-                assigned: assignedSet.has(index),
-                executionOrder: executionOrder + 1,
-            }));
-            this.sendTo(obj.from, obj.command, { native: { planValveTable } }, obj.callback);
+            this.sendTo(
+                obj.from,
+                obj.command,
+                { native: { _planValveTable: this.getPlanValveTable(planIndex) } },
+                obj.callback,
+            );
             return;
         }
 
@@ -944,7 +957,12 @@ class Irrigation extends utils.Adapter {
                     : p,
             );
             await this.writePlansState(updatedPlans);
-            this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
+            this.sendTo(
+                obj.from,
+                obj.command,
+                { native: { plans: updatedPlans, _planValveTable: this.getPlanValveTable(planIndex) } },
+                obj.callback,
+            );
             return;
         }
 

@@ -372,8 +372,8 @@
                     "type": "sendTo",
                     "label": "Apply valve assignment",
                     "command": "applyPlanValveTable",
-                    "jsonData": "{\"_editPlan\": ${JSON.stringify(data._editPlan ?? null)}, \"planValveTable\": ${JSON.stringify(data.planValveTable ?? [])}}",
-                    "alsoDependsOn": ["_editPlan", "planValveTable"],
+                    "jsonData": "{\"_editPlan\": ${JSON.stringify(data._editPlan ?? null)}, \"planValveTable\": ${JSON.stringify(data._planValveTable ?? [])}}",
+                    "alsoDependsOn": ["_editPlan", "_planValveTable"],
                     "useNative": true,
                     "icon": "save",
                     "variant": "contained",
@@ -384,11 +384,10 @@
                     "md": 4,
                     "lg": 3
                 },
-                "planValveTable": {
+                "_planValveTable": {
                     "type": "table",
                     "label": "Valves in selected plan",
                     "newLine": true,
-                    "doNotSave": true,
                     "noDelete": false,
                     "sm": 12,
                     "md": 12,

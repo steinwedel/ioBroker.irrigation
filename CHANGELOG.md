@@ -1,4 +1,7 @@
 # Changelog
+## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **FIXED**: Persisted and reloaded the valve order of each plan reliably
+
 ## 0.2.38 (2026-07-23)
 * (Gerhard Steinwedel) **ENHANCED**: Combined plan creation and renaming into one plan-name input
 

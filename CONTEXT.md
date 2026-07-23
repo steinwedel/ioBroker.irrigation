@@ -1,11 +1,11 @@
 # Context
 
 ## Current Task
-Das Anlegen und Umbenennen von Plänen verwendet ein gemeinsames Eingabefeld.
+Die Ventilreihenfolge wird pro Plan zuverlässig gespeichert und sofort zurückgeladen.
 
 ## Key Decisions
-- `Planname` liefert den Wert für beide Planaktionen.
-- Doppelte Plannamen werden abgewiesen und die Planliste danach aktualisiert.
+- Die temporäre Tabelle verwendet ein reaktives `_planValveTable`-Feld.
+- Nach dem Anwenden liefert der Adapter die gespeicherte Reihenfolge erneut an die Tabelle.
 
 ## Next Steps
-- Übersetzungen und Validierung ausführen.
+- Validierung ausführen.
