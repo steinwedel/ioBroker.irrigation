@@ -37,7 +37,7 @@ Controls irrigation zones, valves and watering schedules based on sensors and we
 
 The fastest way to get your irrigation running with just two steps:
 
-1. **Add your valves** — Open the **Valves** tab, click **Scan for valves** to auto-discover connected valves (Gardena, Homematic, Rainbird, Hydrawise) or manually add a generic valve by entering its ioBroker state ID.
+1. **Add your valves** — Open the **Valves** tab, click **Scan for valves** to auto-discover connected valves (Gardena, Homematic, Rainbird, Hydrawise) or manually add a generic valve by entering its ioBroker state ID. A scan also refreshes names of already known valves from the source adapter's object tree.
 2. **Set a schedule** — Open the **Control** tab, enable **Automatic mode** and add one or more timer times (e.g. `06:00` and `19:00`).
 
 Save the configuration. The adapter will now water all zones on all days at the configured times. Every valve gets a default zone with a duration of 10 minutes.

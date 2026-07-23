@@ -32,14 +32,14 @@ const VALVE_DEFAULTS = {
   days: []
 };
 function nameToString(name, fallback) {
-  var _a;
+  var _a, _b;
   if (!name) {
     return fallback;
   }
   if (typeof name === "string") {
     return name;
   }
-  return (_a = name.en) != null ? _a : fallback;
+  return (_b = (_a = name.de) != null ? _a : name.en) != null ? _b : fallback;
 }
 async function findAdapterInstances(adapter, adapterName) {
   const instanceObjects = await adapter.getForeignObjectsAsync(`system.adapter.${adapterName}.*`, "instance");

@@ -32,7 +32,7 @@ function nameToString(name: ioBroker.StringOrTranslated | undefined, fallback: s
     if (typeof name === 'string') {
         return name;
     }
-    return name.en ?? fallback;
+    return name.de ?? name.en ?? fallback;
 }
 
 /**

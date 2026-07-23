@@ -672,15 +672,12 @@ class Irrigation extends utils.Adapter {
         const assignedIndexes = this.getPlanValveIndexes(planIndex);
         const assignedSet = new Set(assignedIndexes);
         const orderedIndexes = [...assignedIndexes, ...allValveIndexes.filter(index => !assignedSet.has(index))];
-        return orderedIndexes.map((index, executionOrder) => {
-            const assigned = assignedSet.has(index);
-            return {
-                valveNumber: formatValveNumber(index),
-                name: this.config2.valves[index].name || 'unnamed',
-                assigned,
-                executionOrder: assigned ? executionOrder + 1 : 0,
-            };
-        });
+        return orderedIndexes.map((index, executionOrder) => ({
+            valveNumber: formatValveNumber(index),
+            name: this.config2.valves[index].name || 'unnamed',
+            assigned: assignedSet.has(index),
+            executionOrder: executionOrder + 1,
+        }));
     }
 
     private async onMessage(obj: ioBroker.Message): Promise<void> {
@@ -725,18 +722,28 @@ class Irrigation extends utils.Adapter {
             setProgress(`Scanning ${payload.type}...`);
             const result = await scanForValves(this, payload.type, effectiveInstance, payload.locationId, setProgress);
 
-            const existingStateIds = new Set(this.config2.valves.map(v => v.stateId));
-            const newValves = result.valves.filter(v => !existingStateIds.has(v.stateId));
-            const mergedValves = [...this.config2.valves, ...newValves].map((valve, index) => ({
-                ...valve,
-                valveNumber: `valve_${formatValveNumber(index)}`,
-            }));
+            const scannedValvesByStateId = new Map(result.valves.map(valve => [valve.stateId, valve]));
+            const existingStateIds = new Set(this.config2.valves.map(valve => valve.stateId));
+            const newValves = result.valves.filter(valve => !existingStateIds.has(valve.stateId));
+            let updatedNames = 0;
+            const mergedValves = [...this.config2.valves, ...newValves].map((valve, index) => {
+                const scannedValve = scannedValvesByStateId.get(valve.stateId);
+                const name = scannedValve?.name || valve.name;
+                if (index < this.config2.valves.length && name !== valve.name) {
+                    updatedNames++;
+                }
+                return {
+                    ...valve,
+                    name,
+                    valveNumber: `valve_${formatValveNumber(index)}`,
+                };
+            });
 
             this.log.info(
-                `Valve scan (${payload.type}): found ${result.valves.length}, added ${newValves.length} new, ${result.errors.length} error(s)`,
+                `Valve scan (${payload.type}): found ${result.valves.length}, added ${newValves.length} new, updated ${updatedNames} name(s), ${result.errors.length} error(s)`,
             );
 
-            if (newValves.length > 0) {
+            if (newValves.length > 0 || updatedNames > 0) {
                 await this.writeValvesToNative(mergedValves);
             }
 
@@ -745,7 +752,9 @@ class Irrigation extends utils.Adapter {
                     ? `Scan finished with errors: ${result.errors.join('; ')}`
                     : newValves.length > 0
                       ? `Found and added ${newValves.length} new valve(s).`
-                      : 'Scan finished, no new valves found.';
+                      : updatedNames > 0
+                        ? `Updated ${updatedNames} valve name(s).`
+                        : 'Scan finished, no new valves found.';
             setProgress(doneMessage);
 
             if (obj.callback) {

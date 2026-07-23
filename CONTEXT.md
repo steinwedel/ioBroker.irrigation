@@ -1,11 +1,11 @@
 # Context
 
 ## Current Task
-Planventile werden wieder über die nativen Tabellenpfeile sortiert.
+Ventilnamen werden beim Scan aus dem Objektbaum aktualisiert; Plannummern sind fortlaufend.
 
 ## Key Decisions
-- Die Tabellenaktionen sind für Hoch-/Runter-Pfeile aktiviert.
-- Bei Pumpenkapazität 0 wird die gespeicherte Zeilenreihenfolge ausgeführt.
+- Bereits bekannte Ventile erhalten den erkannten Objektbaum-Namen beim Scan.
+- Die Nummernspalte zeigt die einbasierte Tabellenposition aller Ventile.
 
 ## Next Steps
 - Validierung ausführen.
