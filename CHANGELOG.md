@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.2.42 (2026-07-23)
 * (Gerhard Steinwedel) **FIXED**: Refreshed valve names from the object tree during scans and corrected plan numbering
 
 ## 0.2.41 (2026-07-23)

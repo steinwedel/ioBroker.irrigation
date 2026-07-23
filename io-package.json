@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.2.41",
+    "version": "0.2.42",
     "news": {
+      "0.2.42": {
+        "en": "**FIXED**: Refreshed valve names from the object tree during scans and corrected plan numbering",
+        "de": "**BEHOBEN**: Ventilnamen aus dem Objektbaum während der Scans aktualisiert und Plannummerierung korrigiert",
+        "ru": "**ИСПРАВЛЕНО**: Обновлены названия клапанов из дерева объектов во время сканирования и исправлена нумерация планов",
+        "pt": "**CORRIGIDO**: Nomes de válvulas atualizados da árvore de objetos durante as varreduras e numeração de planos corrigida",
+        "nl": "**OPGELOST**: Klepnamen vernieuwd vanuit de objectboom tijdens scans en plannummering gecorrigeerd",
+        "fr": "**CORRIGÉ** : Noms de vannes actualisés depuis l'arborescence d'objets pendant les analyses et numérotation des plans corrigée",
+        "it": "**RISOLTO**: Aggiornati i nomi delle valvole dall'albero degli oggetti durante le scansioni e corretta la numerazione dei piani",
+        "es": "**CORREGIDO**: Nombres de válvulas actualizados desde el árbol de objetos durante los escaneos y numeración de planos corregida",
+        "pl": "**NAPRAWIONO**: Odświeżono nazwy zaworów z drzewa obiektów podczas skanowania i poprawiono numerację planów",
+        "uk": "**ВИПРАВЛЕНО**: Оновлено назви клапанів з дерева об'єктів під час сканування та виправлено нумерацію планів",
+        "zh-cn": "**已修复**：在扫描期间从对象树刷新了阀门名称并修正了平面图编号"
+      },
       "0.2.41": {
         "en": "**FIXED**: Restored native table arrow controls for ordered plan valves",
         "de": "**BEHOBEN**: Native Tabellen-Pfeilsteuerungen für geordnete Planventile wiederhergestellt",
@@ -80,19 +93,6 @@
         "pl": "**ULEPSZONE**: Nagłówek kolumny tabeli zaworów planu zmieniony z \"Kolejność wykonania\" na \"Numer\" z zlokalizowanymi tłumaczeniami dla wszystkich obsługiwanych języków",
         "uk": "**ПОКРАЩЕНО**: Заголовок стовпця таблиці клапанів плану перейменовано з \"Порядок виконання\" на \"Номер\" з локалізованими перекладами для всіх підтримуваних мов",
         "zh-cn": "**增强**：将计划阀门表列标题从\"执行顺序\"重命名为\"编号\"，并为所有支持的语言提供本地化翻译"
-      },
-      "0.2.35": {
-        "en": "**FIXED**: Added a compatible visible sequential execution-order column to the plan valve table",
-        "de": "**BEHOBEN**: Eine kompatible, sichtbare Spalte für die sequenzielle Ausführungsreihenfolge wurde zur Planventiltabelle hinzugefügt",
-        "ru": "**ИСПРАВЛЕНО**: Добавлен совместимый видимый столбец последовательного порядка выполнения в таблицу клапанов плана",
-        "pt": "**CORRIGIDO**: Adicionada uma coluna de ordem de execução sequencial compatível e visível à tabela de válvulas do plano",
-        "nl": "**OPGELOST**: Een compatibele zichtbare kolom voor sequentiële uitvoeringsvolgorde toegevoegd aan de plankleptabel",
-        "fr": "**CORRIGÉ** : Ajout d'une colonne d'ordre d'exécution séquentiel compatible et visible au tableau des vannes du plan",
-        "it": "**RISOLTO**: Aggiunta una colonna visibile compatibile per l'ordine di esecuzione sequenziale alla tabella delle valvole del piano",
-        "es": "**CORREGIDO**: Se agregó una columna de orden de ejecución secuencial compatible y visible a la tabla de válvulas del plan",
-        "pl": "**NAPRAWIONO**: Dodano kompatybilną, widoczną kolumnę kolejności sekwencyjnego wykonywania do tabeli zaworów planu",
-        "uk": "**ВИПРАВЛЕНО**: Додано сумісний видимий стовпець послідовного порядку виконання до таблиці клапанів плану",
-        "zh-cn": "**已修复**：在计划阀门表中添加了兼容的可见顺序执行顺序列"
       }
     },
     "titleLang": {
