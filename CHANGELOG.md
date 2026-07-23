@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.2.41 (2026-07-23)
 * (Gerhard Steinwedel) **FIXED**: Restored native table arrow controls for ordered plan valves
 
 ## 0.2.40 (2026-07-23)

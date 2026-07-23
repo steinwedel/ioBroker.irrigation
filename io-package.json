@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.2.40",
+    "version": "0.2.41",
     "news": {
+      "0.2.41": {
+        "en": "**FIXED**: Restored native table arrow controls for ordered plan valves",
+        "de": "**BEHOBEN**: Native Tabellen-Pfeilsteuerungen für geordnete Planventile wiederhergestellt",
+        "ru": "**ИСПРАВЛЕНО**: Восстановлены нативные элементы управления стрелками таблицы для упорядоченных клапанов плана",
+        "pt": "**CORRIGIDO**: Restaurados os controles de seta da tabela nativa para válvulas de plano ordenadas",
+        "nl": "**OPGELOST**: Native tabel pijlbesturing voor geordende planventielen hersteld",
+        "fr": "**CORRIGÉ** : Restauration des contrôles de flèches de tableau natifs pour les vannes de plan ordonnées",
+        "it": "**RISOLTO**: Ripristinati i controlli freccia della tabella nativa per le valvole del piano ordinate",
+        "es": "**SOLUCIONADO**: Restaurados los controles de flecha de tabla nativos para válvulas de plan ordenadas",
+        "pl": "**NAPRAWIONO**: Przywrócono natywne kontrolki strzałek tabeli dla uporządkowanych zaworów planu",
+        "uk": "**ВИПРАВЛЕНО**: Відновлено нативні елементи керування стрілками таблиці для впорядкованих клапанів плану",
+        "zh-cn": "**已修复**：恢复了有序计划阀门的原生表格箭头控件"
+      },
       "0.2.40": {
         "en": "**FIXED**: Added dedicated persistent move controls for ordered plan valves",
         "de": "**BEHOBEN**: Dedizierte persistente Bewegungssteuerungen für geordnete Planventile hinzugefügt",
@@ -80,19 +93,6 @@
         "pl": "**NAPRAWIONO**: Dodano kompatybilną, widoczną kolumnę kolejności sekwencyjnego wykonywania do tabeli zaworów planu",
         "uk": "**ВИПРАВЛЕНО**: Додано сумісний видимий стовпець послідовного порядку виконання до таблиці клапанів плану",
         "zh-cn": "**已修复**：在计划阀门表中添加了兼容的可见顺序执行顺序列"
-      },
-      "0.2.34": {
-        "en": "**ENHANCED**: Added visible sequential execution positions to the plan valve table",
-        "de": "**VERBESSERT**: Sichtbare sequentielle Ausführungspositionen zur Planventil-Tabelle hinzugefügt",
-        "ru": "**УЛУЧШЕНО**: Добавлены видимые позиции последовательного выполнения в таблицу клапанов плана",
-        "pt": "**MELHORADO**: Adicionadas posições de execução sequencial visíveis à tabela de válvulas do plano",
-        "nl": "**VERBETERD**: Zichtbare sequentiële uitvoeringposities toegevoegd aan de plankleptabel",
-        "fr": "**AMÉLIORÉ**: Ajout de positions d'exécution séquentielle visibles au tableau des vannes du plan",
-        "it": "**MIGLIORATO**: Aggiunte posizioni di esecuzione sequenziale visibili alla tabella delle valvole del piano",
-        "es": "**MEJORADO**: Se agregaron posiciones de ejecución secuencial visibles a la tabla de válvulas del plan",
-        "pl": "**ULEPSZONE**: Dodano widoczne pozycje sekwencyjnego wykonania do tabeli zaworów planu",
-        "uk": "**ПОКРАЩЕНО**: Додано видимі позиції послідовного виконання до таблиці клапанів плану",
-        "zh-cn": "**增强**：在计划阀门表中添加了可见的顺序执行位置"
       }
     },
     "titleLang": {
