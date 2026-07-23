@@ -808,7 +808,7 @@ class Irrigation extends utils.Adapter {
         }
 
         if (obj.command === 'createPlan' && obj.callback) {
-            const name = ((obj.message as Record<string, unknown>)?.newPlanName as string | undefined)?.trim();
+            const name = ((obj.message as Record<string, unknown>)?.planName as string | undefined)?.trim();
             if (!name) {
                 this.sendTo(obj.from, obj.command, { error: 'noName' }, obj.callback);
                 return;
@@ -848,7 +848,7 @@ class Irrigation extends utils.Adapter {
 
         if (obj.command === 'renamePlan' && obj.callback) {
             const planIndex = readPlanIndex(obj.message);
-            const name = ((obj.message as Record<string, unknown>)?.renamePlanName as string | undefined)?.trim();
+            const name = ((obj.message as Record<string, unknown>)?.planName as string | undefined)?.trim();
             if (planIndex === undefined || planIndex < 0 || planIndex >= this.config2.plans.length) {
                 this.sendTo(obj.from, obj.command, { error: 'noSelection' }, obj.callback);
                 return;
@@ -862,14 +862,16 @@ class Irrigation extends utils.Adapter {
                 return;
             }
             const oldName = this.config2.plans[planIndex].name;
-            const updatedPlans = this.config2.plans.map((plan, index) => (index === planIndex ? { ...plan, name } : plan));
+            const updatedPlans = this.config2.plans.map((plan, index) =>
+                index === planIndex ? { ...plan, name } : plan,
+            );
             await this.writePlansState(updatedPlans);
             const selectedPlan = await this.getStateAsync('automation.planSelect');
             if (selectedPlan?.val === oldName) {
                 await this.setStateAsync('automation.planSelect', { val: name, ack: true });
             }
             this.log.info(`Renamed plan "${oldName}" to "${name}"`);
-            this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans, _editPlan: planIndex, renamePlanName: '' } }, obj.callback);
+            this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans, _editPlan: planIndex } }, obj.callback);
             return;
         }
 

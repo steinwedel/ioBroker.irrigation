@@ -1,10 +1,10 @@
 # Context
 
 ## Current Task
-Pläne können im Plan-Editor umbenannt werden.
+Das Anlegen und Umbenennen von Plänen verwendet ein gemeinsames Eingabefeld.
 
 ## Key Decisions
-- Der neue Name wird vor dem Bestätigungsdialog eingegeben.
+- `Planname` liefert den Wert für beide Planaktionen.
 - Doppelte Plannamen werden abgewiesen und die Planliste danach aktualisiert.
 
 ## Next Steps

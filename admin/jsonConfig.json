@@ -279,9 +279,9 @@
                     "md": 4,
                     "lg": 3
                 },
-                "renamePlanName": {
+                "planName": {
                     "type": "text",
-                    "label": "New name for selected plan",
+                    "label": "Plan name",
                     "newLine": true,
                     "doNotSave": true,
                     "sm": 6,
@@ -292,17 +292,17 @@
                     "type": "sendTo",
                     "label": "Rename selected plan",
                     "command": "renamePlan",
-                    "jsonData": "{\"_editPlan\": ${JSON.stringify(data._editPlan ?? null)}, \"renamePlanName\": ${JSON.stringify(data.renamePlanName ?? '')}}",
-                    "alsoDependsOn": ["_editPlan", "renamePlanName"],
+                    "jsonData": "{\"_editPlan\": ${JSON.stringify(data._editPlan ?? null)}, \"planName\": ${JSON.stringify(data.planName ?? '')}}",
+                    "alsoDependsOn": ["_editPlan", "planName"],
                     "useNative": true,
-                    "disabled": "!data.renamePlanName || !data.renamePlanName.trim()",
+                    "disabled": "!data.planName || !data.planName.trim()",
                     "confirm": {
-                        "text": "Rename the selected plan to \"${data.renamePlanName}\"?",
+                        "text": "Rename the selected plan to \"${data.planName}\"?",
                         "title": "Rename plan?",
                         "type": "info",
                         "ok": "Rename",
                         "cancel": "Cancel",
-                        "alsoDependsOn": ["renamePlanName"]
+                        "alsoDependsOn": ["planName"]
                     },
                     "icon": "edit",
                     "variant": "contained",
@@ -315,30 +315,22 @@
                     "md": 4,
                     "lg": 3
                 },
-                "newPlanName": {
-                    "type": "text",
-                    "label": "New plan name",
-                    "newLine": true,
-                    "doNotSave": true,
-                    "sm": 6,
-                    "md": 4,
-                    "lg": 3
-                },
+
                 "addPlan": {
                     "type": "sendTo",
                     "label": "Add new plan",
                     "command": "createPlan",
-                    "jsonData": "{\"newPlanName\": ${JSON.stringify(data.newPlanName ?? '')}}",
-                    "alsoDependsOn": ["newPlanName"],
+                    "jsonData": "{\"planName\": ${JSON.stringify(data.planName ?? '')}}",
+                    "alsoDependsOn": ["planName"],
                     "useNative": true,
-                    "disabled": "!data.newPlanName || !data.newPlanName.trim()",
+                    "disabled": "!data.planName || !data.planName.trim()",
                     "confirm": {
-                        "text": "Create new plan \"${data.newPlanName}\"?",
+                        "text": "Create new plan \"${data.planName}\"?",
                         "title": "Add new plan?",
                         "type": "info",
                         "ok": "Create",
                         "cancel": "Cancel",
-                        "alsoDependsOn": ["newPlanName"]
+                        "alsoDependsOn": ["planName"]
                     },
                     "icon": "add",
                     "variant": "contained",
