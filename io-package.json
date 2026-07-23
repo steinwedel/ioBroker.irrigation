@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.2.35",
+    "version": "0.2.36",
     "news": {
+      "0.2.36": {
+        "en": "**ENHANCED**: Renamed plan valve table column header from \"Execution order\" to \"Number\" with localized translations for all supported languages",
+        "de": "**VERBESSERT**: Spaltenüberschrift der Planventiltabelle von \"Ausführungsreihenfolge\" in \"Nummer\" umbenannt mit lokalisierten Übersetzungen für alle unterstützten Sprachen",
+        "ru": "**УЛУЧШЕНО**: Заголовок столбца таблицы клапанов плана переименован с \"Порядок выполнения\" на \"Номер\" с локализованными переводами для всех поддерживаемых языков",
+        "pt": "**MELHORADO**: Cabeçalho da coluna da tabela de válvulas do plano renomeado de \"Ordem de execução\" para \"Número\" com traduções localizadas para todos os idiomas suportados",
+        "nl": "**VERBETERD**: Kolomkop van de plankleptabel hernoemd van \"Uitvoeringsvolgorde\" naar \"Nummer\" met gelokaliseerde vertalingen voor alle ondersteunde talen",
+        "fr": "**AMÉLIORÉ**: En-tête de colonne du tableau des vannes du plan renommé de \"Ordre d'exécution\" à \"Numéro\" avec des traductions localisées pour toutes les langues prises en charge",
+        "it": "**MIGLIORATO**: Intestazione della colonna della tabella delle valvole del piano rinominata da \"Ordine di esecuzione\" a \"Numero\" con traduzioni localizzate per tutte le lingue supportate",
+        "es": "**MEJORADO**: Encabezado de columna de la tabla de válvulas del plan renombrado de \"Orden de ejecución\" a \"Número\" con traducciones localizadas para todos los idiomas compatibles",
+        "pl": "**ULEPSZONE**: Nagłówek kolumny tabeli zaworów planu zmieniony z \"Kolejność wykonania\" na \"Numer\" z zlokalizowanymi tłumaczeniami dla wszystkich obsługiwanych języków",
+        "uk": "**ПОКРАЩЕНО**: Заголовок стовпця таблиці клапанів плану перейменовано з \"Порядок виконання\" на \"Номер\" з локалізованими перекладами для всіх підтримуваних мов",
+        "zh-cn": "**增强**：将计划阀门表列标题从\"执行顺序\"重命名为\"编号\"，并为所有支持的语言提供本地化翻译"
+      },
       "0.2.35": {
         "en": "**FIXED**: Added a compatible visible sequential execution-order column to the plan valve table",
         "de": "**BEHOBEN**: Eine kompatible, sichtbare Spalte für die sequenzielle Ausführungsreihenfolge wurde zur Planventiltabelle hinzugefügt",
@@ -80,19 +93,6 @@
         "pl": "**ULEPSZONE**: Dodano konfigurowalną kolejność zaworów dla sekwencyjnych planów nawadniania",
         "uk": "**ПОКРАЩЕНО**: Додано налаштовуваний порядок клапанів для послідовних планів поливу",
         "zh-cn": "**增强**：为顺序浇水计划添加了可配置的阀门顺序"
-      },
-      "0.2.29": {
-        "en": "**NEW**: Added temperature-controlled automatic plan duration adjustment\n**FIXED**: Reset automation duration states when stopping a run",
-        "de": "**NEU**: Temperaturgesteuerte automatische Anpassung der Plandauer hinzugefügt\n**BEHOBEN**: Automatisierungsdauer-Zustände werden beim Stoppen eines Durchlaufs zurückgesetzt",
-        "ru": "**НОВОЕ**: Добавлена автоматическая регулировка длительности плана в зависимости от температуры\n**ИСПРАВЛЕНО**: Сброс состояний длительности автоматизации при остановке выполнения",
-        "pt": "**NOVO**: Adicionado ajuste automático da duração do plano controlado por temperatura\n**CORRIGIDO**: Redefinição dos estados de duração da automação ao parar uma execução",
-        "nl": "**NIEUW**: Temperatuurgestuurde automatische aanpassing van planduur toegevoegd\n**OPGELOST**: Automatiseringsduurstatussen worden gereset bij het stoppen van een run",
-        "fr": "**NOUVEAU** : Ajout de l'ajustement automatique de la durée du plan contrôlé par la température\n**CORRIGÉ** : Réinitialisation des états de durée d'automatisation lors de l'arrêt d'une exécution",
-        "it": "**NOVITÀ**: Aggiunto regolazione automatica della durata del piano controllata dalla temperatura\n**RISOLTO**: Ripristino degli stati di durata dell'automazione quando si interrompe un'esecuzione",
-        "es": "**NUEVO**: Añadido ajuste automático de la duración del plan controlado por temperatura\n**CORREGIDO**: Restablecimiento de los estados de duración de la automatización al detener una ejecución",
-        "pl": "**NOWOŚĆ**: Dodano automatyczne dostosowanie czasu trwania planu sterowane temperaturą\n**NAPRAWIONO**: Resetowanie stanów czasu trwania automatyzacji podczas zatrzymywania uruchomienia",
-        "uk": "**НОВЕ**: Додано автоматичне регулювання тривалості плану з контролем температури\n**ВИПРАВЛЕНО**: Скидання станів тривалості автоматизації при зупинці виконання",
-        "zh-cn": "**新增**：添加了温度控制的自动计划持续时间调整\n**修复**：停止运行时重置自动化持续时间状态"
       }
     },
     "titleLang": {
