@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.2.33",
+    "version": "0.2.34",
     "news": {
+      "0.2.34": {
+        "en": "**ENHANCED**: Added visible sequential execution positions to the plan valve table",
+        "de": "**VERBESSERT**: Sichtbare sequentielle Ausführungspositionen zur Planventil-Tabelle hinzugefügt",
+        "ru": "**УЛУЧШЕНО**: Добавлены видимые позиции последовательного выполнения в таблицу клапанов плана",
+        "pt": "**MELHORADO**: Adicionadas posições de execução sequencial visíveis à tabela de válvulas do plano",
+        "nl": "**VERBETERD**: Zichtbare sequentiële uitvoeringposities toegevoegd aan de plankleptabel",
+        "fr": "**AMÉLIORÉ**: Ajout de positions d'exécution séquentielle visibles au tableau des vannes du plan",
+        "it": "**MIGLIORATO**: Aggiunte posizioni di esecuzione sequenziale visibili alla tabella delle valvole del piano",
+        "es": "**MEJORADO**: Se agregaron posiciones de ejecución secuencial visibles a la tabla de válvulas del plan",
+        "pl": "**ULEPSZONE**: Dodano widoczne pozycje sekwencyjnego wykonania do tabeli zaworów planu",
+        "uk": "**ПОКРАЩЕНО**: Додано видимі позиції послідовного виконання до таблиці клапанів плану",
+        "zh-cn": "**增强**：在计划阀门表中添加了可见的顺序执行位置"
+      },
       "0.2.33": {
         "en": "**FIXED**: Restored the unified watering duration in the valve table",
         "de": "**BEHOBEN**: Die einheitliche Bewässerungsdauer in der Ventiltabelle wurde wiederhergestellt",
@@ -80,19 +93,6 @@
         "pl": "**NOWOŚĆ**: Dodano sterowanie zaworami Hydrawise i automatyczne wykrywanie przez ioBroker.hydrawise **ULEPSZONO**: Udokumentowano wszystkie punkty danych adaptera ioBroker i ich zastosowanie w README **ULEPSZONO**: Stany czasu trwania automatyzacji publikowane jako sekundy zamiast sformatowanych minut",
         "uk": "**НОВЕ**: Додано керування клапанами Hydrawise та автоматичне виявлення через ioBroker.hydrawise **ПОКРАЩЕНО**: Задокументовано всі точки даних адаптера ioBroker та їх використання в README **ПОКРАЩЕНО**: Стани тривалості автоматизації публікуються в секундах замість форматованих хвилин",
         "zh-cn": "**新增**：通过 ioBroker.hydrawise 添加了 Hydrawise 阀门控制和自动发现功能 **增强**：在 README 中记录了所有 ioBroker 适配器数据点及其用法 **增强**：自动化持续时间状态以秒为单位发布，而不是格式化的分钟"
-      },
-      "0.2.27": {
-        "en": "**NEW**: Added selectable direct plan starts through ioBroker states",
-        "de": "**NEU**: Auswählbare direkte Planstarts über ioBroker-Zustände hinzugefügt",
-        "ru": "**НОВОЕ**: Добавлена возможность выбора прямого запуска планов через состояния ioBroker",
-        "pt": "**NOVO**: Adicionado início direto de planos selecionáveis através de estados do ioBroker",
-        "nl": "**NIEUW**: Selecteerbare directe planstarts toegevoegd via ioBroker states",
-        "fr": "**NOUVEAU**: Ajout de démarrages de plans directs sélectionnables via les états ioBroker",
-        "it": "**NOVITÀ**: Aggiunti avvii diretti di piani selezionabili tramite stati ioBroker",
-        "es": "**NUEVO**: Añadidos inicios directos de planes seleccionables a través de estados de ioBroker",
-        "pl": "**NOWOŚĆ**: Dodano możliwość wyboru bezpośredniego uruchamiania planów przez stany ioBroker",
-        "uk": "**НОВЕ**: Додано можливість вибору прямого запуску планів через стани ioBroker",
-        "zh-cn": "**新功能**：通过 ioBroker 状态添加了可选择的直接计划启动"
       }
     },
     "titleLang": {

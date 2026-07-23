@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.2.34 (2026-07-23)
 * (Gerhard Steinwedel) **ENHANCED**: Added visible sequential execution positions to the plan valve table
 
 ## 0.2.33 (2026-07-23)
