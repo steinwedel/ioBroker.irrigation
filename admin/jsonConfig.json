@@ -367,11 +367,11 @@
                     "lg": 8,
                     "items": [
                         {
-                            "type": "staticText",
-                            "attr": "_position",
+                            "type": "text",
+                            "attr": "executionOrder",
                             "title": "Execution order",
-                            "text": "${arrayIndex + 1}",
-                            "width": "10%"
+                            "width": "10%",
+                            "readOnly": true
                         },
                         {
                             "type": "checkbox",

@@ -890,10 +890,11 @@ class Irrigation extends utils.Adapter {
                     : (plan?.valveIndexes ?? []).filter(index => index >= 0 && index < this.config2.valves.length);
             const assignedSet = new Set(assignedIndexes);
             const orderedIndexes = [...assignedIndexes, ...allValveIndexes.filter(index => !assignedSet.has(index))];
-            const planValveTable = orderedIndexes.map(index => ({
+            const planValveTable = orderedIndexes.map((index, executionOrder) => ({
                 valveNumber: formatValveNumber(index),
                 name: this.config2.valves[index].name || 'unnamed',
                 assigned: assignedSet.has(index),
+                executionOrder: executionOrder + 1,
             }));
             this.sendTo(obj.from, obj.command, { native: { planValveTable } }, obj.callback);
             return;

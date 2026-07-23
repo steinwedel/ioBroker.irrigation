@@ -1,10 +1,10 @@
 # Context
 
 ## Current Task
-Die Plan-Ventiltabelle zeigt die laufende Ausführungsposition.
+Die Plan-Ventiltabelle zeigt die laufende Ausführungsposition kompatibel als Textspalte.
 
 ## Key Decisions
-- Die statische Spalte aktualisiert sich beim Verschieben per Tabellenpfeil.
+- Der Adapter liefert die schreibgeschützte Ausführungsnummer beim Laden der Tabelle.
 - Bei Pumpenkapazität 0 wird die gespeicherte Zeilenreihenfolge ausgeführt.
 
 ## Next Steps
