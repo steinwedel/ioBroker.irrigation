@@ -431,6 +431,33 @@
                     "lg": 4,
                     "xl": 4
                 },
+                "scheduler.temperatureAdjustmentStateId": {
+                    "type": "objectId",
+                    "label": "Temperature state for irrigation adjustment",
+                    "help": "Current temperature in °C used to calculate the watering duration factor.",
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "scheduler.temperatureAdjustmentEnabled": {
+                    "type": "checkbox",
+                    "label": "Temperature-controlled irrigation adjustment",
+                    "help": "Adjusts automatic plan durations by 7% per °C relative to 20 °C.",
+                    "disabled": "!data.scheduler?.temperatureAdjustmentStateId",
+                    "onChange": {
+                        "alsoDependsOn": ["scheduler.temperatureAdjustmentStateId"],
+                        "calculateFunc": "data.scheduler?.temperatureAdjustmentStateId ? data.scheduler?.temperatureAdjustmentEnabled : false",
+                        "ignoreOwnChanges": true
+                    },
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
                 "scheduler.pumpCapacity": {
                     "type": "number",
                     "label": "Pump capacity (l/min, 0 = sequential only)",

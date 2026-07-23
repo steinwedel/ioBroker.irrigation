@@ -5,7 +5,7 @@
  */
 
 import { expect } from 'chai';
-import { AutomationEngine, buildBatches } from './lib/automation';
+import { AutomationEngine, buildBatches, calculateTemperatureAdjustmentFactor } from './lib/automation';
 import { parseDwdTemperature } from './lib/dwd';
 import { resolvePlanFromIcalTitle } from './lib/scheduler';
 import { parsePlanValveTableRows } from './lib/types';
@@ -30,6 +30,21 @@ function makeValve(overrides: Partial<IValveConfig> = {}): IValveConfig {
         ...overrides,
     };
 }
+
+describe('automation.calculateTemperatureAdjustmentFactor', () => {
+    it('uses 20 °C as the neutral factor', () => {
+        expect(calculateTemperatureAdjustmentFactor(20)).to.equal(1);
+    });
+
+    it('increases by 7% for each degree above the base temperature', () => {
+        expect(calculateTemperatureAdjustmentFactor(21)).to.equal(1.07);
+        expect(calculateTemperatureAdjustmentFactor(22)).to.equal(1.07 ** 2);
+    });
+
+    it('reduces duration below the base temperature', () => {
+        expect(calculateTemperatureAdjustmentFactor(10)).to.be.closeTo(1.07 ** -10, 0.000_000_1);
+    });
+});
 
 describe('automation.buildBatches', () => {
     it('returns one valve per batch when pumpCapacity is 0 (sequential mode)', () => {
@@ -411,6 +426,8 @@ describe('automation.recoverAfterRestart', () => {
                 autoMode: false,
                 timerTimes: [],
                 extensionFactor: 1,
+                temperatureAdjustmentEnabled: false,
+                temperatureAdjustmentStateId: '',
                 pumpCapacity: 0,
                 valvePause: 0,
                 seasonEnabled: false,
@@ -454,6 +471,7 @@ describe('automation.recoverAfterRestart', () => {
             valves: valves as unknown as AutomationDeps['valves'],
             isValveBlockedForAutoRun: () => ({ blocked: false }),
             isLegallyRestricted: () => false,
+            getTemperatureAdjustmentTemperature: () => Promise.resolve(undefined),
         };
     }
 

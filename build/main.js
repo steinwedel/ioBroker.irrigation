@@ -98,6 +98,7 @@ class Irrigation extends utils.Adapter {
       valves: this.valves,
       isValveBlockedForAutoRun: (valveIndex) => this.sensorManager.isValveBlocked(valveIndex),
       isLegallyRestricted: () => this.dwd.isActive(),
+      getTemperatureAdjustmentTemperature: () => this.sensorManager.getTemperatureAdjustmentTemperature(),
       onValveFlowChange: (valveIndex, flowing) => this.waterConsumption.onValveFlowChange(valveIndex, flowing)
     });
     this.automation.start();

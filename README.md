@@ -128,6 +128,8 @@ Central scheduling and behavior settings.
 |---------|-------------|
 | Automatic mode enabled | Master switch for all automatic watering. When disabled, only manual starts are possible. |
 | Timer times | One or more times in `HH:MM` format. At each time, the first plan in the Plans table is triggered. |
+| Temperature state for irrigation adjustment | Numeric ioBroker temperature state in °C used for automatic plan duration adjustment. It must be selected before the adjustment can be enabled. |
+| Temperature-controlled irrigation adjustment | Enables a factor fixed when each automatic plan starts: `1.07^(T - 20)`, where `T` is the selected temperature in °C. At 20 °C the factor is 1.00; each degree above increases duration by 7%, each degree below decreases it by 7%. The factor multiplies the configured duration extension factor and applies to all valves in that plan. Manual valve starts are not adjusted. |
 
 **Expert mode:**
 
@@ -239,12 +241,14 @@ All IDs below are relative to the adapter instance, e.g. `<instance>` is normall
 | `automation.currentZone` | number, R | Zero-based index of the first currently running valve; `-1` if none is running. |
 | `automation.currentBatch` / `automation.totalBatches` | number, R | Current one-based batch number and total calculated batches; `currentBatch` is `0` while idle. |
 | `automation.batchZones` | JSON string, R | Zero-based valve indexes in the active batch, e.g. `[0,2]`; `[]` while idle. |
-| `automation.totalDuration` / `automation.elapsedTime` / `automation.remainingTime` | number, seconds, R | Planned duration, elapsed wall-clock time and remaining duration of the current automatic run. |
+| `automation.totalDuration` / `automation.elapsedTime` / `automation.remainingTime` | number, seconds, R | Planned duration, elapsed wall-clock time and remaining duration of the current automatic run. All three reset to `0` when `automation.stop` is used. |
 | `automation.activePlan` | string, R | Name of the currently active plan; empty while idle. |
 | `automation.planSelect` | string, R/W | Selectable plan-name value for external UIs. It is kept in sync with the available plans; use `startPlan` to execute a choice directly. |
 | `automation.plansList` | JSON string, R | Available plan names, e.g. `["Alle","Rasen"]`. Use this to populate scripts or external UI selectors. |
 | `automation.plansData` | JSON string, R | Internal persistent plan definition containing names and valve indexes. It is maintained by the adapter and not intended for external writes. |
 | `automation.extensionFactor` | number, R/W | Configured duration multiplier (`0.5` to `5`) mirrored from adapter settings. |
+| `automation.temperatureAdjustmentEnabled` / `automation.temperatureAdjustmentStateId` | boolean / string, R/W | Enables temperature-controlled duration adjustment and identifies its numeric temperature source. |
+| `automation.temperatureAdjustmentFactor` | number, R | Factor fixed at the start of the current automatic plan using `1.07^(T - 20)`; `1` when inactive or idle. |
 | `automation.pumpCapacity` | number, `l/min`, R/W | Configured pump capacity used while building parallel batches. |
 | `automation.valvePause` | number, `min`, R/W | Configured pause between batches. |
 | `automation.seasonEnabled` / `automation.seasonStart` / `automation.seasonEnd` | boolean / number, R/W | Mirrored seasonal pause settings; months are `1` through `12`. |

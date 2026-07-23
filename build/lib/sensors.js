@@ -80,6 +80,14 @@ class SensorManager {
   getTemperature() {
     return this.temperatureState;
   }
+  async getTemperatureAdjustmentTemperature() {
+    const stateId = this.deps.getConfig().scheduler.temperatureAdjustmentStateId;
+    if (!stateId) {
+      return void 0;
+    }
+    const state = await this.deps.adapter.getForeignStateAsync(stateId);
+    return typeof (state == null ? void 0 : state.val) === "number" && Number.isFinite(state.val) ? state.val : void 0;
+  }
   /**
    * See plan behavior rules "Niederschlagsunabhängigkeit" and "Bodenfeuchte-Schwellwert".
    *

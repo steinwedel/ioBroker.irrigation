@@ -2,6 +2,10 @@ import type { IrrigationNativeConfig, IValveConfig, IPlanConfig, AutomationStatu
 import type { ValveController } from './ventile';
 import { rainbirdInstanceOf } from './ventile';
 
+export function calculateTemperatureAdjustmentFactor(temperature: number): number {
+    return 1.07 ** (temperature - 20);
+}
+
 export interface AutomationDeps {
     adapter: ioBroker.Adapter;
     getConfig: () => IrrigationNativeConfig;
@@ -17,6 +21,7 @@ export interface AutomationDeps {
     onValveFlowChange?: (valveIndex: number, flowing: boolean) => void;
     /** Returns true if any valve is currently running */
     isAnyValveRunning?: () => boolean;
+    getTemperatureAdjustmentTemperature: () => Promise<number | undefined>;
 }
 
 /**
@@ -119,6 +124,7 @@ export class AutomationEngine {
     private totalDurationMin = 0;
     private startedAtMs = 0;
     private valvePauseMs = 0;
+    private temperatureAdjustmentFactor = 1;
 
     private manualRun: {
         valveIndex: number;
@@ -260,6 +266,7 @@ export class AutomationEngine {
 
         this.activePlanName = plan.name;
         await this.deps.adapter.setStateAsync('automation.planSelect', { val: plan.name, ack: true });
+        await this.updateTemperatureAdjustmentFactor(config);
 
         this.batches = buildBatches(activeValveIndexes, config.valves, config.scheduler.pumpCapacity);
         this.currentBatchIndex = -1;
@@ -279,16 +286,30 @@ export class AutomationEngine {
         await this.startNextBatch();
     }
 
-    /**
-     * Valves assigned to the plan, filtered by enabled/day/sensors.
-     * Empty valveIndexes (default "Alle" plan) includes all valves. A
-     * non-empty valveIndexes array containing no real valve index (e.g. the
-     * NONE_SENTINEL used by "remove all valves from plan") matches nothing,
-     * since real valve indices are always >= 0.
-     *
-     * @param config
-     * @param plan
-     */
+    private async updateTemperatureAdjustmentFactor(config: IrrigationNativeConfig): Promise<void> {
+        this.temperatureAdjustmentFactor = 1;
+        if (!config.scheduler.temperatureAdjustmentEnabled || !config.scheduler.temperatureAdjustmentStateId) {
+            await this.deps.adapter.setStateAsync('automation.temperatureAdjustmentFactor', { val: 1, ack: true });
+            return;
+        }
+        try {
+            const temperature = await this.deps.getTemperatureAdjustmentTemperature();
+            if (temperature === undefined) {
+                throw new Error('configured temperature state has no valid numeric value');
+            }
+            this.temperatureAdjustmentFactor = calculateTemperatureAdjustmentFactor(temperature);
+            await this.deps.adapter.setStateAsync('automation.temperatureAdjustmentFactor', {
+                val: this.temperatureAdjustmentFactor,
+                ack: true,
+            });
+        } catch (error) {
+            this.deps.adapter.log.warn(
+                `Temperature-controlled irrigation adjustment disabled for this plan: ${(error as Error).message}`,
+            );
+            await this.deps.adapter.setStateAsync('automation.temperatureAdjustmentFactor', { val: 1, ack: true });
+        }
+    }
+
     private buildActiveValveList(config: IrrigationNativeConfig, plan: IPlanConfig): number[] {
         const useAllValves = plan.valveIndexes.length === 0;
         const weekday = new Date().getDay();
@@ -327,7 +348,7 @@ export class AutomationEngine {
     }
 
     private effectiveDuration(config: IrrigationNativeConfig, valveIndex: number): number {
-        return config.valves[valveIndex].duration * config.scheduler.extensionFactor;
+        return config.valves[valveIndex].duration * config.scheduler.extensionFactor * this.temperatureAdjustmentFactor;
     }
 
     private async startNextBatch(): Promise<void> {
@@ -434,9 +455,11 @@ export class AutomationEngine {
     public async stop(): Promise<void> {
         if (this.manualRun) {
             await this.stopManualRun();
+            await this.resetDurationStates();
             return;
         }
         if (this.status === 'idle') {
+            await this.resetDurationStates();
             return;
         }
 
@@ -445,6 +468,7 @@ export class AutomationEngine {
             this.deps.onValveFlowChange?.(idx, false);
         }
         this.runningValves.clear();
+        await this.resetDurationStates();
         await this.finishRun();
     }
 
@@ -628,6 +652,16 @@ export class AutomationEngine {
     // ------------------------------------------------------------------
     // Status text
     // ------------------------------------------------------------------
+
+    private async resetDurationStates(): Promise<void> {
+        this.startedAtMs = 0;
+        this.totalDurationMin = 0;
+        this.temperatureAdjustmentFactor = 1;
+        await this.deps.adapter.setStateAsync('automation.elapsedTime', { val: 0, ack: true });
+        await this.deps.adapter.setStateAsync('automation.remainingTime', { val: 0, ack: true });
+        await this.deps.adapter.setStateAsync('automation.totalDuration', { val: 0, ack: true });
+        await this.deps.adapter.setStateAsync('automation.temperatureAdjustmentFactor', { val: 1, ack: true });
+    }
 
     private async publishStatus(): Promise<void> {
         const config = this.deps.getConfig();

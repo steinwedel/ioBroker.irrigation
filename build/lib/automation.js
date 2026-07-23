@@ -19,10 +19,14 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 var automation_exports = {};
 __export(automation_exports, {
   AutomationEngine: () => AutomationEngine,
-  buildBatches: () => buildBatches
+  buildBatches: () => buildBatches,
+  calculateTemperatureAdjustmentFactor: () => calculateTemperatureAdjustmentFactor
 });
 module.exports = __toCommonJS(automation_exports);
 var import_ventile = require("./ventile");
+function calculateTemperatureAdjustmentFactor(temperature) {
+  return 1.07 ** (temperature - 20);
+}
 function buildBatches(valveIndexes, valves, pumpCapacity) {
   if (pumpCapacity <= 0) {
     return valveIndexes.map((idx) => [idx]);
@@ -81,6 +85,7 @@ class AutomationEngine {
   totalDurationMin = 0;
   startedAtMs = 0;
   valvePauseMs = 0;
+  temperatureAdjustmentFactor = 1;
   manualRun = null;
   wasAutomationPausedForManual = false;
   wasAutomationBatchIndexBeforeManual = -1;
@@ -205,6 +210,7 @@ class AutomationEngine {
     }
     this.activePlanName = plan.name;
     await this.deps.adapter.setStateAsync("automation.planSelect", { val: plan.name, ack: true });
+    await this.updateTemperatureAdjustmentFactor(config);
     this.batches = buildBatches(activeValveIndexes, config.valves, config.scheduler.pumpCapacity);
     this.currentBatchIndex = -1;
     this.totalDurationMin = this.computeTotalDurationMin(config);
@@ -230,6 +236,29 @@ class AutomationEngine {
    * @param config
    * @param plan
    */
+  async updateTemperatureAdjustmentFactor(config) {
+    this.temperatureAdjustmentFactor = 1;
+    if (!config.scheduler.temperatureAdjustmentEnabled || !config.scheduler.temperatureAdjustmentStateId) {
+      await this.deps.adapter.setStateAsync("automation.temperatureAdjustmentFactor", { val: 1, ack: true });
+      return;
+    }
+    try {
+      const temperature = await this.deps.getTemperatureAdjustmentTemperature();
+      if (temperature === void 0) {
+        throw new Error("configured temperature state has no valid numeric value");
+      }
+      this.temperatureAdjustmentFactor = calculateTemperatureAdjustmentFactor(temperature);
+      await this.deps.adapter.setStateAsync("automation.temperatureAdjustmentFactor", {
+        val: this.temperatureAdjustmentFactor,
+        ack: true
+      });
+    } catch (error) {
+      this.deps.adapter.log.warn(
+        `Temperature-controlled irrigation adjustment disabled for this plan: ${error.message}`
+      );
+      await this.deps.adapter.setStateAsync("automation.temperatureAdjustmentFactor", { val: 1, ack: true });
+    }
+  }
   buildActiveValveList(config, plan) {
     const useAllValves = plan.valveIndexes.length === 0;
     const weekday = (/* @__PURE__ */ new Date()).getDay();
@@ -266,7 +295,7 @@ class AutomationEngine {
     return total;
   }
   effectiveDuration(config, valveIndex) {
-    return config.valves[valveIndex].duration * config.scheduler.extensionFactor;
+    return config.valves[valveIndex].duration * config.scheduler.extensionFactor * this.temperatureAdjustmentFactor;
   }
   async startNextBatch() {
     var _a, _b;
@@ -363,9 +392,11 @@ class AutomationEngine {
     var _a, _b;
     if (this.manualRun) {
       await this.stopManualRun();
+      await this.resetDurationStates();
       return;
     }
     if (this.status === "idle") {
+      await this.resetDurationStates();
       return;
     }
     for (const idx of this.runningValves) {
@@ -373,6 +404,7 @@ class AutomationEngine {
       (_b = (_a = this.deps).onValveFlowChange) == null ? void 0 : _b.call(_a, idx, false);
     }
     this.runningValves.clear();
+    await this.resetDurationStates();
     await this.finishRun();
   }
   async pause() {
@@ -546,6 +578,15 @@ class AutomationEngine {
   // ------------------------------------------------------------------
   // Status text
   // ------------------------------------------------------------------
+  async resetDurationStates() {
+    this.startedAtMs = 0;
+    this.totalDurationMin = 0;
+    this.temperatureAdjustmentFactor = 1;
+    await this.deps.adapter.setStateAsync("automation.elapsedTime", { val: 0, ack: true });
+    await this.deps.adapter.setStateAsync("automation.remainingTime", { val: 0, ack: true });
+    await this.deps.adapter.setStateAsync("automation.totalDuration", { val: 0, ack: true });
+    await this.deps.adapter.setStateAsync("automation.temperatureAdjustmentFactor", { val: 1, ack: true });
+  }
   async publishStatus() {
     var _a, _b;
     const config = this.deps.getConfig();
@@ -597,6 +638,7 @@ class AutomationEngine {
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   AutomationEngine,
-  buildBatches
+  buildBatches,
+  calculateTemperatureAdjustmentFactor
 });
 //# sourceMappingURL=automation.js.map

@@ -101,6 +101,8 @@ export interface ISchedulerConfig {
     /** "HH:MM" strings */
     timerTimes: string[];
     extensionFactor: number;
+    temperatureAdjustmentEnabled: boolean;
+    temperatureAdjustmentStateId: string;
     /** l/min, 0 = sequential only, >0 = parallel batch optimization */
     pumpCapacity: number;
     /** Minutes between batches/valves, 0 = disabled */

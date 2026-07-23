@@ -30,6 +30,8 @@ const DEFAULT_CONFIG = {
     autoMode: false,
     timerTimes: [],
     extensionFactor: 1,
+    temperatureAdjustmentEnabled: false,
+    temperatureAdjustmentStateId: "",
     pumpCapacity: 0,
     valvePause: 0,
     seasonEnabled: false,

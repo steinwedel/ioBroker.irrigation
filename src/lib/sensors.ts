@@ -78,6 +78,15 @@ export class SensorManager {
         return this.temperatureState;
     }
 
+    public async getTemperatureAdjustmentTemperature(): Promise<number | undefined> {
+        const stateId = this.deps.getConfig().scheduler.temperatureAdjustmentStateId;
+        if (!stateId) {
+            return undefined;
+        }
+        const state = await this.deps.adapter.getForeignStateAsync(stateId);
+        return typeof state?.val === 'number' && Number.isFinite(state.val) ? state.val : undefined;
+    }
+
     /**
      * See plan behavior rules "Niederschlagsunabhängigkeit" and "Bodenfeuchte-Schwellwert".
      *

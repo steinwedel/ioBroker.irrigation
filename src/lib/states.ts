@@ -176,6 +176,30 @@ export async function createBaseStates(adapter: ioBroker.Adapter): Promise<void>
         max: 5,
         def: 1,
     });
+    await setObj(adapter, 'automation.temperatureAdjustmentEnabled', {
+        name: 'Temperature-controlled irrigation adjustment enabled',
+        type: 'boolean',
+        role: 'switch',
+        read: true,
+        write: true,
+        def: false,
+    });
+    await setObj(adapter, 'automation.temperatureAdjustmentStateId', {
+        name: 'Temperature adjustment state id',
+        type: 'string',
+        role: 'text',
+        read: true,
+        write: true,
+        def: '',
+    });
+    await setObj(adapter, 'automation.temperatureAdjustmentFactor', {
+        name: 'Temperature adjustment factor for current run',
+        type: 'number',
+        role: 'value',
+        read: true,
+        write: false,
+        def: 1,
+    });
     await setObj(adapter, 'automation.pumpCapacity', {
         name: 'Pump capacity',
         type: 'number',
@@ -570,6 +594,15 @@ export async function createBaseStates(adapter: ioBroker.Adapter): Promise<void>
 export async function applyConfigToStates(adapter: ioBroker.Adapter, config: IrrigationNativeConfig): Promise<void> {
     await adapter.setStateAsync('automation.active', { val: config.scheduler.autoMode, ack: true });
     await adapter.setStateAsync('automation.extensionFactor', { val: config.scheduler.extensionFactor, ack: true });
+    await adapter.setStateAsync('automation.temperatureAdjustmentEnabled', {
+        val: config.scheduler.temperatureAdjustmentEnabled,
+        ack: true,
+    });
+    await adapter.setStateAsync('automation.temperatureAdjustmentStateId', {
+        val: config.scheduler.temperatureAdjustmentStateId,
+        ack: true,
+    });
+    await adapter.setStateAsync('automation.temperatureAdjustmentFactor', { val: 1, ack: true });
     await adapter.setStateAsync('automation.pumpCapacity', { val: config.scheduler.pumpCapacity, ack: true });
     await adapter.setStateAsync('automation.valvePause', { val: config.scheduler.valvePause, ack: true });
     await adapter.setStateAsync('automation.seasonEnabled', { val: config.scheduler.seasonEnabled, ack: true });
