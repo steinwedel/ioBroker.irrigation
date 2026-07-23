@@ -7,6 +7,8 @@
     "Add valves manually or use auto-discovery for Gardena/Homematic/Rainbird systems.": "Add valves manually or use auto-discovery for Gardena/Homematic/Rainbird systems.",
     "System type to scan": "System type to scan",
     "Adapter instance": "Adapter instance",
+    "Hydrawise": "Hydrawise",
+    "Leave empty to scan all Hydrawise instances.": "Leave empty to scan all Hydrawise instances.",
     
     "Scan for valves": "Scan for valves",
     "Valve": "Valve",

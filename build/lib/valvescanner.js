@@ -46,11 +46,11 @@ async function findAdapterInstances(adapter, adapterName) {
   return Object.keys(instanceObjects).filter((id) => /^system\.adapter\.[^.]+\.\d+$/.test(id)).map((id) => id.replace(/^system\.adapter\./, ""));
 }
 const FORBIDDEN_SCAN_ADAPTERS = ["admin", "irrigation", "alias"];
-const SPECIALIZED_SCAN_ADAPTERS = ["smartgarden", "rainbird", "hm-rpc"];
+const SPECIALIZED_SCAN_ADAPTERS = ["smartgarden", "rainbird", "hm-rpc", "hydrawise"];
 async function scanForValves(adapter, type, instance, locationId, onProgress) {
   if (type === "All") {
-    adapter.log.debug("Valve scan: type=All - running Gardena, Rainbird, Homematic and Generic scans");
-    const steps = ["Gardena", "Rainbird", "Homematic", "Generic"];
+    adapter.log.debug("Valve scan: type=All - running Gardena, Rainbird, Homematic, Hydrawise and Generic scans");
+    const steps = ["Gardena", "Rainbird", "Homematic", "Hydrawise", "Generic"];
     const valves = [];
     const errors = [];
     for (const step of steps) {
@@ -82,6 +82,8 @@ async function scanForValves(adapter, type, instance, locationId, onProgress) {
       return scanHomematic(adapter, namespace || void 0);
     case "Rainbird":
       return scanRainbird(adapter, namespace);
+    case "Hydrawise":
+      return scanHydrawise(adapter, namespace);
     case "Generic":
       return scanGeneric(adapter, namespace || void 0);
     default:
@@ -270,6 +272,34 @@ async function scanRainbird(adapter, instance) {
     }
   } catch (error) {
     errors.push(`Rainbird scan failed: ${error.message}`);
+  }
+  return { valves, errors };
+}
+async function scanHydrawise(adapter, instance) {
+  const errors = [];
+  const valves = [];
+  try {
+    const instances = instance ? [instance] : await findAdapterInstances(adapter, "hydrawise");
+    for (const inst of instances) {
+      const runZoneStates = await adapter.getForeignObjectsAsync(`${inst}.schedule.*.runZone`, "state");
+      const entries = Object.entries(runZoneStates);
+      const zoneObjects = await Promise.all(
+        entries.map(([id]) => adapter.getForeignObjectAsync(id.slice(0, -".runZone".length)).catch(() => null))
+      );
+      entries.forEach(([id], index) => {
+        var _a, _b;
+        const basePath = id.slice(0, -".runZone".length);
+        valves.push({
+          name: nameToString((_b = (_a = zoneObjects[index]) == null ? void 0 : _a.common) == null ? void 0 : _b.name, basePath),
+          type: "Hydrawise",
+          stateId: id,
+          runFor: 600,
+          ...VALVE_DEFAULTS
+        });
+      });
+    }
+  } catch (error) {
+    errors.push(`Hydrawise scan failed: ${error.message}`);
   }
   return { valves, errors };
 }

@@ -1,11 +1,11 @@
 # Context
 
 ## Current Task
-Ein bestimmter Bewässerungsplan kann direkt über einen ioBroker-State gestartet werden.
+Hydrawise-Zonen werden als Ventile integriert und automatisch erkannt.
 
 ## Key Decisions
-- `automation.plansList` stellt die verfügbaren Plannamen als JSON bereit.
-- `automation.startPlan` bietet dieselben Namen als auswählbare Werte und startet den gewählten Plan.
+- Hydrawise `runZone`, `stopZone` und `time` bilden Start, Stop und Restlaufzeit ab.
+- Der Autoscan erkennt alle Zonen von installierten Hydrawise-Instanzen.
 
 ## Next Steps
-- Validierung ausführen.
+- Übersetzungen und Validierung ausführen.

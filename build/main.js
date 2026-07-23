@@ -568,7 +568,7 @@ class Irrigation extends utils.Adapter {
     await this.writeNativeAsync({ valves });
   }
   async onMessage(obj) {
-    var _a, _b, _c, _d, _e, _f, _g;
+    var _a, _b, _c, _d, _e, _f, _g, _h;
     if (typeof obj !== "object" || !obj.command) {
       return;
     }
@@ -584,6 +584,9 @@ class Irrigation extends utils.Adapter {
           break;
         case "Rainbird":
           effectiveInstance = (_b = payload.instanceRainbird) != null ? _b : "";
+          break;
+        case "Hydrawise":
+          effectiveInstance = (_c = payload.instanceHydrawise) != null ? _c : "";
           break;
         default:
           effectiveInstance = payload.instance;
@@ -645,7 +648,7 @@ class Irrigation extends utils.Adapter {
       return;
     }
     if (obj.command === "deleteValvesByStateId") {
-      const stateIds = (_d = (_c = obj.message) == null ? void 0 : _c.stateIds) != null ? _d : [];
+      const stateIds = (_e = (_d = obj.message) == null ? void 0 : _d.stateIds) != null ? _e : [];
       const toRemove = new Set(stateIds);
       const before = this.config2.valves.length;
       const remaining = this.config2.valves.filter((v) => !toRemove.has(v.stateId));
@@ -688,7 +691,7 @@ class Irrigation extends utils.Adapter {
       return;
     }
     if (obj.command === "createPlan" && obj.callback) {
-      const name = (_f = (_e = obj.message) == null ? void 0 : _e.newPlanName) == null ? void 0 : _f.trim();
+      const name = (_g = (_f = obj.message) == null ? void 0 : _f.newPlanName) == null ? void 0 : _g.trim();
       if (!name) {
         this.sendTo(obj.from, obj.command, { error: "noName" }, obj.callback);
         return;
@@ -746,7 +749,7 @@ class Irrigation extends utils.Adapter {
         this.sendTo(obj.from, obj.command, { error: "noSelection" }, obj.callback);
         return;
       }
-      const rows = (_g = msg == null ? void 0 : msg.planValveTable) != null ? _g : [];
+      const rows = (_h = msg == null ? void 0 : msg.planValveTable) != null ? _h : [];
       const selectedIndexes = (0, import_types.parsePlanValveTableRows)(rows, this.config2.valves.length);
       const updatedPlans = this.config2.plans.map(
         (p, i) => i === planIndex ? { ...p, valveIndexes: selectedIndexes.length > 0 ? selectedIndexes : [import_types.NONE_SENTINEL] } : p

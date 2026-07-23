@@ -661,6 +661,7 @@ class Irrigation extends utils.Adapter {
                 instance: string;
                 instanceRainbird?: string;
                 instanceHomematic?: string;
+                instanceHydrawise?: string;
                 locationId?: string;
             };
             let effectiveInstance: string;
@@ -673,6 +674,9 @@ class Irrigation extends utils.Adapter {
                     break;
                 case 'Rainbird':
                     effectiveInstance = payload.instanceRainbird ?? '';
+                    break;
+                case 'Hydrawise':
+                    effectiveInstance = payload.instanceHydrawise ?? '';
                     break;
                 default:
                     effectiveInstance = payload.instance;

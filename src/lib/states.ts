@@ -123,8 +123,8 @@ export async function createBaseStates(adapter: ioBroker.Adapter): Promise<void>
     await setObj(adapter, 'automation.totalDuration', {
         name: 'Total planned duration',
         type: 'number',
-        role: 'value.timer',
-        unit: 'min',
+        role: 'value',
+        unit: 's',
         read: true,
         write: false,
         def: 0,
@@ -132,8 +132,8 @@ export async function createBaseStates(adapter: ioBroker.Adapter): Promise<void>
     await setObj(adapter, 'automation.elapsedTime', {
         name: 'Elapsed time',
         type: 'number',
-        role: 'value.timer',
-        unit: 'min',
+        role: 'value',
+        unit: 's',
         read: true,
         write: false,
         def: 0,
@@ -141,12 +141,15 @@ export async function createBaseStates(adapter: ioBroker.Adapter): Promise<void>
     await setObj(adapter, 'automation.remainingTime', {
         name: 'Remaining time',
         type: 'number',
-        role: 'value.timer',
-        unit: 'min',
+        role: 'value',
+        unit: 's',
         read: true,
         write: false,
         def: 0,
     });
+    await adapter.extendObjectAsync('automation.totalDuration', { common: { role: 'value', unit: 's' } });
+    await adapter.extendObjectAsync('automation.elapsedTime', { common: { role: 'value', unit: 's' } });
+    await adapter.extendObjectAsync('automation.remainingTime', { common: { role: 'value', unit: 's' } });
     await setObj(adapter, 'automation.activePlan', {
         name: 'Active plan name',
         type: 'string',

@@ -579,13 +579,14 @@ class AutomationEngine {
       val: this.status === "running" || this.status === "paused" || this.manualRun !== null,
       ack: true
     });
-    const elapsedMin = this.startedAtMs > 0 ? Math.floor((Date.now() - this.startedAtMs) / 6e4) : 0;
-    await this.deps.adapter.setStateAsync("automation.elapsedTime", { val: elapsedMin, ack: true });
+    const elapsedSecs = this.startedAtMs > 0 ? Math.floor((Date.now() - this.startedAtMs) / 1e3) : 0;
+    const totalDurationSecs = this.totalDurationMin * 60;
+    await this.deps.adapter.setStateAsync("automation.elapsedTime", { val: elapsedSecs, ack: true });
     await this.deps.adapter.setStateAsync("automation.remainingTime", {
-      val: Math.max(0, this.totalDurationMin - elapsedMin),
+      val: Math.max(0, totalDurationSecs - elapsedSecs),
       ack: true
     });
-    await this.deps.adapter.setStateAsync("automation.totalDuration", { val: this.totalDurationMin, ack: true });
+    await this.deps.adapter.setStateAsync("automation.totalDuration", { val: totalDurationSecs, ack: true });
     await this.deps.adapter.setStateAsync("automation.activePlan", { val: (_b = this.activePlanName) != null ? _b : "", ack: true });
     await this.deps.adapter.setStateAsync("automation.currentZone", {
       val: this.runningValves.size > 0 ? [...this.runningValves][0] : -1,

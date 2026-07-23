@@ -2,7 +2,7 @@
  * Shared TypeScript interfaces for the irrigation adapter.
  */
 
-export type ValveType = 'Gardena' | 'Homematic' | 'Rainbird' | 'Generic';
+export type ValveType = 'Gardena' | 'Homematic' | 'Rainbird' | 'Hydrawise' | 'Generic';
 
 /**
  * Formats a zero-based valve array index into its display/id suffix, e.g.
@@ -54,7 +54,7 @@ export const NONE_SENTINEL = -1;
 /**
  * Auto-discovery scan types. "Generic" additionally scans any adapter not
  * covered by a specific type. "All" runs every scan type (Gardena, Rainbird,
- * Homematic, Generic) in one go, without any adapter instance restriction.
+ * Homematic, Hydrawise, Generic) in one go, without any adapter instance restriction.
  */
 export type ScanType = ValveType | 'All';
 

@@ -80,7 +80,7 @@ const FORBIDDEN_SCAN_ADAPTERS = ['admin', 'irrigation', 'alias'];
  * found via their own specialized discovery (which also looks at data points
  * other than a simple on/off switch, e.g. Gardena's duration_value).
  */
-const SPECIALIZED_SCAN_ADAPTERS = ['smartgarden', 'rainbird', 'hm-rpc'];
+const SPECIALIZED_SCAN_ADAPTERS = ['smartgarden', 'rainbird', 'hm-rpc', 'hydrawise'];
 
 export async function scanForValves(
     adapter: ioBroker.Adapter,
@@ -90,8 +90,8 @@ export async function scanForValves(
     onProgress?: ScanProgressCallback,
 ): Promise<ScanResult> {
     if (type === 'All') {
-        adapter.log.debug('Valve scan: type=All - running Gardena, Rainbird, Homematic and Generic scans');
-        const steps: ScanType[] = ['Gardena', 'Rainbird', 'Homematic', 'Generic'];
+        adapter.log.debug('Valve scan: type=All - running Gardena, Rainbird, Homematic, Hydrawise and Generic scans');
+        const steps: ScanType[] = ['Gardena', 'Rainbird', 'Homematic', 'Hydrawise', 'Generic'];
         const valves: IValveConfig[] = [];
         const errors: string[] = [];
         for (const step of steps) {
@@ -124,6 +124,8 @@ export async function scanForValves(
             return scanHomematic(adapter, namespace || undefined);
         case 'Rainbird':
             return scanRainbird(adapter, namespace);
+        case 'Hydrawise':
+            return scanHydrawise(adapter, namespace);
         case 'Generic':
             return scanGeneric(adapter, namespace || undefined);
         default:
@@ -394,6 +396,34 @@ async function scanRainbird(adapter: ioBroker.Adapter, instance: string): Promis
         }
     } catch (error) {
         errors.push(`Rainbird scan failed: ${(error as Error).message}`);
+    }
+    return { valves, errors };
+}
+
+async function scanHydrawise(adapter: ioBroker.Adapter, instance: string): Promise<ScanResult> {
+    const errors: string[] = [];
+    const valves: IValveConfig[] = [];
+    try {
+        const instances = instance ? [instance] : await findAdapterInstances(adapter, 'hydrawise');
+        for (const inst of instances) {
+            const runZoneStates = await adapter.getForeignObjectsAsync(`${inst}.schedule.*.runZone`, 'state');
+            const entries = Object.entries(runZoneStates);
+            const zoneObjects = await Promise.all(
+                entries.map(([id]) => adapter.getForeignObjectAsync(id.slice(0, -'.runZone'.length)).catch(() => null)),
+            );
+            entries.forEach(([id], index) => {
+                const basePath = id.slice(0, -'.runZone'.length);
+                valves.push({
+                    name: nameToString(zoneObjects[index]?.common?.name, basePath),
+                    type: 'Hydrawise',
+                    stateId: id,
+                    runFor: 600,
+                    ...VALVE_DEFAULTS,
+                });
+            });
+        }
+    } catch (error) {
+        errors.push(`Hydrawise scan failed: ${(error as Error).message}`);
     }
     return { valves, errors };
 }

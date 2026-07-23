@@ -37,6 +37,9 @@ function parseGardenaLeftoverMinutes(val) {
 function gardenaValveBasePath(durationValueId) {
   return durationValueId.replace(/\.duration_value$/, "");
 }
+function hydrawiseZoneBasePath(runZoneId) {
+  return runZoneId.replace(/\.runZone$/, "");
+}
 function rainbirdInstanceOf(stateId) {
   const match = /^(.+?)\.device\.stations\./.exec(stateId);
   return match == null ? void 0 : match[1];
@@ -344,6 +347,9 @@ class ValveController {
         case "Rainbird":
           await this.adapter.subscribeForeignStatesAsync(`${this.config.stateId}.remaining`);
           break;
+        case "Hydrawise":
+          await this.adapter.subscribeForeignStatesAsync(`${hydrawiseZoneBasePath(this.config.stateId)}.time`);
+          break;
         case "Generic":
           await this.adapter.subscribeForeignStatesAsync(this.config.stateId);
           break;
@@ -394,6 +400,13 @@ class ValveController {
         break;
       case "Rainbird":
         if (id === `${this.config.stateId}.remaining`) {
+          matched = true;
+          const remaining = typeof (state == null ? void 0 : state.val) === "number" ? state.val : 0;
+          action = () => this.setRunningState(remaining > 0, remaining);
+        }
+        break;
+      case "Hydrawise":
+        if (id === `${hydrawiseZoneBasePath(this.config.stateId)}.time`) {
           matched = true;
           const remaining = typeof (state == null ? void 0 : state.val) === "number" ? state.val : 0;
           action = () => this.setRunningState(remaining > 0, remaining);
@@ -552,6 +565,9 @@ class ValveController {
             Math.ceil(effectiveDurationSecs / 60)
           );
           break;
+        case "Hydrawise":
+          await this.adapter.setForeignStateAsync(this.config.stateId, effectiveDurationSecs);
+          break;
         case "Homematic":
           try {
             await this.adapter.setForeignStateAsync(
@@ -626,6 +642,9 @@ class ValveController {
           if (this.config.allOffId && !this.otherSiblingRainbirdValveRunning()) {
             await this.adapter.setForeignStateAsync(this.config.allOffId, true);
           }
+          break;
+        case "Hydrawise":
+          await this.adapter.setForeignStateAsync(`${hydrawiseZoneBasePath(this.config.stateId)}.stopZone`, true);
           break;
         case "Homematic":
           await this.adapter.setForeignStateAsync(`${this.config.stateId}.ON_TIME`, 0);

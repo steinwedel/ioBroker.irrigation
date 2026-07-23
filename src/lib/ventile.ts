@@ -33,6 +33,10 @@ function gardenaValveBasePath(durationValueId: string): string {
     return durationValueId.replace(/\.duration_value$/, '');
 }
 
+function hydrawiseZoneBasePath(runZoneId: string): string {
+    return runZoneId.replace(/\.runZone$/, '');
+}
+
 /**
  * Derives the Rainbird adapter instance namespace (e.g. "rainbird.0") from a
  * valve's `stateId`, which is the per-station base path written by
@@ -398,6 +402,11 @@ export class ValveController {
                 case 'Rainbird':
                     await this.adapter.subscribeForeignStatesAsync(`${this.config.stateId}.remaining`);
                     break;
+                case 'Hydrawise':
+                    await this.adapter.subscribeForeignStatesAsync(
+                        `${hydrawiseZoneBasePath(this.config.stateId)}.time`,
+                    );
+                    break;
                 case 'Generic':
                     await this.adapter.subscribeForeignStatesAsync(this.config.stateId);
                     break;
@@ -451,6 +460,13 @@ export class ValveController {
                 break;
             case 'Rainbird':
                 if (id === `${this.config.stateId}.remaining`) {
+                    matched = true;
+                    const remaining = typeof state?.val === 'number' ? state.val : 0;
+                    action = () => this.setRunningState(remaining > 0, remaining);
+                }
+                break;
+            case 'Hydrawise':
+                if (id === `${hydrawiseZoneBasePath(this.config.stateId)}.time`) {
                     matched = true;
                     const remaining = typeof state?.val === 'number' ? state.val : 0;
                     action = () => this.setRunningState(remaining > 0, remaining);
@@ -647,6 +663,9 @@ export class ValveController {
                         Math.ceil(effectiveDurationSecs / 60),
                     );
                     break;
+                case 'Hydrawise':
+                    await this.adapter.setForeignStateAsync(this.config.stateId, effectiveDurationSecs);
+                    break;
                 case 'Homematic':
                     // ON_TIME is best-effort (some Homematic actuators expose it under a
                     // different name or not at all): a failure here must not prevent the
@@ -740,6 +759,12 @@ export class ValveController {
                     if (this.config.allOffId && !this.otherSiblingRainbirdValveRunning()) {
                         await this.adapter.setForeignStateAsync(this.config.allOffId, true);
                     }
+                    break;
+                case 'Hydrawise':
+                    await this.adapter.setForeignStateAsync(
+                        `${hydrawiseZoneBasePath(this.config.stateId)}.stopZone`,
+                        true,
+                    );
                     break;
                 case 'Homematic':
                     // Reset ON_TIME first so the actuator does not re-arm itself from a

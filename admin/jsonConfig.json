@@ -36,6 +36,7 @@
                                 { "label": "Gardena", "value": "Gardena" },
                                 { "label": "Homematic", "value": "Homematic" },
                                 { "label": "Rainbird", "value": "Rainbird" },
+                                { "label": "Hydrawise", "value": "Hydrawise" },
                                 { "label": "Generic (any adapter)", "value": "Generic" },
                                 { "label": "All", "value": "All" }
                             ],
@@ -82,6 +83,19 @@
                             "lg": 3,
                             "xl": 3
                         },
+                        "scanInstanceHydrawise": {
+                            "type": "instance",
+                            "label": "Adapter instance",
+                            "adapter": "hydrawise",
+                            "allowDeactivate": true,
+                            "help": "Leave empty to scan all Hydrawise instances.",
+                            "hidden": "data.scanType !== 'Hydrawise'",
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 4,
+                            "lg": 3,
+                            "xl": 3
+                        },
                         "_scanHomematicInfo": {
                             "type": "staticText",
                             "text": "Homematic discovery scans the \"Bewässerung\" function enum (enum.functions) for members with a switch state, optionally restricted to the selected adapter instance.",
@@ -94,7 +108,7 @@
                         },
                         "_scanGenericInfo": {
                             "type": "staticText",
-                            "text": "Generic discovery scans the \"Bewässerung\"/\"Irrigation\" function enum (enum.functions) for members with a switch state, across all adapters. Adapters with a dedicated scan type (Gardena, Rainbird, Homematic), the alias adapter and this irrigation adapter itself are always excluded.",
+                            "text": "Generic discovery scans the \"Bewässerung\"/\"Irrigation\" function enum (enum.functions) for members with a switch state, across all adapters. Adapters with a dedicated scan type (Gardena, Rainbird, Homematic, Hydrawise), the alias adapter and this irrigation adapter itself are always excluded.",
                             "hidden": "data.scanType !== 'Generic'",
                             "xs": 12,
                             "sm": 12,
@@ -104,7 +118,7 @@
                         },
                         "_scanAllInfo": {
                             "type": "staticText",
-                            "text": "Runs Gardena, Rainbird, Homematic and Generic discovery across all adapter instances in one go. The alias, admin and irrigation adapters are always excluded.",
+                            "text": "Runs Gardena, Rainbird, Homematic, Hydrawise and Generic discovery across all adapter instances in one go. The alias, admin and irrigation adapters are always excluded.",
                             "hidden": "data.scanType !== 'All'",
                             "xs": 12,
                             "sm": 12,
@@ -116,7 +130,7 @@
                             "type": "sendTo",
                             "label": "Scan for valves",
                             "command": "scanValves",
-                            "jsonData": "{\"type\": \"${data.scanType}\", \"instance\": \"${data.scanInstance}\", \"instanceRainbird\": \"${data.scanInstanceRainbird}\", \"instanceHomematic\": \"${data.scanInstanceHomematic}\"}",
+                            "jsonData": "{\"type\": \"${data.scanType}\", \"instance\": \"${data.scanInstance}\", \"instanceRainbird\": \"${data.scanInstanceRainbird}\", \"instanceHomematic\": \"${data.scanInstanceHomematic}\", \"instanceHydrawise\": \"${data.scanInstanceHydrawise}\"}",
                             "useNative": true,
                             "showProcess": true,
                             "result": {
@@ -174,6 +188,7 @@
                                 { "label": "Gardena", "value": "Gardena" },
                                 { "label": "Homematic", "value": "Homematic" },
                                 { "label": "Rainbird", "value": "Rainbird" },
+                                { "label": "Hydrawise", "value": "Hydrawise" },
                                 { "label": "Generic", "value": "Generic" }
                             ]
                         },

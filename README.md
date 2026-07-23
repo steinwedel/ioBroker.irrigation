@@ -15,7 +15,7 @@
 Controls irrigation zones, valves and watering schedules based on sensors and weather data.
 
 ### Features
-- Valve support for Gardena (smartgarden), Homematic, Rain Bird and generic ioBroker states, with auto-discovery via object-tree scanning
+- Valve support for Gardena (smartgarden), Homematic, Rain Bird, Hydrawise and generic ioBroker states, with auto-discovery via object-tree scanning
 - Zones with configurable duration, weekday schedule, groups and rain/soil-moisture based skipping
 - Plans that group zones for combined watering runs, with automatic parallel batching based on pump capacity
 - Manual per-zone watering, independent of the automatic schedule
@@ -37,7 +37,7 @@ Controls irrigation zones, valves and watering schedules based on sensors and we
 
 The fastest way to get your irrigation running with just two steps:
 
-1. **Add your valves** — Open the **Valves** tab, click **Scan for valves** to auto-discover connected valves (Gardena, Homematic, Rainbird) or manually add a generic valve by entering its ioBroker state ID.
+1. **Add your valves** — Open the **Valves** tab, click **Scan for valves** to auto-discover connected valves (Gardena, Homematic, Rainbird, Hydrawise) or manually add a generic valve by entering its ioBroker state ID.
 2. **Set a schedule** — Open the **Control** tab, enable **Automatic mode** and add one or more timer times (e.g. `06:00` and `19:00`).
 
 Save the configuration. The adapter will now water all zones on all days at the configured times. Every valve gets a default zone with a duration of 10 minutes.
@@ -61,7 +61,7 @@ The adapter configuration is organized into tabs. In **Normal mode** you see 5 t
 A valve is the physical output that opens or closes a water circuit. Each valve must be configured before you can assign zones to it.
 
 **Auto-Discovery (recommended):**
-1. Select your valve type (Gardena, Homematic, Rainbird, Generic, or All).
+1. Select your valve type (Gardena, Homematic, Rainbird, Hydrawise, Generic, or All).
 2. If prompted, select the corresponding ioBroker adapter instance.
 3. Click **Scan for valves** — discovered valves are added to the table automatically.
 
@@ -71,11 +71,13 @@ Add entries to the table directly:
 | Column | Description |
 |--------|-------------|
 | Display name | A descriptive name for the valve (e.g. "Front lawn", "Hedge"). |
-| Type | Valve type: **Gardena** (smartgarden), **Homematic**, **Rainbird**, or **Generic** (any writable boolean state). |
+| Type | Valve type: **Gardena** (smartgarden), **Homematic**, **Rainbird**, **Hydrawise**, or **Generic** (any writable boolean state). |
 | Target run duration (s) | How long the valve runs when started manually (in seconds, default 600 = 10 min). |
-| State id | The ioBroker state ID that controls the valve (on/off). For Gardena this is the `duration_value` state. |
+| State id | The ioBroker state ID that controls the valve. For Gardena this is `duration_value`; for Hydrawise it is the zone's `runZone` state, discovered automatically. |
 
 The all-off state (a master stop that shuts down all valves on the same controller at once, e.g. Gardena's `stop_all_valves_i` or Rainbird's `stopIrrigation`) is detected and stored automatically by **Scan for valves** and is not shown as a column - it is applied internally when needed and does not require manual configuration.
+
+**Hydrawise:** Install and configure `ioBroker.hydrawise` first. The Hydrawise scan finds every `schedule.<zone>.runZone` state, uses it to start a zone for the requested seconds, sends the associated `stopZone` command to stop it, and reads the zone's `time` state as remaining runtime.
 
 - **Delete all valves** removes all entries with a confirmation prompt.
 
@@ -209,6 +211,122 @@ Receive alerts about adapter events via Pushover or Telegram.
 | Water consumption tracking enabled | Records water usage per zone and aggregates (today, week, month, total). |
 
 Notifications are sent for events such as: watering started/completed, leak detected, clog suspected, legal restriction activated.
+
+---
+
+### ioBroker Data Point Reference
+
+All IDs below are relative to the adapter instance, e.g. `<instance>` is normally `irrigation.0`. **R** means read-only status; **R/W** means the state accepts commands or selections. For commands, write with `ack=false`; the adapter processes the command and confirms/reset it with `ack=true`.
+
+#### `scan`
+
+| ID | Type / access | Meaning and use |
+|---|---|---|
+| `scan.progress` | string, R | Progress and result text of an admin valve scan, e.g. `Found and added 2 new valve(s).` |
+
+#### `automation`
+
+| ID | Type / access | Meaning and use |
+|---|---|---|
+| `automation.active` | boolean, R/W | Enables automatic timer-based operation. A runtime write changes the current adapter session. |
+| `automation.running` | boolean, R | `true` while an automatic plan or manual valve run is active or paused. |
+| `automation.status` | string, R | Human-readable execution status including plan, batch, active valves and pauses. |
+| `automation.start` | boolean button, R/W | Write `true` to start the first plan in the Plans table. Resets to `false`. |
+| `automation.startPlan` | string command, R/W | Write a plan name to start that plan directly; selectable values are maintained from `plansList` and the state resets to an empty string. |
+| `automation.stop` | boolean button, R/W | Write `true` to stop the current automatic or manual run. Resets to `false`. |
+| `automation.pause` | boolean button, R/W | Write `true` to pause or resume the current automatic plan. Resets to `false`. |
+| `automation.next` / `automation.back` | boolean buttons, R/W | Write `true` to skip the current batch or repeat the previous batch. Each resets to `false`. |
+| `automation.currentZone` | number, R | Zero-based index of the first currently running valve; `-1` if none is running. |
+| `automation.currentBatch` / `automation.totalBatches` | number, R | Current one-based batch number and total calculated batches; `currentBatch` is `0` while idle. |
+| `automation.batchZones` | JSON string, R | Zero-based valve indexes in the active batch, e.g. `[0,2]`; `[]` while idle. |
+| `automation.totalDuration` / `automation.elapsedTime` / `automation.remainingTime` | number, seconds, R | Planned duration, elapsed wall-clock time and remaining duration of the current automatic run. |
+| `automation.activePlan` | string, R | Name of the currently active plan; empty while idle. |
+| `automation.planSelect` | string, R/W | Selectable plan-name value for external UIs. It is kept in sync with the available plans; use `startPlan` to execute a choice directly. |
+| `automation.plansList` | JSON string, R | Available plan names, e.g. `["Alle","Rasen"]`. Use this to populate scripts or external UI selectors. |
+| `automation.plansData` | JSON string, R | Internal persistent plan definition containing names and valve indexes. It is maintained by the adapter and not intended for external writes. |
+| `automation.extensionFactor` | number, R/W | Configured duration multiplier (`0.5` to `5`) mirrored from adapter settings. |
+| `automation.pumpCapacity` | number, `l/min`, R/W | Configured pump capacity used while building parallel batches. |
+| `automation.valvePause` | number, `min`, R/W | Configured pause between batches. |
+| `automation.seasonEnabled` / `automation.seasonStart` / `automation.seasonEnd` | boolean / number, R/W | Mirrored seasonal pause settings; months are `1` through `12`. |
+| `automation.frostEnabled` / `automation.frostMinTemp` | boolean / number `°C`, R/W | Mirrored frost-protection settings. |
+
+#### `valves.valve_NNN` (one channel per configured valve)
+
+`NNN` is a zero-based, three-digit index, e.g. `valves.valve_000`. Configuration-derived states are mirrored at startup. Use `state`, `runFor`, `manualStart`, and `manualDuration` for operational control; edit the adapter configuration for durable configuration changes.
+
+| Suffix | Type / access | Meaning and use |
+|---|---|---|
+| `.name` | string, R/W | Display name of the valve. |
+| `.type`, `.stateId`, `.allOffId` | string, R | Configured valve type, underlying adapter state, and optional Rainbird all-off command state. |
+| `.state` | boolean, R/W | Direct valve control. Write `true` to run for `.runFor` seconds; write `false` to stop. It also reports actual valve activity. |
+| `.runFor` | number, seconds, R/W | Duration used by a direct `.state=true` command. |
+| `.remainingTime` | number, seconds, R | Remaining runtime of the valve. |
+| `.timestampStart` | number, Unix milliseconds, R | Start timestamp of the most recent/active valve run. |
+| `.online` | boolean, R | Reachability indicator, initially `true`. |
+| `.errorLast` | string, R | Most recent start or stop error; cleared after a successful start. |
+| `.enabled` | boolean, R/W | Configured enabled flag used for automatic plans. |
+| `.flowRateLpm` | number, `l/min`, R | Configured flow rate used for batching and water-consumption calculation. |
+| `.duration` | number, `min`, R/W | Planned automatic watering duration before applying `extensionFactor`. |
+| `.rainIndependent` | boolean, R/W | When `true`, rain detection does not skip this valve. |
+| `.moistureThreshold` | number, `%`, R/W | Automatic watering is skipped when configured soil moisture is at or above this threshold; `0` disables the condition. |
+| `.manualStart` | boolean button, R/W | Write `true` to start this valve for `.manualDuration` minutes. Resets to `false`. |
+| `.manualDuration` | number, `min`, R/W | Duration used by `.manualStart`. |
+| `.flowSensorId` | string, R/W | Configured foreign state ID of the flow sensor. |
+| `.days` | JSON string, R/W | Configured allowed weekdays for automatic runs. |
+| `.flowActual` / `.flowExpected` | number, `l/min`, R | Runtime flow values when a flow sensor/calibration is used. |
+
+#### `sensors`
+
+| ID | Type / access | Meaning and use |
+|---|---|---|
+| `sensors.rain` | boolean, R | Mirror of the configured rain sensor; `true` causes automatic zones to be skipped unless `.rainIndependent` is set. |
+| `sensors.soilMoisture` | number, `%`, R | Mirror of the configured soil-moisture sensor used with valve thresholds. |
+| `sensors.temperature` | number, `°C`, R | Mirror of the configured temperature sensor used by frost protection. |
+| `sensors.rainId` / `sensors.soilMoistureId` / `sensors.temperatureId` | string, R | Configured foreign state IDs mirrored from adapter settings. |
+
+#### `weather` (optional OpenWeatherMap integration)
+
+| ID | Type / access | Meaning and use |
+|---|---|---|
+| `weather.enabled` | boolean, R | Whether the weather integration is enabled in adapter settings. |
+| `weather.temperature` | number, `°C`, R | Latest API temperature. |
+| `weather.precipitationChance` | number, `%`, R | API cloud-cover value used as precipitation-chance approximation. |
+| `weather.precipitation` | number, `mm`, R | API precipitation over the last hour. |
+| `weather.lastUpdate` | number, Unix milliseconds, R | Timestamp of the latest successful API request. |
+
+#### `legalRestriction`
+
+| ID | Type / access | Meaning and use |
+|---|---|---|
+| `legalRestriction.enabled` / `legalRestriction.active` | boolean, R | Configured master switch and currently active watering restriction. |
+| `legalRestriction.stationId` / `legalRestriction.temperatureStateId` | string, R | Configured DWD station or local temperature-state source. Only one source is used. |
+| `legalRestriction.startDate` / `legalRestriction.endDate` | string, R | Annual restriction range in `D.M` format; empty start means no date limit. |
+| `legalRestriction.startTime` / `legalRestriction.endTime` | string, R | Daily restriction range in `HH:MM` format; empty start means no time limit. |
+| `legalRestriction.minTemperature` | number, `°C`, R | Configured maximum irrigation temperature; at or above it, a configured temperature source activates the restriction. |
+| `legalRestriction.currentTemp` | number, `°C`, R | Last valid temperature read from the selected source. |
+| `legalRestriction.currentTempTs` | number, Unix milliseconds, R | Timestamp of the last successful temperature read. |
+| `legalRestriction.lastCheckError` | string, R | Latest DWD/local temperature read error; cleared after a successful read. |
+
+#### `watchdog` and `waterConsumption`
+
+| ID | Type / access | Meaning and use |
+|---|---|---|
+| `watchdog.lastIssue` / `watchdog.lastIssueTs` / `watchdog.issueCount` | string / Unix milliseconds / number, R | Latest flow-monitoring warning, its timestamp, and total warning count. |
+| `watchdog.flowActive` | boolean, R | `true` when flow is detected while no adapter-controlled valve should run, indicating a possible leak. |
+| `watchdog.flowDeviationValve` / `watchdog.flowDeviationPct` | number / number `%`, R | Valve index and percentage when measured flow deviates from expected flow. |
+| `watchdog.testNotify` | boolean button, R/W | Write `true` to send a configured test notification. Resets to `false`. |
+| `waterConsumption.enabled` | boolean, R | Whether consumption tracking is enabled in adapter settings. |
+| `waterConsumption.today` / `waterConsumption.week` / `waterConsumption.month` / `waterConsumption.total` | number, `l`, R | Calculated consumption totals. Consumption is runtime × `.flowRateLpm`; week/month reset on the next consumption update after their period changes. |
+
+#### `smartgardenRateLimit` and connection status
+
+| ID | Type / access | Meaning and use |
+|---|---|---|
+| `smartgardenRateLimit.window10sCount` | number, R | Gardena API requests in the rolling 10-second window. |
+| `smartgardenRateLimit.weeklyCount` | number, R | Gardena API requests in the rolling seven-day window. |
+| `smartgardenRateLimit.lastRequest` / `smartgardenRateLimit.nextSlot` | number, Unix milliseconds, R | Last request and next available rate-limit slot (`0` means immediately available). |
+| `smartgardenRateLimit.queueLength` | number, R | Requests currently waiting for a Gardena API slot. |
+| `info.connection` | boolean, R | Adapter initialization/connection indicator; set to `true` after successful startup. |
 
 ---
 
