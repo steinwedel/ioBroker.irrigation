@@ -1,11 +1,11 @@
 # Context
 
 ## Current Task
-Die Plan-Ventiltabelle zeigt die laufende Ausführungsposition kompatibel als Textspalte.
+Pläne können im Plan-Editor umbenannt werden.
 
 ## Key Decisions
-- Der Adapter liefert die schreibgeschützte Ausführungsnummer beim Laden der Tabelle.
-- Bei Pumpenkapazität 0 wird die gespeicherte Zeilenreihenfolge ausgeführt.
+- Der neue Name wird vor dem Bestätigungsdialog eingegeben.
+- Doppelte Plannamen werden abgewiesen und die Planliste danach aktualisiert.
 
 ## Next Steps
-- Validierung ausführen.
+- Übersetzungen und Validierung ausführen.

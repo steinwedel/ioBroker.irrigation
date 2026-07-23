@@ -846,6 +846,33 @@ class Irrigation extends utils.Adapter {
             return;
         }
 
+        if (obj.command === 'renamePlan' && obj.callback) {
+            const planIndex = readPlanIndex(obj.message);
+            const name = ((obj.message as Record<string, unknown>)?.renamePlanName as string | undefined)?.trim();
+            if (planIndex === undefined || planIndex < 0 || planIndex >= this.config2.plans.length) {
+                this.sendTo(obj.from, obj.command, { error: 'noSelection' }, obj.callback);
+                return;
+            }
+            if (!name) {
+                this.sendTo(obj.from, obj.command, { error: 'noName' }, obj.callback);
+                return;
+            }
+            if (this.config2.plans.some((plan, index) => index !== planIndex && plan.name === name)) {
+                this.sendTo(obj.from, obj.command, { error: 'nameExists' }, obj.callback);
+                return;
+            }
+            const oldName = this.config2.plans[planIndex].name;
+            const updatedPlans = this.config2.plans.map((plan, index) => (index === planIndex ? { ...plan, name } : plan));
+            await this.writePlansState(updatedPlans);
+            const selectedPlan = await this.getStateAsync('automation.planSelect');
+            if (selectedPlan?.val === oldName) {
+                await this.setStateAsync('automation.planSelect', { val: name, ack: true });
+            }
+            this.log.info(`Renamed plan "${oldName}" to "${name}"`);
+            this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans, _editPlan: planIndex, renamePlanName: '' } }, obj.callback);
+            return;
+        }
+
         if (obj.command === 'deletePlan' && obj.callback) {
             const planIndex = readPlanIndex(obj.message);
             if (planIndex === undefined || planIndex < 0 || planIndex >= this.config2.plans.length) {

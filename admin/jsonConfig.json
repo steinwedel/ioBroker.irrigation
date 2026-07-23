@@ -279,6 +279,42 @@
                     "md": 4,
                     "lg": 3
                 },
+                "renamePlanName": {
+                    "type": "text",
+                    "label": "New name for selected plan",
+                    "newLine": true,
+                    "doNotSave": true,
+                    "sm": 6,
+                    "md": 4,
+                    "lg": 3
+                },
+                "renamePlan": {
+                    "type": "sendTo",
+                    "label": "Rename selected plan",
+                    "command": "renamePlan",
+                    "jsonData": "{\"_editPlan\": ${JSON.stringify(data._editPlan ?? null)}, \"renamePlanName\": ${JSON.stringify(data.renamePlanName ?? '')}}",
+                    "alsoDependsOn": ["_editPlan", "renamePlanName"],
+                    "useNative": true,
+                    "disabled": "!data.renamePlanName || !data.renamePlanName.trim()",
+                    "confirm": {
+                        "text": "Rename the selected plan to \"${data.renamePlanName}\"?",
+                        "title": "Rename plan?",
+                        "type": "info",
+                        "ok": "Rename",
+                        "cancel": "Cancel",
+                        "alsoDependsOn": ["renamePlanName"]
+                    },
+                    "icon": "edit",
+                    "variant": "contained",
+                    "error": {
+                        "noSelection": "No plan selected.",
+                        "noName": "Please enter a new plan name.",
+                        "nameExists": "A plan with this name already exists."
+                    },
+                    "sm": 6,
+                    "md": 4,
+                    "lg": 3
+                },
                 "newPlanName": {
                     "type": "text",
                     "label": "New plan name",

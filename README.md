@@ -112,7 +112,7 @@ Plans group zones by tags for combined watering runs. When a plan is triggered, 
 | Name | Plan name (e.g. "Lawn plan", "Evening run"). |
 | Groups | Comma-separated group names. Only zones that have at least one matching group are included. Leave empty to include all zones. |
 
-The built-in default plan **"Alle"** (all zones) has empty groups and therefore always waters every enabled zone.
+The built-in default plan **"Alle"** (all zones) has empty groups and therefore always waters every enabled zone. To rename a plan, select it, enter the replacement name in **New name for selected plan**, click **Rename selected plan**, and confirm the dialog. Plan names must be unique.
 
 For sequential operation (`Pump capacity` = `0`), open **Valve assignment** for a plan. The read-only **Execution order** column shows the running position in which the valves are processed. Use the table's up/down arrow buttons, click **Apply valve assignment**, then reload the table to refresh the displayed numbers. The saved row order is the execution order. With parallel batching enabled, valves are grouped by pump capacity and duration instead, so the configured order is not guaranteed.
 
