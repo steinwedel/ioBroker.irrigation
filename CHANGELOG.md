@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.2.32 (2026-07-23)
 * (Gerhard Steinwedel) **ENHANCED**: Unified direct and planned valve watering duration
 
 ## 0.2.31 (2026-07-23)

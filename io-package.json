@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.2.31",
+    "version": "0.2.32",
     "news": {
+      "0.2.32": {
+        "en": "**ENHANCED**: Unified direct and planned valve watering duration",
+        "de": "**VERBESSERT**: Einheitliche Bewässerungsdauer für direkte und geplante Ventilbewässerung",
+        "ru": "**УЛУЧШЕНО**: Унифицированная продолжительность полива для прямого и запланированного управления клапанами",
+        "pt": "**MELHORADO**: Duração unificada de rega direta e programada da válvula",
+        "nl": "**VERBETERD**: Uniforme directe en geplande klep bewateringsduur",
+        "fr": "**AMÉLIORÉ**: Durée d'arrosage unifiée pour les vannes directes et planifiées",
+        "it": "**MIGLIORATO**: Durata unificata dell'irrigazione diretta e pianificata della valvola",
+        "es": "**MEJORADO**: Duración unificada de riego directo y programado de la válvula",
+        "pl": "**ULEPSZONE**: Ujednolicony czas trwania podlewania bezpośredniego i zaplanowanego zaworu",
+        "uk": "**ПОКРАЩЕНО**: Уніфікована тривалість прямого та запланованого поливу клапана",
+        "zh-cn": "**增强**：统一直接和计划阀门浇水持续时间"
+      },
       "0.2.31": {
         "en": "**FIXED**: Enabled native table arrow buttons to order sequential plan valves",
         "de": "**BEHOBEN**: Native Tabellen-Pfeil-Schaltflächen aktiviert, um sequentielle Planventile zu sortieren",
@@ -80,19 +93,6 @@
         "pl": "**ULEPSZONE**: Data/godzina zakończenia ograniczenia wyłączone i wyczyszczone do momentu skonfigurowania ich wartości początkowych",
         "uk": "**ПОКРАЩЕНО**: Дата/час завершення обмеження вимкнено та очищено, доки не буде налаштовано їхні початкові значення",
         "zh-cn": "**增强**：限制结束日期/时间已禁用并清除，直到配置其开始值为止"
-      },
-      "0.2.25": {
-        "en": "**ENHANCED**: Disabled the maximum irrigation temperature without a configured temperature source\n**ENHANCED**: Made restriction date and time ranges independently optional\n**FIXED**: Validated annual dates such as 1.6 in the admin configuration",
-        "de": "**VERBESSERT**: Maximale Bewässerungstemperatur ohne konfigurierte Temperaturquelle deaktiviert\n**VERBESSERT**: Einschränkungsdatum und Zeitbereiche unabhängig voneinander optional gemacht\n**BEHOBEN**: Jährliche Datumsangaben wie 1.6 in der Admin-Konfiguration validiert",
-        "ru": "**УЛУЧШЕНО**: Отключена максимальная температура полива без настроенного источника температуры\n**УЛУЧШЕНО**: Диапазоны дат и времени ограничений сделаны независимо опциональными\n**ИСПРАВЛЕНО**: Валидация годовых дат, таких как 1.6, в конфигурации администратора",
-        "pt": "**MELHORADO**: Desativada a temperatura máxima de irrigação sem uma fonte de temperatura configurada\n**MELHORADO**: Intervalos de data e hora de restrição tornados independentemente opcionais\n**CORRIGIDO**: Validadas datas anuais como 1.6 na configuração do administrador",
-        "nl": "**VERBETERD**: Maximale irrigatietemperatuur uitgeschakeld zonder geconfigureerde temperatuurbron\n**VERBETERD**: Beperkingsdatum en tijdsbereiken onafhankelijk optioneel gemaakt\n**OPGELOST**: Jaarlijkse datums zoals 1.6 gevalideerd in de beheerconfiguratie",
-        "fr": "**AMÉLIORÉ** : Désactivation de la température maximale d'irrigation sans source de température configurée\n**AMÉLIORÉ** : Plages de dates et d'heures de restriction rendues indépendamment optionnelles\n**CORRIGÉ** : Validation des dates annuelles telles que 1.6 dans la configuration administrateur",
-        "it": "**MIGLIORATO**: Disabilitata la temperatura massima di irrigazione senza una sorgente di temperatura configurata\n**MIGLIORATO**: Intervalli di date e orari di restrizione resi indipendentemente opzionali\n**CORRETTO**: Validate le date annuali come 1.6 nella configurazione amministratore",
-        "es": "**MEJORADO**: Deshabilitada la temperatura máxima de riego sin una fuente de temperatura configurada\n**MEJORADO**: Rangos de fecha y hora de restricción hechos independientemente opcionales\n**CORREGIDO**: Validadas fechas anuales como 1.6 en la configuración del administrador",
-        "pl": "**ULEPSZONE**: Wyłączono maksymalną temperaturę nawadniania bez skonfigurowanego źródła temperatury\n**ULEPSZONE**: Zakresy dat i godzin ograniczeń uczyniono niezależnie opcjonalnymi\n**NAPRAWIONO**: Zwalidowano daty roczne takie jak 1.6 w konfiguracji administratora",
-        "uk": "**ПОКРАЩЕНО**: Вимкнено максимальну температуру зрошення без налаштованого джерела температури\n**ПОКРАЩЕНО**: Діапазони дат і часу обмежень зроблено незалежно опціональними\n**ВИПРАВЛЕНО**: Валідовано річні дати, такі як 1.6, у конфігурації адміністратора",
-        "zh-cn": "**增强**：在没有配置温度源的情况下禁用了最大灌溉温度\n**增强**：使限制日期和时间范围可独立设为可选\n**修复**：在管理员配置中验证了如 1.6 这样的年度日期"
       }
     },
     "titleLang": {
