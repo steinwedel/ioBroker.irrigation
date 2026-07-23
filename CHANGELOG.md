@@ -1,4 +1,7 @@
 # Changelog
+## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **FIXED**: Restored native table arrow controls for ordered plan valves
+
 ## 0.2.40 (2026-07-23)
 * (Gerhard Steinwedel) **FIXED**: Added dedicated persistent move controls for ordered plan valves
 

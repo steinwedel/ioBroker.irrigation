@@ -1,11 +1,11 @@
 # Context
 
 ## Current Task
-Planventile werden über dedizierte Pfeil-Schaltflächen dauerhaft sortiert.
+Planventile werden wieder über die nativen Tabellenpfeile sortiert.
 
 ## Key Decisions
-- Die Tabelle hat keine Add/Delete-Aktionen, weil alle Ventile angezeigt werden.
-- Jede Verschiebeaktion speichert und lädt die Planreihenfolge sofort neu.
+- Die Tabellenaktionen sind für Hoch-/Runter-Pfeile aktiviert.
+- Bei Pumpenkapazität 0 wird die gespeicherte Zeilenreihenfolge ausgeführt.
 
 ## Next Steps
-- Übersetzungen und Validierung ausführen.
+- Validierung ausführen.

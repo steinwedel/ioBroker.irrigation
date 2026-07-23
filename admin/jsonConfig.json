@@ -348,7 +348,7 @@
                 },
                 "planValvesHint": {
                     "type": "staticText",
-                    "text": "After changing \"Selected plan\" above, click \"Load valves for selected plan\" to refresh the table below. Tick/untick valves and save the assignment. Select an assigned valve below and use the move buttons to change its saved execution order. The order is used when the pump capacity is 0 (sequential watering).",
+                    "text": "After changing \"Selected plan\" above, click \"Load valves for selected plan\" to refresh the table below. Tick/untick valves and use the up/down arrow buttons to set their order. Click \"Apply valve assignment\" to save. The order is used when the pump capacity is 0 (sequential watering).",
                     "newLine": true,
                     "sm": 12,
                     "md": 12,
@@ -384,61 +384,21 @@
                     "md": 4,
                     "lg": 3
                 },
-                "planOrderValveIndex": {
-                    "type": "selectSendTo",
-                    "label": "Valve to move",
-                    "command": "listPlanValves",
-                    "jsonData": "{\"_editPlan\": ${JSON.stringify(data._editPlan ?? null)}}",
-                    "alsoDependsOn": ["_editPlan"],
-                    "newLine": true,
-                    "sm": 6,
-                    "md": 4,
-                    "lg": 3
-                },
-                "movePlanValveUp": {
-                    "type": "sendTo",
-                    "label": "Move valve up",
-                    "command": "movePlanValve",
-                    "jsonData": "{\"_editPlan\": ${JSON.stringify(data._editPlan ?? null)}, \"valveIndex\": ${JSON.stringify(data.planOrderValveIndex ?? null)}, \"direction\": \"up\"}",
-                    "alsoDependsOn": ["_editPlan", "planOrderValveIndex"],
-                    "useNative": true,
-                    "disabled": "data.planOrderValveIndex === undefined || data.planOrderValveIndex === null || data.planOrderValveIndex === ''",
-                    "icon": "arrow_upward",
-                    "variant": "outlined",
-                    "sm": 3,
-                    "md": 2,
-                    "lg": 2
-                },
-                "movePlanValveDown": {
-                    "type": "sendTo",
-                    "label": "Move valve down",
-                    "command": "movePlanValve",
-                    "jsonData": "{\"_editPlan\": ${JSON.stringify(data._editPlan ?? null)}, \"valveIndex\": ${JSON.stringify(data.planOrderValveIndex ?? null)}, \"direction\": \"down\"}",
-                    "alsoDependsOn": ["_editPlan", "planOrderValveIndex"],
-                    "useNative": true,
-                    "disabled": "data.planOrderValveIndex === undefined || data.planOrderValveIndex === null || data.planOrderValveIndex === ''",
-                    "icon": "arrow_downward",
-                    "variant": "outlined",
-                    "sm": 3,
-                    "md": 2,
-                    "lg": 2
-                },
                 "_planValveTable": {
                     "type": "table",
                     "label": "Valves in selected plan",
                     "newLine": true,
-                    "noDelete": true,
+                    "noDelete": false,
                     "sm": 12,
                     "md": 12,
                     "lg": 8,
                     "items": [
                         {
-                            "type": "number",
+                            "type": "text",
                             "attr": "executionOrder",
                             "title": "Number",
                             "width": "10%",
-                            "readOnly": true,
-                            "sort": true
+                            "readOnly": true
                         },
                         {
                             "type": "checkbox",
