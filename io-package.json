@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.2.48",
+    "version": "0.2.49",
     "news": {
+      "0.2.49": {
+        "en": "**FIXED**: Added direct persistent move controls for plan valve order",
+        "de": "**BEHOBEN**: Direkte persistente Verschiebungssteuerelemente für die Planventilreihenfolge hinzugefügt",
+        "ru": "**ИСПРАВЛЕНО**: Добавлены прямые постоянные элементы управления перемещением для порядка клапанов плана",
+        "pt": "**CORRIGIDO**: Adicionados controles de movimentação persistentes diretos para a ordem das válvulas do plano",
+        "nl": "**OPGELOST**: Directe persistente verplaatsingsbesturingen toegevoegd voor de volgorde van planventielen",
+        "fr": "**CORRIGÉ** : Ajout de contrôles de déplacement persistants directs pour l'ordre des vannes du plan",
+        "it": "**RISOLTO**: Aggiunti controlli di spostamento persistenti diretti per l'ordine delle valvole del piano",
+        "es": "**SOLUCIONADO**: Se agregaron controles de movimiento persistentes directos para el orden de las válvulas del plan",
+        "pl": "**NAPRAWIONO**: Dodano bezpośrednie trwałe kontrolki przesuwania dla kolejności zaworów planu",
+        "uk": "**ВИПРАВЛЕНО**: Додано прямі постійні елементи керування переміщенням для порядку клапанів плану",
+        "zh-cn": "**已修复**：为计划阀门顺序添加了直接持久移动控件"
+      },
       "0.2.48": {
         "en": "**ENHANCED**: Plans now track valves by stable state IDs instead of array indexes — `valveStateIds`, `valveOrderStateIds`, and `knownValveStateIds` added to plan config. Prevents assignment loss when valves are renamed, reordered, added, or deleted. New valves are automatically added to existing plans unless explicitly empty. Legacy `valveIndexes` and `valveOrder` are migrated on adapter start and kept in sync for backward compatibility",
         "de": "**VERBESSERT**: Pläne verfolgen Ventile nun anhand stabiler Zustands-IDs anstelle von Array-Indizes — `valveStateIds`, `valveOrderStateIds` und `knownValveStateIds` wurden zur Plan-Konfiguration hinzugefügt. Verhindert Zuordnungsverlust, wenn Ventile umbenannt, neu sortiert, hinzugefügt oder gelöscht werden. Neue Ventile werden automatisch zu bestehenden Plänen hinzugefügt, sofern nicht explizit leer. Die veralteten `valveIndexes` und `valveOrder` werden beim Adapter-Start migriert und zur Abwärtskompatibilität synchron gehalten",
@@ -80,19 +93,6 @@
         "pl": "**NAPRAWIONO**: Numery wykonania planu są teraz aktualizowane natychmiast po przesunięciu wierszy tabeli",
         "uk": "**ВИПРАВЛЕНО**: Номери виконання плану тепер оновлюються одразу після переміщення рядків таблиці",
         "zh-cn": "**已修复**：移动表格行后立即更新计划执行编号"
-      },
-      "0.2.42": {
-        "en": "**FIXED**: Refreshed valve names from the object tree during scans and corrected plan numbering",
-        "de": "**BEHOBEN**: Ventilnamen aus dem Objektbaum während der Scans aktualisiert und Plannummerierung korrigiert",
-        "ru": "**ИСПРАВЛЕНО**: Обновлены названия клапанов из дерева объектов во время сканирования и исправлена нумерация планов",
-        "pt": "**CORRIGIDO**: Nomes de válvulas atualizados da árvore de objetos durante as varreduras e numeração de planos corrigida",
-        "nl": "**OPGELOST**: Klepnamen vernieuwd vanuit de objectboom tijdens scans en plannummering gecorrigeerd",
-        "fr": "**CORRIGÉ** : Noms de vannes actualisés depuis l'arborescence d'objets pendant les analyses et numérotation des plans corrigée",
-        "it": "**RISOLTO**: Aggiornati i nomi delle valvole dall'albero degli oggetti durante le scansioni e corretta la numerazione dei piani",
-        "es": "**CORREGIDO**: Nombres de válvulas actualizados desde el árbol de objetos durante los escaneos y numeración de planos corregida",
-        "pl": "**NAPRAWIONO**: Odświeżono nazwy zaworów z drzewa obiektów podczas skanowania i poprawiono numerację planów",
-        "uk": "**ВИПРАВЛЕНО**: Оновлено назви клапанів з дерева об'єктів під час сканування та виправлено нумерацію планів",
-        "zh-cn": "**已修复**：在扫描期间从对象树刷新了阀门名称并修正了平面图编号"
       }
     },
     "titleLang": {

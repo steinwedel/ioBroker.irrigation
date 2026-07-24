@@ -867,7 +867,12 @@ class Irrigation extends utils.Adapter {
       const currentIndex = valveOrder.indexOf(valveIndex);
       const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
       if (currentIndex < 0 || targetIndex < 0 || targetIndex >= valveOrder.length) {
-        this.sendTo(obj.from, obj.command, { native: { _planValveTable: this.getPlanValveTable(planIndex) } }, obj.callback);
+        this.sendTo(
+          obj.from,
+          obj.command,
+          { native: { _planValveTable: this.getPlanValveTable(planIndex) } },
+          obj.callback
+        );
         return;
       }
       [valveOrder[currentIndex], valveOrder[targetIndex]] = [valveOrder[targetIndex], valveOrder[currentIndex]];
