@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.2.45",
+    "version": "0.2.46",
     "news": {
+      "0.2.46": {
+        "en": "**FIXED**: Removed the repeating plan assignment confirmation dialog",
+        "de": "**BEHOBEN**: Der sich wiederholende Bestätigungsdialog für die Planzuweisung wurde entfernt",
+        "ru": "**ИСПРАВЛЕНО**: Удалено повторяющееся диалоговое окно подтверждения назначения плана",
+        "pt": "**CORRIGIDO**: Removido o diálogo de confirmação de atribuição de plano repetitivo",
+        "nl": "**OPGELOST**: Het herhalende bevestigingsdialoogvenster voor plantoewijzing is verwijderd",
+        "fr": "**CORRIGÉ**: Suppression de la boîte de dialogue de confirmation d'affectation de plan répétitive",
+        "it": "**RISOLTO**: Rimossa la finestra di dialogo di conferma dell'assegnazione del piano ripetitiva",
+        "es": "**SOLUCIONADO**: Se eliminó el cuadro de diálogo de confirmación de asignación de plan repetitivo",
+        "pl": "**NAPRAWIONO**: Usunięto powtarzające się okno dialogowe potwierdzenia przypisania planu",
+        "uk": "**ВИПРАВЛЕНО**: Видалено діалогове вікно підтвердження призначення плану, що повторювалося",
+        "zh-cn": "**已修复**: 移除了重复出现的计划分配确认对话框"
+      },
       "0.2.45": {
         "en": "**ENHANCED**: Valve assignment confirmation dialog now explicitly enabled with `condition: true` to ensure the dialog is always shown and gives the table debounce time to persist the current valve order before saving",
         "de": "**VERBESSERT**: Der Bestätigungsdialog für die Ventilzuordnung ist jetzt explizit mit `condition: true` aktiviert, um sicherzustellen, dass der Dialog immer angezeigt wird und der Tabelle genügend Debounce-Zeit gibt, um die aktuelle Ventilreihenfolge vor dem Speichern zu persistieren",
@@ -80,19 +93,6 @@
         "pl": "**NAPRAWIONO**: Dodano dedykowane trwałe sterowanie ruchem dla zaworów planu uporządkowanego",
         "uk": "**ВИПРАВЛЕНО**: Додано спеціальні постійні елементи керування переміщенням для клапанів упорядкованого плану",
         "zh-cn": "**已修复**：为有序计划阀门添加了专用的持久移动控制"
-      },
-      "0.2.39": {
-        "en": "**FIXED**: Persisted and reloaded the valve order of each plan reliably",
-        "de": "**BEHOBEN**: Die Ventilreihenfolge jedes Plans wird nun zuverlässig gespeichert und neu geladen",
-        "ru": "**ИСПРАВЛЕНО**: Порядок клапанов каждого плана теперь надежно сохраняется и перезагружается",
-        "pt": "**CORRIGIDO**: A ordem das válvulas de cada plano é agora persistida e recarregada de forma confiável",
-        "nl": "**OPGELOST**: De volgorde van de kleppen van elk plan wordt nu betrouwbaar opgeslagen en herladen",
-        "fr": "**CORRIGÉ**: L'ordre des vannes de chaque plan est désormais enregistré et rechargé de manière fiable",
-        "it": "**RISOLTO**: L'ordine delle valvole di ogni piano viene ora salvato e ricaricato in modo affidabile",
-        "es": "**SOLUCIONADO**: El orden de las válvulas de cada plan se guarda y recarga de forma fiable",
-        "pl": "**NAPRAWIONO**: Kolejność zaworów każdego planu jest teraz niezawodnie zapisywana i wczytywana",
-        "uk": "**ВИПРАВЛЕНО**: Порядок клапанів кожного плану тепер надійно зберігається та перезавантажується",
-        "zh-cn": "**已修复**: 现在可靠地保存和重新加载每个计划的阀门顺序"
       }
     },
     "titleLang": {

@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.2.46 (2026-07-24)
 * (Gerhard Steinwedel) **FIXED**: Removed the repeating plan assignment confirmation dialog
 
 ## 0.2.45 (2026-07-24)
