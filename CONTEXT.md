@@ -1,11 +1,11 @@
 # Context
 
 ## Current Task
-Die Nummerierung der Planventile aktualisiert sich unmittelbar nach dem Verschieben.
+Die Reihenfolge eines Planventils wird nach Tabellenverschiebung zuverlässig gespeichert.
 
 ## Key Decisions
+- Der Bestätigungsdialog gibt dem Tabellen-Debounce Zeit, die aktuelle Reihenfolge zu übernehmen.
 - Die Nummer wird dynamisch aus der aktuellen Tabellenposition berechnet.
-- Bereits bekannte Ventile erhalten den erkannten Objektbaum-Namen beim Scan.
 
 ## Next Steps
-- Validierung ausführen.
+- Übersetzungen und Validierung ausführen.

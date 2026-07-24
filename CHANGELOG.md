@@ -1,4 +1,7 @@
 # Changelog
+## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **FIXED**: Ensured reordered plan valves are persisted after table updates
+
 ## 0.2.43 (2026-07-23)
 * (Gerhard Steinwedel) **FIXED**: Updated plan execution numbers immediately after moving table rows
 
