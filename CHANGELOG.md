@@ -1,5 +1,6 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.2.51 (2026-07-24)
+* (Gerhard Steinwedel) **ENHANCED**: Made release-script confirmations automatic
 * (Gerhard Steinwedel) **FIXED**: Restored reliable plan valve order serialization in the admin table
 
 ## 0.2.50 (2026-07-24)

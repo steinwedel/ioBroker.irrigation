@@ -44,7 +44,7 @@ function run(command, commandArgs) {
 
 run('node', [path.join('scripts', 'translate-news.js'), bump]);
 
-const releaseArgs = ['--addPlaceholder'];
+const releaseArgs = ['--addPlaceholder', '--yes'];
 if (!args.includes('--all') && !args.includes('-A') && !args.includes('--includeUnstaged')) {
     releaseArgs.push('--all');
 }

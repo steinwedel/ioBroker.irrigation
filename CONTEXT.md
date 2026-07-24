@@ -1,11 +1,11 @@
 # Context
 
 ## Current Task
-Planreihenfolgen werden über den bewährten Admin-Tabellenwert gespeichert und geladen.
+Release-Bestätigungen werden automatisch mit Ja beantwortet.
 
 ## Key Decisions
-- `planValveTable` bleibt ein temporäres, aber sendbares Formularfeld.
-- Debug-Logs zeigen die beim Speichern und Laden verwendete `valveOrder`.
+- Der Release-Wrapper übergibt dauerhaft `--yes` an `release-script`.
+- Die Release-Übersetzung und der normale Release-Ablauf bleiben unverändert.
 
 ## Next Steps
-- Validierung ausführen.
+- Keine.

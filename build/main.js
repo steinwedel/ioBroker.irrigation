@@ -171,6 +171,15 @@ class Irrigation extends utils.Adapter {
     const storedPlans = this.parsePlansState(plansState == null ? void 0 : plansState.val);
     if (storedPlans && storedPlans.length > 0) {
       const synchronizedPlans = this.synchronizePlansWithValves(storedPlans);
+      this.log.debug(
+        `Loaded plan valve orders: ${JSON.stringify(
+          synchronizedPlans.map((plan) => ({
+            name: plan.name,
+            valveIndexes: plan.valveIndexes,
+            valveOrder: plan.valveOrder
+          }))
+        )}`
+      );
       if (JSON.stringify(synchronizedPlans) !== JSON.stringify(storedPlans)) {
         await this.writePlansState(synchronizedPlans);
       } else {
@@ -257,6 +266,15 @@ class Irrigation extends utils.Adapter {
   async writePlansState(plans) {
     const synchronizedPlans = this.synchronizePlansWithValves(plans);
     this.config2.plans = synchronizedPlans;
+    this.log.debug(
+      `Persisting plan valve orders: ${JSON.stringify(
+        synchronizedPlans.map((plan) => ({
+          name: plan.name,
+          valveIndexes: plan.valveIndexes,
+          valveOrder: plan.valveOrder
+        }))
+      )}`
+    );
     await this.setStateAsync("automation.plansData", { val: JSON.stringify(synchronizedPlans), ack: true });
     await this.publishPlanNames(synchronizedPlans);
   }
@@ -843,7 +861,7 @@ class Irrigation extends utils.Adapter {
       this.sendTo(
         obj.from,
         obj.command,
-        { native: { _planValveTable: this.getPlanValveTable(planIndex) } },
+        { native: { planValveTable: this.getPlanValveTable(planIndex) } },
         obj.callback
       );
       return;
@@ -872,7 +890,7 @@ class Irrigation extends utils.Adapter {
       this.sendTo(
         obj.from,
         obj.command,
-        { native: { plans: updatedPlans, _planValveTable: this.getPlanValveTable(planIndex) } },
+        { native: { plans: updatedPlans, planValveTable: this.getPlanValveTable(planIndex) } },
         obj.callback
       );
       return;

@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.2.50",
+    "version": "0.2.51",
     "news": {
+      "0.2.51": {
+        "en": "**FIXED**: Restored reliable plan valve order serialization in the admin table",
+        "de": "**BEHOBEN**: Zuverlässige Serialisierung der Planventil-Reihenfolge in der Admin-Tabelle wiederhergestellt",
+        "ru": "**ИСПРАВЛЕНО**: Восстановлена надежная сериализация порядка клапанов плана в таблице администратора",
+        "pt": "**CORRIGIDO**: Restaurada a serialização confiável da ordem das válvulas do plano na tabela de administração",
+        "nl": "**OPGELOST**: Betrouwbare serialisatie van de volgorde van planventielen in de beheerderstabel hersteld",
+        "fr": "**CORRIGÉ**: Restauration de la sérialisation fiable de l'ordre des vannes du plan dans le tableau d'administration",
+        "it": "**RISOLTO**: Ripristinata la serializzazione affidabile dell'ordine delle valvole del piano nella tabella di amministrazione",
+        "es": "**SOLUCIONADO**: Restaurada la serialización confiable del orden de las válvulas del plan en la tabla de administración",
+        "pl": "**NAPRAWIONO**: Przywrócono niezawodną serializację kolejności zaworów planu w tabeli administratora",
+        "uk": "**ВИПРАВЛЕНО**: Відновлено надійну серіалізацію порядку клапанів плану в таблиці адміністратора",
+        "zh-cn": "**已修复**：恢复了管理表中计划阀门顺序的可靠序列化"
+      },
       "0.2.50": {
         "en": "**ENHANCED**: Plan valve order now uses native table arrow buttons instead of dedicated move controls — the dropdown and up/down buttons were removed; users drag or click table arrows to reorder valves, then apply changes. Simplifies UI and aligns with standard JSONConfig table behavior",
         "de": "**VERBESSERT**: Die Reihenfolge der Planventile verwendet jetzt native Tabellen-Pfeilschaltflächen anstelle dedizierter Verschiebe-Steuerelemente – das Dropdown und die Auf-/Ab-Schaltflächen wurden entfernt; Benutzer ziehen oder klicken auf die Tabellenpfeile, um Ventile neu anzuordnen, und übernehmen dann die Änderungen. Vereinfacht die Benutzeroberfläche und entspricht dem standardmäßigen JSONConfig-Tabellenverhalten",
@@ -80,19 +93,6 @@
         "pl": "**ULEPSZONE**: Okno dialogowe potwierdzenia przypisania zaworów jest teraz jawnie włączone z `condition: true`, aby zapewnić, że okno dialogowe jest zawsze wyświetlane i daje tabeli czas debounce na utrwalenie bieżącej kolejności zaworów przed zapisaniem",
         "uk": "**ПОКРАЩЕНО**: Діалогове вікно підтвердження призначення клапанів тепер явно увімкнено з `condition: true`, щоб гарантувати, що діалогове вікно завжди відображається і дає таблиці час debounce для збереження поточного порядку клапанів перед збереженням",
         "zh-cn": "**增强**：阀门分配确认对话框现在明确启用 `condition: true`，以确保对话框始终显示，并为表格提供防抖时间以在保存前持久化当前阀门顺序"
-      },
-      "0.2.44": {
-        "en": "**FIXED**: Ensured reordered plan valves are persisted after table updates",
-        "de": "**BEHOBEN**: Sichergestellt, dass neu angeordnete Planventile nach Tabellenaktualisierungen gespeichert werden",
-        "ru": "**ИСПРАВЛЕНО**: Обеспечено сохранение переупорядоченных клапанов плана после обновления таблицы",
-        "pt": "**CORRIGIDO**: Garantido que as válvulas do plano reordenadas sejam persistidas após atualizações da tabela",
-        "nl": "**OPGELOST**: Ervoor gezorgd dat opnieuw geordende planventielen worden bewaard na tabelupdates",
-        "fr": "**CORRIGÉ**: Assuré que les vannes de plan réorganisées sont conservées après les mises à jour du tableau",
-        "it": "**RISOLTO**: Assicurato che le valvole del piano riordinate vengano mantenute dopo gli aggiornamenti della tabella",
-        "es": "**CORREGIDO**: Se aseguró que las válvulas del plan reordenadas se persistan después de las actualizaciones de la tabla",
-        "pl": "**NAPRAWIONO**: Zapewniono, że zmieniona kolejność zaworów planu jest zachowywana po aktualizacjach tabeli",
-        "uk": "**ВИПРАВЛЕНО**: Забезпечено збереження переупорядкованих клапанів плану після оновлення таблиці",
-        "zh-cn": "**已修复**：确保重新排序的计划阀门在表格更新后被持久化保存"
       }
     },
     "titleLang": {
