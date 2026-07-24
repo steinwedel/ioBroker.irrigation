@@ -162,6 +162,7 @@
                     "type": "table",
                     "label": "Valves",
                     "newLine": true,
+                    "noDelete": false,
                     "items": [
                         {
                             "type": "text",

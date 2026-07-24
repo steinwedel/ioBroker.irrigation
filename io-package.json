@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.2.52",
+    "version": "0.2.53",
     "news": {
+      "0.2.53": {
+        "en": "**FIXED**: Enabled both table reorder arrows for valves",
+        "de": "**BEHOBEN**: Beide Pfeile zum Neuordnen der Tabelle für Ventile aktiviert",
+        "ru": "**ИСПРАВЛЕНО**: Включены обе стрелки изменения порядка таблицы для клапанов",
+        "pt": "**CORRIGIDO**: Ativadas ambas as setas de reordenação da tabela para válvulas",
+        "nl": "**OPGELOST**: Beide pijlen voor het herschikken van de tabel voor kleppen ingeschakeld",
+        "fr": "**CORRIGÉ**: Activation des deux flèches de réorganisation du tableau pour les vannes",
+        "it": "**RISOLTO**: Abilitate entrambe le frecce di riordino della tabella per le valvole",
+        "es": "**SOLUCIONADO**: Habilitadas ambas flechas de reordenación de tabla para válvulas",
+        "pl": "**NAPRAWIONO**: Włączono obie strzałki zmiany kolejności tabeli dla zaworów",
+        "uk": "**ВИПРАВЛЕНО**: Увімкнено обидві стрілки зміни порядку таблиці для клапанів",
+        "zh-cn": "**已修复**：启用了阀门表格重新排序的两个箭头"
+      },
       "0.2.52": {
         "en": "**ENHANCED**: Disabled manual release review prompts for automated releases",
         "de": "**VERBESSERT**: Manuelle Release-Überprüfungsaufforderungen für automatisierte Releases deaktiviert",
@@ -80,19 +93,6 @@
         "pl": "**NAPRAWIONO**: Utrwalona jawna kolejność zaworów dla każdego planu nawadniania",
         "uk": "**ВИПРАВЛЕНО**: Збережено явний порядок клапанів для кожного плану зрошення",
         "zh-cn": "**已修复**: 为每个灌溉计划持久化显式阀门顺序"
-      },
-      "0.2.46": {
-        "en": "**FIXED**: Removed the repeating plan assignment confirmation dialog",
-        "de": "**BEHOBEN**: Der sich wiederholende Bestätigungsdialog für die Planzuweisung wurde entfernt",
-        "ru": "**ИСПРАВЛЕНО**: Удалено повторяющееся диалоговое окно подтверждения назначения плана",
-        "pt": "**CORRIGIDO**: Removido o diálogo de confirmação de atribuição de plano repetitivo",
-        "nl": "**OPGELOST**: Het herhalende bevestigingsdialoogvenster voor plantoewijzing is verwijderd",
-        "fr": "**CORRIGÉ**: Suppression de la boîte de dialogue de confirmation d'affectation de plan répétitive",
-        "it": "**RISOLTO**: Rimossa la finestra di dialogo di conferma dell'assegnazione del piano ripetitiva",
-        "es": "**SOLUCIONADO**: Se eliminó el cuadro de diálogo de confirmación de asignación de plan repetitivo",
-        "pl": "**NAPRAWIONO**: Usunięto powtarzające się okno dialogowe potwierdzenia przypisania planu",
-        "uk": "**ВИПРАВЛЕНО**: Видалено діалогове вікно підтвердження призначення плану, що повторювалося",
-        "zh-cn": "**已修复**: 移除了重复出现的计划分配确认对话框"
       }
     },
     "titleLang": {

@@ -1,11 +1,11 @@
 # Context
 
 ## Current Task
-Der Release läuft ohne interaktive Bestätigungen.
+Die Ventiltabelle bietet vollständige native Verschiebeaktionen.
 
 ## Key Decisions
-- Der Release-Wrapper übergibt dauerhaft `--yes` an `release-script`.
-- Das `manual-review`-Plugin wurde entfernt, weil es `--yes` ignoriert.
+- `noDelete: false` aktiviert Hoch- und Runterpfeile explizit.
+- Die Release-Übersetzung und der normale Release-Ablauf bleiben unverändert.
 
 ## Next Steps
-- Keine.
+- Validierung ausführen.

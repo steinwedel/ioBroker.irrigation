@@ -1,4 +1,7 @@
 # Changelog
+## 0.2.53 (2026-07-24)
+* (Gerhard Steinwedel) **FIXED**: Enabled both table reorder arrows for valves
+
 ## 0.2.52 (2026-07-24)
 * (Gerhard Steinwedel) **ENHANCED**: Disabled manual release review prompts for automated releases
 
