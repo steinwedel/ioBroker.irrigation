@@ -1,4 +1,7 @@
 # Changelog
+## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **FIXED**: Persisted explicit valve order for every irrigation plan
+
 ## 0.2.46 (2026-07-24)
 * (Gerhard Steinwedel) **FIXED**: Removed the repeating plan assignment confirmation dialog
 

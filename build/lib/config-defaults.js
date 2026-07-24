@@ -25,7 +25,7 @@ module.exports = __toCommonJS(config_defaults_exports);
 const DEFAULT_CONFIG = {
   expertMode: false,
   valves: [],
-  plans: [{ name: "Alle", valveIndexes: [] }],
+  plans: [{ name: "Alle", valveIndexes: [], valveOrder: [] }],
   scheduler: {
     autoMode: false,
     timerTimes: [],

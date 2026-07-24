@@ -1,11 +1,11 @@
 # Context
 
 ## Current Task
-Der Plan-Zuordnungsdialog öffnet sich nach Bestätigung nicht erneut.
+Die Ventilreihenfolge eines Plans wird explizit in `automation.plansData` gespeichert.
 
 ## Key Decisions
-- Die bedingungslose JSONConfig-Bestätigung wurde entfernt.
-- Die Nummer wird dynamisch aus der aktuellen Tabellenposition berechnet.
+- `valveOrder` speichert die vollständige Reihenfolge unabhängig von `valveIndexes`.
+- Bestehende Plan-Daten werden beim Start mit `valveOrder: []` migriert.
 
 ## Next Steps
 - Validierung ausführen.

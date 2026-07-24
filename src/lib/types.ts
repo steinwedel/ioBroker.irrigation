@@ -32,14 +32,27 @@ export function formatValveNumber(index: number): string {
  * @param rows
  * @param valveCount
  */
+export function parsePlanValveTableOrder(rows: Array<{ valveNumber?: string }>, valveCount: number): number[] {
+    const seen = new Set<number>();
+    return rows
+        .map(row => Number.parseInt(row.valveNumber ?? '', 10))
+        .filter(index => {
+            if (!Number.isInteger(index) || index < 0 || index >= valveCount || seen.has(index)) {
+                return false;
+            }
+            seen.add(index);
+            return true;
+        });
+}
+
 export function parsePlanValveTableRows(
     rows: Array<{ valveNumber?: string; assigned?: boolean }>,
     valveCount: number,
 ): number[] {
-    return rows
-        .filter(row => row?.assigned)
-        .map(row => Number.parseInt(row.valveNumber ?? '', 10))
-        .filter(index => Number.isInteger(index) && index >= 0 && index < valveCount);
+    return parsePlanValveTableOrder(
+        rows.filter(row => row?.assigned),
+        valveCount,
+    );
 }
 
 /**
@@ -92,6 +105,7 @@ export interface IPlanConfig {
      * [NONE_SENTINEL] rather than [] to avoid the "all valves" fallback.
      */
     valveIndexes: number[];
+    valveOrder?: number[];
 }
 
 export interface ISchedulerConfig {

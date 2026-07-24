@@ -6,7 +6,7 @@
 import * as utils from '@iobroker/adapter-core';
 import { normalizeConfig } from './lib/config-defaults';
 import type { IPlanConfig, IrrigationNativeConfig, IValveConfig, ScanType } from './lib/types';
-import { formatValveNumber, NONE_SENTINEL, parsePlanValveTableRows } from './lib/types';
+import { formatValveNumber, NONE_SENTINEL, parsePlanValveTableOrder, parsePlanValveTableRows } from './lib/types';
 import { createBaseStates, applyConfigToStates } from './lib/states';
 import { ValveController } from './lib/ventile';
 import { AutomationEngine } from './lib/automation';
@@ -207,8 +207,13 @@ class Irrigation extends utils.Adapter {
         const storedPlans = this.parsePlansState(plansState?.val);
 
         if (storedPlans && storedPlans.length > 0) {
-            this.config2.plans = storedPlans;
-            await this.publishPlanNames(storedPlans);
+            const needsOrderMigration = storedPlans.some(plan => plan.valveOrder === undefined);
+            if (needsOrderMigration) {
+                await this.writePlansState(storedPlans.map(plan => ({ ...plan, valveOrder: [] })));
+            } else {
+                this.config2.plans = storedPlans;
+                await this.publishPlanNames(storedPlans);
+            }
             return;
         }
 
@@ -234,6 +239,7 @@ class Irrigation extends utils.Adapter {
             return parsed.map((p: Partial<IPlanConfig>) => ({
                 name: p?.name ?? '',
                 valveIndexes: Array.isArray(p?.valveIndexes) ? p.valveIndexes : [],
+                valveOrder: Array.isArray(p?.valveOrder) ? p.valveOrder : undefined,
             }));
         } catch (err) {
             this.log.warn(`Failed to parse automation.plansData state, ignoring: ${(err as Error).message}`);
@@ -670,7 +676,12 @@ class Irrigation extends utils.Adapter {
         const allValveIndexes = this.config2.valves.map((_, index) => index);
         const assignedIndexes = this.getPlanValveIndexes(planIndex);
         const assignedSet = new Set(assignedIndexes);
-        const orderedIndexes = [...assignedIndexes, ...allValveIndexes.filter(index => !assignedSet.has(index))];
+        const plan =
+            planIndex !== undefined && planIndex >= 0 && planIndex < this.config2.plans.length
+                ? this.config2.plans[planIndex]
+                : undefined;
+        const storedOrder = (plan?.valveOrder ?? []).filter(index => allValveIndexes.includes(index));
+        const orderedIndexes = [...storedOrder, ...allValveIndexes.filter(index => !storedOrder.includes(index))];
         return orderedIndexes.map(index => ({
             valveNumber: formatValveNumber(index),
             name: this.config2.valves[index].name || 'unnamed',
@@ -852,7 +863,7 @@ class Irrigation extends utils.Adapter {
                 this.sendTo(obj.from, obj.command, { error: 'noName' }, obj.callback);
                 return;
             }
-            const updatedPlans = [...this.config2.plans, { name, valveIndexes: [] }];
+            const updatedPlans = [...this.config2.plans, { name, valveIndexes: [], valveOrder: [] }];
             const newPlanIndex = updatedPlans.length - 1;
             await this.writePlansState(updatedPlans);
             this.log.info(`Created new plan "${name}"`);
@@ -965,9 +976,14 @@ class Irrigation extends utils.Adapter {
             }
             const rows = (msg?.planValveTable as Array<{ valveNumber?: string; assigned?: boolean }> | undefined) ?? [];
             const selectedIndexes = parsePlanValveTableRows(rows, this.config2.valves.length);
+            const valveOrder = parsePlanValveTableOrder(rows, this.config2.valves.length);
             const updatedPlans = this.config2.plans.map((p, i) =>
                 i === planIndex
-                    ? { ...p, valveIndexes: selectedIndexes.length > 0 ? selectedIndexes : [NONE_SENTINEL] }
+                    ? {
+                          ...p,
+                          valveIndexes: selectedIndexes.length > 0 ? selectedIndexes : [NONE_SENTINEL],
+                          valveOrder,
+                      }
                     : p,
             );
             await this.writePlansState(updatedPlans);
@@ -985,6 +1001,7 @@ class Irrigation extends utils.Adapter {
             const updatedPlans = this.config2.plans.map(p => ({
                 ...p,
                 valveIndexes: [...allValveIndexes],
+                valveOrder: [...allValveIndexes],
             }));
             await this.writePlansState(updatedPlans);
             this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);

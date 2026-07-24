@@ -7,7 +7,7 @@ import type { IrrigationNativeConfig } from './types';
 export const DEFAULT_CONFIG: IrrigationNativeConfig = {
     expertMode: false,
     valves: [],
-    plans: [{ name: 'Alle', valveIndexes: [] }],
+    plans: [{ name: 'Alle', valveIndexes: [], valveOrder: [] }],
     scheduler: {
         autoMode: false,
         timerTimes: [],
