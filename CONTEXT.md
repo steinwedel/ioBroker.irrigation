@@ -1,11 +1,11 @@
 # Context
 
 ## Current Task
-Release-Bestätigungen werden automatisch mit Ja beantwortet.
+Der Release läuft ohne interaktive Bestätigungen.
 
 ## Key Decisions
 - Der Release-Wrapper übergibt dauerhaft `--yes` an `release-script`.
-- Die Release-Übersetzung und der normale Release-Ablauf bleiben unverändert.
+- Das `manual-review`-Plugin wurde entfernt, weil es `--yes` ignoriert.
 
 ## Next Steps
 - Keine.

@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.2.51",
+    "version": "0.2.52",
     "news": {
+      "0.2.52": {
+        "en": "**ENHANCED**: Disabled manual release review prompts for automated releases",
+        "de": "**VERBESSERT**: Manuelle Release-Überprüfungsaufforderungen für automatisierte Releases deaktiviert",
+        "ru": "**УЛУЧШЕНО**: Отключены запросы на ручную проверку релизов для автоматических релизов",
+        "pt": "**MELHORADO**: Desativadas as solicitações de revisão manual de lançamento para lançamentos automatizados",
+        "nl": "**VERBETERD**: Handmatige release-beoordelingsprompts uitgeschakeld voor geautomatiseerde releases",
+        "fr": "**AMÉLIORÉ**: Désactivation des invites de révision manuelle des versions pour les versions automatisées",
+        "it": "**MIGLIORATO**: Disattivati i prompt di revisione manuale del rilascio per i rilasci automatizzati",
+        "es": "**MEJORADO**: Desactivadas las solicitudes de revisión manual de versiones para lanzamientos automatizados",
+        "pl": "**ULEPSZONE**: Wyłączono monity o ręczny przegląd wydań dla zautomatyzowanych wydań",
+        "uk": "**ПОКРАЩЕНО**: Вимкнено запити на ручний перегляд релізів для автоматизованих релізів",
+        "zh-cn": "**增强**：已禁用自动发布的手动发布审查提示"
+      },
       "0.2.51": {
         "en": "**FIXED**: Restored reliable plan valve order serialization in the admin table",
         "de": "**BEHOBEN**: Zuverlässige Serialisierung der Planventil-Reihenfolge in der Admin-Tabelle wiederhergestellt",
@@ -80,19 +93,6 @@
         "pl": "**NAPRAWIONO**: Usunięto powtarzające się okno dialogowe potwierdzenia przypisania planu",
         "uk": "**ВИПРАВЛЕНО**: Видалено діалогове вікно підтвердження призначення плану, що повторювалося",
         "zh-cn": "**已修复**: 移除了重复出现的计划分配确认对话框"
-      },
-      "0.2.45": {
-        "en": "**ENHANCED**: Valve assignment confirmation dialog now explicitly enabled with `condition: true` to ensure the dialog is always shown and gives the table debounce time to persist the current valve order before saving",
-        "de": "**VERBESSERT**: Der Bestätigungsdialog für die Ventilzuordnung ist jetzt explizit mit `condition: true` aktiviert, um sicherzustellen, dass der Dialog immer angezeigt wird und der Tabelle genügend Debounce-Zeit gibt, um die aktuelle Ventilreihenfolge vor dem Speichern zu persistieren",
-        "ru": "**УЛУЧШЕНО**: Диалог подтверждения назначения клапанов теперь явно включен с `condition: true`, чтобы гарантировать, что диалог всегда отображается и дает таблице время debounce для сохранения текущего порядка клапанов перед сохранением",
-        "pt": "**MELHORADO**: O diálogo de confirmação de atribuição de válvulas agora está explicitamente ativado com `condition: true` para garantir que o diálogo seja sempre exibido e dê tempo de debounce à tabela para persistir a ordem atual das válvulas antes de salvar",
-        "nl": "**VERBETERD**: Het bevestigingsdialoogvenster voor klepptoewijzing is nu expliciet ingeschakeld met `condition: true` om ervoor te zorgen dat het dialoogvenster altijd wordt weergegeven en de tabel debounce-tijd krijgt om de huidige klepvolgorde te behouden voordat deze wordt opgeslagen",
-        "fr": "**AMÉLIORÉ**: La boîte de dialogue de confirmation d'affectation des vannes est maintenant explicitement activée avec `condition: true` pour garantir que la boîte de dialogue est toujours affichée et donne à la table le temps de debounce nécessaire pour persister l'ordre actuel des vannes avant l'enregistrement",
-        "it": "**MIGLIORATO**: La finestra di dialogo di conferma dell'assegnazione delle valvole è ora esplicitamente abilitata con `condition: true` per garantire che la finestra di dialogo venga sempre visualizzata e dia alla tabella il tempo di debounce per persistere l'ordine corrente delle valvole prima del salvataggio",
-        "es": "**MEJORADO**: El diálogo de confirmación de asignación de válvulas ahora está explícitamente habilitado con `condition: true` para garantizar que el diálogo siempre se muestre y dé tiempo de debounce a la tabla para persistir el orden actual de las válvulas antes de guardar",
-        "pl": "**ULEPSZONE**: Okno dialogowe potwierdzenia przypisania zaworów jest teraz jawnie włączone z `condition: true`, aby zapewnić, że okno dialogowe jest zawsze wyświetlane i daje tabeli czas debounce na utrwalenie bieżącej kolejności zaworów przed zapisaniem",
-        "uk": "**ПОКРАЩЕНО**: Діалогове вікно підтвердження призначення клапанів тепер явно увімкнено з `condition: true`, щоб гарантувати, що діалогове вікно завжди відображається і дає таблиці час debounce для збереження поточного порядку клапанів перед збереженням",
-        "zh-cn": "**增强**：阀门分配确认对话框现在明确启用 `condition: true`，以确保对话框始终显示，并为表格提供防抖时间以在保存前持久化当前阀门顺序"
       }
     },
     "titleLang": {
