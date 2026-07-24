@@ -1,5 +1,6 @@
 # Changelog
 ## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **ENHANCED**: Valve assignment confirmation dialog now explicitly enabled with `condition: true` to ensure the dialog is always shown and gives the table debounce time to persist the current valve order before saving
 
 ## 0.2.44 (2026-07-24)
 * (Gerhard Steinwedel) **FIXED**: Ensured reordered plan valves are persisted after table updates
