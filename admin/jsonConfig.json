@@ -377,14 +377,6 @@
                     "useNative": true,
                     "icon": "save",
                     "variant": "contained",
-                    "confirm": {
-                        "condition": "true",
-                        "text": "Save the current valve assignment and execution order?",
-                        "title": "Apply valve assignment?",
-                        "type": "info",
-                        "ok": "Apply",
-                        "cancel": "Cancel"
-                    },
                     "error": {
                         "noSelection": "No plan selected."
                     },
