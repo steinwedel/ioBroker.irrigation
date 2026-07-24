@@ -1,11 +1,11 @@
 # Context
 
 ## Current Task
-Die funktionierende native Planventiltabelle wurde wiederhergestellt.
+Planreihenfolgen werden über den bewährten Admin-Tabellenwert gespeichert und geladen.
 
 ## Key Decisions
-- Die Tabellenpfeile steuern die sichtbare Reihenfolge.
-- `valveOrder` speichert die vollständige Reihenfolge unabhängig von Ventilindizes.
+- `planValveTable` bleibt ein temporäres, aber sendbares Formularfeld.
+- Debug-Logs zeigen die beim Speichern und Laden verwendete `valveOrder`.
 
 ## Next Steps
 - Validierung ausführen.
