@@ -1,5 +1,6 @@
 # Changelog
 ## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **ENHANCED**: Plan valve order now uses native table arrow buttons instead of dedicated move controls — the dropdown and up/down buttons were removed; users drag or click table arrows to reorder valves, then apply changes. Simplifies UI and aligns with standard JSONConfig table behavior
 
 ## 0.2.49 (2026-07-24)
 * (Gerhard Steinwedel) **FIXED**: Added direct persistent move controls for plan valve order
