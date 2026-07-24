@@ -1,11 +1,11 @@
 # Context
 
 ## Current Task
-Die Ventilreihenfolge eines Plans wird explizit in `automation.plansData` gespeichert.
+Planventile werden ohne Tabellen-Debounce direkt und dauerhaft sortiert.
 
 ## Key Decisions
-- `valveOrder` speichert die vollständige Reihenfolge unabhängig von `valveIndexes`.
-- Bestehende Plan-Daten werden beim Start mit `valveOrder: []` migriert.
+- Die Verschiebe-Schaltflächen speichern `valveOrder` direkt in `automation.plansData`.
+- Die Standardtabelle zeigt weiterhin alle Ventile, aber ohne Add/Delete-Aktionen.
 
 ## Next Steps
-- Validierung ausführen.
+- Übersetzungen und Validierung ausführen.

@@ -1,4 +1,7 @@
 # Changelog
+## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **FIXED**: Added direct persistent move controls for plan valve order
+
 ## 0.2.48 (2026-07-24)
 * (Gerhard Steinwedel) **ENHANCED**: Plans now track valves by stable state IDs instead of array indexes — `valveStateIds`, `valveOrderStateIds`, and `knownValveStateIds` added to plan config. Prevents assignment loss when valves are renamed, reordered, added, or deleted. New valves are automatically added to existing plans unless explicitly empty. Legacy `valveIndexes` and `valveOrder` are migrated on adapter start and kept in sync for backward compatibility
 
