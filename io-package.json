@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.2.44",
+    "version": "0.2.45",
     "news": {
+      "0.2.45": {
+        "en": "**ENHANCED**: Valve assignment confirmation dialog now explicitly enabled with `condition: true` to ensure the dialog is always shown and gives the table debounce time to persist the current valve order before saving",
+        "de": "**VERBESSERT**: Der Bestätigungsdialog für die Ventilzuordnung ist jetzt explizit mit `condition: true` aktiviert, um sicherzustellen, dass der Dialog immer angezeigt wird und der Tabelle genügend Debounce-Zeit gibt, um die aktuelle Ventilreihenfolge vor dem Speichern zu persistieren",
+        "ru": "**УЛУЧШЕНО**: Диалог подтверждения назначения клапанов теперь явно включен с `condition: true`, чтобы гарантировать, что диалог всегда отображается и дает таблице время debounce для сохранения текущего порядка клапанов перед сохранением",
+        "pt": "**MELHORADO**: O diálogo de confirmação de atribuição de válvulas agora está explicitamente ativado com `condition: true` para garantir que o diálogo seja sempre exibido e dê tempo de debounce à tabela para persistir a ordem atual das válvulas antes de salvar",
+        "nl": "**VERBETERD**: Het bevestigingsdialoogvenster voor klepptoewijzing is nu expliciet ingeschakeld met `condition: true` om ervoor te zorgen dat het dialoogvenster altijd wordt weergegeven en de tabel debounce-tijd krijgt om de huidige klepvolgorde te behouden voordat deze wordt opgeslagen",
+        "fr": "**AMÉLIORÉ**: La boîte de dialogue de confirmation d'affectation des vannes est maintenant explicitement activée avec `condition: true` pour garantir que la boîte de dialogue est toujours affichée et donne à la table le temps de debounce nécessaire pour persister l'ordre actuel des vannes avant l'enregistrement",
+        "it": "**MIGLIORATO**: La finestra di dialogo di conferma dell'assegnazione delle valvole è ora esplicitamente abilitata con `condition: true` per garantire che la finestra di dialogo venga sempre visualizzata e dia alla tabella il tempo di debounce per persistere l'ordine corrente delle valvole prima del salvataggio",
+        "es": "**MEJORADO**: El diálogo de confirmación de asignación de válvulas ahora está explícitamente habilitado con `condition: true` para garantizar que el diálogo siempre se muestre y dé tiempo de debounce a la tabla para persistir el orden actual de las válvulas antes de guardar",
+        "pl": "**ULEPSZONE**: Okno dialogowe potwierdzenia przypisania zaworów jest teraz jawnie włączone z `condition: true`, aby zapewnić, że okno dialogowe jest zawsze wyświetlane i daje tabeli czas debounce na utrwalenie bieżącej kolejności zaworów przed zapisaniem",
+        "uk": "**ПОКРАЩЕНО**: Діалогове вікно підтвердження призначення клапанів тепер явно увімкнено з `condition: true`, щоб гарантувати, що діалогове вікно завжди відображається і дає таблиці час debounce для збереження поточного порядку клапанів перед збереженням",
+        "zh-cn": "**增强**：阀门分配确认对话框现在明确启用 `condition: true`，以确保对话框始终显示，并为表格提供防抖时间以在保存前持久化当前阀门顺序"
+      },
       "0.2.44": {
         "en": "**FIXED**: Ensured reordered plan valves are persisted after table updates",
         "de": "**BEHOBEN**: Sichergestellt, dass neu angeordnete Planventile nach Tabellenaktualisierungen gespeichert werden",
@@ -80,19 +93,6 @@
         "pl": "**NAPRAWIONO**: Kolejność zaworów każdego planu jest teraz niezawodnie zapisywana i wczytywana",
         "uk": "**ВИПРАВЛЕНО**: Порядок клапанів кожного плану тепер надійно зберігається та перезавантажується",
         "zh-cn": "**已修复**: 现在可靠地保存和重新加载每个计划的阀门顺序"
-      },
-      "0.2.38": {
-        "en": "**ENHANCED**: Combined plan creation and renaming into one plan-name input",
-        "de": "**VERBESSERT**: Planerstellung und Umbenennung in einem Plannamens-Eingabefeld kombiniert",
-        "ru": "**УЛУЧШЕНО**: Создание и переименование плана объединены в одно поле ввода имени плана",
-        "pt": "**MELHORADO**: Criação e renomeação de plano combinadas em um único campo de entrada de nome de plano",
-        "nl": "**VERBETERD**: Plannen aanmaken en hernoemen gecombineerd in één plannaam-invoerveld",
-        "fr": "**AMÉLIORÉ**: Création et renommage de plan combinés en un seul champ de saisie de nom de plan",
-        "it": "**MIGLIORATO**: Creazione e ridenominazione del piano combinate in un unico campo di inserimento del nome del piano",
-        "es": "**MEJORADO**: Creación y cambio de nombre de plan combinados en un único campo de entrada de nombre de plan",
-        "pl": "**ULEPSZONE**: Tworzenie i zmiana nazwy planu połączone w jedno pole wprowadzania nazwy planu",
-        "uk": "**ПОКРАЩЕНО**: Створення та перейменування плану об'єднано в одне поле введення назви плану",
-        "zh-cn": "**增强**：将计划创建和重命名合并到一个计划名称输入框中"
       }
     },
     "titleLang": {
