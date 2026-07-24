@@ -1,11 +1,11 @@
 # Context
 
 ## Current Task
-Planventile werden ohne Tabellen-Debounce direkt und dauerhaft sortiert.
+Die funktionierende native Planventiltabelle wurde wiederhergestellt.
 
 ## Key Decisions
-- Die Verschiebe-Schaltflächen speichern `valveOrder` direkt in `automation.plansData`.
-- Die Standardtabelle zeigt weiterhin alle Ventile, aber ohne Add/Delete-Aktionen.
+- Die Tabellenpfeile steuern die sichtbare Reihenfolge.
+- `valveOrder` speichert die vollständige Reihenfolge unabhängig von Ventilindizes.
 
 ## Next Steps
-- Übersetzungen und Validierung ausführen.
+- Validierung ausführen.
