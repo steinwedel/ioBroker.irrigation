@@ -169,22 +169,19 @@
                             "attr": "valveNumber",
                             "title": "Valve",
                             "width": "8%",
-                            "readOnly": true,
-                            "sort": true
+                            "readOnly": true
                         },
                         {
                             "type": "text",
                             "attr": "name",
                             "title": "Display name",
-                            "width": "24%",
-                            "sort": true
+                            "width": "24%"
                         },
                         {
                             "type": "select",
                             "attr": "type",
                             "title": "Type",
                             "width": "14%",
-                            "sort": true,
                             "options": [
                                 { "label": "Gardena", "value": "Gardena" },
                                 { "label": "Homematic", "value": "Homematic" },
@@ -199,15 +196,13 @@
                             "title": "Watering duration (min)",
                             "width": "16%",
                             "min": 1,
-                            "default": 10,
-                            "sort": true
+                            "default": 10
                         },
                         {
                             "type": "objectId",
                             "attr": "stateId",
                             "title": "State id",
-                            "width": "30%",
-                            "sort": true
+                            "width": "30%"
                         }
                     ]
                 },

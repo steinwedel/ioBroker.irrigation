@@ -1,4 +1,7 @@
 # Changelog
+## 0.2.54 (2026-07-24)
+* (Gerhard Steinwedel) **FIXED**: Kept valve reorder arrows available by disabling valve table sorting
+
 ## 0.2.53 (2026-07-24)
 * (Gerhard Steinwedel) **FIXED**: Enabled both table reorder arrows for valves
 

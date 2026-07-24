@@ -1,11 +1,11 @@
 # Context
 
 ## Current Task
-Die Ventiltabelle bietet vollständige native Verschiebeaktionen.
+Die Ventiltabelle hält native Verschiebepfeile für alle bewegbaren Zeilen verfügbar.
 
 ## Key Decisions
 - `noDelete: false` aktiviert Hoch- und Runterpfeile explizit.
-- Die Release-Übersetzung und der normale Release-Ablauf bleiben unverändert.
+- Die Spaltensortierung ist deaktiviert, damit sie Pfeile nicht ausblendet.
 
 ## Next Steps
 - Validierung ausführen.

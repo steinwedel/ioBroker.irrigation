@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.2.53",
+    "version": "0.2.54",
     "news": {
+      "0.2.54": {
+        "en": "**FIXED**: Kept valve reorder arrows available by disabling valve table sorting",
+        "de": "**BEHOBEN**: Pfeile zum Neuordnen der Ventile verfügbar gehalten, indem die Sortierung der Ventiltabelle deaktiviert wurde",
+        "ru": "**ИСПРАВЛЕНО**: Стрелки изменения порядка клапанов оставлены доступными путём отключения сортировки таблицы клапанов",
+        "pt": "**CORRIGIDO**: Mantidas as setas de reordenação de válvulas disponíveis ao desativar a ordenação da tabela de válvulas",
+        "nl": "**OPGELOST**: Pijlen voor het herschikken van kleppen beschikbaar gehouden door het sorteren van de kleppenlijst uit te schakelen",
+        "fr": "**CORRIGÉ** : Les flèches de réorganisation des vannes restent disponibles en désactivant le tri du tableau des vannes",
+        "it": "**RISOLTO**: Mantenute disponibili le frecce di riordino delle valvole disabilitando l'ordinamento della tabella delle valvole",
+        "es": "**SOLUCIONADO**: Se mantuvieron disponibles las flechas de reordenación de válvulas al deshabilitar la ordenación de la tabla de válvulas",
+        "pl": "**NAPRAWIONO**: Zachowano dostępność strzałek zmiany kolejności zaworów poprzez wyłączenie sortowania tabeli zaworów",
+        "uk": "**ВИПРАВЛЕНО**: Збережено доступність стрілок зміни порядку клапанів шляхом вимкнення сортування таблиці клапанів",
+        "zh-cn": "**已修复**：通过禁用阀门表排序保持阀门重新排序箭头可用"
+      },
       "0.2.53": {
         "en": "**FIXED**: Enabled both table reorder arrows for valves",
         "de": "**BEHOBEN**: Beide Pfeile zum Neuordnen der Tabelle für Ventile aktiviert",
@@ -80,19 +93,6 @@
         "pl": "**ULEPSZONE**: Plany teraz śledzą zawory za pomocą stabilnych identyfikatorów stanów zamiast indeksów tablicy — `valveStateIds`, `valveOrderStateIds` i `knownValveStateIds` dodane do konfiguracji planu. Zapobiega utracie przypisania, gdy zawory są zmieniane, przestawiane, dodawane lub usuwane. Nowe zawory są automatycznie dodawane do istniejących planów, chyba że są jawnie puste. Starsze `valveIndexes` i `valveOrder` są migrowane przy starcie adaptera i synchronizowane dla zachowania wstecznej kompatybilności",
         "uk": "**ПОКРАЩЕНО**: Плани тепер відстежують клапани за стабільними ідентифікаторами станів замість індексів масиву — `valveStateIds`, `valveOrderStateIds` та `knownValveStateIds` додано до конфігурації плану. Запобігає втраті призначень при перейменуванні, зміні порядку, додаванні або видаленні клапанів. Нові клапани автоматично додаються до існуючих планів, якщо вони не є явно порожніми. Застарілі `valveIndexes` та `valveOrder` мігруються при запуску адаптера та синхронізуються для зворотної сумісності",
         "zh-cn": "**增强**：计划现在通过稳定的状态ID而非数组索引来跟踪阀门 — 向计划配置中添加了 `valveStateIds`、`valveOrderStateIds` 和 `knownValveStateIds`。防止在阀门重命名、重新排序、添加或删除时丢失分配。新阀门会自动添加到现有计划中，除非明确为空。旧版 `valveIndexes` 和 `valveOrder` 在适配器启动时迁移，并保持同步以实现向后兼容"
-      },
-      "0.2.47": {
-        "en": "**FIXED**: Persisted explicit valve order for every irrigation plan",
-        "de": "**BEHOBEN**: Gespeicherte explizite Ventilreihenfolge für jeden Bewässerungsplan",
-        "ru": "**ИСПРАВЛЕНО**: Сохранение явного порядка клапанов для каждого плана полива",
-        "pt": "**CORRIGIDO**: Ordem explícita de válvulas persistida para cada plano de irrigação",
-        "nl": "**OPGELOST**: Persistente expliciete ventielvolgorde voor elk irrigatieplan",
-        "fr": "**CORRIGÉ**: Ordre explicite des vannes persisté pour chaque plan d'irrigation",
-        "it": "**RISOLTO**: Ordine esplicito delle valvole persistito per ogni piano di irrigazione",
-        "es": "**SOLUCIONADO**: Orden explícito de válvulas persistido para cada plan de riego",
-        "pl": "**NAPRAWIONO**: Utrwalona jawna kolejność zaworów dla każdego planu nawadniania",
-        "uk": "**ВИПРАВЛЕНО**: Збережено явний порядок клапанів для кожного плану зрошення",
-        "zh-cn": "**已修复**: 为每个灌溉计划持久化显式阀门顺序"
       }
     },
     "titleLang": {
