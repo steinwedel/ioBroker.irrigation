@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.2.43",
+    "version": "0.2.44",
     "news": {
+      "0.2.44": {
+        "en": "**FIXED**: Ensured reordered plan valves are persisted after table updates",
+        "de": "**BEHOBEN**: Sichergestellt, dass neu angeordnete Planventile nach Tabellenaktualisierungen gespeichert werden",
+        "ru": "**ИСПРАВЛЕНО**: Обеспечено сохранение переупорядоченных клапанов плана после обновления таблицы",
+        "pt": "**CORRIGIDO**: Garantido que as válvulas do plano reordenadas sejam persistidas após atualizações da tabela",
+        "nl": "**OPGELOST**: Ervoor gezorgd dat opnieuw geordende planventielen worden bewaard na tabelupdates",
+        "fr": "**CORRIGÉ**: Assuré que les vannes de plan réorganisées sont conservées après les mises à jour du tableau",
+        "it": "**RISOLTO**: Assicurato che le valvole del piano riordinate vengano mantenute dopo gli aggiornamenti della tabella",
+        "es": "**CORREGIDO**: Se aseguró que las válvulas del plan reordenadas se persistan después de las actualizaciones de la tabla",
+        "pl": "**NAPRAWIONO**: Zapewniono, że zmieniona kolejność zaworów planu jest zachowywana po aktualizacjach tabeli",
+        "uk": "**ВИПРАВЛЕНО**: Забезпечено збереження переупорядкованих клапанів плану після оновлення таблиці",
+        "zh-cn": "**已修复**：确保重新排序的计划阀门在表格更新后被持久化保存"
+      },
       "0.2.43": {
         "en": "**FIXED**: Updated plan execution numbers immediately after moving table rows",
         "de": "**BEHOBEN**: Planausführungsnummern werden jetzt sofort nach dem Verschieben von Tabellenzeilen aktualisiert",
@@ -80,19 +93,6 @@
         "pl": "**ULEPSZONE**: Tworzenie i zmiana nazwy planu połączone w jedno pole wprowadzania nazwy planu",
         "uk": "**ПОКРАЩЕНО**: Створення та перейменування плану об'єднано в одне поле введення назви плану",
         "zh-cn": "**增强**：将计划创建和重命名合并到一个计划名称输入框中"
-      },
-      "0.2.37": {
-        "en": "**NEW**: Added plan renaming with name validation in the plan editor",
-        "de": "**NEU**: Umbenennung von Plänen mit Namensvalidierung im Plan-Editor hinzugefügt",
-        "ru": "**НОВОЕ**: Добавлено переименование планов с проверкой имени в редакторе планов",
-        "pt": "**NOVO**: Adicionada renomeação de planos com validação de nome no editor de planos",
-        "nl": "**NIEUW**: Hernoemen van plannen met naamvalidatie toegevoegd in de planeditor",
-        "fr": "**NOUVEAU**: Ajout du renommage des plans avec validation du nom dans l'éditeur de plans",
-        "it": "**NOVITÀ**: Aggiunta la ridenominazione dei piani con validazione del nome nell'editor dei piani",
-        "es": "**NUEVO**: Se agregó el cambio de nombre de planes con validación de nombre en el editor de planes",
-        "pl": "**NOWOŚĆ**: Dodano zmianę nazwy planów z walidacją nazwy w edytorze planów",
-        "uk": "**НОВЕ**: Додано перейменування планів з перевіркою імені в редакторі планів",
-        "zh-cn": "**新功能**：在计划编辑器中添加了带名称验证的计划重命名功能"
       }
     },
     "titleLang": {

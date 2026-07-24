@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.2.44 (2026-07-24)
 * (Gerhard Steinwedel) **FIXED**: Ensured reordered plan valves are persisted after table updates
 
 ## 0.2.43 (2026-07-23)
