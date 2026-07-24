@@ -225,9 +225,9 @@ class Irrigation extends utils.Adapter {
         }
       }
       const legacyOrderStateIds = ((_c = plan.valveOrder) != null ? _c : []).map((index) => currentStateIds[index]).filter((stateId) => Boolean(stateId));
-      const orderStateIds = [
-        ...(_d = plan.valveOrderStateIds) != null ? _d : legacyOrderStateIds
-      ].filter((stateId) => selectedStateIds.includes(stateId));
+      const orderStateIds = [...(_d = plan.valveOrderStateIds) != null ? _d : legacyOrderStateIds].filter(
+        (stateId) => selectedStateIds.includes(stateId)
+      );
       for (const stateId of selectedStateIds) {
         if (!orderStateIds.includes(stateId)) {
           orderStateIds.push(stateId);
