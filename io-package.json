@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.2.49",
+    "version": "0.2.50",
     "news": {
+      "0.2.50": {
+        "en": "**ENHANCED**: Plan valve order now uses native table arrow buttons instead of dedicated move controls — the dropdown and up/down buttons were removed; users drag or click table arrows to reorder valves, then apply changes. Simplifies UI and aligns with standard JSONConfig table behavior",
+        "de": "**VERBESSERT**: Die Reihenfolge der Planventile verwendet jetzt native Tabellen-Pfeilschaltflächen anstelle dedizierter Verschiebe-Steuerelemente – das Dropdown und die Auf-/Ab-Schaltflächen wurden entfernt; Benutzer ziehen oder klicken auf die Tabellenpfeile, um Ventile neu anzuordnen, und übernehmen dann die Änderungen. Vereinfacht die Benutzeroberfläche und entspricht dem standardmäßigen JSONConfig-Tabellenverhalten",
+        "ru": "**УЛУЧШЕНО**: Порядок клапанов в плане теперь использует встроенные кнопки со стрелками таблицы вместо отдельных элементов управления перемещением – выпадающий список и кнопки вверх/вниз удалены; пользователи перетаскивают или нажимают стрелки таблицы для изменения порядка клапанов, затем применяют изменения. Упрощает интерфейс и соответствует стандартному поведению таблиц JSONConfig",
+        "pt": "**MELHORADO**: A ordem das válvulas do plano agora usa botões de seta nativos da tabela em vez de controles de movimentação dedicados – o menu suspenso e os botões para cima/para baixo foram removidos; os usuários arrastam ou clicam nas setas da tabela para reordenar as válvulas e, em seguida, aplicam as alterações. Simplifica a interface e alinha-se ao comportamento padrão de tabelas JSONConfig",
+        "nl": "**VERBETERD**: De volgorde van de planventielen gebruikt nu native tabelknoppen met pijlen in plaats van speciale verplaatsingsbesturingen – de dropdown en de omhoog/omlaag-knoppen zijn verwijderd; gebruikers slepen of klikken op de tabelpijlen om ventielen opnieuw te ordenen en passen vervolgens de wijzigingen toe. Vereenvoudigt de gebruikersinterface en sluit aan bij het standaard JSONConfig-tabelgedrag",
+        "fr": "**AMÉLIORÉ** : L'ordre des vannes du plan utilise désormais les boutons fléchés natifs du tableau au lieu de contrôles de déplacement dédiés – le menu déroulant et les boutons haut/bas ont été supprimés ; les utilisateurs font glisser ou cliquent sur les flèches du tableau pour réorganiser les vannes, puis appliquent les modifications. Simplifie l'interface utilisateur et s'aligne sur le comportement standard des tableaux JSONConfig",
+        "it": "**MIGLIORATO**: L'ordine delle valvole del piano ora utilizza i pulsanti freccia nativi della tabella invece di controlli di spostamento dedicati – il menu a discesa e i pulsanti su/giù sono stati rimossi; gli utenti trascinano o fanno clic sulle frecce della tabella per riordinare le valvole, quindi applicano le modifiche. Semplifica l'interfaccia utente e si allinea al comportamento standard delle tabelle JSONConfig",
+        "es": "**MEJORADO**: El orden de las válvulas del plan ahora utiliza botones de flecha nativos de la tabla en lugar de controles de movimiento dedicados – se eliminaron el menú desplegable y los botones arriba/abajo; los usuarios arrastran o hacen clic en las flechas de la tabla para reordenar las válvulas y luego aplican los cambios. Simplifica la interfaz de usuario y se alinea con el comportamiento estándar de las tablas JSONConfig",
+        "pl": "**ULEPSZONE**: Kolejność zaworów w planie teraz używa natywnych przycisków strzałek tabeli zamiast dedykowanych kontrolek przesuwania – usunięto menu rozwijane i przyciski góra/dół; użytkownicy przeciągają lub klikają strzałki tabeli, aby zmienić kolejność zaworów, a następnie stosują zmiany. Upraszcza interfejs użytkownika i dostosowuje się do standardowego zachowania tabel JSONConfig",
+        "uk": "**ПОКРАЩЕНО**: Порядок клапанів у плані тепер використовує вбудовані кнопки зі стрілками таблиці замість окремих елементів керування переміщенням – випадаюче меню та кнопки вгору/вниз видалено; користувачі перетягують або натискають стрілки таблиці для зміни порядку клапанів, а потім застосовують зміни. Спрощує інтерфейс і відповідає стандартній поведінці таблиць JSONConfig",
+        "zh-cn": "**增强**：计划阀门顺序现在使用原生表格箭头按钮，而不是专用的移动控件——下拉菜单和上/下按钮已被移除；用户拖动或点击表格箭头来重新排序阀门，然后应用更改。简化了用户界面并与标准 JSONConfig 表格行为保持一致"
+      },
       "0.2.49": {
         "en": "**FIXED**: Added direct persistent move controls for plan valve order",
         "de": "**BEHOBEN**: Direkte persistente Verschiebungssteuerelemente für die Planventilreihenfolge hinzugefügt",
@@ -80,19 +93,6 @@
         "pl": "**NAPRAWIONO**: Zapewniono, że zmieniona kolejność zaworów planu jest zachowywana po aktualizacjach tabeli",
         "uk": "**ВИПРАВЛЕНО**: Забезпечено збереження переупорядкованих клапанів плану після оновлення таблиці",
         "zh-cn": "**已修复**：确保重新排序的计划阀门在表格更新后被持久化保存"
-      },
-      "0.2.43": {
-        "en": "**FIXED**: Updated plan execution numbers immediately after moving table rows",
-        "de": "**BEHOBEN**: Planausführungsnummern werden jetzt sofort nach dem Verschieben von Tabellenzeilen aktualisiert",
-        "ru": "**ИСПРАВЛЕНО**: Номера выполнения плана теперь обновляются сразу после перемещения строк таблицы",
-        "pt": "**CORRIGIDO**: Números de execução do plano atualizados imediatamente após mover linhas da tabela",
-        "nl": "**OPGELOST**: Planuitvoeringsnummers worden nu direct bijgewerkt na het verplaatsen van tabelrijen",
-        "fr": "**CORRIGÉ**: Les numéros d'exécution du plan sont maintenant mis à jour immédiatement après le déplacement des lignes du tableau",
-        "it": "**RISOLTO**: I numeri di esecuzione del piano vengono ora aggiornati immediatamente dopo lo spostamento delle righe della tabella",
-        "es": "**SOLUCIONADO**: Los números de ejecución del plan se actualizan inmediatamente después de mover filas de la tabla",
-        "pl": "**NAPRAWIONO**: Numery wykonania planu są teraz aktualizowane natychmiast po przesunięciu wierszy tabeli",
-        "uk": "**ВИПРАВЛЕНО**: Номери виконання плану тепер оновлюються одразу після переміщення рядків таблиці",
-        "zh-cn": "**已修复**：移动表格行后立即更新计划执行编号"
       }
     },
     "titleLang": {
