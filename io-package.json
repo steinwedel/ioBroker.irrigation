@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.2.46",
+    "version": "0.2.47",
     "news": {
+      "0.2.47": {
+        "en": "**FIXED**: Persisted explicit valve order for every irrigation plan",
+        "de": "**BEHOBEN**: Gespeicherte explizite Ventilreihenfolge für jeden Bewässerungsplan",
+        "ru": "**ИСПРАВЛЕНО**: Сохранение явного порядка клапанов для каждого плана полива",
+        "pt": "**CORRIGIDO**: Ordem explícita de válvulas persistida para cada plano de irrigação",
+        "nl": "**OPGELOST**: Persistente expliciete ventielvolgorde voor elk irrigatieplan",
+        "fr": "**CORRIGÉ**: Ordre explicite des vannes persisté pour chaque plan d'irrigation",
+        "it": "**RISOLTO**: Ordine esplicito delle valvole persistito per ogni piano di irrigazione",
+        "es": "**SOLUCIONADO**: Orden explícito de válvulas persistido para cada plan de riego",
+        "pl": "**NAPRAWIONO**: Utrwalona jawna kolejność zaworów dla każdego planu nawadniania",
+        "uk": "**ВИПРАВЛЕНО**: Збережено явний порядок клапанів для кожного плану зрошення",
+        "zh-cn": "**已修复**: 为每个灌溉计划持久化显式阀门顺序"
+      },
       "0.2.46": {
         "en": "**FIXED**: Removed the repeating plan assignment confirmation dialog",
         "de": "**BEHOBEN**: Der sich wiederholende Bestätigungsdialog für die Planzuweisung wurde entfernt",
@@ -80,19 +93,6 @@
         "pl": "**NAPRAWIONO**: Przywrócono natywne kontrolki strzałek tabeli dla uporządkowanych zaworów planu",
         "uk": "**ВИПРАВЛЕНО**: Відновлено нативні елементи керування стрілками таблиці для впорядкованих клапанів плану",
         "zh-cn": "**已修复**：恢复了有序计划阀门的原生表格箭头控件"
-      },
-      "0.2.40": {
-        "en": "**FIXED**: Added dedicated persistent move controls for ordered plan valves",
-        "de": "**BEHOBEN**: Dedizierte persistente Bewegungssteuerungen für geordnete Planventile hinzugefügt",
-        "ru": "**ИСПРАВЛЕНО**: Добавлены выделенные постоянные элементы управления перемещением для клапанов упорядоченного плана",
-        "pt": "**CORRIGIDO**: Adicionados controles de movimento persistentes dedicados para válvulas de plano ordenado",
-        "nl": "**OPGELOST**: Toegewijde persistente bewegingsbesturingen toegevoegd voor geordende planventielen",
-        "fr": "**CORRIGÉ**: Ajout de commandes de déplacement persistantes dédiées pour les vannes de plan ordonné",
-        "it": "**RISOLTO**: Aggiunti controlli di movimento persistenti dedicati per le valvole del piano ordinato",
-        "es": "**CORREGIDO**: Se agregaron controles de movimiento persistentes dedicados para válvulas de plan ordenado",
-        "pl": "**NAPRAWIONO**: Dodano dedykowane trwałe sterowanie ruchem dla zaworów planu uporządkowanego",
-        "uk": "**ВИПРАВЛЕНО**: Додано спеціальні постійні елементи керування переміщенням для клапанів упорядкованого плану",
-        "zh-cn": "**已修复**：为有序计划阀门添加了专用的持久移动控制"
       }
     },
     "titleLang": {

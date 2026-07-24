@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.2.47 (2026-07-24)
 * (Gerhard Steinwedel) **FIXED**: Persisted explicit valve order for every irrigation plan
 
 ## 0.2.46 (2026-07-24)

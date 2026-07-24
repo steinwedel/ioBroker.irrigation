@@ -41,7 +41,10 @@ function parsePlanValveTableOrder(rows, valveCount) {
   });
 }
 function parsePlanValveTableRows(rows, valveCount) {
-  return parsePlanValveTableOrder(rows.filter((row) => row == null ? void 0 : row.assigned), valveCount);
+  return parsePlanValveTableOrder(
+    rows.filter((row) => row == null ? void 0 : row.assigned),
+    valveCount
+  );
 }
 const NONE_SENTINEL = -1;
 // Annotate the CommonJS export names for ESM import in node:
