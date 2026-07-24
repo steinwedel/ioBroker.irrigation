@@ -106,6 +106,9 @@ export interface IPlanConfig {
      */
     valveIndexes: number[];
     valveOrder?: number[];
+    valveStateIds?: string[];
+    valveOrderStateIds?: string[];
+    knownValveStateIds?: string[];
 }
 
 export interface ISchedulerConfig {

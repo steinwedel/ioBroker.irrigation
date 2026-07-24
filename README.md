@@ -247,7 +247,7 @@ All IDs below are relative to the adapter instance, e.g. `<instance>` is normall
 | `automation.activePlan` | string, R | Name of the currently active plan; empty while idle. |
 | `automation.planSelect` | string, R/W | Selectable plan-name value for external UIs. It is kept in sync with the available plans; use `startPlan` to execute a choice directly. |
 | `automation.plansList` | JSON string, R | Available plan names, e.g. `["Alle","Rasen"]`. Use this to populate scripts or external UI selectors. |
-| `automation.plansData` | JSON string, R | Internal persistent plan definition containing `name`, assigned `valveIndexes`, and explicit `valveOrder`. The order array is used for sequential execution and is maintained by the adapter. |
+| `automation.plansData` | JSON string, R | Internal persistent plan definition containing `name`, legacy indexes, and stable `valveStateIds` / `valveOrderStateIds`. The stable IDs keep assignments and sequential order correct when valves are renamed, added, removed, or reindexed. |
 | `automation.extensionFactor` | number, R/W | Configured duration multiplier (`0.5` to `5`) mirrored from adapter settings. |
 | `automation.temperatureAdjustmentEnabled` / `automation.temperatureAdjustmentStateId` | boolean / string, R/W | Enables temperature-controlled duration adjustment and identifies its numeric temperature source. |
 | `automation.temperatureAdjustmentFactor` | number, R | Factor fixed at the start of the current automatic plan using `1.07^(T - 20)`; `1` when inactive or idle. |

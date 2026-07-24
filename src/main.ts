@@ -207,12 +207,12 @@ class Irrigation extends utils.Adapter {
         const storedPlans = this.parsePlansState(plansState?.val);
 
         if (storedPlans && storedPlans.length > 0) {
-            const needsOrderMigration = storedPlans.some(plan => plan.valveOrder === undefined);
-            if (needsOrderMigration) {
-                await this.writePlansState(storedPlans.map(plan => ({ ...plan, valveOrder: [] })));
+            const synchronizedPlans = this.synchronizePlansWithValves(storedPlans);
+            if (JSON.stringify(synchronizedPlans) !== JSON.stringify(storedPlans)) {
+                await this.writePlansState(synchronizedPlans);
             } else {
-                this.config2.plans = storedPlans;
-                await this.publishPlanNames(storedPlans);
+                this.config2.plans = synchronizedPlans;
+                await this.publishPlanNames(synchronizedPlans);
             }
             return;
         }
@@ -240,11 +240,56 @@ class Irrigation extends utils.Adapter {
                 name: p?.name ?? '',
                 valveIndexes: Array.isArray(p?.valveIndexes) ? p.valveIndexes : [],
                 valveOrder: Array.isArray(p?.valveOrder) ? p.valveOrder : undefined,
+                valveStateIds: Array.isArray(p?.valveStateIds) ? p.valveStateIds : undefined,
+                valveOrderStateIds: Array.isArray(p?.valveOrderStateIds) ? p.valveOrderStateIds : undefined,
+                knownValveStateIds: Array.isArray(p?.knownValveStateIds) ? p.knownValveStateIds : undefined,
             }));
         } catch (err) {
             this.log.warn(`Failed to parse automation.plansData state, ignoring: ${(err as Error).message}`);
             return undefined;
         }
+    }
+
+    private synchronizePlansWithValves(plans: IPlanConfig[]): IPlanConfig[] {
+        const currentStateIds = this.config2.valves.map(valve => valve.stateId);
+        return plans.map(plan => {
+            const explicitlyEmpty = plan.valveIndexes.includes(NONE_SENTINEL);
+            const legacySelectedStateIds = plan.valveIndexes
+                .map(index => currentStateIds[index])
+                .filter((stateId): stateId is string => Boolean(stateId));
+            const selectedStateIds = [
+                ...(plan.valveStateIds ?? (plan.valveIndexes.length === 0 ? currentStateIds : legacySelectedStateIds)),
+            ].filter(stateId => currentStateIds.includes(stateId));
+            const knownStateIds = plan.knownValveStateIds ?? currentStateIds;
+            if (!explicitlyEmpty) {
+                for (const stateId of currentStateIds) {
+                    if (!knownStateIds.includes(stateId) && !selectedStateIds.includes(stateId)) {
+                        selectedStateIds.push(stateId);
+                    }
+                }
+            }
+            const legacyOrderStateIds = (plan.valveOrder ?? [])
+                .map(index => currentStateIds[index])
+                .filter((stateId): stateId is string => Boolean(stateId));
+            const orderStateIds = [...(plan.valveOrderStateIds ?? legacyOrderStateIds)].filter(stateId =>
+                selectedStateIds.includes(stateId),
+            );
+            for (const stateId of selectedStateIds) {
+                if (!orderStateIds.includes(stateId)) {
+                    orderStateIds.push(stateId);
+                }
+            }
+            const valveIndexes = selectedStateIds.map(stateId => currentStateIds.indexOf(stateId));
+            const valveOrder = orderStateIds.map(stateId => currentStateIds.indexOf(stateId));
+            return {
+                ...plan,
+                valveIndexes: explicitlyEmpty ? [NONE_SENTINEL] : valveIndexes,
+                valveOrder,
+                valveStateIds: selectedStateIds,
+                valveOrderStateIds: orderStateIds,
+                knownValveStateIds: currentStateIds,
+            };
+        });
     }
 
     /**
@@ -257,9 +302,10 @@ class Irrigation extends utils.Adapter {
      * @param plans
      */
     private async writePlansState(plans: IPlanConfig[]): Promise<void> {
-        this.config2.plans = plans;
-        await this.setStateAsync('automation.plansData', { val: JSON.stringify(plans), ack: true });
-        await this.publishPlanNames(plans);
+        const synchronizedPlans = this.synchronizePlansWithValves(plans);
+        this.config2.plans = synchronizedPlans;
+        await this.setStateAsync('automation.plansData', { val: JSON.stringify(synchronizedPlans), ack: true });
+        await this.publishPlanNames(synchronizedPlans);
     }
 
     private async publishPlanNames(plans: IPlanConfig[]): Promise<void> {
@@ -983,6 +1029,9 @@ class Irrigation extends utils.Adapter {
                           ...p,
                           valveIndexes: selectedIndexes.length > 0 ? selectedIndexes : [NONE_SENTINEL],
                           valveOrder,
+                          valveStateIds: selectedIndexes.map(index => this.config2.valves[index].stateId),
+                          valveOrderStateIds: valveOrder.map(index => this.config2.valves[index].stateId),
+                          knownValveStateIds: this.config2.valves.map(valve => valve.stateId),
                       }
                     : p,
             );
@@ -1002,6 +1051,9 @@ class Irrigation extends utils.Adapter {
                 ...p,
                 valveIndexes: [...allValveIndexes],
                 valveOrder: [...allValveIndexes],
+                valveStateIds: this.config2.valves.map(valve => valve.stateId),
+                valveOrderStateIds: this.config2.valves.map(valve => valve.stateId),
+                knownValveStateIds: this.config2.valves.map(valve => valve.stateId),
             }));
             await this.writePlansState(updatedPlans);
             this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
@@ -1009,7 +1061,14 @@ class Irrigation extends utils.Adapter {
         }
 
         if (obj.command === 'removeAllValvesFromAllPlans' && obj.callback) {
-            const updatedPlans = this.config2.plans.map(p => ({ ...p, valveIndexes: [NONE_SENTINEL] }));
+            const updatedPlans = this.config2.plans.map(p => ({
+                ...p,
+                valveIndexes: [NONE_SENTINEL],
+                valveOrder: [],
+                valveStateIds: [],
+                valveOrderStateIds: [],
+                knownValveStateIds: this.config2.valves.map(valve => valve.stateId),
+            }));
             await this.writePlansState(updatedPlans);
             this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
             return;
