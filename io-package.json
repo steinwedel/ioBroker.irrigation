@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.2.54",
+    "version": "0.2.55",
     "news": {
+      "0.2.55": {
+        "en": "**ENHANCED**: Unified sequential plan execution order with the Valves tab order\n**FIXED**: Reserved space for all valve table action buttons",
+        "de": "**VERBESSERT**: Einheitliche sequenzielle Planausführungsreihenfolge entsprechend der Reihenfolge im Ventile-Tab\n**BEHOBEN**: Reservierter Platz für alle Aktionsschaltflächen in der Ventiltabelle",
+        "ru": "**УЛУЧШЕНО**: Унифицирован последовательный порядок выполнения плана с порядком вкладки клапанов\n**ИСПРАВЛЕНО**: Зарезервировано место для всех кнопок действий в таблице клапанов",
+        "pt": "**MELHORADO**: Ordem de execução sequencial do plano unificada com a ordem da aba de válvulas\n**CORRIGIDO**: Espaço reservado para todos os botões de ação da tabela de válvulas",
+        "nl": "**VERBETERD**: Uniforme sequentiële planuitvoeringsvolgorde met de volgorde van het Kleppen-tabblad\n**OPGELOST**: Gereserveerde ruimte voor alle actieknoppen in de kleppenlijst",
+        "fr": "**AMÉLIORÉ**: Ordre d'exécution séquentielle du plan unifié avec l'ordre de l'onglet Vannes\n**CORRIGÉ**: Espace réservé pour tous les boutons d'action du tableau des vannes",
+        "it": "**MIGLIORATO**: Ordine di esecuzione sequenziale del piano unificato con l'ordine della scheda Valvole\n**CORRETTO**: Spazio riservato per tutti i pulsanti di azione della tabella valvole",
+        "es": "**MEJORADO**: Orden de ejecución secuencial del plan unificado con el orden de la pestaña de Válvulas\n**CORREGIDO**: Espacio reservado para todos los botones de acción de la tabla de válvulas",
+        "pl": "**ULEPSZONE**: Ujednolicona kolejność sekwencyjnego wykonywania planu z kolejnością zakładki Zawory\n**NAPRAWIONO**: Zarezerwowano miejsce dla wszystkich przycisków akcji w tabeli zaworów",
+        "uk": "**ПОКРАЩЕНО**: Уніфіковано послідовний порядок виконання плану з порядком вкладки клапанів\n**ВИПРАВЛЕНО**: Зарезервовано місце для всіх кнопок дій у таблиці клапанів",
+        "zh-cn": "**增强**：统一了顺序计划执行顺序与阀门选项卡顺序\n**修复**：为所有阀门表操作按钮预留了空间"
+      },
       "0.2.54": {
         "en": "**FIXED**: Kept valve reorder arrows available by disabling valve table sorting",
         "de": "**BEHOBEN**: Pfeile zum Neuordnen der Ventile verfügbar gehalten, indem die Sortierung der Ventiltabelle deaktiviert wurde",
@@ -80,19 +93,6 @@
         "pl": "**NAPRAWIONO**: Dodano bezpośrednie trwałe kontrolki przesuwania dla kolejności zaworów planu",
         "uk": "**ВИПРАВЛЕНО**: Додано прямі постійні елементи керування переміщенням для порядку клапанів плану",
         "zh-cn": "**已修复**：为计划阀门顺序添加了直接持久移动控件"
-      },
-      "0.2.48": {
-        "en": "**ENHANCED**: Plans now track valves by stable state IDs instead of array indexes — `valveStateIds`, `valveOrderStateIds`, and `knownValveStateIds` added to plan config. Prevents assignment loss when valves are renamed, reordered, added, or deleted. New valves are automatically added to existing plans unless explicitly empty. Legacy `valveIndexes` and `valveOrder` are migrated on adapter start and kept in sync for backward compatibility",
-        "de": "**VERBESSERT**: Pläne verfolgen Ventile nun anhand stabiler Zustands-IDs anstelle von Array-Indizes — `valveStateIds`, `valveOrderStateIds` und `knownValveStateIds` wurden zur Plan-Konfiguration hinzugefügt. Verhindert Zuordnungsverlust, wenn Ventile umbenannt, neu sortiert, hinzugefügt oder gelöscht werden. Neue Ventile werden automatisch zu bestehenden Plänen hinzugefügt, sofern nicht explizit leer. Die veralteten `valveIndexes` und `valveOrder` werden beim Adapter-Start migriert und zur Abwärtskompatibilität synchron gehalten",
-        "ru": "**УЛУЧШЕНО**: Планы теперь отслеживают клапаны по стабильным идентификаторам состояний вместо индексов массива — в конфигурацию плана добавлены `valveStateIds`, `valveOrderStateIds` и `knownValveStateIds`. Предотвращает потерю назначений при переименовании, изменении порядка, добавлении или удалении клапанов. Новые клапаны автоматически добавляются в существующие планы, если они не пусты явно. Устаревшие `valveIndexes` и `valveOrder` мигрируются при запуске адаптера и синхронизируются для обратной совместимости",
-        "pt": "**MELHORADO**: Os planos agora rastreiam válvulas por IDs de estado estáveis em vez de índices de array — `valveStateIds`, `valveOrderStateIds` e `knownValveStateIds` adicionados à configuração do plano. Evita perda de atribuição quando válvulas são renomeadas, reordenadas, adicionadas ou excluídas. Novas válvulas são automaticamente adicionadas aos planos existentes, a menos que explicitamente vazias. Os legados `valveIndexes` e `valveOrder` são migrados na inicialização do adaptador e mantidos sincronizados para compatibilidade retroativa",
-        "nl": "**VERBETERD**: Plannen volgen nu kleppen via stabiele status-ID's in plaats van array-indexen — `valveStateIds`, `valveOrderStateIds` en `knownValveStateIds` toegevoegd aan planconfiguratie. Voorkomt verlies van toewijzing wanneer kleppen worden hernoemd, opnieuw geordend, toegevoegd of verwijderd. Nieuwe kleppen worden automatisch toegevoegd aan bestaande plannen, tenzij expliciet leeg. Verouderde `valveIndexes` en `valveOrder` worden bij het starten van de adapter gemigreerd en gesynchroniseerd gehouden voor achterwaartse compatibiliteit",
-        "fr": "**AMÉLIORÉ** : Les plans suivent désormais les vannes par des ID d'état stables au lieu d'index de tableau — `valveStateIds`, `valveOrderStateIds` et `knownValveStateIds` ajoutés à la configuration du plan. Empêche la perte d'affectation lorsque les vannes sont renommées, réorganisées, ajoutées ou supprimées. Les nouvelles vannes sont automatiquement ajoutées aux plans existants sauf si explicitement vides. Les anciens `valveIndexes` et `valveOrder` sont migrés au démarrage de l'adaptateur et maintenus synchronisés pour la rétrocompatibilité",
-        "it": "**MIGLIORATO**: I piani ora tracciano le valvole tramite ID di stato stabili anziché indici di array — `valveStateIds`, `valveOrderStateIds` e `knownValveStateIds` aggiunti alla configurazione del piano. Previene la perdita di assegnazione quando le valvole vengono rinominate, riordinate, aggiunte o eliminate. Le nuove valvole vengono automaticamente aggiunte ai piani esistenti a meno che non siano esplicitamente vuote. I vecchi `valveIndexes` e `valveOrder` vengono migrati all'avvio dell'adattatore e mantenuti sincronizzati per la retrocompatibilità",
-        "es": "**MEJORADO**: Los planes ahora rastrean válvulas mediante IDs de estado estables en lugar de índices de array — `valveStateIds`, `valveOrderStateIds` y `knownValveStateIds` añadidos a la configuración del plan. Evita la pérdida de asignación cuando las válvulas se renombran, reordenan, añaden o eliminan. Las nuevas válvulas se añaden automáticamente a los planes existentes a menos que estén explícitamente vacías. Los antiguos `valveIndexes` y `valveOrder` se migran al iniciar el adaptador y se mantienen sincronizados para compatibilidad retroactiva",
-        "pl": "**ULEPSZONE**: Plany teraz śledzą zawory za pomocą stabilnych identyfikatorów stanów zamiast indeksów tablicy — `valveStateIds`, `valveOrderStateIds` i `knownValveStateIds` dodane do konfiguracji planu. Zapobiega utracie przypisania, gdy zawory są zmieniane, przestawiane, dodawane lub usuwane. Nowe zawory są automatycznie dodawane do istniejących planów, chyba że są jawnie puste. Starsze `valveIndexes` i `valveOrder` są migrowane przy starcie adaptera i synchronizowane dla zachowania wstecznej kompatybilności",
-        "uk": "**ПОКРАЩЕНО**: Плани тепер відстежують клапани за стабільними ідентифікаторами станів замість індексів масиву — `valveStateIds`, `valveOrderStateIds` та `knownValveStateIds` додано до конфігурації плану. Запобігає втраті призначень при перейменуванні, зміні порядку, додаванні або видаленні клапанів. Нові клапани автоматично додаються до існуючих планів, якщо вони не є явно порожніми. Застарілі `valveIndexes` та `valveOrder` мігруються при запуску адаптера та синхронізуються для зворотної сумісності",
-        "zh-cn": "**增强**：计划现在通过稳定的状态ID而非数组索引来跟踪阀门 — 向计划配置中添加了 `valveStateIds`、`valveOrderStateIds` 和 `knownValveStateIds`。防止在阀门重命名、重新排序、添加或删除时丢失分配。新阀门会自动添加到现有计划中，除非明确为空。旧版 `valveIndexes` 和 `valveOrder` 在适配器启动时迁移，并保持同步以实现向后兼容"
       }
     },
     "titleLang": {

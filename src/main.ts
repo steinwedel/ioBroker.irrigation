@@ -6,7 +6,7 @@
 import * as utils from '@iobroker/adapter-core';
 import { normalizeConfig } from './lib/config-defaults';
 import type { IPlanConfig, IrrigationNativeConfig, IValveConfig, ScanType } from './lib/types';
-import { formatValveNumber, NONE_SENTINEL, parsePlanValveTableOrder, parsePlanValveTableRows } from './lib/types';
+import { formatValveNumber, NONE_SENTINEL, parsePlanValveTableRows } from './lib/types';
 import { createBaseStates, applyConfigToStates } from './lib/states';
 import { ValveController } from './lib/ventile';
 import { AutomationEngine } from './lib/automation';
@@ -213,7 +213,6 @@ class Irrigation extends utils.Adapter {
                     synchronizedPlans.map(plan => ({
                         name: plan.name,
                         valveIndexes: plan.valveIndexes,
-                        valveOrder: plan.valveOrder,
                     })),
                 )}`,
             );
@@ -248,9 +247,7 @@ class Irrigation extends utils.Adapter {
             return parsed.map((p: Partial<IPlanConfig>) => ({
                 name: p?.name ?? '',
                 valveIndexes: Array.isArray(p?.valveIndexes) ? p.valveIndexes : [],
-                valveOrder: Array.isArray(p?.valveOrder) ? p.valveOrder : undefined,
                 valveStateIds: Array.isArray(p?.valveStateIds) ? p.valveStateIds : undefined,
-                valveOrderStateIds: Array.isArray(p?.valveOrderStateIds) ? p.valveOrderStateIds : undefined,
                 knownValveStateIds: Array.isArray(p?.knownValveStateIds) ? p.knownValveStateIds : undefined,
             }));
         } catch (err) {
@@ -277,25 +274,11 @@ class Irrigation extends utils.Adapter {
                     }
                 }
             }
-            const legacyOrderStateIds = (plan.valveOrder ?? [])
-                .map(index => currentStateIds[index])
-                .filter((stateId): stateId is string => Boolean(stateId));
-            const orderStateIds = [...(plan.valveOrderStateIds ?? legacyOrderStateIds)].filter(stateId =>
-                selectedStateIds.includes(stateId),
-            );
-            for (const stateId of selectedStateIds) {
-                if (!orderStateIds.includes(stateId)) {
-                    orderStateIds.push(stateId);
-                }
-            }
             const valveIndexes = selectedStateIds.map(stateId => currentStateIds.indexOf(stateId));
-            const valveOrder = orderStateIds.map(stateId => currentStateIds.indexOf(stateId));
             return {
-                ...plan,
+                name: plan.name,
                 valveIndexes: explicitlyEmpty ? [NONE_SENTINEL] : valveIndexes,
-                valveOrder,
                 valveStateIds: selectedStateIds,
-                valveOrderStateIds: orderStateIds,
                 knownValveStateIds: currentStateIds,
             };
         });
@@ -318,7 +301,6 @@ class Irrigation extends utils.Adapter {
                 synchronizedPlans.map(plan => ({
                     name: plan.name,
                     valveIndexes: plan.valveIndexes,
-                    valveOrder: plan.valveOrder,
                 })),
             )}`,
         );
@@ -740,13 +722,7 @@ class Irrigation extends utils.Adapter {
         const allValveIndexes = this.config2.valves.map((_, index) => index);
         const assignedIndexes = this.getPlanValveIndexes(planIndex);
         const assignedSet = new Set(assignedIndexes);
-        const plan =
-            planIndex !== undefined && planIndex >= 0 && planIndex < this.config2.plans.length
-                ? this.config2.plans[planIndex]
-                : undefined;
-        const storedOrder = (plan?.valveOrder ?? []).filter(index => allValveIndexes.includes(index));
-        const orderedIndexes = [...storedOrder, ...allValveIndexes.filter(index => !storedOrder.includes(index))];
-        return orderedIndexes.map(index => ({
+        return allValveIndexes.map(index => ({
             valveNumber: formatValveNumber(index),
             name: this.config2.valves[index].name || 'unnamed',
             assigned: assignedSet.has(index),
@@ -927,7 +903,7 @@ class Irrigation extends utils.Adapter {
                 this.sendTo(obj.from, obj.command, { error: 'noName' }, obj.callback);
                 return;
             }
-            const updatedPlans = [...this.config2.plans, { name, valveIndexes: [], valveOrder: [] }];
+            const updatedPlans = [...this.config2.plans, { name, valveIndexes: [] }];
             const newPlanIndex = updatedPlans.length - 1;
             await this.writePlansState(updatedPlans);
             this.log.info(`Created new plan "${name}"`);
@@ -1040,15 +1016,12 @@ class Irrigation extends utils.Adapter {
             }
             const rows = (msg?.planValveTable as Array<{ valveNumber?: string; assigned?: boolean }> | undefined) ?? [];
             const selectedIndexes = parsePlanValveTableRows(rows, this.config2.valves.length);
-            const valveOrder = parsePlanValveTableOrder(rows, this.config2.valves.length);
             const updatedPlans = this.config2.plans.map((p, i) =>
                 i === planIndex
                     ? {
                           ...p,
                           valveIndexes: selectedIndexes.length > 0 ? selectedIndexes : [NONE_SENTINEL],
-                          valveOrder,
                           valveStateIds: selectedIndexes.map(index => this.config2.valves[index].stateId),
-                          valveOrderStateIds: valveOrder.map(index => this.config2.valves[index].stateId),
                           knownValveStateIds: this.config2.valves.map(valve => valve.stateId),
                       }
                     : p,
@@ -1068,9 +1041,7 @@ class Irrigation extends utils.Adapter {
             const updatedPlans = this.config2.plans.map(p => ({
                 ...p,
                 valveIndexes: [...allValveIndexes],
-                valveOrder: [...allValveIndexes],
                 valveStateIds: this.config2.valves.map(valve => valve.stateId),
-                valveOrderStateIds: this.config2.valves.map(valve => valve.stateId),
                 knownValveStateIds: this.config2.valves.map(valve => valve.stateId),
             }));
             await this.writePlansState(updatedPlans);
@@ -1082,9 +1053,7 @@ class Irrigation extends utils.Adapter {
             const updatedPlans = this.config2.plans.map(p => ({
                 ...p,
                 valveIndexes: [NONE_SENTINEL],
-                valveOrder: [],
                 valveStateIds: [],
-                valveOrderStateIds: [],
                 knownValveStateIds: this.config2.valves.map(valve => valve.stateId),
             }));
             await this.writePlansState(updatedPlans);

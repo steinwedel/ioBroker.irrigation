@@ -8,7 +8,7 @@ import { expect } from 'chai';
 import { AutomationEngine, buildBatches, calculateTemperatureAdjustmentFactor } from './lib/automation';
 import { parseDwdTemperature } from './lib/dwd';
 import { resolvePlanFromIcalTitle } from './lib/scheduler';
-import { parsePlanValveTableOrder, parsePlanValveTableRows } from './lib/types';
+import { parsePlanValveTableRows } from './lib/types';
 import { ValveController } from './lib/ventile';
 import type { AutomationDeps } from './lib/automation';
 import type { IrrigationNativeConfig, IValveConfig } from './lib/types';
@@ -331,15 +331,6 @@ describe('main.parsePlanValveTableRows', () => {
             { valveNumber: '001', assigned: true },
         ];
         expect(parsePlanValveTableRows(rows, 4)).to.deep.equal([3, 1]);
-    });
-
-    it('persists the complete displayed row order separately from assignments', () => {
-        const rows = [
-            { valveNumber: '003', assigned: true },
-            { valveNumber: '001', assigned: false },
-            { valveNumber: '000', assigned: true },
-        ];
-        expect(parsePlanValveTableOrder(rows, 4)).to.deep.equal([3, 1, 0]);
     });
 
     it('ignores rows with an out-of-range or malformed valveNumber', () => {

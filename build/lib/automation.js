@@ -250,11 +250,8 @@ class AutomationEngine {
     }
   }
   buildActiveValveList(config, plan) {
-    var _a;
     const useAllValves = plan.valveIndexes.length === 0;
-    const eligibleIndexes = useAllValves ? config.valves.map((_, index) => index) : plan.valveIndexes;
-    const storedOrder = ((_a = plan.valveOrder) != null ? _a : []).filter((index) => eligibleIndexes.includes(index));
-    const requestedIndexes = [...storedOrder, ...eligibleIndexes.filter((index) => !storedOrder.includes(index))];
+    const requestedIndexes = config.valves.map((_, index) => index).filter((index) => useAllValves || plan.valveIndexes.includes(index));
     const weekday = (/* @__PURE__ */ new Date()).getDay();
     const result = [];
     const seenIndexes = /* @__PURE__ */ new Set();

@@ -312,9 +312,9 @@ export class AutomationEngine {
 
     private buildActiveValveList(config: IrrigationNativeConfig, plan: IPlanConfig): number[] {
         const useAllValves = plan.valveIndexes.length === 0;
-        const eligibleIndexes = useAllValves ? config.valves.map((_, index) => index) : plan.valveIndexes;
-        const storedOrder = (plan.valveOrder ?? []).filter(index => eligibleIndexes.includes(index));
-        const requestedIndexes = [...storedOrder, ...eligibleIndexes.filter(index => !storedOrder.includes(index))];
+        const requestedIndexes = config.valves
+            .map((_, index) => index)
+            .filter(index => useAllValves || plan.valveIndexes.includes(index));
         const weekday = new Date().getDay();
         const result: number[] = [];
         const seenIndexes = new Set<number>();

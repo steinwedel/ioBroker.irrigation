@@ -114,7 +114,7 @@ Plans group zones by tags for combined watering runs. When a plan is triggered, 
 
 The built-in default plan **"Alle"** (all zones) has empty groups and therefore always waters every enabled zone. Use the single **Plan name** field to enter a name, then select **Add new plan** or **Rename selected plan** and confirm the dialog. Plan names must be unique.
 
-For sequential operation (`Pump capacity` = `0`), open **Valve assignment** for a plan. Use the table's up/down arrow buttons to arrange the assigned valves, then click **Apply valve assignment**. The saved row order is used for sequential execution. With parallel batching enabled, valves are grouped by pump capacity and duration instead, so the configured order is not guaranteed.
+For sequential operation (`Pump capacity` = `0`), the valve order from the **Valves** tab is the execution order for every plan. The plan table only controls which valves are assigned; it cannot reorder them. With parallel batching enabled, valves are grouped by pump capacity and duration instead, so the configured global order is not guaranteed.
 
 **Example:** Zone "Rasen vorne" has groups `Lawn`, Zone "Hecke" has groups `Hedge`, Zone "Beet" has groups `Beds,Lawn`. A plan with groups `Lawn` would water "Rasen vorne" and "Beet" but not "Hecke".
 
@@ -247,7 +247,7 @@ All IDs below are relative to the adapter instance, e.g. `<instance>` is normall
 | `automation.activePlan` | string, R | Name of the currently active plan; empty while idle. |
 | `automation.planSelect` | string, R/W | Selectable plan-name value for external UIs. It is kept in sync with the available plans; use `startPlan` to execute a choice directly. |
 | `automation.plansList` | JSON string, R | Available plan names, e.g. `["Alle","Rasen"]`. Use this to populate scripts or external UI selectors. |
-| `automation.plansData` | JSON string, R | Internal persistent plan definition containing `name`, legacy indexes, and stable `valveStateIds` / `valveOrderStateIds`. The stable IDs keep assignments and sequential order correct when valves are renamed, added, removed, or reindexed. |
+| `automation.plansData` | JSON string, R | Internal persistent plan definition containing `name`, legacy indexes, and stable `valveStateIds`. The stable IDs keep assignments correct when valves are renamed, added, removed, or reindexed. Sequential order always follows the Valves tab. |
 | `automation.extensionFactor` | number, R/W | Configured duration multiplier (`0.5` to `5`) mirrored from adapter settings. |
 | `automation.temperatureAdjustmentEnabled` / `automation.temperatureAdjustmentStateId` | boolean / string, R/W | Enables temperature-controlled duration adjustment and identifies its numeric temperature source. |
 | `automation.temperatureAdjustmentFactor` | number, R | Factor fixed at the start of the current automatic plan using `1.07^(T - 20)`; `1` when inactive or idle. |

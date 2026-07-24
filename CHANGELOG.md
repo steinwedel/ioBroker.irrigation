@@ -1,4 +1,8 @@
 # Changelog
+## 0.2.55 (2026-07-24)
+* (Gerhard Steinwedel) **ENHANCED**: Unified sequential plan execution order with the Valves tab order
+* (Gerhard Steinwedel) **FIXED**: Reserved space for all valve table action buttons
+
 ## 0.2.54 (2026-07-24)
 * (Gerhard Steinwedel) **FIXED**: Kept valve reorder arrows available by disabling valve table sorting
 

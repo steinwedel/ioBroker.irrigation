@@ -168,20 +168,20 @@
                             "type": "text",
                             "attr": "valveNumber",
                             "title": "Valve",
-                            "width": "8%",
+                            "width": "6%",
                             "readOnly": true
                         },
                         {
                             "type": "text",
                             "attr": "name",
                             "title": "Display name",
-                            "width": "24%"
+                            "width": "18%"
                         },
                         {
                             "type": "select",
                             "attr": "type",
                             "title": "Type",
-                            "width": "14%",
+                            "width": "12%",
                             "options": [
                                 { "label": "Gardena", "value": "Gardena" },
                                 { "label": "Homematic", "value": "Homematic" },
@@ -194,7 +194,7 @@
                             "type": "number",
                             "attr": "duration",
                             "title": "Watering duration (min)",
-                            "width": "16%",
+                            "width": "14%",
                             "min": 1,
                             "default": 10
                         },
@@ -202,7 +202,7 @@
                             "type": "objectId",
                             "attr": "stateId",
                             "title": "State id",
-                            "width": "30%"
+                            "width": "20%"
                         }
                     ]
                 },
@@ -385,7 +385,7 @@
                     "label": "Valves in selected plan",
                     "newLine": true,
                     "doNotSave": true,
-                    "noDelete": false,
+                    "noDelete": true,
                     "sm": 12,
                     "md": 12,
                     "lg": 8,

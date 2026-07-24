@@ -20,38 +20,23 @@ var types_exports = {};
 __export(types_exports, {
   NONE_SENTINEL: () => NONE_SENTINEL,
   formatValveNumber: () => formatValveNumber,
-  parsePlanValveTableOrder: () => parsePlanValveTableOrder,
   parsePlanValveTableRows: () => parsePlanValveTableRows
 });
 module.exports = __toCommonJS(types_exports);
 function formatValveNumber(index) {
   return String(index).padStart(3, "0");
 }
-function parsePlanValveTableOrder(rows, valveCount) {
-  const seen = /* @__PURE__ */ new Set();
-  return rows.map((row) => {
+function parsePlanValveTableRows(rows, valveCount) {
+  return rows.filter((row) => row == null ? void 0 : row.assigned).map((row) => {
     var _a;
     return Number.parseInt((_a = row.valveNumber) != null ? _a : "", 10);
-  }).filter((index) => {
-    if (!Number.isInteger(index) || index < 0 || index >= valveCount || seen.has(index)) {
-      return false;
-    }
-    seen.add(index);
-    return true;
-  });
-}
-function parsePlanValveTableRows(rows, valveCount) {
-  return parsePlanValveTableOrder(
-    rows.filter((row) => row == null ? void 0 : row.assigned),
-    valveCount
-  );
+  }).filter((index) => Number.isInteger(index) && index >= 0 && index < valveCount);
 }
 const NONE_SENTINEL = -1;
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   NONE_SENTINEL,
   formatValveNumber,
-  parsePlanValveTableOrder,
   parsePlanValveTableRows
 });
 //# sourceMappingURL=types.js.map
