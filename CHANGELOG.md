@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.3.8 (2026-07-25)
 * (Gerhard Steinwedel) **FIXED**: `automation.remainingDuration`/`remainingDurationMin` are now recalculated when the "Next"/"Back" batch buttons (`automation.next`/`automation.back`) are used — previously the remaining-time estimate stayed based on the original linear run timeline and became wrong once a batch was skipped or repeated
 * (Gerhard Steinwedel) **ENHANCED**: Renamed `remainingTime` state to `remainingDuration` (both `automation.remainingTime` and per-valve `valves.valve_XXX.remainingTime`) for consistency with `remainingDurationMin`; stale `remainingTime` objects are automatically removed on startup
 
