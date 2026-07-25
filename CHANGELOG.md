@@ -1,5 +1,6 @@
 # Changelog
 ## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **ENHANCED**: Valve durations now stored and processed in seconds instead of minutes — admin UI accepts flexible input formats (minutes, MM:SS, HH:MM:SS) and normalizes to display format. Legacy migration converts old minute values automatically. State units changed from `min` to `s`.
 
 ## 0.3.0 (2026-07-25)
 * (Gerhard Steinwedel) **NEW**: Added wind speed/gust limits with resume hysteresis as an automatic pause condition
