@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.3.10 (2026-07-25)
 * (Gerhard Steinwedel) **FIXED**: Added null-safety checks to `onForeignStateChange()` calls for optional manager instances (`sensorManager`, `windMonitor`, `dwd`, `scheduler`, `flowMonitor`) to prevent NullPointerExceptions if these instances are not initialized
 
 ## 0.3.9 (2026-07-25)
