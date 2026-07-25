@@ -290,13 +290,23 @@ class ValveController {
       min: 1,
       def: this.config.manualDuration
     });
-    await this.ensureState("flowSensorId", {
-      name: "Flow sensor state id",
-      type: "string",
-      role: "text",
+    await this.adapter.delObjectAsync(`${this.id}.flowSensorId`).catch(() => void 0);
+    await this.ensureState("flowExpected", {
+      name: "Calibrated expected flow rate (l/min)",
+      type: "number",
+      role: "value",
+      unit: "l/min",
+      read: true,
+      write: false,
+      def: 0
+    });
+    await this.ensureState("calibrateFlow", {
+      name: "Calibrate expected flow rate",
+      type: "boolean",
+      role: "button",
       read: true,
       write: true,
-      def: this.config.flowSensorId
+      def: false
     });
     await this.ensureState("days", {
       name: "Weekdays (JSON)",
@@ -319,7 +329,6 @@ class ValveController {
       ack: true
     });
     await this.adapter.setStateAsync(`${this.id}.manualDuration`, { val: this.config.manualDuration, ack: true });
-    await this.adapter.setStateAsync(`${this.id}.flowSensorId`, { val: this.config.flowSensorId, ack: true });
     await this.adapter.setStateAsync(`${this.id}.days`, { val: JSON.stringify(this.config.days), ack: true });
     await this.subscribeStatus();
   }
@@ -539,6 +548,25 @@ class ValveController {
     }
   }
   /**
+   * Best-effort write of the Homematic `ON_TIME` datapoint, shared by
+   * start() (arms the auto-shutoff) and stop() (resets it so the actuator
+   * does not re-arm itself from a stale value). Some Homematic actuators
+   * expose ON_TIME under a different name or not at all, so a failure here
+   * must never prevent the critical STATE=true/false command that follows
+   * - it is only logged.
+   *
+   * @param value Duration in seconds to arm (start), or 0 to reset (stop).
+   */
+  async setHomematicOnTime(value) {
+    try {
+      await this.adapter.setForeignStateAsync(`${this.config.stateId}.ON_TIME`, value);
+    } catch (error) {
+      this.adapter.log.warn(
+        `Valve ${this.config.name}: failed to set ON_TIME (continuing anyway): ${error.message}`
+      );
+    }
+  }
+  /**
    * Start this valve for the given duration in seconds. For device-internal
    * timer types (Gardena/Rainbird) the device handles the shutoff itself.
    * For Homematic/Generic the adapter must schedule the stop itself and
@@ -574,16 +602,7 @@ class ValveController {
           await this.adapter.setForeignStateAsync(this.config.stateId, effectiveDurationSecs);
           break;
         case "Homematic":
-          try {
-            await this.adapter.setForeignStateAsync(
-              `${this.config.stateId}.ON_TIME`,
-              effectiveDurationSecs
-            );
-          } catch (error) {
-            this.adapter.log.warn(
-              `Valve ${this.config.name}: failed to set ON_TIME (continuing anyway): ${error.message}`
-            );
-          }
+          await this.setHomematicOnTime(effectiveDurationSecs);
           await this.adapter.setForeignStateAsync(`${this.config.stateId}.STATE`, true);
           this.scheduleTick();
           break;
@@ -632,11 +651,17 @@ class ValveController {
   async stop() {
     var _a;
     if (!this.config.enabled) {
+      if (this.running) {
+        this.clearTickTimer();
+        this.remainingSecs = 0;
+        await this.setRunningState(false, 0);
+      }
       return;
     }
     this.clearTickTimer();
     this.remainingSecs = 0;
     this.running = false;
+    let commandIssued = true;
     try {
       switch (this.config.type) {
         case "Gardena":
@@ -646,6 +671,11 @@ class ValveController {
         case "Rainbird":
           if (this.config.allOffId && !this.otherSiblingRainbirdValveRunning()) {
             await this.adapter.setForeignStateAsync(this.config.allOffId, true);
+          } else if (!this.config.allOffId) {
+            commandIssued = false;
+            this.adapter.log.warn(
+              `Valve ${this.config.name}: cannot stop Rainbird valve - no allOffId configured. Reporting stopped in ioBroker only; the physical station may still be running.`
+            );
           }
           break;
         case "Hydrawise":
@@ -655,7 +685,7 @@ class ValveController {
           );
           break;
         case "Homematic":
-          await this.adapter.setForeignStateAsync(`${this.config.stateId}.ON_TIME`, 0);
+          await this.setHomematicOnTime(0);
           await this.adapter.setForeignStateAsync(`${this.config.stateId}.STATE`, false);
           break;
         case "Generic":
@@ -663,6 +693,12 @@ class ValveController {
           break;
       }
       await this.setRunningState(false, 0);
+      if (!commandIssued) {
+        await this.adapter.setStateAsync(`${this.id}.errorLast`, {
+          val: "Stop requested but no allOffId configured - physical Rainbird station may still be running.",
+          ack: true
+        });
+      }
     } catch (error) {
       if (error instanceof import_rate_limiter.CancelledError) {
         return;

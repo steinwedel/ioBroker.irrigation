@@ -172,9 +172,10 @@
   "native": {
     "expertMode": false,
     "valves": [],
+    "nextValveId": 0,
     "plans": [
       {
-        "name": "Alle",
+        "name": "All",
         "valveIndexes": []
       }
     ],
@@ -192,7 +193,7 @@
       "temperatureAdjustmentEnabled": false,
       "temperatureAdjustmentStateId": "",
       "pumpCapacity": 0,
-      "zonePause": 0,
+      "valvePause": 0,
       "seasonEnabled": false,
       "seasonStart": 4,
       "seasonEnd": 10,
@@ -232,6 +233,10 @@
     },
     "waterConsumption": {
       "enabled": false
+    },
+    "flowMonitor": {
+      "enabled": false,
+      "sensorId": ""
     }
   },
   "encryptedNative": [

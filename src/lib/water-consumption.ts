@@ -18,6 +18,8 @@ export class WaterConsumptionTracker {
     private monthTotal = 0;
     private grandTotal = 0;
     private currentDay = new Date().getDate();
+    private currentWeekKey = weekKeyOf(new Date());
+    private currentMonthKey = monthKeyOf(new Date());
 
     public constructor(deps: WaterConsumptionDeps) {
         this.deps = deps;
@@ -82,23 +84,55 @@ export class WaterConsumptionTracker {
     }
 
     private rolloverIfNeeded(): void {
-        const nowDay = new Date().getDate();
+        const now = new Date();
+        const nowDay = now.getDate();
         if (nowDay !== this.currentDay) {
             this.dayTotal = 0;
             this.currentDay = nowDay;
         }
-        // week/month rollover intentionally simplified: reset on day 1 for month,
-        // and Monday for week. Kept minimal for v1 as per plan scope.
-        const now = new Date();
-        if (now.getDay() === 1) {
+        // week/month rollover intentionally simplified: reset on the first Monday
+        // seen for the week, and on the first day of a new month. Both are guarded
+        // by a key comparison (rather than "getDay() === 1"/"getDate() === 1" alone)
+        // so that repeated calls on the same Monday/1st-of-month do not wipe out
+        // consumption already recorded earlier that same day.
+        const weekKey = weekKeyOf(now);
+        if (weekKey !== this.currentWeekKey) {
             this.weekTotal = 0;
+            this.currentWeekKey = weekKey;
         }
-        if (now.getDate() === 1) {
+        const monthKey = monthKeyOf(now);
+        if (monthKey !== this.currentMonthKey) {
             this.monthTotal = 0;
+            this.currentMonthKey = monthKey;
         }
     }
 }
 
 function round2(value: number): number {
     return Math.round(value * 100) / 100;
+}
+
+/**
+ * ISO-8601-ish week key ("<year>-W<week>") used to detect the Monday-to-Monday
+ * boundary exactly once, instead of re-triggering the reset on every call made
+ * on a Monday.
+ *
+ * @param date
+ */
+function weekKeyOf(date: Date): string {
+    // Shift to the Monday of the current week, then key by that Monday's date.
+    const monday = new Date(date);
+    const isoDayOfWeek = (date.getDay() + 6) % 7; // Monday=0 ... Sunday=6
+    monday.setDate(date.getDate() - isoDayOfWeek);
+    return `${monday.getFullYear()}-${monday.getMonth()}-${monday.getDate()}`;
+}
+
+/**
+ * Month key ("<year>-<month>") used to detect the month boundary exactly
+ * once, instead of re-triggering the reset on every call made on the 1st.
+ *
+ * @param date
+ */
+function monthKeyOf(date: Date): string {
+    return `${date.getFullYear()}-${date.getMonth()}`;
 }

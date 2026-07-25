@@ -71,7 +71,7 @@ export class Scheduler {
                 continue;
             }
             if (normalizeTime(timeStr) === normalizeTime(nowStr)) {
-                const planName = config.plans[0]?.name ?? 'Alle';
+                const planName = config.plans[0]?.name ?? 'All';
                 await this.deps.onTrigger(planName, 'timer');
             }
         }
@@ -99,7 +99,7 @@ export class Scheduler {
             return true;
         }
 
-        const planName = config.plans[0]?.name ?? 'Alle';
+        const planName = config.plans[0]?.name ?? 'All';
         await this.deps.onTrigger(planName, 'ical');
         return true;
     }

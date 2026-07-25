@@ -48,7 +48,7 @@ class WeatherApi {
     }
   }
   async poll() {
-    var _a, _b, _c, _d, _e, _f;
+    var _a, _b, _c, _d, _e;
     const config = this.deps.getConfig().weather;
     try {
       const url = `https://api.openweathermap.org/data/2.5/weather?lat=${config.latitude}&lon=${config.longitude}&appid=${config.apiKey}&units=metric`;
@@ -57,15 +57,21 @@ class WeatherApi {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
       const data = await response.json();
-      await this.deps.adapter.setStateAsync("weather.temperature", { val: (_b = (_a = data.main) == null ? void 0 : _a.temp) != null ? _b : 0, ack: true });
-      await this.deps.adapter.setStateAsync("weather.precipitation", { val: (_d = (_c = data.rain) == null ? void 0 : _c["1h"]) != null ? _d : 0, ack: true });
+      if (typeof ((_a = data.main) == null ? void 0 : _a.temp) === "number" && Number.isFinite(data.main.temp)) {
+        await this.deps.adapter.setStateAsync("weather.temperature", { val: data.main.temp, ack: true });
+      } else {
+        this.deps.adapter.log.warn("Weather API response is missing a valid temperature value.");
+      }
+      await this.deps.adapter.setStateAsync("weather.precipitation", { val: (_c = (_b = data.rain) == null ? void 0 : _b["1h"]) != null ? _c : 0, ack: true });
       await this.deps.adapter.setStateAsync("weather.precipitationChance", {
-        val: (_f = (_e = data.clouds) == null ? void 0 : _e.all) != null ? _f : 0,
+        val: (_e = (_d = data.clouds) == null ? void 0 : _d.all) != null ? _e : 0,
         ack: true
       });
       await this.deps.adapter.setStateAsync("weather.lastUpdate", { val: Date.now(), ack: true });
+      await this.deps.adapter.setStateAsync("info.connection", { val: true, ack: true });
     } catch (error) {
       this.deps.adapter.log.warn(`Weather API request failed: ${error.message}`);
+      await this.deps.adapter.setStateAsync("info.connection", { val: false, ack: true });
     }
   }
 }

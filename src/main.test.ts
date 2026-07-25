@@ -26,7 +26,6 @@ function makeValve(overrides: Partial<IValveConfig> = {}): IValveConfig {
         rainIndependent: false,
         moistureThreshold: 0,
         manualDuration: 10,
-        flowSensorId: '',
         days: [],
         ...overrides,
     };
@@ -555,7 +554,7 @@ describe('dwd.DwdRestriction.check', () => {
             expertMode: false,
             valves: [],
             nextValveId: 0,
-            plans: [{ name: 'Alle', valveIndexes: [] }],
+            plans: [{ name: 'All', valveIndexes: [] }],
             scheduler: {
                 autoMode: false,
                 pauseOnRain: false,
@@ -606,6 +605,7 @@ describe('dwd.DwdRestriction.check', () => {
             },
             notifications: { pushoverInstance: '', telegramInstance: '' },
             waterConsumption: { enabled: false },
+            flowMonitor: { enabled: false, sensorId: '' },
         };
     }
 
@@ -864,7 +864,7 @@ describe('automation temperature-controlled irrigation adjustment (full plan run
             expertMode: false,
             valves: [makeValve({ name: 'Rasen', duration: 600 })],
             nextValveId: 0,
-            plans: [{ name: 'Alle', valveIndexes: [] }],
+            plans: [{ name: 'All', valveIndexes: [] }],
             scheduler: {
                 autoMode: false,
                 pauseOnRain: false,
@@ -911,6 +911,7 @@ describe('automation temperature-controlled irrigation adjustment (full plan run
             },
             notifications: { pushoverInstance: '', telegramInstance: '' },
             waterConsumption: { enabled: false },
+            flowMonitor: { enabled: false, sensorId: '' },
         };
     }
 
@@ -929,7 +930,7 @@ describe('automation temperature-controlled irrigation adjustment (full plan run
             getTemperatureAdjustmentTemperature: () => Promise.resolve(27), // 7°C above the 20°C base
         });
 
-        await engine.requestRun('Alle', 'manual-button');
+        await engine.requestRun('All', 'manual-button');
 
         const expectedFactor = calculateTemperatureAdjustmentFactor(27);
         const expectedDurationSecs = Math.round(600 * expectedFactor);
@@ -956,7 +957,7 @@ describe('automation temperature-controlled irrigation adjustment (full plan run
             getTemperatureAdjustmentTemperature: () => Promise.resolve(undefined),
         });
 
-        await engine.requestRun('Alle', 'manual-button');
+        await engine.requestRun('All', 'manual-button');
 
         expect(valve.startCalls).to.deep.equal([600]); // unadjusted duration
         expect(
@@ -981,46 +982,44 @@ describe('automation temperature-controlled irrigation adjustment (full plan run
             getTemperatureAdjustmentTemperature: () => Promise.resolve(35), // must be ignored while disabled
         });
 
-        await engine.requestRun('Alle', 'manual-button');
+        await engine.requestRun('All', 'manual-button');
 
         expect(valve.startCalls).to.deep.equal([600]);
     });
 });
 
 describe('scheduler.resolvePlanFromIcalTitle', () => {
-    const planNames = ['Alle', 'Rasen', 'Beete'];
+    const planNames = ['All', 'Rasen', 'Beete'];
 
     it('returns the default plan when the title has no suffix', () => {
-        expect(resolvePlanFromIcalTitle('Bewässerung', 'Bewässerung', planNames, 'Alle')).to.equal('Alle');
+        expect(resolvePlanFromIcalTitle('Bewässerung', 'Bewässerung', planNames, 'All')).to.equal('All');
     });
 
     it('extracts the plan name after a colon', () => {
-        expect(resolvePlanFromIcalTitle('Bewässerung: Rasen', 'Bewässerung', planNames, 'Alle')).to.equal('Rasen');
+        expect(resolvePlanFromIcalTitle('Bewässerung: Rasen', 'Bewässerung', planNames, 'All')).to.equal('Rasen');
     });
 
     it('extracts the plan name after a dash', () => {
-        expect(resolvePlanFromIcalTitle('Bewässerung - Beete', 'Bewässerung', planNames, 'Alle')).to.equal('Beete');
+        expect(resolvePlanFromIcalTitle('Bewässerung - Beete', 'Bewässerung', planNames, 'All')).to.equal('Beete');
     });
 
     it('falls back to the default plan for an unknown plan name', () => {
-        expect(resolvePlanFromIcalTitle('Bewässerung: Unbekannt', 'Bewässerung', planNames, 'Alle')).to.equal('Alle');
+        expect(resolvePlanFromIcalTitle('Bewässerung: Unbekannt', 'Bewässerung', planNames, 'All')).to.equal('All');
     });
 
     it('falls back to the default plan when the title does not match the prefix', () => {
-        expect(resolvePlanFromIcalTitle('Anderes Event', 'Bewässerung', planNames, 'Alle')).to.equal('Alle');
+        expect(resolvePlanFromIcalTitle('Anderes Event', 'Bewässerung', planNames, 'All')).to.equal('All');
     });
 });
 
 /**
  * Regression tests for AutomationEngine.recoverAfterRestart(). This is
- * called once from main.ts:onReady() on every adapter start. It used to
- * unconditionally call stop() on every configured valve regardless of
- * whether an automation run was actually interrupted - which meant a
- * Gardena valve started moments earlier (from the Gardena app or from
- * ioBroker) was immediately closed again by the very next adapter restart.
- * These tests lock in the fix: only stop valves that automation.batchZones
- * says were genuinely part of an interrupted run, and only when
- * automation.running confirms a run was in progress.
+ * called once from main.ts:onReady() on every adapter start. It
+ * unconditionally stops every configured valve so the adapter always
+ * starts from a known, consistent "all off" state, regardless of whether
+ * an automation run was actually interrupted or a valve is currently being
+ * controlled independently (e.g. from the Gardena app or another ioBroker
+ * adapter).
  */
 describe('automation.recoverAfterRestart', () => {
     class FakeValve {
@@ -1056,7 +1055,7 @@ describe('automation.recoverAfterRestart', () => {
             expertMode: false,
             valves: Array.from({ length: valveCount }, () => makeValve()),
             nextValveId: 0,
-            plans: [{ name: 'Alle', valveIndexes: [] }],
+            plans: [{ name: 'All', valveIndexes: [] }],
             scheduler: {
                 autoMode: false,
                 pauseOnRain: false,
@@ -1103,6 +1102,7 @@ describe('automation.recoverAfterRestart', () => {
             },
             notifications: { pushoverInstance: '', telegramInstance: '' },
             waterConsumption: { enabled: false },
+            flowMonitor: { enabled: false, sensorId: '' },
         };
     }
 
@@ -1119,7 +1119,7 @@ describe('automation.recoverAfterRestart', () => {
         };
     }
 
-    it('does not stop any valve when no automation run was in progress (fresh install / normal restart)', async () => {
+    it('stops every configured valve on a fresh install / normal restart, even with no prior automation state', async () => {
         const valves = [new FakeValve(), new FakeValve(), new FakeValve()];
         const adapter = makeFakeAdapter(); // no automation.running state at all, like a fresh install
         const engine = new AutomationEngine(makeDeps(adapter, valves, makeConfig(valves.length)));
@@ -1127,53 +1127,51 @@ describe('automation.recoverAfterRestart', () => {
         await engine.recoverAfterRestart();
 
         for (const valve of valves) {
-            expect(valve.stopCalls).to.equal(0);
+            expect(valve.stopCalls).to.equal(1);
         }
     });
 
-    it('does not stop any valve when automation.running is false, even if a valve is running externally', async () => {
+    it('stops every configured valve even when automation.running is false, e.g. a valve running externally', async () => {
         const valves = [new FakeValve(), new FakeValve()];
         // Simulates: a Gardena valve was just started via the app or via ioBroker,
-        // automation itself is idle. The bug used to stop this valve anyway.
-        const adapter = makeFakeAdapter({ 'automation.running': false, 'automation.batchZones': '[]' });
+        // automation itself is idle. A restart must still bring it to a known "off" state.
+        const adapter = makeFakeAdapter({ 'automation.running': false, 'automation.batchValves': '[]' });
         const engine = new AutomationEngine(makeDeps(adapter, valves, makeConfig(valves.length)));
 
         await engine.recoverAfterRestart();
 
         for (const valve of valves) {
-            expect(valve.stopCalls).to.equal(0);
+            expect(valve.stopCalls).to.equal(1);
         }
     });
 
-    it('stops only the valves recorded in automation.batchZones when automation.running is true', async () => {
+    it('stops every configured valve when automation.running is true, not just the ones in automation.batchValves', async () => {
         const valves = [new FakeValve(), new FakeValve(), new FakeValve()];
-        // Simulates: the adapter crashed mid-run while valves 0 and 2 were part of the
-        // active batch; valve 1 was never part of it and must not be touched.
         const adapter = makeFakeAdapter({
             'automation.running': true,
-            'automation.batchZones': JSON.stringify([0, 2]),
-        });
-        const engine = new AutomationEngine(makeDeps(adapter, valves, makeConfig(valves.length)));
-
-        await engine.recoverAfterRestart();
-
-        expect(valves[0].stopCalls).to.equal(1);
-        expect(valves[1].stopCalls).to.equal(0);
-        expect(valves[2].stopCalls).to.equal(1);
-    });
-
-    it('does not throw and stops nothing when automation.running is true but batchZones is malformed', async () => {
-        const valves = [new FakeValve(), new FakeValve()];
-        const adapter = makeFakeAdapter({
-            'automation.running': true,
-            'automation.batchZones': 'not valid json',
+            'automation.batchValves': JSON.stringify([0, 2]),
         });
         const engine = new AutomationEngine(makeDeps(adapter, valves, makeConfig(valves.length)));
 
         await engine.recoverAfterRestart();
 
         for (const valve of valves) {
-            expect(valve.stopCalls).to.equal(0);
+            expect(valve.stopCalls).to.equal(1);
+        }
+    });
+
+    it('stops every configured valve even when automation.batchValves is malformed', async () => {
+        const valves = [new FakeValve(), new FakeValve()];
+        const adapter = makeFakeAdapter({
+            'automation.running': true,
+            'automation.batchValves': 'not valid json',
+        });
+        const engine = new AutomationEngine(makeDeps(adapter, valves, makeConfig(valves.length)));
+
+        await engine.recoverAfterRestart();
+
+        for (const valve of valves) {
+            expect(valve.stopCalls).to.equal(1);
         }
     });
 });

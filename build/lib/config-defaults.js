@@ -27,7 +27,7 @@ const DEFAULT_CONFIG = {
   expertMode: false,
   valves: [],
   nextValveId: 0,
-  plans: [{ name: "Alle", valveIndexes: [] }],
+  plans: [{ name: "All", valveIndexes: [] }],
   scheduler: {
     autoMode: false,
     pauseOnRain: false,
@@ -82,6 +82,10 @@ const DEFAULT_CONFIG = {
   },
   waterConsumption: {
     enabled: false
+  },
+  flowMonitor: {
+    enabled: false,
+    sensorId: ""
   }
 };
 function normalizeConfig(config) {
@@ -100,7 +104,7 @@ function normalizeConfig(config) {
   return {
     expertMode: (_m = config.expertMode) != null ? _m : DEFAULT_CONFIG.expertMode,
     valves: ((_n = config.valves) != null ? _n : []).map((valve, index) => {
-      var _a2, _b2, _c2, _d2, _e2, _f2, _g2, _h2, _i2, _j2;
+      var _a2, _b2, _c2, _d2, _e2, _f2, _g2, _h2, _i2;
       const legacyRunFor = valve.runFor;
       const duration = typeof valve.duration === "number" ? Math.max(1, Math.round(valve.duration * 60)) : (0, import_duration.parseDuration)((_a2 = valve.duration) != null ? _a2 : legacyRunFor !== void 0 ? legacyRunFor : "10");
       return {
@@ -119,8 +123,7 @@ function normalizeConfig(config) {
         rainIndependent: (_g2 = valve.rainIndependent) != null ? _g2 : false,
         moistureThreshold: (_h2 = valve.moistureThreshold) != null ? _h2 : 0,
         manualDuration: typeof valve.manualDuration === "number" ? Math.max(1, Math.round(valve.manualDuration * 60)) : valve.manualDuration === void 0 ? duration : (0, import_duration.parseDuration)(valve.manualDuration),
-        flowSensorId: (_i2 = valve.flowSensorId) != null ? _i2 : "",
-        days: (_j2 = valve.days) != null ? _j2 : []
+        days: (_i2 = valve.days) != null ? _i2 : []
       };
     }),
     nextValveId: (_o = config.nextValveId) != null ? _o : DEFAULT_CONFIG.nextValveId,
@@ -133,7 +136,8 @@ function normalizeConfig(config) {
     weather: { ...DEFAULT_CONFIG.weather, ...config.weather },
     legalRestriction,
     notifications: { ...DEFAULT_CONFIG.notifications, ...config.notifications },
-    waterConsumption: { ...DEFAULT_CONFIG.waterConsumption, ...config.waterConsumption }
+    waterConsumption: { ...DEFAULT_CONFIG.waterConsumption, ...config.waterConsumption },
+    flowMonitor: { ...DEFAULT_CONFIG.flowMonitor, ...config.flowMonitor }
   };
 }
 // Annotate the CommonJS export names for ESM import in node:

@@ -29,6 +29,8 @@ class WaterConsumptionTracker {
   monthTotal = 0;
   grandTotal = 0;
   currentDay = (/* @__PURE__ */ new Date()).getDate();
+  currentWeekKey = weekKeyOf(/* @__PURE__ */ new Date());
+  currentMonthKey = monthKeyOf(/* @__PURE__ */ new Date());
   constructor(deps) {
     this.deps = deps;
   }
@@ -87,22 +89,35 @@ class WaterConsumptionTracker {
     await this.deps.adapter.setStateAsync("waterConsumption.total", { val: round2(this.grandTotal), ack: true });
   }
   rolloverIfNeeded() {
-    const nowDay = (/* @__PURE__ */ new Date()).getDate();
+    const now = /* @__PURE__ */ new Date();
+    const nowDay = now.getDate();
     if (nowDay !== this.currentDay) {
       this.dayTotal = 0;
       this.currentDay = nowDay;
     }
-    const now = /* @__PURE__ */ new Date();
-    if (now.getDay() === 1) {
+    const weekKey = weekKeyOf(now);
+    if (weekKey !== this.currentWeekKey) {
       this.weekTotal = 0;
+      this.currentWeekKey = weekKey;
     }
-    if (now.getDate() === 1) {
+    const monthKey = monthKeyOf(now);
+    if (monthKey !== this.currentMonthKey) {
       this.monthTotal = 0;
+      this.currentMonthKey = monthKey;
     }
   }
 }
 function round2(value) {
   return Math.round(value * 100) / 100;
+}
+function weekKeyOf(date) {
+  const monday = new Date(date);
+  const isoDayOfWeek = (date.getDay() + 6) % 7;
+  monday.setDate(date.getDate() - isoDayOfWeek);
+  return `${monday.getFullYear()}-${monday.getMonth()}-${monday.getDate()}`;
+}
+function monthKeyOf(date) {
+  return `${date.getFullYear()}-${date.getMonth()}`;
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {

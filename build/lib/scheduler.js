@@ -71,7 +71,7 @@ class Scheduler {
         continue;
       }
       if (normalizeTime(timeStr) === normalizeTime(nowStr)) {
-        const planName = (_b = (_a = config.plans[0]) == null ? void 0 : _a.name) != null ? _b : "Alle";
+        const planName = (_b = (_a = config.plans[0]) == null ? void 0 : _a.name) != null ? _b : "All";
         await this.deps.onTrigger(planName, "timer");
       }
     }
@@ -97,7 +97,7 @@ class Scheduler {
       this.deps.adapter.log.info("iCal trigger fired but season/frost block is active - ignored.");
       return true;
     }
-    const planName = (_b = (_a = config.plans[0]) == null ? void 0 : _a.name) != null ? _b : "Alle";
+    const planName = (_b = (_a = config.plans[0]) == null ? void 0 : _a.name) != null ? _b : "All";
     await this.deps.onTrigger(planName, "ical");
     return true;
   }

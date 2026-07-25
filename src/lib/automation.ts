@@ -134,7 +134,8 @@ export class AutomationEngine {
         endsAt: number;
     } | null = null;
     private wasAutomationPausedForManual = false;
-    private wasAutomationBatchIndexBeforeManual = -1;
+    /** Last remaining-minutes value shown in automation.status during a manual run, used to throttle publishStatus() to only fire when the displayed value actually changes. */
+    private lastManualRunRemainingMin = -1;
 
     private tickTimer: ReturnType<ioBroker.Adapter['setInterval']> | undefined;
 
@@ -177,38 +178,18 @@ export class AutomationEngine {
      * from ioBroker was immediately closed again by the very next restart,
      * regardless of who/what started it and regardless of whether an
      * automation run was actually interrupted.
-     *
-     * Only defensively stop valves if the persisted `automation.running`
-     * state confirms a plan-driven run was genuinely in progress when the
-     * process last shut down (e.g. a real crash mid-run, not a clean
-     * shutdown or an unrelated valve being controlled independently), and
-     * then only stop the specific valves recorded in `automation.batchZones`
-     * - not every configured valve. Manual single-valve runs
-     * (requestManualStart()) are not persisted at all and are intentionally
-     * left untouched here: there is no reliable evidence either way, and
-     * erring on the side of not touching them is what avoids stopping a
-     * valve someone just started externally.
+     * Unconditionally stops every configured valve so the adapter always starts
+     * from a known, consistent "all off" state - regardless of whether an
+     * automation run was actually in progress, and regardless of whether a
+     * valve is currently being controlled independently (e.g. from the
+     * Gardena app or another ioBroker adapter). This intentionally trades
+     * away the previous "only touch valves that were genuinely part of an
+     * interrupted run" behavior in favor of a guaranteed consistent state on
+     * every adapter start/restart.
      */
     public async recoverAfterRestart(): Promise<void> {
-        const runningState = await this.deps.adapter.getStateAsync('automation.running');
-        const wasRunning = runningState?.val === true;
-        if (wasRunning) {
-            const batchZonesState = await this.deps.adapter.getStateAsync('automation.batchZones');
-            let interruptedValveIndexes: number[] = [];
-            try {
-                const parsed = JSON.parse(typeof batchZonesState?.val === 'string' ? batchZonesState.val : '[]');
-                if (Array.isArray(parsed)) {
-                    interruptedValveIndexes = parsed.filter((v): v is number => typeof v === 'number');
-                }
-            } catch {
-                interruptedValveIndexes = [];
-            }
-            for (const valveIndex of interruptedValveIndexes) {
-                const valve = this.deps.valves[valveIndex];
-                if (valve) {
-                    await valve.stop();
-                }
-            }
+        for (const valve of this.deps.valves) {
+            await valve.stop();
         }
         this.status = 'idle';
         this.pauseReason = null;
@@ -427,7 +408,7 @@ export class AutomationEngine {
             ack: true,
         });
         await this.deps.adapter.setStateAsync('automation.totalBatches', { val: this.batches.length, ack: true });
-        await this.deps.adapter.setStateAsync('automation.batchZones', {
+        await this.deps.adapter.setStateAsync('automation.batchValves', {
             val: JSON.stringify(batch),
             ack: true,
         });
@@ -442,7 +423,7 @@ export class AutomationEngine {
         this.currentBatchIndex = -1;
         this.runningValves.clear();
         await this.deps.adapter.setStateAsync('automation.currentBatch', { val: 0, ack: true });
-        await this.deps.adapter.setStateAsync('automation.batchZones', { val: '[]', ack: true });
+        await this.deps.adapter.setStateAsync('automation.batchValves', { val: '[]', ack: true });
         await this.publishStatus();
     }
 
@@ -454,6 +435,16 @@ export class AutomationEngine {
         if (this.manualRun) {
             if (Date.now() >= this.manualRun.endsAt) {
                 await this.finishManualRun();
+            } else {
+                // Only re-publish status when the displayed remaining-minutes value
+                // actually changes, instead of on every tick, since publishStatus()
+                // performs a double-digit number of setStateAsync writes.
+                const remainingSecs = Math.max(0, Math.round((this.manualRun.endsAt - Date.now()) / 1000));
+                const remainingMin = Math.ceil(remainingSecs / 60);
+                if (remainingMin !== this.lastManualRunRemainingMin) {
+                    this.lastManualRunRemainingMin = remainingMin;
+                    await this.publishStatus();
+                }
             }
             return;
         }
@@ -523,14 +514,43 @@ export class AutomationEngine {
         await this.finishRun();
     }
 
+    /**
+     * Stops every valve currently in `runningValves` and notifies
+     * `onValveFlowChange(idx, false)` for each. Shared by pause(),
+     * manualStartValve(), and onLegalRestrictionChanged() so this
+     * stop-and-notify sequence cannot silently diverge between the three.
+     */
+    private async stopRunningValves(): Promise<void> {
+        for (const idx of this.runningValves) {
+            await this.deps.valves[idx].stop();
+            this.deps.onValveFlowChange?.(idx, false);
+        }
+    }
+
+    /**
+     * Restarts every valve currently in `runningValves` with its remaining
+     * time (from `valveEndsAt`) and notifies `onValveFlowChange(idx, true)`
+     * for each. Shared by pause()'s resume path, finishManualRun(), and
+     * onLegalRestrictionChanged()'s resume path. Valves whose remaining time
+     * has already elapsed are skipped rather than restarted with 0/negative
+     * duration.
+     */
+    private async resumeRunningValves(): Promise<void> {
+        for (const idx of this.runningValves) {
+            const remaining = Math.max(0, Math.round(((this.valveEndsAt.get(idx) ?? 0) - Date.now()) / 1000));
+            if (remaining > 0) {
+                await this.deps.valves[idx].start(remaining);
+                this.deps.onValveFlowChange?.(idx, true);
+            }
+        }
+    }
+
     public async pause(): Promise<void> {
         if (this.manualRun) {
             return;
         } // manual runs only support start/stop
         if (this.status === 'running') {
-            for (const idx of this.runningValves) {
-                await this.deps.valves[idx].stop();
-            }
+            await this.stopRunningValves();
             this.status = 'paused';
             this.pauseReason = 'manual';
             await this.publishStatus();
@@ -549,10 +569,7 @@ export class AutomationEngine {
             }
             this.status = 'running';
             this.pauseReason = null;
-            for (const idx of this.runningValves) {
-                const remaining = Math.max(0, Math.round(((this.valveEndsAt.get(idx) ?? 0) - Date.now()) / 1000));
-                await this.deps.valves[idx].start(remaining);
-            }
+            await this.resumeRunningValves();
             await this.publishStatus();
         }
     }
@@ -562,10 +579,7 @@ export class AutomationEngine {
             return;
         }
         if (raining && this.status === 'running') {
-            for (const idx of this.runningValves) {
-                await this.deps.valves[idx].stop();
-                this.deps.onValveFlowChange?.(idx, false);
-            }
+            await this.stopRunningValves();
             this.status = 'paused';
             this.pauseReason = 'rain';
             await this.publishStatus();
@@ -574,13 +588,7 @@ export class AutomationEngine {
         if (!raining && this.status === 'paused' && this.pauseReason === 'rain') {
             this.status = 'running';
             this.pauseReason = null;
-            for (const idx of this.runningValves) {
-                const remaining = Math.max(0, Math.round(((this.valveEndsAt.get(idx) ?? 0) - Date.now()) / 1000));
-                if (remaining > 0) {
-                    await this.deps.valves[idx].start(remaining);
-                    this.deps.onValveFlowChange?.(idx, true);
-                }
-            }
+            await this.resumeRunningValves();
             await this.publishStatus();
         }
     }
@@ -590,10 +598,7 @@ export class AutomationEngine {
             return;
         }
         if (paused && this.status === 'running') {
-            for (const idx of this.runningValves) {
-                await this.deps.valves[idx].stop();
-                this.deps.onValveFlowChange?.(idx, false);
-            }
+            await this.stopRunningValves();
             this.status = 'paused';
             this.pauseReason = 'wind';
             await this.publishStatus();
@@ -602,13 +607,7 @@ export class AutomationEngine {
         if (!paused && this.status === 'paused' && this.pauseReason === 'wind') {
             this.status = 'running';
             this.pauseReason = null;
-            for (const idx of this.runningValves) {
-                const remaining = Math.max(0, Math.round(((this.valveEndsAt.get(idx) ?? 0) - Date.now()) / 1000));
-                if (remaining > 0) {
-                    await this.deps.valves[idx].start(remaining);
-                    this.deps.onValveFlowChange?.(idx, true);
-                }
-            }
+            await this.resumeRunningValves();
             await this.publishStatus();
         }
     }
@@ -684,10 +683,7 @@ export class AutomationEngine {
 
         this.wasAutomationPausedForManual = false;
         if (this.status === 'running') {
-            for (const idx of this.runningValves) {
-                await this.deps.valves[idx].stop();
-            }
-            this.wasAutomationBatchIndexBeforeManual = this.currentBatchIndex;
+            await this.stopRunningValves();
             this.status = 'paused';
             this.pauseReason = 'manual';
             this.wasAutomationPausedForManual = true;
@@ -695,6 +691,7 @@ export class AutomationEngine {
 
         const durationSecs = Math.round(valve.manualDuration);
         this.manualRun = { valveIndex, endsAt: Date.now() + durationSecs * 1000 };
+        this.lastManualRunRemainingMin = Math.ceil(durationSecs / 60);
         await this.deps.valves[valveIndex].start(durationSecs);
         this.deps.onValveFlowChange?.(valveIndex, true);
         await this.publishStatus();
@@ -711,8 +708,14 @@ export class AutomationEngine {
         if (this.wasAutomationPausedForManual) {
             this.status = 'running';
             this.pauseReason = null;
-            this.currentBatchIndex = this.wasAutomationBatchIndexBeforeManual;
-            await this.startNextBatch();
+            // Resume the batch that was interrupted for the manual run, exactly as
+            // pause()/resume does: restart the same valves (still tracked in
+            // runningValves/valveEndsAt, never cleared for a manual-run interruption)
+            // with their remaining time. Do NOT go through startNextBatch() here - it
+            // unconditionally increments currentBatchIndex, which would skip the
+            // interrupted batch entirely instead of resuming it.
+            await this.resumeRunningValves();
+            await this.publishStatus();
         } else {
             await this.publishStatus();
         }
@@ -737,9 +740,7 @@ export class AutomationEngine {
     public async onLegalRestrictionChanged(active: boolean): Promise<void> {
         if (active) {
             if (this.status === 'running') {
-                for (const idx of this.runningValves) {
-                    await this.deps.valves[idx].stop();
-                }
+                await this.stopRunningValves();
                 this.status = 'paused';
                 this.pauseReason = 'legalRestriction';
                 await this.publishStatus();
@@ -755,13 +756,7 @@ export class AutomationEngine {
                     await this.startNextBatch();
                 } else {
                     this.status = 'running';
-                    for (const idx of this.runningValves) {
-                        const remaining = Math.max(
-                            0,
-                            Math.round(((this.valveEndsAt.get(idx) ?? 0) - Date.now()) / 1000),
-                        );
-                        await this.deps.valves[idx].start(remaining);
-                    }
+                    await this.resumeRunningValves();
                     await this.publishStatus();
                 }
             }
@@ -832,7 +827,7 @@ export class AutomationEngine {
         });
         await this.deps.adapter.setStateAsync('automation.totalDuration', { val: totalDurationSecs, ack: true });
         await this.deps.adapter.setStateAsync('automation.activePlan', { val: this.activePlanName ?? '', ack: true });
-        await this.deps.adapter.setStateAsync('automation.currentZone', {
+        await this.deps.adapter.setStateAsync('automation.currentValve', {
             val: this.runningValves.size > 0 ? [...this.runningValves][0] : -1,
             ack: true,
         });

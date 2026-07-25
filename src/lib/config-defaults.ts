@@ -9,7 +9,7 @@ export const DEFAULT_CONFIG: IrrigationNativeConfig = {
     expertMode: false,
     valves: [],
     nextValveId: 0,
-    plans: [{ name: 'Alle', valveIndexes: [] }],
+    plans: [{ name: 'All', valveIndexes: [] }],
     scheduler: {
         autoMode: false,
         pauseOnRain: false,
@@ -64,6 +64,10 @@ export const DEFAULT_CONFIG: IrrigationNativeConfig = {
     },
     waterConsumption: {
         enabled: false,
+    },
+    flowMonitor: {
+        enabled: false,
+        sensorId: '',
     },
 };
 
@@ -124,7 +128,6 @@ export function normalizeConfig(config: Partial<IrrigationNativeConfig>): Irriga
                         : valve.manualDuration === undefined
                           ? duration
                           : parseDuration(valve.manualDuration),
-                flowSensorId: valve.flowSensorId ?? '',
                 days: valve.days ?? [],
             };
         }),
@@ -139,5 +142,6 @@ export function normalizeConfig(config: Partial<IrrigationNativeConfig>): Irriga
         legalRestriction,
         notifications: { ...DEFAULT_CONFIG.notifications, ...config.notifications },
         waterConsumption: { ...DEFAULT_CONFIG.waterConsumption, ...config.waterConsumption },
+        flowMonitor: { ...DEFAULT_CONFIG.flowMonitor, ...config.flowMonitor },
     };
 }

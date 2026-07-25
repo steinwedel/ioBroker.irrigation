@@ -43,6 +43,10 @@ function readPlanIndex(message) {
   const value = message == null ? void 0 : message._editPlan;
   return typeof value === "number" ? value : void 0;
 }
+function readPlanName(message) {
+  const value = message == null ? void 0 : message.planName;
+  return typeof value === "string" ? value.trim() : void 0;
+}
 class Irrigation extends utils.Adapter {
   config2;
   valves = [];
@@ -109,7 +113,7 @@ class Irrigation extends utils.Adapter {
       adapter: this,
       getConfig: () => this.config2,
       notifications: this.notifications,
-      isAnyValveRunning: () => this.valves.some((v) => v.isRunning())
+      getRunningValveIndexes: () => this.valves.map((v, i) => v.isRunning() ? i : -1).filter((i) => i >= 0)
     });
     await this.flowMonitor.init();
     this.automation = new import_automation.AutomationEngine({
@@ -143,6 +147,7 @@ class Irrigation extends utils.Adapter {
     await this.weatherApi.init();
     this.subscribeStates("automation.*");
     this.subscribeStates("valves.*.manualStart");
+    this.subscribeStates("valves.*.calibrateFlow");
     this.subscribeStates("valves.*.duration");
     this.subscribeStates("watchdog.testNotify");
     this.subscribeStates("valves.*.state");
@@ -469,7 +474,7 @@ class Irrigation extends utils.Adapter {
           activeTitle,
           this.config2.scheduler.icalTitlePrefix,
           this.config2.plans.map((p) => p.name),
-          (_b = (_a = this.config2.plans[0]) == null ? void 0 : _a.name) != null ? _b : "Alle"
+          (_b = (_a = this.config2.plans[0]) == null ? void 0 : _a.name) != null ? _b : "All"
         );
       }
     }
@@ -519,7 +524,7 @@ class Irrigation extends utils.Adapter {
     }
   }
   onUnload(callback) {
-    var _a, _b, _c, _d, _e, _f, _g;
+    var _a, _b, _c, _d, _e, _f, _g, _h;
     try {
       if (this.rateLimiterPoll) {
         this.clearInterval(this.rateLimiterPoll);
@@ -536,6 +541,7 @@ class Irrigation extends utils.Adapter {
       (_e = this.windMonitor) == null ? void 0 : _e.destroy();
       (_f = this.weatherApi) == null ? void 0 : _f.destroy();
       (_g = this.flowMonitor) == null ? void 0 : _g.destroy();
+      (_h = this.sensorManager) == null ? void 0 : _h.destroy();
       for (const valve of this.valves) {
         valve.destroy();
       }
@@ -586,7 +592,7 @@ class Irrigation extends utils.Adapter {
     switch (localId) {
       case "automation.start":
         await this.setStateAsync(id, { val: false, ack: true });
-        await this.automation.requestRun((_b = (_a = this.config2.plans[0]) == null ? void 0 : _a.name) != null ? _b : "Alle", "manual-button");
+        await this.automation.requestRun((_b = (_a = this.config2.plans[0]) == null ? void 0 : _a.name) != null ? _b : "All", "manual-button");
         return;
       case "automation.startPlan": {
         const planName = typeof state.val === "string" ? state.val.trim() : "";
@@ -626,8 +632,29 @@ class Irrigation extends utils.Adapter {
     const valveManualStartMatch = /^valves\.valve_(\d+)\.manualStart$/.exec(localId);
     if (valveManualStartMatch) {
       await this.setStateAsync(id, { val: false, ack: true });
-      const valveIndex = parseInt(valveManualStartMatch[1], 10);
-      await this.automation.manualStartValve(valveIndex);
+      const valveIndex = this.findValveIndexByObjectSuffix(parseInt(valveManualStartMatch[1], 10));
+      if (valveIndex >= 0) {
+        await this.automation.manualStartValve(valveIndex);
+      }
+      return;
+    }
+    const valveCalibrateMatch = /^valves\.valve_(\d+)\.calibrateFlow$/.exec(localId);
+    if (valveCalibrateMatch) {
+      await this.setStateAsync(id, { val: false, ack: true });
+      const valveIndex = this.findValveIndexByObjectSuffix(parseInt(valveCalibrateMatch[1], 10));
+      if (valveIndex >= 0) {
+        await this.flowMonitor.startCalibration(
+          valveIndex,
+          // Explicitly pass the calibration window's own duration rather than
+          // letting start() fall back to the valve's configured `duration`:
+          // if that configured duration were shorter than
+          // CALIBRATION_DURATION_SECS, the valve would auto-stop itself
+          // mid-calibration while flow-monitor keeps sampling (now zero
+          // flow) for the remainder of the window, skewing the average down.
+          () => this.valves[valveIndex].start(import_flow_monitor.CALIBRATION_DURATION_SECS),
+          () => this.valves[valveIndex].stop()
+        );
+      }
       return;
     }
     const valveMatch = /^valves\.valve_\d+\./.exec(localId);
@@ -689,6 +716,22 @@ class Irrigation extends utils.Adapter {
   async writeValvesToNative(valves) {
     await this.writeNativeAsync({ valves: this.formatValvesForNative(valves) });
   }
+  /**
+   * Maps the numeric suffix of a `valves.valve_NNN.*` object id back to the
+   * valve's current array index in `this.config2.valves`/`this.valves`. The
+   * object suffix is the valve's stable `id` (see `IValveConfig.id`), which
+   * can differ from its current array position once valves have been
+   * reordered/deleted/re-added - so this must never be used directly as an
+   * array index.
+   *
+   * @param numericSuffix
+   */
+  findValveIndexByObjectSuffix(numericSuffix) {
+    return this.config2.valves.findIndex((valve, index) => {
+      var _a;
+      return ((_a = valve.id) != null ? _a : index) === numericSuffix;
+    });
+  }
   getPlanValveIndexes(planIndex) {
     var _a;
     const plan = planIndex !== void 0 && planIndex >= 0 && planIndex < this.config2.plans.length ? this.config2.plans[planIndex] : void 0;
@@ -709,8 +752,8 @@ class Irrigation extends utils.Adapter {
     });
   }
   async onMessage(obj) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
-    if (typeof obj !== "object" || !obj.command) {
+    var _a, _b, _c, _d;
+    if (obj === null || typeof obj !== "object" || !obj.command) {
       return;
     }
     if (obj.command === "scanValves") {
@@ -818,7 +861,8 @@ class Irrigation extends utils.Adapter {
       return;
     }
     if (obj.command === "deleteValvesByStateId") {
-      const stateIds = (_e = (_d = obj.message) == null ? void 0 : _d.stateIds) != null ? _e : [];
+      const rawStateIds = (_d = obj.message) == null ? void 0 : _d.stateIds;
+      const stateIds = Array.isArray(rawStateIds) ? rawStateIds.filter((v) => typeof v === "string") : [];
       const toRemove = new Set(stateIds);
       const before = this.config2.valves.length;
       const remaining = this.config2.valves.filter((v) => !toRemove.has(v.stateId));
@@ -861,9 +905,13 @@ class Irrigation extends utils.Adapter {
       return;
     }
     if (obj.command === "createPlan" && obj.callback) {
-      const name = (_g = (_f = obj.message) == null ? void 0 : _f.planName) == null ? void 0 : _g.trim();
+      const name = readPlanName(obj.message);
       if (!name) {
         this.sendTo(obj.from, obj.command, { error: "noName" }, obj.callback);
+        return;
+      }
+      if (this.config2.plans.some((plan) => plan.name === name)) {
+        this.sendTo(obj.from, obj.command, { error: "nameExists" }, obj.callback);
         return;
       }
       const updatedPlans = [...this.config2.plans, { name, valveIndexes: [] }];
@@ -880,7 +928,7 @@ class Irrigation extends utils.Adapter {
     }
     if (obj.command === "renamePlan" && obj.callback) {
       const planIndex = readPlanIndex(obj.message);
-      const name = (_i = (_h = obj.message) == null ? void 0 : _h.planName) == null ? void 0 : _i.trim();
+      const name = readPlanName(obj.message);
       if (planIndex === void 0 || planIndex < 0 || planIndex >= this.config2.plans.length) {
         this.sendTo(obj.from, obj.command, { error: "noSelection" }, obj.callback);
         return;
@@ -946,7 +994,8 @@ class Irrigation extends utils.Adapter {
         this.sendTo(obj.from, obj.command, { error: "noSelection" }, obj.callback);
         return;
       }
-      const rows = (_j = msg == null ? void 0 : msg.planValveTable) != null ? _j : [];
+      const rawRows = msg == null ? void 0 : msg.planValveTable;
+      const rows = Array.isArray(rawRows) ? rawRows : [];
       const selectedIndexes = (0, import_types.parsePlanValveTableRows)(rows, this.config2.valves);
       const updatedPlans = this.config2.plans.map(
         (p, i) => i === planIndex ? {

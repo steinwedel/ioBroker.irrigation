@@ -147,8 +147,12 @@ export async function createBaseStates(adapter: ioBroker.Adapter): Promise<void>
         write: true,
         def: false,
     });
-    await setObj(adapter, 'automation.currentZone', {
-        name: 'Current zone index (sequential fallback)',
+    // Migration: "currentZone" was renamed to "currentValve" (it always indexed
+    // into valves, never into the separate "zones" object branch). Remove the
+    // stale object so it does not linger in the Objects view.
+    await adapter.delObjectAsync('automation.currentZone').catch(() => undefined);
+    await setObj(adapter, 'automation.currentValve', {
+        name: 'Current valve index (sequential fallback)',
         type: 'number',
         role: 'value',
         read: true,
@@ -171,8 +175,11 @@ export async function createBaseStates(adapter: ioBroker.Adapter): Promise<void>
         write: false,
         def: 0,
     });
-    await setObj(adapter, 'automation.batchZones', {
-        name: 'Zone indexes in the current batch',
+    // Migration: "batchZones" was renamed to "batchValves" (see currentZone
+    // above for the same rationale). Remove the stale object.
+    await adapter.delObjectAsync('automation.batchZones').catch(() => undefined);
+    await setObj(adapter, 'automation.batchValves', {
+        name: 'Valve indexes in the current batch',
         type: 'string',
         role: 'json',
         read: true,
@@ -234,7 +241,7 @@ export async function createBaseStates(adapter: ioBroker.Adapter): Promise<void>
         role: 'text',
         read: true,
         write: true,
-        def: 'Alle',
+        def: 'All',
     });
     await setObj(adapter, 'automation.extensionFactor', {
         name: 'Duration extension factor',
@@ -259,9 +266,15 @@ export async function createBaseStates(adapter: ioBroker.Adapter): Promise<void>
         type: 'string',
         role: 'text',
         read: true,
-        write: true,
+        write: false,
         def: '',
     });
+    // Migration: this was previously writable, inconsistent with every other
+    // "*StateId" mirror-of-config state (windSpeedStateId, sensors.rainId, ...),
+    // which are all read-only reflections of the admin config.
+    // setObjectNotExistsAsync above does not update existing objects, so force
+    // the permission change here.
+    await adapter.extendObjectAsync('automation.temperatureAdjustmentStateId', { common: { write: false } });
     await setObj(adapter, 'automation.temperatureAdjustmentFactor', {
         name: 'Temperature adjustment factor for current run',
         type: 'number',
@@ -576,11 +589,14 @@ export async function createBaseStates(adapter: ioBroker.Adapter): Promise<void>
     await setObj(adapter, 'watchdog.flowActive', {
         name: 'Flow leak detected',
         type: 'boolean',
-        role: 'indicator',
+        role: 'indicator.alarm',
         read: true,
         write: false,
         def: false,
     });
+    // Migration: role used to be the generic "indicator"; setObjectNotExistsAsync
+    // above does not update existing objects, so force the role change here.
+    await adapter.extendObjectAsync('watchdog.flowActive', { common: { role: 'indicator.alarm' } });
     await setObj(adapter, 'watchdog.flowDeviationValve', {
         name: 'Valve with flow deviation',
         type: 'number',
@@ -594,6 +610,15 @@ export async function createBaseStates(adapter: ioBroker.Adapter): Promise<void>
         type: 'number',
         role: 'value',
         unit: '%',
+        read: true,
+        write: false,
+        def: 0,
+    });
+    await setObj(adapter, 'watchdog.flowActual', {
+        name: 'Actual flow rate at the shared sensor (l/min)',
+        type: 'number',
+        role: 'value',
+        unit: 'l/min',
         read: true,
         write: false,
         def: 0,
@@ -651,6 +676,24 @@ export async function createBaseStates(adapter: ioBroker.Adapter): Promise<void>
         read: true,
         write: false,
         def: 0,
+    });
+
+    // flow monitor (single shared sensor at the water source, see IFlowMonitorConfig)
+    await setObj(adapter, 'flowMonitor.enabled', {
+        name: 'Flow monitoring enabled',
+        type: 'boolean',
+        role: 'switch',
+        read: true,
+        write: false,
+        def: false,
+    });
+    await setObj(adapter, 'flowMonitor.sensorId', {
+        name: 'Shared flow sensor state id (at the water source)',
+        type: 'string',
+        role: 'text',
+        read: true,
+        write: false,
+        def: '',
     });
 }
 
@@ -716,6 +759,9 @@ export async function applyConfigToStates(adapter: ioBroker.Adapter, config: Irr
     });
 
     await adapter.setStateAsync('waterConsumption.enabled', { val: config.waterConsumption.enabled, ack: true });
+
+    await adapter.setStateAsync('flowMonitor.enabled', { val: config.flowMonitor.enabled, ack: true });
+    await adapter.setStateAsync('flowMonitor.sensorId', { val: config.flowMonitor.sensorId, ack: true });
 }
 
 async function setObj(adapter: ioBroker.Adapter, id: string, common: ioBroker.StateCommon): Promise<void> {

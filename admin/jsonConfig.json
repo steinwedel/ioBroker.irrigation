@@ -9,7 +9,7 @@
                 "expertMode": {
                     "type": "checkbox",
                     "label": "Expert mode",
-                    "help": "Show advanced options (sensors, weather, restrictions, notifications, flow monitoring, ...)",
+                    "help": "Show advanced options (sensors, weather, restrictions, notifications, flow monitoring, ...) and expert-only valve fields",
                     "newLine": true,
                     "xs": 12,
                     "sm": 12,
@@ -213,6 +213,55 @@
                             "attr": "stateId",
                             "title": "State id",
                             "width": "20%"
+                        },
+                        {
+                            "type": "checkbox",
+                            "attr": "enabled",
+                            "title": "Enabled",
+                            "width": "6%",
+                            "default": true,
+                            "hidden": "!data.expertMode"
+                        },
+                        {
+                            "type": "number",
+                            "attr": "flowRateLpm",
+                            "title": "Flow rate (l/min)",
+                            "width": "8%",
+                            "default": 0,
+                            "hidden": "!data.expertMode"
+                        },
+                        {
+                            "type": "checkbox",
+                            "attr": "rainIndependent",
+                            "title": "Rain independent",
+                            "width": "8%",
+                            "default": false,
+                            "hidden": "!data.expertMode"
+                        },
+                        {
+                            "type": "number",
+                            "attr": "moistureThreshold",
+                            "title": "Moisture threshold",
+                            "width": "8%",
+                            "default": 0,
+                            "hidden": "!data.expertMode"
+                        },
+                        {
+                            "type": "text",
+                            "attr": "manualDuration",
+                            "title": "Manual duration",
+                            "width": "10%",
+                            "default": "10:00",
+                            "validator": "/^(?:\\d+|(?:\\d+:)?[0-5]\\d:[0-5]\\d)$/.test(data.manualDuration)",
+                            "tooltip": "Enter minutes, MM:SS or HH:MM:SS",
+                            "hidden": "!data.expertMode"
+                        },
+                        {
+                            "type": "objectId",
+                            "attr": "allOffId",
+                            "title": "All-off command state (Rainbird)",
+                            "width": "12%",
+                            "hidden": "!data.expertMode"
                         }
                     ]
                 },
@@ -962,6 +1011,27 @@
                     "type": "checkbox",
                     "label": "Water consumption tracking enabled",
                     "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "flowMonitor.enabled": {
+                    "type": "checkbox",
+                    "label": "Flow monitoring enabled",
+                    "help": "There is only ONE shared flow sensor for the whole installation, directly behind the water source (e.g. the pump) - not one per valve.",
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "flowMonitor.sensorId": {
+                    "type": "objectId",
+                    "label": "Shared flow sensor state id",
+                    "hidden": "!data.flowMonitor.enabled",
                     "xs": 12,
                     "sm": 12,
                     "md": 6,

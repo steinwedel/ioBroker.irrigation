@@ -96,7 +96,6 @@ A zone represents one irrigation area and is linked to exactly one valve. Zones 
 | Rain independent | Expert — if enabled, the zone runs even when the rain sensor is active. |
 | Moisture threshold (%) | Expert — skip watering if soil moisture is at or above this percentage (0 = disabled). |
 | Manual duration (min) | Expert — duration used when starting this zone manually. |
-| Flow sensor state id | Expert — ioBroker state ID of a flow sensor for consumption tracking and leak detection. |
 | Flow rate (l/min) | Expert — estimated water flow rate (used for batching and consumption calculation). |
 | Groups (comma separated) | Expert — tags to assign the zone to specific plans (e.g. `Lawn`, `Beds`). |
 | Weekdays (0=Sun..6=Sat) | Expert — restrict watering to specific days (e.g. `1,3,5` = Mon, Wed, Fri). Empty = all days. |
@@ -112,7 +111,7 @@ Plans group zones by tags for combined watering runs. When a plan is triggered, 
 | Name | Plan name (e.g. "Lawn plan", "Evening run"). |
 | Groups | Comma-separated group names. Only zones that have at least one matching group are included. Leave empty to include all zones. |
 
-The built-in default plan **"Alle"** (all zones) has empty groups and therefore always waters every enabled zone. Use the single **Plan name** field to enter a name, then select **Add new plan** or **Rename selected plan** and confirm the dialog. Plan names must be unique.
+The built-in default plan **"All"** (all zones) has empty groups and therefore always waters every enabled zone. Use the single **Plan name** field to enter a name, then select **Add new plan** or **Rename selected plan** and confirm the dialog. Plan names must be unique.
 
 For sequential operation (`Pump capacity` = `0`), the valve order from the **Valves** tab is the execution order for every plan. The plan table only controls which valves are assigned; it cannot reorder them. With parallel batching enabled, valves are grouped by pump capacity and duration instead, so the configured global order is not guaranteed.
 
@@ -243,14 +242,14 @@ All IDs below are relative to the adapter instance, e.g. `<instance>` is normall
 | `automation.stop` | boolean button, R/W | Write `true` to stop the current automatic or manual run. Resets to `false`. |
 | `automation.pause` | boolean button, R/W | Write `true` to pause or resume the current automatic plan. Resets to `false`. |
 | `automation.next` / `automation.back` | boolean buttons, R/W | Write `true` to skip the current batch or repeat the previous batch. Each resets to `false`. |
-| `automation.currentZone` | number, R | Zero-based index of the first currently running valve; `-1` if none is running. |
+| `automation.currentValve` | number, R | Zero-based index of the first currently running valve; `-1` if none is running. |
 | `automation.currentBatch` / `automation.totalBatches` | number, R | Current one-based batch number and total calculated batches; `currentBatch` is `0` while idle. |
-| `automation.batchZones` | JSON string, R | Zero-based valve indexes in the active batch, e.g. `[0,2]`; `[]` while idle. |
+| `automation.batchValves` | JSON string, R | Zero-based valve indexes in the active batch, e.g. `[0,2]`; `[]` while idle. |
 | `automation.totalDuration` / `automation.elapsedTime` / `automation.remainingDuration` | number, seconds, R | Planned duration, elapsed wall-clock time and remaining duration of the current automatic run. All three reset to `0` when `automation.stop` is used. |
 | `automation.remainingDurationMin` | string, R | Same value as `automation.remainingDuration`, formatted as `mm:ss` (or `hh:mm:ss`). |
 | `automation.activePlan` | string, R | Name of the currently active plan; empty while idle. |
 | `automation.planSelect` | string, R/W | Selectable plan-name value for external UIs. It is kept in sync with the available plans; use `startPlan` to execute a choice directly. |
-| `automation.plansList` | JSON string, R | Available plan names, e.g. `["Alle","Rasen"]`. Use this to populate scripts or external UI selectors. |
+| `automation.plansList` | JSON string, R | Available plan names, e.g. `["All","Rasen"]`. Use this to populate scripts or external UI selectors. |
 | `automation.plansData` | JSON string, R | Internal persistent plan definition containing `name`, legacy indexes, and stable `valveStateIds`. The stable IDs keep assignments correct when valves are renamed, added, removed, or reindexed. Sequential order always follows the Valves tab. |
 | `automation.extensionFactor` | number, R/W | Configured duration multiplier (`0.5` to `5`) mirrored from adapter settings. |
 | `automation.temperatureAdjustmentEnabled` / `automation.temperatureAdjustmentStateId` | boolean / string, R/W | Enables temperature-controlled duration adjustment and identifies its numeric temperature source. |
@@ -281,9 +280,9 @@ All IDs below are relative to the adapter instance, e.g. `<instance>` is normall
 | `.moistureThreshold` | number, `%`, R/W | Automatic watering is skipped when configured soil moisture is at or above this threshold; `0` disables the condition. |
 | `.manualStart` | boolean button, R/W | Write `true` to start this valve for `.manualDuration` minutes. Resets to `false`. |
 | `.manualDuration` | number, `min`, R/W | Duration used by `.manualStart`. |
-| `.flowSensorId` | string, R/W | Configured foreign state ID of the flow sensor. |
 | `.days` | JSON string, R/W | Configured allowed weekdays for automatic runs. |
-| `.flowActual` / `.flowExpected` | number, `l/min`, R | Runtime flow values when a flow sensor/calibration is used. |
+| `.flowExpected` | number, `l/min`, R | Calibrated expected flow rate for this valve alone, measured via the single shared flow sensor (see `flowMonitor` below) while only this valve was open. |
+| `.calibrateFlow` | boolean button, R/W | Write `true` to calibrate `.flowExpected`: opens this valve alone for ~2 minutes and averages the shared flow sensor's reading. Rejected while any other valve is running or no shared sensor is configured. Resets to `false`. |
 
 #### `sensors`
 
@@ -317,14 +316,17 @@ All IDs below are relative to the adapter instance, e.g. `<instance>` is normall
 | `legalRestriction.currentTempTs` | number, Unix milliseconds, R | Timestamp of the last successful temperature read. |
 | `legalRestriction.lastCheckError` | string, R | Latest DWD/local temperature read error; cleared after a successful read. |
 
-#### `watchdog` and `waterConsumption`
+#### `watchdog`, `flowMonitor` and `waterConsumption`
 
 | ID | Type / access | Meaning and use |
 |---|---|---|
 | `watchdog.lastIssue` / `watchdog.lastIssueTs` / `watchdog.issueCount` | string / Unix milliseconds / number, R | Latest flow-monitoring warning, its timestamp, and total warning count. |
-| `watchdog.flowActive` | boolean, R | `true` when flow is detected while no adapter-controlled valve should run, indicating a possible leak. |
-| `watchdog.flowDeviationValve` / `watchdog.flowDeviationPct` | number / number `%`, R | Valve index and percentage when measured flow deviates from expected flow. |
+| `watchdog.flowActive` | boolean, R | `true` when the shared flow sensor detects flow while no valve is running, indicating a possible leak. |
+| `watchdog.flowActual` | number, `l/min`, R | Current reading of the single shared flow sensor at the water source. |
+| `watchdog.flowDeviationValve` / `watchdog.flowDeviationPct` | number / number `%`, R | Running valve index (or `-1` when several valves ran in parallel) and percentage when measured flow deviates from the sum of the running valves' expected flow. |
 | `watchdog.testNotify` | boolean button, R/W | Write `true` to send a configured test notification. Resets to `false`. |
+| `flowMonitor.enabled` | boolean, R | Whether flow monitoring is enabled in adapter settings. |
+| `flowMonitor.sensorId` | string, R | Configured foreign state ID of the single shared flow sensor. |
 | `waterConsumption.enabled` | boolean, R | Whether consumption tracking is enabled in adapter settings. |
 | `waterConsumption.today` / `waterConsumption.week` / `waterConsumption.month` / `waterConsumption.total` | number, `l`, R | Calculated consumption totals. Consumption is runtime × `.flowRateLpm`; week/month reset on the next consumption update after their period changes. |
 
@@ -357,11 +359,11 @@ Plan names are published as JSON in `irrigation.0.automation.plansList`. To star
 
 #### Flow Monitoring and Leak Detection
 
-When flow sensors are configured per zone:
+There is only **one** shared flow sensor for the whole installation, installed directly behind the water source (e.g. the pump) — not one sensor per valve. Configure it via `flowMonitor.enabled`/`flowMonitor.sensorId` in adapter settings.
 
-1. **Calibrate** each zone by triggering `calibrateFlow` — the valve opens for 120 seconds, measures actual flow, and stores the calibrated rate.
-2. During watering, actual flow is compared to the calibrated value. Deviations over ±30% trigger alerts.
-3. If the flow sensor detects water movement while all valves are closed, a leak alert is triggered.
+1. **Calibrate** each valve individually by writing `true` to its `.calibrateFlow` state — the valve opens alone for 120 seconds, the shared sensor's reading is averaged, and the result is stored as that valve's `.flowExpected`. Calibration is rejected while any other valve is running, since the shared sensor's reading could otherwise not be attributed to a single valve.
+2. During watering, the shared sensor's actual flow is compared against the sum of `.flowExpected` of all currently running valves (a batch may run several valves in parallel). Deviations over ±30% trigger alerts.
+3. If the shared sensor detects water movement while all valves are closed, a leak alert is triggered.
 
 ---
 
@@ -390,8 +392,8 @@ When flow sensors are configured per zone:
 3. Add a pause between batches to let water soak in.
 
 **Level 5 — Consumption Tracking and Monitoring:**
-1. Connect flow sensors per zone.
-2. Calibrate each zone's flow rate.
+1. Connect the single shared flow sensor at the water source and enable `flowMonitor.enabled`.
+2. Calibrate each valve's expected flow rate via `.calibrateFlow`.
 3. Enable water consumption tracking.
 4. Set up notifications (Pushover/Telegram) to receive alerts.
 

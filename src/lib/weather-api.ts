@@ -54,7 +54,15 @@ export class WeatherApi {
                 clouds?: { all?: number };
             };
 
-            await this.deps.adapter.setStateAsync('weather.temperature', { val: data.main?.temp ?? 0, ack: true });
+            // Unlike rain/clouds below (which OpenWeatherMap legitimately omits to mean
+            // "0"), a missing/non-numeric temperature is a genuine API/schema anomaly:
+            // defaulting it to 0 would look like a real 0°C reading rather than
+            // "unknown", so skip the write and keep the last known value instead.
+            if (typeof data.main?.temp === 'number' && Number.isFinite(data.main.temp)) {
+                await this.deps.adapter.setStateAsync('weather.temperature', { val: data.main.temp, ack: true });
+            } else {
+                this.deps.adapter.log.warn('Weather API response is missing a valid temperature value.');
+            }
             await this.deps.adapter.setStateAsync('weather.precipitation', { val: data.rain?.['1h'] ?? 0, ack: true });
             // OpenWeatherMap's free "current weather" endpoint has no direct rain
             // probability field; cloud coverage is used as a rough proxy.
@@ -63,8 +71,10 @@ export class WeatherApi {
                 ack: true,
             });
             await this.deps.adapter.setStateAsync('weather.lastUpdate', { val: Date.now(), ack: true });
+            await this.deps.adapter.setStateAsync('info.connection', { val: true, ack: true });
         } catch (error) {
             this.deps.adapter.log.warn(`Weather API request failed: ${(error as Error).message}`);
+            await this.deps.adapter.setStateAsync('info.connection', { val: false, ack: true });
         }
     }
 }

@@ -137,8 +137,6 @@ export interface IValveConfig {
     moistureThreshold: number;
     /** Manual single-valve run duration in seconds */
     manualDuration: number;
-    /** Optional flow sensor state id (liters/min or pulses) */
-    flowSensorId: string;
     /** 0=Sunday..6=Saturday, empty array = every day */
     days: number[];
 }
@@ -223,6 +221,21 @@ export interface IWaterConsumptionConfig {
     enabled: boolean;
 }
 
+/**
+ * There is only ONE physical flow sensor in the supported hardware setup,
+ * installed directly behind the water source (e.g. the pump), never one per
+ * valve. `sensorId` is therefore a single global state id, and leak/deviation
+ * detection in flow-monitor.ts always evaluates it against the set of valves
+ * currently running (summed expected flow), never against a single valve in
+ * isolation - except during calibration, where exactly one valve is opened
+ * alone on purpose so its individual flow rate can be measured.
+ */
+export interface IFlowMonitorConfig {
+    enabled: boolean;
+    /** Foreign state id of the single flow sensor at the water source */
+    sensorId: string;
+}
+
 export interface IrrigationNativeConfig {
     expertMode: boolean;
     valves: IValveConfig[];
@@ -240,6 +253,7 @@ export interface IrrigationNativeConfig {
     legalRestriction: ILegalRestrictionConfig;
     notifications: INotificationsConfig;
     waterConsumption: IWaterConsumptionConfig;
+    flowMonitor: IFlowMonitorConfig;
 }
 
 /** Automation state machine status */

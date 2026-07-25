@@ -162,8 +162,9 @@ async function createBaseStates(adapter) {
     write: true,
     def: false
   });
-  await setObj(adapter, "automation.currentZone", {
-    name: "Current zone index (sequential fallback)",
+  await adapter.delObjectAsync("automation.currentZone").catch(() => void 0);
+  await setObj(adapter, "automation.currentValve", {
+    name: "Current valve index (sequential fallback)",
     type: "number",
     role: "value",
     read: true,
@@ -186,8 +187,9 @@ async function createBaseStates(adapter) {
     write: false,
     def: 0
   });
-  await setObj(adapter, "automation.batchZones", {
-    name: "Zone indexes in the current batch",
+  await adapter.delObjectAsync("automation.batchZones").catch(() => void 0);
+  await setObj(adapter, "automation.batchValves", {
+    name: "Valve indexes in the current batch",
     type: "string",
     role: "json",
     read: true,
@@ -247,7 +249,7 @@ async function createBaseStates(adapter) {
     role: "text",
     read: true,
     write: true,
-    def: "Alle"
+    def: "All"
   });
   await setObj(adapter, "automation.extensionFactor", {
     name: "Duration extension factor",
@@ -272,9 +274,10 @@ async function createBaseStates(adapter) {
     type: "string",
     role: "text",
     read: true,
-    write: true,
+    write: false,
     def: ""
   });
+  await adapter.extendObjectAsync("automation.temperatureAdjustmentStateId", { common: { write: false } });
   await setObj(adapter, "automation.temperatureAdjustmentFactor", {
     name: "Temperature adjustment factor for current run",
     type: "number",
@@ -581,11 +584,12 @@ async function createBaseStates(adapter) {
   await setObj(adapter, "watchdog.flowActive", {
     name: "Flow leak detected",
     type: "boolean",
-    role: "indicator",
+    role: "indicator.alarm",
     read: true,
     write: false,
     def: false
   });
+  await adapter.extendObjectAsync("watchdog.flowActive", { common: { role: "indicator.alarm" } });
   await setObj(adapter, "watchdog.flowDeviationValve", {
     name: "Valve with flow deviation",
     type: "number",
@@ -599,6 +603,15 @@ async function createBaseStates(adapter) {
     type: "number",
     role: "value",
     unit: "%",
+    read: true,
+    write: false,
+    def: 0
+  });
+  await setObj(adapter, "watchdog.flowActual", {
+    name: "Actual flow rate at the shared sensor (l/min)",
+    type: "number",
+    role: "value",
+    unit: "l/min",
     read: true,
     write: false,
     def: 0
@@ -655,6 +668,22 @@ async function createBaseStates(adapter) {
     write: false,
     def: 0
   });
+  await setObj(adapter, "flowMonitor.enabled", {
+    name: "Flow monitoring enabled",
+    type: "boolean",
+    role: "switch",
+    read: true,
+    write: false,
+    def: false
+  });
+  await setObj(adapter, "flowMonitor.sensorId", {
+    name: "Shared flow sensor state id (at the water source)",
+    type: "string",
+    role: "text",
+    read: true,
+    write: false,
+    def: ""
+  });
 }
 async function applyConfigToStates(adapter, config) {
   await adapter.setStateAsync("automation.active", { val: config.scheduler.autoMode, ack: true });
@@ -704,6 +733,8 @@ async function applyConfigToStates(adapter, config) {
     ack: true
   });
   await adapter.setStateAsync("waterConsumption.enabled", { val: config.waterConsumption.enabled, ack: true });
+  await adapter.setStateAsync("flowMonitor.enabled", { val: config.flowMonitor.enabled, ack: true });
+  await adapter.setStateAsync("flowMonitor.sensorId", { val: config.flowMonitor.sensorId, ack: true });
 }
 async function setObj(adapter, id, common) {
   await adapter.setObjectNotExistsAsync(id, {

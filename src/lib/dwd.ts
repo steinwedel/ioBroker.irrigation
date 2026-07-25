@@ -200,11 +200,13 @@ export class DwdRestriction {
                 throw new Error('Temperature column not found or unparsable in DWD CSV');
             }
             await this.recordTemperature(temp);
+            await this.deps.adapter.setStateAsync('info.connection', { val: true, ack: true });
             return temp;
         } catch (error) {
             const message = (error as Error).message;
             this.deps.adapter.log.warn(`DWD temperature fetch failed: ${message}`);
             await this.recordTemperatureError(message);
+            await this.deps.adapter.setStateAsync('info.connection', { val: false, ack: true });
             return null;
         }
     }

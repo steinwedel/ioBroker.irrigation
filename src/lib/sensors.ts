@@ -90,6 +90,19 @@ export class SensorManager {
     }
 
     /**
+     * Called on adapter unload to release the foreign-state subscriptions made
+     * in resubscribe()/init(), for consistency with the other subsystems'
+     * cleanup discipline (rateLimiter, automation, scheduler, dwd, windMonitor,
+     * weatherApi, flowMonitor, valves).
+     */
+    public destroy(): void {
+        for (const id of this.subscribedIds) {
+            this.deps.adapter.unsubscribeForeignStatesAsync(id).catch(() => undefined);
+        }
+        this.subscribedIds = [];
+    }
+
+    /**
      * See plan behavior rules "Niederschlagsunabhängigkeit" and "Bodenfeuchte-Schwellwert".
      *
      * @param valveIndex
