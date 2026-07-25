@@ -1,5 +1,6 @@
 # Changelog
 ## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **ENHANCED**: Scan progress message now remains visible for 10 seconds after scan completion before being automatically cleared — admin UI hides the progress field when empty. Timer is cleaned up on new scans and adapter shutdown.
 
 ## 0.3.1 (2026-07-25)
 * (Gerhard Steinwedel) **ENHANCED**: Valve durations now stored and processed in seconds instead of minutes — admin UI accepts flexible input formats (minutes, MM:SS, HH:MM:SS) and normalizes to display format. Legacy migration converts old minute values automatically. State units changed from `min` to `s`.
