@@ -1,361 +1,374 @@
 {
-  "common": {
-    "name": "irrigation",
-    "version": "0.3.1",
-    "news": {
-      "0.3.1": {
-        "en": "**ENHANCED**: Valve durations now stored and processed in seconds instead of minutes — admin UI accepts flexible input formats (minutes, MM:SS, HH:MM:SS) and normalizes to display format. Legacy migration converts old minute values automatically. State units changed from `min` to `s`.",
-        "de": "**VERBESSERT**: Ventillaufzeiten werden jetzt in Sekunden statt in Minuten gespeichert und verarbeitet – die Admin-Oberfläche akzeptiert flexible Eingabeformate (Minuten, MM:SS, HH:MM:SS) und normalisiert zur Anzeige. Legacy-Migration konvertiert alte Minutenwerte automatisch. Zustandseinheiten von `min` auf `s` geändert.",
-        "ru": "**УЛУЧШЕНО**: Длительность работы клапанов теперь хранится и обрабатывается в секундах вместо минут — интерфейс администратора принимает гибкие форматы ввода (минуты, MM:SS, HH:MM:SS) и нормализует для отображения. Миграция автоматически конвертирует старые значения в минутах. Единицы измерения состояний изменены с `min` на `s`.",
-        "pt": "**MELHORADO**: As durações das válvulas agora são armazenadas e processadas em segundos em vez de minutos — a interface de administração aceita formatos de entrada flexíveis (minutos, MM:SS, HH:MM:SS) e normaliza para o formato de exibição. A migração legada converte valores antigos em minutos automaticamente. Unidades de estado alteradas de `min` para `s`.",
-        "nl": "**VERBETERD**: Klepduurtijden worden nu opgeslagen en verwerkt in seconden in plaats van minuten — de beheerinterface accepteert flexibele invoerformaten (minuten, MM:SS, HH:MM:SS) en normaliseert naar weergaveformaat. Legacy-migratie converteert oude minutenwaarden automatisch. Statuseenheden gewijzigd van `min` naar `s`.",
-        "fr": "**AMÉLIORÉ** : Les durées de vanne sont désormais stockées et traitées en secondes au lieu de minutes — l'interface d'administration accepte des formats d'entrée flexibles (minutes, MM:SS, HH:MM:SS) et normalise vers le format d'affichage. La migration héritée convertit automatiquement les anciennes valeurs en minutes. Unités d'état changées de `min` à `s`.",
-        "it": "**MIGLIORATO**: Le durate delle valvole ora sono memorizzate ed elaborate in secondi anziché in minuti — l'interfaccia di amministrazione accetta formati di input flessibili (minuti, MM:SS, HH:MM:SS) e normalizza al formato di visualizzazione. La migrazione legacy converte automaticamente i vecchi valori in minuti. Unità degli stati cambiate da `min` a `s`.",
-        "es": "**MEJORADO**: Las duraciones de las válvulas ahora se almacenan y procesan en segundos en lugar de minutos — la interfaz de administración acepta formatos de entrada flexibles (minutos, MM:SS, HH:MM:SS) y normaliza al formato de visualización. La migración heredada convierte automáticamente los valores antiguos en minutos. Unidades de estado cambiadas de `min` a `s`.",
-        "pl": "**ULEPSZONE**: Czasy trwania zaworów są teraz przechowywane i przetwarzane w sekundach zamiast w minutach — interfejs administratora akceptuje elastyczne formaty wejściowe (minuty, MM:SS, HH:MM:SS) i normalizuje do formatu wyświetlania. Migracja starszych wersji automatycznie konwertuje stare wartości w minutach. Jednostki stanów zmienione z `min` na `s`.",
-        "uk": "**ПОКРАЩЕНО**: Тривалість роботи клапанів тепер зберігається та обробляється в секундах замість хвилин — інтерфейс адміністратора приймає гнучкі формати введення (хвилини, MM:SS, HH:MM:SS) і нормалізує для відображення. Міграція автоматично конвертує старі значення в хвилинах. Одиниці вимірювання станів змінено з `min` на `s`.",
-        "zh-cn": "**增强**：阀门持续时间现在以秒而非分钟存储和处理——管理界面接受灵活的输入格式（分钟、MM:SS、HH:MM:SS）并规范化为显示格式。旧版迁移会自动转换旧的分钟值。状态单位从 `min` 更改为 `s`。"
-      },
-      "0.3.0": {
-        "en": "**NEW**: Added wind speed/gust limits with resume hysteresis as an automatic pause condition\n**ENHANCED**: Added unit tests for per-valve-type start/stop/status (Gardena, Homematic, Hydrawise, Generic), the DWD/local/no-source legal restriction, and a full-plan-run test for the temperature-controlled irrigation adjustment\n**ENHANCED**: Added build.sh --dry-run/--no-deploy/--help and an admin hint that the Valves tab order is authoritative\n**FIXED**: Legacy fields (e.g. valveOrder) that were only dropped in memory now trigger a one-time cleanup rewrite of automation.plansData\n**ENHANCED**: Reduced plansData debug logging to a concise count instead of a full JSON dump\n**ENHANCED**: Extracted plan/valve synchronization into a tested pure function covering valve add/remove/rename regressions\n**FIXED**: Removed stale plan valve table order hint and misleading row-number column that contradicted the global Valves tab order\n**ENHANCED**: Updated the architecture status with current irrigation features\n**NEW**: Added automatic pause and resume of watering plans during rain\n**ENHANCED**: Added wind, precipitation, ET and flow-monitoring roadmap items\n**ENHANCED**: Expanded the adapter roadmap with operation, import/export and dashboard tasks\n**ENHANCED**: Updated the adapter implementation plan with completed and open work",
-        "de": "**NEU**: Windgeschwindigkeits-/Böenlimits mit Wiederaufnahme-Hysterese als automatische Pausenbedingung hinzugefügt **ERWEITERT**: Unit-Tests für Start/Stopp/Status pro Ventiltyp (Gardena, Homematic, Hydrawise, Generic), die DWD/lokale/keine-Quelle gesetzliche Einschränkung und einen vollständigen Plandurchlauf-Test für die temperaturgesteuerte Bewässerungsanpassung hinzugefügt **ERWEITERT**: build.sh --dry-run/--no-deploy/--help und einen Admin-Hinweis hinzugefügt, dass die Reihenfolge im Ventile-Tab maßgeblich ist **BEHOBEN**: Legacy-Felder (z. B. valveOrder), die bisher nur im Speicher entfernt wurden, lösen nun ein einmaliges Aufräumen und Neuschreiben von automation.plansData aus **ERWEITERT**: plansData-Debug-Logging auf eine kompakte Anzahl reduziert statt eines vollständigen JSON-Dumps **ERWEITERT**: Plan-/Ventil-Synchronisation in eine getestete reine Funktion extrahiert, die Ventil-Hinzufügen/Entfernen/Umbenennen-Regressionen abdeckt **BEHOBEN**: Veralteten Hinweis zur Reihenfolge der Plan-Ventil-Tabelle und irreführende Zeilennummer-Spalte entfernt, die der globalen Ventile-Tab-Reihenfolge widersprach **ERWEITERT**: Architekturstatus mit aktuellen Bewässerungsfunktionen aktualisiert **NEU**: Automatisches Pausieren und Fortsetzen von Bewässerungsplänen bei Regen hinzugefügt **ERWEITERT**: Wind-, Niederschlags-, ET- und Durchflussüberwachungs-Roadmap-Punkte hinzugefügt **ERWEITERT**: Adapter-Roadmap um Betriebs-, Import/Export- und Dashboard-Aufgaben erweitert **ERWEITERT**: Adapter-Implementierungsplan mit abgeschlossenen und offenen Arbeiten aktualisiert",
-        "ru": "**НОВОЕ**: Добавлены лимиты скорости ветра/порывов с гистерезисом возобновления в качестве условия автоматической паузы **УЛУЧШЕНО**: Добавлены модульные тесты для запуска/остановки/статуса по типам клапанов (Gardena, Homematic, Hydrawise, Generic), юридических ограничений DWD/локальных/без источника и полного теста выполнения плана для регулировки полива с учетом температуры **УЛУЧШЕНО**: Добавлены build.sh --dry-run/--no-deploy/--help и подсказка администратора о том, что порядок на вкладке \"Клапаны\" является определяющим **ИСПРАВЛЕНО**: Устаревшие поля (например, valveOrder), которые ранее удалялись только в памяти, теперь запускают однократную очистку и перезапись automation.plansData **УЛУЧШЕНО**: Отладочное логирование plansData сокращено до краткого подсчета вместо полного дампа JSON **УЛУЧШЕНО**: Синхронизация планов/клапанов выделена в тестируемую чистую функцию, охватывающую регрессии добавления/удаления/переименования клапанов **ИСПРАВЛЕНО**: Удалена устаревшая подсказка о порядке таблицы клапанов плана и вводящий в заблуждение столбец с номерами строк, который противоречил глобальному порядку вкладки \"Клапаны\" **УЛУЧШЕНО**: Обновлен статус архитектуры с текущими функциями орошения **НОВОЕ**: Добавлена автоматическая пауза и возобновление планов полива во время дождя **УЛУЧШЕНО**: Добавлены пункты дорожной карты по ветру, осадкам, ET и мониторингу потока **УЛУЧШЕНО**: Дорожная карта адаптера расширена задачами по эксплуатации, импорту/экспорту и панели управления **УЛУЧШЕНО**: Обновлен план реализации адаптера с завершенными и открытыми работами",
-        "pt": "**NOVO**: Adicionados limites de velocidade do vento/rajadas com histerese de retomada como condição de pausa automática **MELHORADO**: Adicionados testes unitários para iniciar/parar/status por tipo de válvula (Gardena, Homematic, Hydrawise, Generic), restrição legal DWD/local/sem fonte e um teste de execução completa de plano para o ajuste de irrigação controlado por temperatura **MELHORADO**: Adicionados build.sh --dry-run/--no-deploy/--help e uma dica de administrador de que a ordem da aba \"Válvulas\" é autoritativa **CORRIGIDO**: Campos legados (por exemplo, valveOrder) que eram removidos apenas na memória agora acionam uma reescrita de limpeza única de automation.plansData **MELHORADO**: Reduzido o log de depuração de plansData para uma contagem concisa em vez de um despejo JSON completo **MELHORADO**: Extraída a sincronização de plano/válvula em uma função pura testada cobrindo regressões de adição/remoção/renomeação de válvulas **CORRIGIDO**: Removida a dica de ordem da tabela de válvulas do plano obsoleta e a coluna de número de linha enganosa que contradizia a ordem global da aba \"Válvulas\" **MELHORADO**: Atualizado o status da arquitetura com os recursos atuais de irrigação **NOVO**: Adicionada pausa e retomada automática de planos de irrigação durante a chuva **MELHORADO**: Adicionados itens de roteiro para vento, precipitação, ET e monitoramento de fluxo **MELHORADO**: Expandido o roteiro do adaptador com tarefas de operação, importação/exportação e painel **MELHORADO**: Atualizado o plano de implementação do adaptador com trabalhos concluídos e abertos",
-        "nl": "**NIEUW**: Windsnelheid-/windstootlimieten met hervattingshysterese toegevoegd als automatische pauzevoorwaarde **VERBETERD**: Unit-tests toegevoegd voor start/stop/status per ventielttype (Gardena, Homematic, Hydrawise, Generic), de DWD/lokale/geen-bron wettelijke beperking en een volledige planuitvoeringstest voor de temperatuurgestuurde irrigatieaanpassing **VERBETERD**: build.sh --dry-run/--no-deploy/--help toegevoegd en een beheerdershint dat de volgorde van het tabblad \"Ventielen\" leidend is **OPGELOST**: Legacy-velden (bijv. valveOrder) die alleen in het geheugen werden verwijderd, activeren nu een eenmalige opschoning en herschrijving van automation.plansData **VERBETERD**: plansData debug-logging teruggebracht tot een beknopt aantal in plaats van een volledige JSON-dump **VERBETERD**: Plan-/ventielsynchronisatie geëxtraheerd naar een geteste pure functie die ventiel toevoegen/verwijderen/hernoemen regressies dekt **OPGELOST**: Verouderde hint voor volgorde van planventieltabel en misleidende rijnummerkolom verwijderd die in tegenspraak was met de globale volgorde van het tabblad \"Ventielen\" **VERBETERD**: Architectuurstatus bijgewerkt met huidige irrigatiefuncties **NIEUW**: Automatisch pauzeren en hervatten van bewateringsplannen tijdens regen toegevoegd **VERBETERD**: Wind-, neerslag-, ET- en stroommonitoringroadmap-items toegevoegd **VERBETERD**: Adapterroadmap uitgebreid met operatie-, import/export- en dashboardtaken **VERBETERD**: Adapterimplementatieplan bijgewerkt met voltooide en openstaande werkzaamheden",
-        "fr": "**NOUVEAU** : Ajout de limites de vitesse du vent/rafales avec hystérésis de reprise comme condition de pause automatique **AMÉLIORÉ** : Ajout de tests unitaires pour démarrage/arrêt/statut par type de vanne (Gardena, Homematic, Hydrawise, Generic), la restriction légale DWD/locale/sans source et un test d'exécution complète de plan pour l'ajustement d'irrigation contrôlé par température **AMÉLIORÉ** : Ajout de build.sh --dry-run/--no-deploy/--help et d'une indication administrateur que l'ordre de l'onglet \"Vannes\" fait autorité **CORRIGÉ** : Les champs hérités (par ex. valveOrder) qui n'étaient supprimés qu'en mémoire déclenchent maintenant une réécriture de nettoyage unique de automation.plansData **AMÉLIORÉ** : Réduction de la journalisation de débogage plansData à un décompte concis au lieu d'un vidage JSON complet **AMÉLIORÉ** : Extraction de la synchronisation plan/vanne dans une fonction pure testée couvrant les régressions d'ajout/suppression/renommage de vannes **CORRIGÉ** : Suppression de l'indication obsolète d'ordre de table de vannes de plan et de la colonne de numéro de ligne trompeuse qui contredisait l'ordre global de l'onglet \"Vannes\" **AMÉLIORÉ** : Mise à jour du statut de l'architecture avec les fonctionnalités d'irrigation actuelles **NOUVEAU** : Ajout de la pause et reprise automatiques des plans d'arrosage pendant la pluie **AMÉLIORÉ** : Ajout d'éléments de feuille de route pour le vent, les précipitations, l'ET et la surveillance du débit **AMÉLIORÉ** : Extension de la feuille de route de l'adaptateur avec des tâches d'exploitation, d'import/export et de tableau de bord **AMÉLIORÉ** : Mise à jour du plan de mise en œuvre de l'adaptateur avec les travaux terminés et en cours",
-        "it": "**NUOVO**: Aggiunti limiti di velocità del vento/raffiche con isteresi di ripresa come condizione di pausa automatica **MIGLIORATO**: Aggiunti test unitari per avvio/arresto/stato per tipo di valvola (Gardena, Homematic, Hydrawise, Generic), la restrizione legale DWD/locale/senza fonte e un test di esecuzione completa del piano per la regolazione dell'irrigazione controllata dalla temperatura **MIGLIORATO**: Aggiunti build.sh --dry-run/--no-deploy/--help e un suggerimento amministratore che l'ordine della scheda \"Valvole\" è autorevole **CORRETTO**: I campi legacy (ad es. valveOrder) che venivano rimossi solo in memoria ora attivano una riscrittura di pulizia una tantum di automation.plansData **MIGLIORATO**: Ridotto il logging di debug di plansData a un conteggio conciso invece di un dump JSON completo **MIGLIORATO**: Estratta la sincronizzazione piano/valvola in una funzione pura testata che copre le regressioni di aggiunta/rimozione/rinomina delle valvole **CORRETTO**: Rimosso il suggerimento obsoleto sull'ordine della tabella valvole del piano e la colonna fuorviante del numero di riga che contraddiceva l'ordine globale della scheda \"Valvole\" **MIGLIORATO**: Aggiornato lo stato dell'architettura con le funzionalità di irrigazione attuali **NUOVO**: Aggiunta pausa e ripresa automatica dei piani di irrigazione durante la pioggia **MIGLIORATO**: Aggiunti elementi della roadmap per vento, precipitazioni, ET e monitoraggio del flusso **MIGLIORATO**: Ampliata la roadmap dell'adattatore con attività di operazione, importazione/esportazione e dashboard **MIGLIORATO**: Aggiornato il piano di implementazione dell'adattatore con lavori completati e aperti",
-        "es": "**NUEVO**: Añadidos límites de velocidad del viento/ráfagas con histéresis de reanudación como condición de pausa automática **MEJORADO**: Añadidos tests unitarios para inicio/parada/estado por tipo de válvula (Gardena, Homematic, Hydrawise, Generic), la restricción legal DWD/local/sin fuente y una prueba de ejecución completa de plan para el ajuste de riego controlado por temperatura **MEJORADO**: Añadidos build.sh --dry-run/--no-deploy/--help y una sugerencia de administrador de que el orden de la pestaña \"Válvulas\" es autoritativo **CORREGIDO**: Los campos heredados (por ejemplo, valveOrder) que solo se eliminaban en memoria ahora activan una reescritura de limpieza única de automation.plansData **MEJORADO**: Reducido el registro de depuración de plansData a un recuento conciso en lugar de un volcado JSON completo **MEJORADO**: Extraída la sincronización de plan/válvula en una función pura probada que cubre regresiones de agregar/eliminar/renombrar válvulas **CORREGIDO**: Eliminada la sugerencia obsoleta de orden de tabla de válvulas del plan y la columna de número de fila engañosa que contradecía el orden global de la pestaña \"Válvulas\" **MEJORADO**: Actualizado el estado de la arquitectura con las características actuales de riego **NUEVO**: Añadida pausa y reanudación automática de planes de riego durante la lluvia **MEJORADO**: Añadidos elementos de hoja de ruta para viento, precipitación, ET y monitoreo de flujo **MEJORADO**: Ampliada la hoja de ruta del adaptador con tareas de operación, importación/exportación y panel de control **MEJORADO**: Actualizado el plan de implementación del adaptador con trabajos completados y abiertos",
-        "pl": "**NOWE**: Dodano limity prędkości wiatru/porywów z histerezą wznowienia jako warunek automatycznej pauzy **ULEPSZONE**: Dodano testy jednostkowe dla start/stop/status według typu zaworu (Gardena, Homematic, Hydrawise, Generic), ograniczenia prawnego DWD/lokalnego/bez źródła oraz pełny test wykonania planu dla regulacji nawadniania sterowanej temperaturą **ULEPSZONE**: Dodano build.sh --dry-run/--no-deploy/--help oraz wskazówkę administratora, że kolejność w zakładce \"Zawory\" jest wiążąca **NAPRAWIONE**: Przestarzałe pola (np. valveOrder), które były usuwane tylko w pamięci, teraz uruchamiają jednorazowe czyszczenie i przepisanie automation.plansData **ULEPSZONE**: Zredukowano logowanie debugowania plansData do zwięzłej liczby zamiast pełnego zrzutu JSON **ULEPSZONE**: Wyodrębniono synchronizację planu/zaworu do przetestowanej czystej funkcji obejmującej regresje dodawania/usuwania/zmiany nazwy zaworów **NAPRAWIONE**: Usunięto przestarzałą wskazówkę kolejności tabeli zaworów planu i mylącą kolumnę numeru wiersza, która była sprzeczna z globalną kolejnością zakładki \"Zawory\" **ULEPSZONE**: Zaktualizowano status architektury o aktualne funkcje nawadniania **NOWE**: Dodano automatyczne wstrzymywanie i wznawianie planów podlewania podczas deszczu **ULEPSZONE**: Dodano elementy mapy drogowej dla wiatru, opadów, ET i monitorowania przepływu **ULEPSZONE**: Rozszerzono mapę drogową adaptera o zadania operacyjne, importu/eksportu i pulpitu nawigacyjnego **ULEPSZONE**: Zaktualizowano plan implementacji adaptera o ukończone i otwarte prace",
-        "uk": "**НОВЕ**: Додано обмеження швидкості вітру/поривів з гістерезисом відновлення як умову автоматичної паузи **ПОКРАЩЕНО**: Додано модульні тести для запуску/зупинки/статусу за типом клапана (Gardena, Homematic, Hydrawise, Generic), юридичного обмеження DWD/локального/без джерела та повного тесту виконання плану для регулювання зрошення з урахуванням температури **ПОКРАЩЕНО**: Додано build.sh --dry-run/--no-deploy/--help та підказку адміністратора, що порядок на вкладці \"Клапани\" є визначальним **ВИПРАВЛЕНО**: Застарілі поля (наприклад, valveOrder), які раніше видалялися лише в пам'яті, тепер запускають одноразове очищення та перезапис automation.plansData **ПОКРАЩЕНО**: Скорочено журналювання налагодження plansData до стислого підрахунку замість повного дампу JSON **ПОКРАЩЕНО**: Синхронізацію плану/клапана виділено в тестовану чисту функцію, що охоплює регресії додавання/видалення/перейменування клапанів **ВИПРАВЛЕНО**: Видалено застарілу підказку порядку таблиці клапанів плану та оманливу колонку номерів рядків, яка суперечила глобальному порядку вкладки \"Клапани\" **ПОКРАЩЕНО**: Оновлено статус архітектури з поточними функціями зрошення **НОВЕ**: Додано автоматичну паузу та відновлення планів поливу під час дощу **ПОКРАЩЕНО**: Додано пункти дорожньої карти щодо вітру, опадів, ET та моніторингу потоку **ПОКРАЩЕНО**: Розширено дорожню карту адаптера завданнями з експлуатації, імпорту/експорту та панелі керування **ПОКРАЩЕНО**: Оновлено план реалізації адаптера із завершеними та відкритими роботами",
-        "zh-cn": "**新增**:添加了风速/阵风限制及恢复滞后作为自动暂停条件 **增强**:为每种阀门类型的启动/停止/状态(Gardena、Homematic、Hydrawise、Generic)、DWD/本地/无来源法律限制以及温度控制灌溉调整的完整计划运行测试添加了单元测试 **增强**:添加了 build.sh --dry-run/--no-deploy/--help 以及管理员提示,说明\"阀门\"选项卡的顺序具有权威性 **修复**:仅在内存中删除的旧字段(例如 valveOrder)现在会触发对 automation.plansData 的一次性清理重写 **增强**:将 plansData 调试日志减少为简洁的计数,而不是完整的 JSON 转储 **增强**:将计划/阀门同步提取为经过测试的纯函数,涵盖阀门添加/删除/重命名回归 **修复**:删除了过时的计划阀门表顺序提示和误导性的行号列,该列与全局\"阀门\"选项卡顺序相矛盾 **增强**:更新了架构状态,包含当前的灌溉功能 **新增**:添加了在下雨期间自动暂停和恢复浇水计划的功能 **增强**:添加了风力、降水、ET 和流量监控路线图项目 **增强**:扩展了适配器路线图,包含操作、导入/导出和仪表板任务 **增强**:更新了适配器实施计划,包含已完成和待完成的工作"
-      },
-      "0.2.56": {
-        "en": "**FIXED**: Legacy fields (e.g. valveOrder) that were only dropped in memory now trigger a one-time cleanup rewrite of automation.plansData\n**ENHANCED**: Reduced plansData debug logging to a concise count instead of a full JSON dump\n**ENHANCED**: Extracted plan/valve synchronization into a tested pure function covering valve add/remove/rename regressions\n**FIXED**: Removed stale plan valve table order hint and misleading row-number column that contradicted the global Valves tab order\n**ENHANCED**: Updated the architecture status with current irrigation features\n**NEW**: Added automatic pause and resume of watering plans during rain\n**ENHANCED**: Added wind, precipitation, ET and flow-monitoring roadmap items\n**ENHANCED**: Expanded the adapter roadmap with operation, import/export and dashboard tasks\n**ENHANCED**: Updated the adapter implementation plan with completed and open work",
-        "de": "**BEHOBEN**: Legacy-Felder (z. B. valveOrder), die bisher nur im Speicher entfernt wurden, lösen nun eine einmalige Bereinigung und Neuschreibung von automation.plansData aus **VERBESSERT**: Die Debug-Protokollierung von plansData wurde auf eine kompakte Anzahl reduziert, anstatt eines vollständigen JSON-Dumps **VERBESSERT**: Plan-/Ventil-Synchronisierung in eine getestete reine Funktion extrahiert, die Regressionen beim Hinzufügen/Entfernen/Umbenennen von Ventilen abdeckt **BEHOBEN**: Veralteter Sortierhinweis für Plan-Ventil-Tabelle und irreführende Zeilennummernspalte entfernt, die der globalen Reihenfolge im Ventile-Tab widersprach **VERBESSERT**: Architekturstatus mit aktuellen Bewässerungsfunktionen aktualisiert **NEU**: Automatisches Pausieren und Fortsetzen von Bewässerungsplänen bei Regen hinzugefügt **VERBESSERT**: Wind, Niederschlag, ET und Durchflussüberwachung zur Roadmap hinzugefügt **VERBESSERT**: Adapter-Roadmap um Betriebs-, Import-/Export- und Dashboard-Aufgaben erweitert **VERBESSERT**: Adapter-Implementierungsplan mit abgeschlossenen und offenen Arbeiten aktualisiert",
-        "ru": "**ИСПРАВЛЕНО**: Устаревшие поля (например, valveOrder), которые ранее удалялись только из памяти, теперь запускают однократную очистку и перезапись automation.plansData **УЛУЧШЕНО**: Отладочное логирование plansData сокращено до краткого подсчёта вместо полного дампа JSON **УЛУЧШЕНО**: Синхронизация планов и клапанов выделена в тестируемую чистую функцию, охватывающую регрессии при добавлении/удалении/переименовании клапанов **ИСПРАВЛЕНО**: Удалена устаревшая подсказка порядка таблицы клапанов плана и вводящий в заблуждение столбец номеров строк, противоречащий глобальному порядку на вкладке \"Клапаны\" **УЛУЧШЕНО**: Обновлён статус архитектуры с учётом текущих функций орошения **НОВОЕ**: Добавлена автоматическая приостановка и возобновление планов полива во время дождя **УЛУЧШЕНО**: Добавлены пункты дорожной карты: ветер, осадки, ET и мониторинг расхода **УЛУЧШЕНО**: Дорожная карта адаптера расширена задачами по эксплуатации, импорту/экспорту и панели управления **УЛУЧШЕНО**: Обновлён план реализации адаптера с завершёнными и открытыми задачами",
-        "pt": "**CORRIGIDO**: Campos legados (por exemplo, valveOrder) que eram removidos apenas na memória agora acionam uma reescrita de limpeza única de automation.plansData **MELHORADO**: Registro de depuração de plansData reduzido a uma contagem concisa em vez de um despejo JSON completo **MELHORADO**: Sincronização de plano/válvula extraída para uma função pura testada cobrindo regressões de adição/remoção/renomeação de válvulas **CORRIGIDO**: Removida dica de ordem da tabela de válvulas do plano obsoleta e coluna de número de linha enganosa que contradizia a ordem global da aba Válvulas **MELHORADO**: Atualizado o status da arquitetura com os recursos atuais de irrigação **NOVO**: Adicionada pausa e retomada automática de planos de rega durante a chuva **MELHORADO**: Adicionados itens de roteiro para vento, precipitação, ET e monitoramento de fluxo **MELHORADO**: Expandido o roteiro do adaptador com tarefas de operação, importação/exportação e painel **MELHORADO**: Atualizado o plano de implementação do adaptador com trabalhos concluídos e pendentes",
-        "nl": "**OPGELOST**: Legacy-velden (bijv. valveOrder) die alleen in het geheugen werden verwijderd, activeren nu een eenmalige opschoning en herschrijving van automation.plansData **VERBETERD**: Debug-logging van plansData teruggebracht tot een beknopt aantal in plaats van een volledige JSON-dump **VERBETERD**: Plan-/klepsynchronisatie geëxtraheerd naar een geteste pure functie die regressies bij toevoegen/verwijderen/hernoemen van kleppen dekt **OPGELOST**: Verouderde sorteertip voor plankleptabel en misleidende rijnummerkolom verwijderd die in tegenspraak was met de globale volgorde op het tabblad Kleppen **VERBETERD**: Architectuurstatus bijgewerkt met huidige irrigatiefuncties **NIEUW**: Automatisch pauzeren en hervatten van bewateringsplannen tijdens regen toegevoegd **VERBETERD**: Wind, neerslag, ET en stroommonitoringitems toegevoegd aan de roadmap **VERBETERD**: Adapterroadmap uitgebreid met operatie-, import-/export- en dashboardtaken **VERBETERD**: Implementatieplan van de adapter bijgewerkt met voltooide en openstaande werkzaamheden",
-        "fr": "**CORRIGÉ** : Les champs hérités (par exemple valveOrder) qui n'étaient supprimés qu'en mémoire déclenchent désormais une réécriture de nettoyage unique de automation.plansData **AMÉLIORÉ** : La journalisation de débogage de plansData a été réduite à un décompte concis au lieu d'un vidage JSON complet **AMÉLIORÉ** : La synchronisation plan/vanne a été extraite dans une fonction pure testée couvrant les régressions d'ajout/suppression/renommage de vannes **CORRIGÉ** : Suppression de l'indication d'ordre de table de vannes de plan obsolète et de la colonne de numéro de ligne trompeuse qui contredisait l'ordre global de l'onglet \"Vannes\" **AMÉLIORÉ** : Mise à jour du statut de l'architecture avec les fonctionnalités d'irrigation actuelles **NOUVEAU** : Ajout de la pause et de la reprise automatiques des plans d'arrosage pendant la pluie **AMÉLIORÉ** : Ajout d'éléments de feuille de route pour le vent, les précipitations, l'ET et la surveillance du débit **AMÉLIORÉ** : Extension de la feuille de route de l'adaptateur avec des tâches d'exploitation, d'import/export et de tableau de bord **AMÉLIORÉ** : Mise à jour du plan de mise en œuvre de l'adaptateur avec les travaux terminés et en cours",
-        "it": "**CORRETTO**: I campi legacy (ad es. valveOrder) che venivano eliminati solo in memoria ora attivano una riscrittura di pulizia una tantum di automation.plansData **MIGLIORATO**: Il logging di debug di plansData è stato ridotto a un conteggio conciso invece di un dump JSON completo **MIGLIORATO**: La sincronizzazione piano/valvola è stata estratta in una funzione pura testata che copre le regressioni di aggiunta/rimozione/rinomina delle valvole **CORRETTO**: Rimosso il suggerimento di ordinamento della tabella valvole del piano obsoleto e la colonna del numero di riga fuorviante che contraddiceva l'ordine globale della scheda Valvole **MIGLIORATO**: Aggiornato lo stato dell'architettura con le funzionalità di irrigazione attuali **NUOVO**: Aggiunta la pausa e la ripresa automatica dei piani di irrigazione durante la pioggia **MIGLIORATO**: Aggiunti elementi della roadmap per vento, precipitazioni, ET e monitoraggio del flusso **MIGLIORATO**: Ampliata la roadmap dell'adattatore con attività di gestione, importazione/esportazione e dashboard **MIGLIORATO**: Aggiornato il piano di implementazione dell'adattatore con i lavori completati e aperti",
-        "es": "**CORREGIDO**: Los campos heredados (por ejemplo, valveOrder) que solo se eliminaban en memoria ahora activan una reescritura de limpieza única de automation.plansData **MEJORADO**: El registro de depuración de plansData se ha reducido a un recuento conciso en lugar de un volcado JSON completo **MEJORADO**: La sincronización de plan/válvula se ha extraído en una función pura probada que cubre regresiones de agregar/eliminar/renombrar válvulas **CORREGIDO**: Se eliminó la sugerencia de orden de tabla de válvulas de plan obsoleta y la columna de número de fila engañosa que contradecía el orden global de la pestaña \"Válvulas\" **MEJORADO**: Se actualizó el estado de la arquitectura con las características actuales de riego **NUEVO**: Se agregó la pausa y reanudación automática de planes de riego durante la lluvia **MEJORADO**: Se agregaron elementos de hoja de ruta para viento, precipitación, ET y monitoreo de flujo **MEJORADO**: Se amplió la hoja de ruta del adaptador con tareas de operación, importación/exportación y panel de control **MEJORADO**: Se actualizó el plan de implementación del adaptador con trabajos completados y pendientes",
-        "pl": "**NAPRAWIONO**: Przestarzałe pola (np. valveOrder), które były usuwane tylko z pamięci, teraz uruchamiają jednorazowe czyszczenie i przepisanie automation.plansData **ULEPSZONE**: Logowanie debugowania plansData zostało zredukowane do zwięzłego licznika zamiast pełnego zrzutu JSON **ULEPSZONE**: Synchronizacja planu/zaworu została wyodrębniona do przetestowanej czystej funkcji obejmującej regresje dodawania/usuwania/zmiany nazwy zaworów **NAPRAWIONO**: Usunięto przestarzałą wskazówkę kolejności tabeli zaworów planu i mylącą kolumnę numeru wiersza, która była sprzeczna z globalną kolejnością na karcie \"Zawory\" **ULEPSZONE**: Zaktualizowano status architektury o aktualne funkcje nawadniania **NOWE**: Dodano automatyczne wstrzymywanie i wznawianie planów podlewania podczas deszczu **ULEPSZONE**: Dodano elementy mapy drogowej dla wiatru, opadów, ET i monitorowania przepływu **ULEPSZONE**: Rozszerzono mapę drogową adaptera o zadania operacyjne, importu/eksportu i pulpitu nawigacyjnego **ULEPSZONE**: Zaktualizowano plan implementacji adaptera o ukończone i otwarte prace",
-        "uk": "**ВИПРАВЛЕНО**: Застарілі поля (наприклад, valveOrder), які раніше видалялися лише з пам'яті, тепер запускають одноразове очищення та перезапис automation.plansData **ПОКРАЩЕНО**: Налагоджувальне логування plansData скорочено до стислого підрахунку замість повного дампу JSON **ПОКРАЩЕНО**: Синхронізацію плану/клапана виділено в тестовану чисту функцію, що охоплює регресії додавання/видалення/перейменування клапанів **ВИПРАВЛЕНО**: Видалено застарілу підказку порядку таблиці клапанів плану та оманливу колонку номерів рядків, що суперечила глобальному порядку на вкладці \"Клапани\" **ПОКРАЩЕНО**: Оновлено статус архітектури з урахуванням поточних функцій зрошення **НОВЕ**: Додано автоматичну паузу та відновлення планів поливу під час дощу **ПОКРАЩЕНО**: Додано пункти дорожньої карти: вітер, опади, ET та моніторинг витрати **ПОКРАЩЕНО**: Дорожню карту адаптера розширено завданнями з експлуатації, імпорту/експорту та панелі керування **ПОКРАЩЕНО**: Оновлено план реалізації адаптера із завершеними та відкритими завданнями",
-        "zh-cn": "**修复**：仅在内存中删除的旧字段(例如 valveOrder)现在会触发一次性清理并重写 automation.plansData **增强**：将 plansData 调试日志减少为简洁的计数，而不是完整的 JSON 转储 **增强**：将计划/阀门同步提取为经过测试的纯函数，涵盖阀门添加/删除/重命名的回归问题 **修复**：删除了过时的计划阀门表排序提示和误导性的行号列，该列与全局\"阀门\"选项卡顺序相矛盾 **增强**：更新了架构状态，包含当前的灌溉功能 **新增**：添加了在下雨期间自动暂停和恢复浇水计划的功能 **增强**：添加了风力、降水、ET 和流量监测路线图项目 **增强**：扩展了适配器路线图，包含操作、导入/导出和仪表板任务 **增强**：更新了适配器实施计划，包含已完成和未完成的工作"
-      },
-      "0.2.55": {
-        "en": "**ENHANCED**: Unified sequential plan execution order with the Valves tab order\n**FIXED**: Reserved space for all valve table action buttons",
-        "de": "**VERBESSERT**: Einheitliche sequenzielle Planausführungsreihenfolge entsprechend der Reihenfolge im Ventile-Tab\n**BEHOBEN**: Reservierter Platz für alle Aktionsschaltflächen in der Ventiltabelle",
-        "ru": "**УЛУЧШЕНО**: Унифицирован последовательный порядок выполнения плана с порядком вкладки клапанов\n**ИСПРАВЛЕНО**: Зарезервировано место для всех кнопок действий в таблице клапанов",
-        "pt": "**MELHORADO**: Ordem de execução sequencial do plano unificada com a ordem da aba de válvulas\n**CORRIGIDO**: Espaço reservado para todos os botões de ação da tabela de válvulas",
-        "nl": "**VERBETERD**: Uniforme sequentiële planuitvoeringsvolgorde met de volgorde van het Kleppen-tabblad\n**OPGELOST**: Gereserveerde ruimte voor alle actieknoppen in de kleppenlijst",
-        "fr": "**AMÉLIORÉ**: Ordre d'exécution séquentielle du plan unifié avec l'ordre de l'onglet Vannes\n**CORRIGÉ**: Espace réservé pour tous les boutons d'action du tableau des vannes",
-        "it": "**MIGLIORATO**: Ordine di esecuzione sequenziale del piano unificato con l'ordine della scheda Valvole\n**CORRETTO**: Spazio riservato per tutti i pulsanti di azione della tabella valvole",
-        "es": "**MEJORADO**: Orden de ejecución secuencial del plan unificado con el orden de la pestaña de Válvulas\n**CORREGIDO**: Espacio reservado para todos los botones de acción de la tabla de válvulas",
-        "pl": "**ULEPSZONE**: Ujednolicona kolejność sekwencyjnego wykonywania planu z kolejnością zakładki Zawory\n**NAPRAWIONO**: Zarezerwowano miejsce dla wszystkich przycisków akcji w tabeli zaworów",
-        "uk": "**ПОКРАЩЕНО**: Уніфіковано послідовний порядок виконання плану з порядком вкладки клапанів\n**ВИПРАВЛЕНО**: Зарезервовано місце для всіх кнопок дій у таблиці клапанів",
-        "zh-cn": "**增强**：统一了顺序计划执行顺序与阀门选项卡顺序\n**修复**：为所有阀门表操作按钮预留了空间"
-      },
-      "0.2.54": {
-        "en": "**FIXED**: Kept valve reorder arrows available by disabling valve table sorting",
-        "de": "**BEHOBEN**: Pfeile zum Neuordnen der Ventile verfügbar gehalten, indem die Sortierung der Ventiltabelle deaktiviert wurde",
-        "ru": "**ИСПРАВЛЕНО**: Стрелки изменения порядка клапанов оставлены доступными путём отключения сортировки таблицы клапанов",
-        "pt": "**CORRIGIDO**: Mantidas as setas de reordenação de válvulas disponíveis ao desativar a ordenação da tabela de válvulas",
-        "nl": "**OPGELOST**: Pijlen voor het herschikken van kleppen beschikbaar gehouden door het sorteren van de kleppenlijst uit te schakelen",
-        "fr": "**CORRIGÉ** : Les flèches de réorganisation des vannes restent disponibles en désactivant le tri du tableau des vannes",
-        "it": "**RISOLTO**: Mantenute disponibili le frecce di riordino delle valvole disabilitando l'ordinamento della tabella delle valvole",
-        "es": "**SOLUCIONADO**: Se mantuvieron disponibles las flechas de reordenación de válvulas al deshabilitar la ordenación de la tabla de válvulas",
-        "pl": "**NAPRAWIONO**: Zachowano dostępność strzałek zmiany kolejności zaworów poprzez wyłączenie sortowania tabeli zaworów",
-        "uk": "**ВИПРАВЛЕНО**: Збережено доступність стрілок зміни порядку клапанів шляхом вимкнення сортування таблиці клапанів",
-        "zh-cn": "**已修复**：通过禁用阀门表排序保持阀门重新排序箭头可用"
-      },
-      "0.2.53": {
-        "en": "**FIXED**: Enabled both table reorder arrows for valves",
-        "de": "**BEHOBEN**: Beide Pfeile zum Neuordnen der Tabelle für Ventile aktiviert",
-        "ru": "**ИСПРАВЛЕНО**: Включены обе стрелки изменения порядка таблицы для клапанов",
-        "pt": "**CORRIGIDO**: Ativadas ambas as setas de reordenação da tabela para válvulas",
-        "nl": "**OPGELOST**: Beide pijlen voor het herschikken van de tabel voor kleppen ingeschakeld",
-        "fr": "**CORRIGÉ**: Activation des deux flèches de réorganisation du tableau pour les vannes",
-        "it": "**RISOLTO**: Abilitate entrambe le frecce di riordino della tabella per le valvole",
-        "es": "**SOLUCIONADO**: Habilitadas ambas flechas de reordenación de tabla para válvulas",
-        "pl": "**NAPRAWIONO**: Włączono obie strzałki zmiany kolejności tabeli dla zaworów",
-        "uk": "**ВИПРАВЛЕНО**: Увімкнено обидві стрілки зміни порядку таблиці для клапанів",
-        "zh-cn": "**已修复**：启用了阀门表格重新排序的两个箭头"
-      },
-      "0.2.52": {
-        "en": "**ENHANCED**: Disabled manual release review prompts for automated releases",
-        "de": "**VERBESSERT**: Manuelle Release-Überprüfungsaufforderungen für automatisierte Releases deaktiviert",
-        "ru": "**УЛУЧШЕНО**: Отключены запросы на ручную проверку релизов для автоматических релизов",
-        "pt": "**MELHORADO**: Desativadas as solicitações de revisão manual de lançamento para lançamentos automatizados",
-        "nl": "**VERBETERD**: Handmatige release-beoordelingsprompts uitgeschakeld voor geautomatiseerde releases",
-        "fr": "**AMÉLIORÉ**: Désactivation des invites de révision manuelle des versions pour les versions automatisées",
-        "it": "**MIGLIORATO**: Disattivati i prompt di revisione manuale del rilascio per i rilasci automatizzati",
-        "es": "**MEJORADO**: Desactivadas las solicitudes de revisión manual de versiones para lanzamientos automatizados",
-        "pl": "**ULEPSZONE**: Wyłączono monity o ręczny przegląd wydań dla zautomatyzowanych wydań",
-        "uk": "**ПОКРАЩЕНО**: Вимкнено запити на ручний перегляд релізів для автоматизованих релізів",
-        "zh-cn": "**增强**：已禁用自动发布的手动发布审查提示"
-      }
-    },
-    "titleLang": {
-      "en": "Irrigation",
-      "de": "Bewässerung",
-      "ru": "Орошение",
-      "pt": "Irrigação",
-      "nl": "Irrigatie",
-      "fr": "Irrigation",
-      "it": "Irrigazione",
-      "es": "Riego",
-      "pl": "Nawadnianie",
-      "uk": "зрошення",
-      "zh-cn": "灌溉"
-    },
-    "desc": {
-      "en": "Controls irrigation zones, valves and watering schedules based on sensors and weather data",
-      "de": "Steuert Bewässerungszonen, Ventile und Bewässerungspläne basierend auf Sensoren und Wetterdaten",
-      "ru": "Управляет зонами орошения, клапанами и графиками полива на основе датчиков и погодных данных.",
-      "pt": "Controla zonas de irrigação, válvulas e cronogramas de irrigação com base em sensores e dados meteorológicos",
-      "nl": "Regelt irrigatiezones, kleppen en bewateringsschema's op basis van sensoren en weergegevens",
-      "fr": "Contrôle les zones d'irrigation, les vannes et les programmes d'arrosage en fonction de capteurs et de données météorologiques.",
-      "it": "Controlla le zone di irrigazione, le valvole e i programmi di irrigazione in base a sensori e dati meteorologici",
-      "es": "Controla zonas de riego, válvulas y programas de riego basados ​​en sensores y datos meteorológicos.",
-      "pl": "Kontroluje strefy nawadniania, zawory i harmonogramy nawadniania w oparciu o czujniki i dane pogodowe",
-      "uk": "Controls irrigation zones, valves and watering schedules based on sensors and weather data",
-      "zh-cn": "根据传感器和天气数据控制灌溉区、阀门和浇水时间表"
-    },
-    "authors": [
-      "Gerhard Steinwedel <dev@steinwedel.de>"
-    ],
-    "keywords": [
-      "irrigation",
-      "garden",
-      "watering",
-      "sprinkler",
-      "zones",
-      "valves",
-      "sensor",
-      "weather",
-      "smart home"
-    ],
-    "licenseInformation": {
-      "type": "free",
-      "license": "MIT"
-    },
-    "platform": "Javascript/Node.js",
-    "icon": "irrigation.png",
-    "enabled": true,
-    "extIcon": "https://raw.githubusercontent.com/steinwedel/ioBroker.irrigation/main/admin/irrigation.png",
-    "readme": "https://github.com/steinwedel/ioBroker.irrigation/blob/main/README.md",
-    "loglevel": "info",
-    "tier": 3,
-    "mode": "daemon",
-    "type": "garden",
-    "compact": true,
-    "connectionType": "local",
-    "dataSource": "poll",
-    "messagebox": true,
-    "supportedMessages": {
-      "custom": true
-    },
-    "adminUI": {
-      "config": "json"
-    },
-    "dependencies": [
-      {
-        "js-controller": ">=6.0.11"
-      }
-    ],
-    "globalDependencies": [
-      {
-        "admin": ">=7.0.23"
-      }
-    ]
-  },
-  "native": {
-    "expertMode": false,
-    "valves": [],
-    "plans": [
-      {
-        "name": "Alle",
-        "valveIndexes": []
-      }
-    ],
-    "scheduler": {
-      "autoMode": false,
-      "pauseOnRain": false,
-      "windPauseEnabled": false,
-      "windSpeedStateId": "",
-      "windSpeedLimit": 0,
-      "windGustStateId": "",
-      "windGustLimit": 0,
-      "windHysteresisMinutes": 10,
-      "timerTimes": [],
-      "extensionFactor": 1,
-      "temperatureAdjustmentEnabled": false,
-      "temperatureAdjustmentStateId": "",
-      "pumpCapacity": 0,
-      "zonePause": 0,
-      "seasonEnabled": false,
-      "seasonStart": 4,
-      "seasonEnd": 10,
-      "frostEnabled": false,
-      "frostMinTemp": 2,
-      "icalAdapterInstance": "",
-      "icalTriggerState": "",
-      "icalTitlePrefix": "Bewässerung"
-    },
-    "sensors": {
-      "rainId": "",
-      "soilMoistureId": "",
-      "temperatureId": ""
-    },
-    "weather": {
-      "enabled": false,
-      "apiType": "openweathermap",
-      "apiKey": "",
-      "latitude": 0,
-      "longitude": 0,
-      "pollInterval": 30
-    },
-    "legalRestriction": {
-      "enabled": false,
-      "stationId": "10400",
-      "temperatureStateId": "",
-      "startDate": "1.6",
-      "endDate": "30.9",
-      "startTime": "11:00",
-      "endTime": "17:00",
-      "minTemperature": 27,
-      "checkInterval": 10
-    },
-    "notifications": {
-      "pushoverInstance": "",
-      "telegramInstance": ""
-    },
-    "waterConsumption": {
-      "enabled": false
-    }
-  },
-  "encryptedNative": [
-    "weather.apiKey"
-  ],
-  "protectedNative": [
-    "weather.apiKey"
-  ],
-  "objects": [],
-  "instanceObjects": [
-    {
-      "_id": "valves",
-      "type": "folder",
-      "common": {
-        "name": {
-          "en": "Valves",
-          "de": "Ventile"
-        }
-      },
-      "native": {}
-    },
-    {
-      "_id": "zones",
-      "type": "folder",
-      "common": {
-        "name": {
-          "en": "Zones",
-          "de": "Zonen"
-        }
-      },
-      "native": {}
-    },
-    {
-      "_id": "automation",
-      "type": "channel",
-      "common": {
-        "name": {
-          "en": "Automation",
-          "de": "Automatik"
-        }
-      },
-      "native": {}
-    },
-    {
-      "_id": "sensors",
-      "type": "channel",
-      "common": {
-        "name": {
-          "en": "Sensors",
-          "de": "Sensoren"
-        }
-      },
-      "native": {}
-    },
-    {
-      "_id": "weather",
-      "type": "channel",
-      "common": {
-        "name": {
-          "en": "Weather",
-          "de": "Wetter"
-        }
-      },
-      "native": {}
-    },
-    {
-      "_id": "legalRestriction",
-      "type": "channel",
-      "common": {
-        "name": {
-          "en": "Legal restriction",
-          "de": "Beregnungssperre"
-        }
-      },
-      "native": {}
-    },
-    {
-      "_id": "watchdog",
-      "type": "channel",
-      "common": {
-        "name": {
-          "en": "Watchdog",
-          "de": "Watchdog"
-        }
-      },
-      "native": {}
-    },
-    {
-      "_id": "waterConsumption",
-      "type": "channel",
-      "common": {
-        "name": {
-          "en": "Water consumption",
-          "de": "Wasserverbrauch"
-        }
-      },
-      "native": {}
-    },
-    {
-      "_id": "info",
-      "type": "channel",
-      "common": {
-        "name": {
-          "en": "Information",
-          "de": "Information"
-        }
-      },
-      "native": {}
-    },
-    {
-      "_id": "info.connection",
-      "type": "state",
-      "common": {
-        "role": "indicator.connected",
-        "name": {
-          "en": "If connected to control system",
-          "de": "Verbindung zum Steuerungssystem"
+    "common": {
+        "name": "irrigation",
+        "version": "0.3.1",
+        "news": {
+            "0.3.2": {
+                "en": "**ENHANCED**: Scan progress message now remains visible for 10 seconds after scan completion before being automatically cleared — admin UI hides the progress field when empty. Timer is cleaned up on new scans and adapter shutdown.",
+                "de": "**VERBESSERT**: Die Fortschrittsmeldung des Scans bleibt nun 10 Sekunden nach Abschluss des Scans sichtbar, bevor sie automatisch gelöscht wird — die Admin-Oberfläche blendet das Fortschrittsfeld aus, wenn es leer ist. Der Timer wird bei neuen Scans und beim Herunterfahren des Adapters bereinigt.",
+                "ru": "**УЛУЧШЕНО**: Сообщение о ходе сканирования теперь остается видимым в течение 10 секунд после завершения сканирования, прежде чем автоматически исчезнет — интерфейс администратора скрывает поле прогресса, когда оно пустое. Таймер очищается при новых сканированиях и при остановке адаптера.",
+                "pt": "**MELHORADO**: A mensagem de progresso da verificação agora permanece visível por 10 segundos após a conclusão da verificação antes de ser automaticamente limpa — a interface de administração oculta o campo de progresso quando está vazio. O temporizador é limpo em novas verificações e no encerramento do adaptador.",
+                "nl": "**VERBETERD**: De voortgangsboodschap van de scan blijft nu 10 seconden zichtbaar na voltooiing van de scan voordat deze automatisch wordt gewist — de beheerinterface verbergt het voortgangsveld wanneer het leeg is. De timer wordt opgeschoond bij nieuwe scans en bij het afsluiten van de adapter.",
+                "fr": "**AMÉLIORÉ** : Le message de progression de l'analyse reste désormais visible pendant 10 secondes après la fin de l'analyse avant d'être automatiquement effacé — l'interface d'administration masque le champ de progression lorsqu'il est vide. Le minuteur est nettoyé lors de nouvelles analyses et à l'arrêt de l'adaptateur.",
+                "it": "**MIGLIORATO**: Il messaggio di avanzamento della scansione ora rimane visibile per 10 secondi dopo il completamento della scansione prima di essere automaticamente cancellato — l'interfaccia di amministrazione nasconde il campo di avanzamento quando è vuoto. Il timer viene ripulito con nuove scansioni e allo spegnimento dell'adattatore.",
+                "es": "**MEJORADO**: El mensaje de progreso del escaneo ahora permanece visible durante 10 segundos después de completarse el escaneo antes de borrarse automáticamente — la interfaz de administración oculta el campo de progreso cuando está vacío. El temporizador se limpia en nuevos escaneos y al apagar el adaptador.",
+                "pl": "**ULEPSZONE**: Komunikat postępu skanowania pozostaje teraz widoczny przez 10 sekund po zakończeniu skanowania, zanim zostanie automatycznie wyczyszczony — interfejs administratora ukrywa pole postępu, gdy jest puste. Timer jest czyszczony przy nowych skanowaniach i wyłączaniu adaptera.",
+                "uk": "**ПОКРАЩЕНО**: Повідомлення про прогрес сканування тепер залишається видимим протягом 10 секунд після завершення сканування перед автоматичним очищенням — інтерфейс адміністратора приховує поле прогресу, коли воно порожнє. Таймер очищається при нових скануваннях та вимкненні адаптера.",
+                "zh-cn": "**增强**：扫描进度消息现在在扫描完成后保持可见 10 秒，然后自动清除 — 管理界面在进度字段为空时会隐藏该字段。计时器会在新扫描和适配器关闭时清理。"
+            },
+            "0.3.1": {
+                "en": "**ENHANCED**: Valve durations now stored and processed in seconds instead of minutes — admin UI accepts flexible input formats (minutes, MM:SS, HH:MM:SS) and normalizes to display format. Legacy migration converts old minute values automatically. State units changed from `min` to `s`.",
+                "de": "**VERBESSERT**: Ventillaufzeiten werden jetzt in Sekunden statt in Minuten gespeichert und verarbeitet – die Admin-Oberfläche akzeptiert flexible Eingabeformate (Minuten, MM:SS, HH:MM:SS) und normalisiert zur Anzeige. Legacy-Migration konvertiert alte Minutenwerte automatisch. Zustandseinheiten von `min` auf `s` geändert.",
+                "ru": "**УЛУЧШЕНО**: Длительность работы клапанов теперь хранится и обрабатывается в секундах вместо минут — интерфейс администратора принимает гибкие форматы ввода (минуты, MM:SS, HH:MM:SS) и нормализует для отображения. Миграция автоматически конвертирует старые значения в минутах. Единицы измерения состояний изменены с `min` на `s`.",
+                "pt": "**MELHORADO**: As durações das válvulas agora são armazenadas e processadas em segundos em vez de minutos — a interface de administração aceita formatos de entrada flexíveis (minutos, MM:SS, HH:MM:SS) e normaliza para o formato de exibição. A migração legada converte valores antigos em minutos automaticamente. Unidades de estado alteradas de `min` para `s`.",
+                "nl": "**VERBETERD**: Klepduurtijden worden nu opgeslagen en verwerkt in seconden in plaats van minuten — de beheerinterface accepteert flexibele invoerformaten (minuten, MM:SS, HH:MM:SS) en normaliseert naar weergaveformaat. Legacy-migratie converteert oude minutenwaarden automatisch. Statuseenheden gewijzigd van `min` naar `s`.",
+                "fr": "**AMÉLIORÉ** : Les durées de vanne sont désormais stockées et traitées en secondes au lieu de minutes — l'interface d'administration accepte des formats d'entrée flexibles (minutes, MM:SS, HH:MM:SS) et normalise vers le format d'affichage. La migration héritée convertit automatiquement les anciennes valeurs en minutes. Unités d'état changées de `min` à `s`.",
+                "it": "**MIGLIORATO**: Le durate delle valvole ora sono memorizzate ed elaborate in secondi anziché in minuti — l'interfaccia di amministrazione accetta formati di input flessibili (minuti, MM:SS, HH:MM:SS) e normalizza al formato di visualizzazione. La migrazione legacy converte automaticamente i vecchi valori in minuti. Unità degli stati cambiate da `min` a `s`.",
+                "es": "**MEJORADO**: Las duraciones de las válvulas ahora se almacenan y procesan en segundos en lugar de minutos — la interfaz de administración acepta formatos de entrada flexibles (minutos, MM:SS, HH:MM:SS) y normaliza al formato de visualización. La migración heredada convierte automáticamente los valores antiguos en minutos. Unidades de estado cambiadas de `min` a `s`.",
+                "pl": "**ULEPSZONE**: Czasy trwania zaworów są teraz przechowywane i przetwarzane w sekundach zamiast w minutach — interfejs administratora akceptuje elastyczne formaty wejściowe (minuty, MM:SS, HH:MM:SS) i normalizuje do formatu wyświetlania. Migracja starszych wersji automatycznie konwertuje stare wartości w minutach. Jednostki stanów zmienione z `min` na `s`.",
+                "uk": "**ПОКРАЩЕНО**: Тривалість роботи клапанів тепер зберігається та обробляється в секундах замість хвилин — інтерфейс адміністратора приймає гнучкі формати введення (хвилини, MM:SS, HH:MM:SS) і нормалізує для відображення. Міграція автоматично конвертує старі значення в хвилинах. Одиниці вимірювання станів змінено з `min` на `s`.",
+                "zh-cn": "**增强**：阀门持续时间现在以秒而非分钟存储和处理——管理界面接受灵活的输入格式（分钟、MM:SS、HH:MM:SS）并规范化为显示格式。旧版迁移会自动转换旧的分钟值。状态单位从 `min` 更改为 `s`。"
+            },
+            "0.3.0": {
+                "en": "**NEW**: Added wind speed/gust limits with resume hysteresis as an automatic pause condition\n**ENHANCED**: Added unit tests for per-valve-type start/stop/status (Gardena, Homematic, Hydrawise, Generic), the DWD/local/no-source legal restriction, and a full-plan-run test for the temperature-controlled irrigation adjustment\n**ENHANCED**: Added build.sh --dry-run/--no-deploy/--help and an admin hint that the Valves tab order is authoritative\n**FIXED**: Legacy fields (e.g. valveOrder) that were only dropped in memory now trigger a one-time cleanup rewrite of automation.plansData\n**ENHANCED**: Reduced plansData debug logging to a concise count instead of a full JSON dump\n**ENHANCED**: Extracted plan/valve synchronization into a tested pure function covering valve add/remove/rename regressions\n**FIXED**: Removed stale plan valve table order hint and misleading row-number column that contradicted the global Valves tab order\n**ENHANCED**: Updated the architecture status with current irrigation features\n**NEW**: Added automatic pause and resume of watering plans during rain\n**ENHANCED**: Added wind, precipitation, ET and flow-monitoring roadmap items\n**ENHANCED**: Expanded the adapter roadmap with operation, import/export and dashboard tasks\n**ENHANCED**: Updated the adapter implementation plan with completed and open work",
+                "de": "**NEU**: Windgeschwindigkeits-/Böenlimits mit Wiederaufnahme-Hysterese als automatische Pausenbedingung hinzugefügt **ERWEITERT**: Unit-Tests für Start/Stopp/Status pro Ventiltyp (Gardena, Homematic, Hydrawise, Generic), die DWD/lokale/keine-Quelle gesetzliche Einschränkung und einen vollständigen Plandurchlauf-Test für die temperaturgesteuerte Bewässerungsanpassung hinzugefügt **ERWEITERT**: build.sh --dry-run/--no-deploy/--help und einen Admin-Hinweis hinzugefügt, dass die Reihenfolge im Ventile-Tab maßgeblich ist **BEHOBEN**: Legacy-Felder (z. B. valveOrder), die bisher nur im Speicher entfernt wurden, lösen nun ein einmaliges Aufräumen und Neuschreiben von automation.plansData aus **ERWEITERT**: plansData-Debug-Logging auf eine kompakte Anzahl reduziert statt eines vollständigen JSON-Dumps **ERWEITERT**: Plan-/Ventil-Synchronisation in eine getestete reine Funktion extrahiert, die Ventil-Hinzufügen/Entfernen/Umbenennen-Regressionen abdeckt **BEHOBEN**: Veralteten Hinweis zur Reihenfolge der Plan-Ventil-Tabelle und irreführende Zeilennummer-Spalte entfernt, die der globalen Ventile-Tab-Reihenfolge widersprach **ERWEITERT**: Architekturstatus mit aktuellen Bewässerungsfunktionen aktualisiert **NEU**: Automatisches Pausieren und Fortsetzen von Bewässerungsplänen bei Regen hinzugefügt **ERWEITERT**: Wind-, Niederschlags-, ET- und Durchflussüberwachungs-Roadmap-Punkte hinzugefügt **ERWEITERT**: Adapter-Roadmap um Betriebs-, Import/Export- und Dashboard-Aufgaben erweitert **ERWEITERT**: Adapter-Implementierungsplan mit abgeschlossenen und offenen Arbeiten aktualisiert",
+                "ru": "**НОВОЕ**: Добавлены лимиты скорости ветра/порывов с гистерезисом возобновления в качестве условия автоматической паузы **УЛУЧШЕНО**: Добавлены модульные тесты для запуска/остановки/статуса по типам клапанов (Gardena, Homematic, Hydrawise, Generic), юридических ограничений DWD/локальных/без источника и полного теста выполнения плана для регулировки полива с учетом температуры **УЛУЧШЕНО**: Добавлены build.sh --dry-run/--no-deploy/--help и подсказка администратора о том, что порядок на вкладке \"Клапаны\" является определяющим **ИСПРАВЛЕНО**: Устаревшие поля (например, valveOrder), которые ранее удалялись только в памяти, теперь запускают однократную очистку и перезапись automation.plansData **УЛУЧШЕНО**: Отладочное логирование plansData сокращено до краткого подсчета вместо полного дампа JSON **УЛУЧШЕНО**: Синхронизация планов/клапанов выделена в тестируемую чистую функцию, охватывающую регрессии добавления/удаления/переименования клапанов **ИСПРАВЛЕНО**: Удалена устаревшая подсказка о порядке таблицы клапанов плана и вводящий в заблуждение столбец с номерами строк, который противоречил глобальному порядку вкладки \"Клапаны\" **УЛУЧШЕНО**: Обновлен статус архитектуры с текущими функциями орошения **НОВОЕ**: Добавлена автоматическая пауза и возобновление планов полива во время дождя **УЛУЧШЕНО**: Добавлены пункты дорожной карты по ветру, осадкам, ET и мониторингу потока **УЛУЧШЕНО**: Дорожная карта адаптера расширена задачами по эксплуатации, импорту/экспорту и панели управления **УЛУЧШЕНО**: Обновлен план реализации адаптера с завершенными и открытыми работами",
+                "pt": "**NOVO**: Adicionados limites de velocidade do vento/rajadas com histerese de retomada como condição de pausa automática **MELHORADO**: Adicionados testes unitários para iniciar/parar/status por tipo de válvula (Gardena, Homematic, Hydrawise, Generic), restrição legal DWD/local/sem fonte e um teste de execução completa de plano para o ajuste de irrigação controlado por temperatura **MELHORADO**: Adicionados build.sh --dry-run/--no-deploy/--help e uma dica de administrador de que a ordem da aba \"Válvulas\" é autoritativa **CORRIGIDO**: Campos legados (por exemplo, valveOrder) que eram removidos apenas na memória agora acionam uma reescrita de limpeza única de automation.plansData **MELHORADO**: Reduzido o log de depuração de plansData para uma contagem concisa em vez de um despejo JSON completo **MELHORADO**: Extraída a sincronização de plano/válvula em uma função pura testada cobrindo regressões de adição/remoção/renomeação de válvulas **CORRIGIDO**: Removida a dica de ordem da tabela de válvulas do plano obsoleta e a coluna de número de linha enganosa que contradizia a ordem global da aba \"Válvulas\" **MELHORADO**: Atualizado o status da arquitetura com os recursos atuais de irrigação **NOVO**: Adicionada pausa e retomada automática de planos de irrigação durante a chuva **MELHORADO**: Adicionados itens de roteiro para vento, precipitação, ET e monitoramento de fluxo **MELHORADO**: Expandido o roteiro do adaptador com tarefas de operação, importação/exportação e painel **MELHORADO**: Atualizado o plano de implementação do adaptador com trabalhos concluídos e abertos",
+                "nl": "**NIEUW**: Windsnelheid-/windstootlimieten met hervattingshysterese toegevoegd als automatische pauzevoorwaarde **VERBETERD**: Unit-tests toegevoegd voor start/stop/status per ventielttype (Gardena, Homematic, Hydrawise, Generic), de DWD/lokale/geen-bron wettelijke beperking en een volledige planuitvoeringstest voor de temperatuurgestuurde irrigatieaanpassing **VERBETERD**: build.sh --dry-run/--no-deploy/--help toegevoegd en een beheerdershint dat de volgorde van het tabblad \"Ventielen\" leidend is **OPGELOST**: Legacy-velden (bijv. valveOrder) die alleen in het geheugen werden verwijderd, activeren nu een eenmalige opschoning en herschrijving van automation.plansData **VERBETERD**: plansData debug-logging teruggebracht tot een beknopt aantal in plaats van een volledige JSON-dump **VERBETERD**: Plan-/ventielsynchronisatie geëxtraheerd naar een geteste pure functie die ventiel toevoegen/verwijderen/hernoemen regressies dekt **OPGELOST**: Verouderde hint voor volgorde van planventieltabel en misleidende rijnummerkolom verwijderd die in tegenspraak was met de globale volgorde van het tabblad \"Ventielen\" **VERBETERD**: Architectuurstatus bijgewerkt met huidige irrigatiefuncties **NIEUW**: Automatisch pauzeren en hervatten van bewateringsplannen tijdens regen toegevoegd **VERBETERD**: Wind-, neerslag-, ET- en stroommonitoringroadmap-items toegevoegd **VERBETERD**: Adapterroadmap uitgebreid met operatie-, import/export- en dashboardtaken **VERBETERD**: Adapterimplementatieplan bijgewerkt met voltooide en openstaande werkzaamheden",
+                "fr": "**NOUVEAU** : Ajout de limites de vitesse du vent/rafales avec hystérésis de reprise comme condition de pause automatique **AMÉLIORÉ** : Ajout de tests unitaires pour démarrage/arrêt/statut par type de vanne (Gardena, Homematic, Hydrawise, Generic), la restriction légale DWD/locale/sans source et un test d'exécution complète de plan pour l'ajustement d'irrigation contrôlé par température **AMÉLIORÉ** : Ajout de build.sh --dry-run/--no-deploy/--help et d'une indication administrateur que l'ordre de l'onglet \"Vannes\" fait autorité **CORRIGÉ** : Les champs hérités (par ex. valveOrder) qui n'étaient supprimés qu'en mémoire déclenchent maintenant une réécriture de nettoyage unique de automation.plansData **AMÉLIORÉ** : Réduction de la journalisation de débogage plansData à un décompte concis au lieu d'un vidage JSON complet **AMÉLIORÉ** : Extraction de la synchronisation plan/vanne dans une fonction pure testée couvrant les régressions d'ajout/suppression/renommage de vannes **CORRIGÉ** : Suppression de l'indication obsolète d'ordre de table de vannes de plan et de la colonne de numéro de ligne trompeuse qui contredisait l'ordre global de l'onglet \"Vannes\" **AMÉLIORÉ** : Mise à jour du statut de l'architecture avec les fonctionnalités d'irrigation actuelles **NOUVEAU** : Ajout de la pause et reprise automatiques des plans d'arrosage pendant la pluie **AMÉLIORÉ** : Ajout d'éléments de feuille de route pour le vent, les précipitations, l'ET et la surveillance du débit **AMÉLIORÉ** : Extension de la feuille de route de l'adaptateur avec des tâches d'exploitation, d'import/export et de tableau de bord **AMÉLIORÉ** : Mise à jour du plan de mise en œuvre de l'adaptateur avec les travaux terminés et en cours",
+                "it": "**NUOVO**: Aggiunti limiti di velocità del vento/raffiche con isteresi di ripresa come condizione di pausa automatica **MIGLIORATO**: Aggiunti test unitari per avvio/arresto/stato per tipo di valvola (Gardena, Homematic, Hydrawise, Generic), la restrizione legale DWD/locale/senza fonte e un test di esecuzione completa del piano per la regolazione dell'irrigazione controllata dalla temperatura **MIGLIORATO**: Aggiunti build.sh --dry-run/--no-deploy/--help e un suggerimento amministratore che l'ordine della scheda \"Valvole\" è autorevole **CORRETTO**: I campi legacy (ad es. valveOrder) che venivano rimossi solo in memoria ora attivano una riscrittura di pulizia una tantum di automation.plansData **MIGLIORATO**: Ridotto il logging di debug di plansData a un conteggio conciso invece di un dump JSON completo **MIGLIORATO**: Estratta la sincronizzazione piano/valvola in una funzione pura testata che copre le regressioni di aggiunta/rimozione/rinomina delle valvole **CORRETTO**: Rimosso il suggerimento obsoleto sull'ordine della tabella valvole del piano e la colonna fuorviante del numero di riga che contraddiceva l'ordine globale della scheda \"Valvole\" **MIGLIORATO**: Aggiornato lo stato dell'architettura con le funzionalità di irrigazione attuali **NUOVO**: Aggiunta pausa e ripresa automatica dei piani di irrigazione durante la pioggia **MIGLIORATO**: Aggiunti elementi della roadmap per vento, precipitazioni, ET e monitoraggio del flusso **MIGLIORATO**: Ampliata la roadmap dell'adattatore con attività di operazione, importazione/esportazione e dashboard **MIGLIORATO**: Aggiornato il piano di implementazione dell'adattatore con lavori completati e aperti",
+                "es": "**NUEVO**: Añadidos límites de velocidad del viento/ráfagas con histéresis de reanudación como condición de pausa automática **MEJORADO**: Añadidos tests unitarios para inicio/parada/estado por tipo de válvula (Gardena, Homematic, Hydrawise, Generic), la restricción legal DWD/local/sin fuente y una prueba de ejecución completa de plan para el ajuste de riego controlado por temperatura **MEJORADO**: Añadidos build.sh --dry-run/--no-deploy/--help y una sugerencia de administrador de que el orden de la pestaña \"Válvulas\" es autoritativo **CORREGIDO**: Los campos heredados (por ejemplo, valveOrder) que solo se eliminaban en memoria ahora activan una reescritura de limpieza única de automation.plansData **MEJORADO**: Reducido el registro de depuración de plansData a un recuento conciso en lugar de un volcado JSON completo **MEJORADO**: Extraída la sincronización de plan/válvula en una función pura probada que cubre regresiones de agregar/eliminar/renombrar válvulas **CORREGIDO**: Eliminada la sugerencia obsoleta de orden de tabla de válvulas del plan y la columna de número de fila engañosa que contradecía el orden global de la pestaña \"Válvulas\" **MEJORADO**: Actualizado el estado de la arquitectura con las características actuales de riego **NUEVO**: Añadida pausa y reanudación automática de planes de riego durante la lluvia **MEJORADO**: Añadidos elementos de hoja de ruta para viento, precipitación, ET y monitoreo de flujo **MEJORADO**: Ampliada la hoja de ruta del adaptador con tareas de operación, importación/exportación y panel de control **MEJORADO**: Actualizado el plan de implementación del adaptador con trabajos completados y abiertos",
+                "pl": "**NOWE**: Dodano limity prędkości wiatru/porywów z histerezą wznowienia jako warunek automatycznej pauzy **ULEPSZONE**: Dodano testy jednostkowe dla start/stop/status według typu zaworu (Gardena, Homematic, Hydrawise, Generic), ograniczenia prawnego DWD/lokalnego/bez źródła oraz pełny test wykonania planu dla regulacji nawadniania sterowanej temperaturą **ULEPSZONE**: Dodano build.sh --dry-run/--no-deploy/--help oraz wskazówkę administratora, że kolejność w zakładce \"Zawory\" jest wiążąca **NAPRAWIONE**: Przestarzałe pola (np. valveOrder), które były usuwane tylko w pamięci, teraz uruchamiają jednorazowe czyszczenie i przepisanie automation.plansData **ULEPSZONE**: Zredukowano logowanie debugowania plansData do zwięzłej liczby zamiast pełnego zrzutu JSON **ULEPSZONE**: Wyodrębniono synchronizację planu/zaworu do przetestowanej czystej funkcji obejmującej regresje dodawania/usuwania/zmiany nazwy zaworów **NAPRAWIONE**: Usunięto przestarzałą wskazówkę kolejności tabeli zaworów planu i mylącą kolumnę numeru wiersza, która była sprzeczna z globalną kolejnością zakładki \"Zawory\" **ULEPSZONE**: Zaktualizowano status architektury o aktualne funkcje nawadniania **NOWE**: Dodano automatyczne wstrzymywanie i wznawianie planów podlewania podczas deszczu **ULEPSZONE**: Dodano elementy mapy drogowej dla wiatru, opadów, ET i monitorowania przepływu **ULEPSZONE**: Rozszerzono mapę drogową adaptera o zadania operacyjne, importu/eksportu i pulpitu nawigacyjnego **ULEPSZONE**: Zaktualizowano plan implementacji adaptera o ukończone i otwarte prace",
+                "uk": "**НОВЕ**: Додано обмеження швидкості вітру/поривів з гістерезисом відновлення як умову автоматичної паузи **ПОКРАЩЕНО**: Додано модульні тести для запуску/зупинки/статусу за типом клапана (Gardena, Homematic, Hydrawise, Generic), юридичного обмеження DWD/локального/без джерела та повного тесту виконання плану для регулювання зрошення з урахуванням температури **ПОКРАЩЕНО**: Додано build.sh --dry-run/--no-deploy/--help та підказку адміністратора, що порядок на вкладці \"Клапани\" є визначальним **ВИПРАВЛЕНО**: Застарілі поля (наприклад, valveOrder), які раніше видалялися лише в пам'яті, тепер запускають одноразове очищення та перезапис automation.plansData **ПОКРАЩЕНО**: Скорочено журналювання налагодження plansData до стислого підрахунку замість повного дампу JSON **ПОКРАЩЕНО**: Синхронізацію плану/клапана виділено в тестовану чисту функцію, що охоплює регресії додавання/видалення/перейменування клапанів **ВИПРАВЛЕНО**: Видалено застарілу підказку порядку таблиці клапанів плану та оманливу колонку номерів рядків, яка суперечила глобальному порядку вкладки \"Клапани\" **ПОКРАЩЕНО**: Оновлено статус архітектури з поточними функціями зрошення **НОВЕ**: Додано автоматичну паузу та відновлення планів поливу під час дощу **ПОКРАЩЕНО**: Додано пункти дорожньої карти щодо вітру, опадів, ET та моніторингу потоку **ПОКРАЩЕНО**: Розширено дорожню карту адаптера завданнями з експлуатації, імпорту/експорту та панелі керування **ПОКРАЩЕНО**: Оновлено план реалізації адаптера із завершеними та відкритими роботами",
+                "zh-cn": "**新增**:添加了风速/阵风限制及恢复滞后作为自动暂停条件 **增强**:为每种阀门类型的启动/停止/状态(Gardena、Homematic、Hydrawise、Generic)、DWD/本地/无来源法律限制以及温度控制灌溉调整的完整计划运行测试添加了单元测试 **增强**:添加了 build.sh --dry-run/--no-deploy/--help 以及管理员提示,说明\"阀门\"选项卡的顺序具有权威性 **修复**:仅在内存中删除的旧字段(例如 valveOrder)现在会触发对 automation.plansData 的一次性清理重写 **增强**:将 plansData 调试日志减少为简洁的计数,而不是完整的 JSON 转储 **增强**:将计划/阀门同步提取为经过测试的纯函数,涵盖阀门添加/删除/重命名回归 **修复**:删除了过时的计划阀门表顺序提示和误导性的行号列,该列与全局\"阀门\"选项卡顺序相矛盾 **增强**:更新了架构状态,包含当前的灌溉功能 **新增**:添加了在下雨期间自动暂停和恢复浇水计划的功能 **增强**:添加了风力、降水、ET 和流量监控路线图项目 **增强**:扩展了适配器路线图,包含操作、导入/导出和仪表板任务 **增强**:更新了适配器实施计划,包含已完成和待完成的工作"
+            },
+            "0.2.56": {
+                "en": "**FIXED**: Legacy fields (e.g. valveOrder) that were only dropped in memory now trigger a one-time cleanup rewrite of automation.plansData\n**ENHANCED**: Reduced plansData debug logging to a concise count instead of a full JSON dump\n**ENHANCED**: Extracted plan/valve synchronization into a tested pure function covering valve add/remove/rename regressions\n**FIXED**: Removed stale plan valve table order hint and misleading row-number column that contradicted the global Valves tab order\n**ENHANCED**: Updated the architecture status with current irrigation features\n**NEW**: Added automatic pause and resume of watering plans during rain\n**ENHANCED**: Added wind, precipitation, ET and flow-monitoring roadmap items\n**ENHANCED**: Expanded the adapter roadmap with operation, import/export and dashboard tasks\n**ENHANCED**: Updated the adapter implementation plan with completed and open work",
+                "de": "**BEHOBEN**: Legacy-Felder (z. B. valveOrder), die bisher nur im Speicher entfernt wurden, lösen nun eine einmalige Bereinigung und Neuschreibung von automation.plansData aus **VERBESSERT**: Die Debug-Protokollierung von plansData wurde auf eine kompakte Anzahl reduziert, anstatt eines vollständigen JSON-Dumps **VERBESSERT**: Plan-/Ventil-Synchronisierung in eine getestete reine Funktion extrahiert, die Regressionen beim Hinzufügen/Entfernen/Umbenennen von Ventilen abdeckt **BEHOBEN**: Veralteter Sortierhinweis für Plan-Ventil-Tabelle und irreführende Zeilennummernspalte entfernt, die der globalen Reihenfolge im Ventile-Tab widersprach **VERBESSERT**: Architekturstatus mit aktuellen Bewässerungsfunktionen aktualisiert **NEU**: Automatisches Pausieren und Fortsetzen von Bewässerungsplänen bei Regen hinzugefügt **VERBESSERT**: Wind, Niederschlag, ET und Durchflussüberwachung zur Roadmap hinzugefügt **VERBESSERT**: Adapter-Roadmap um Betriebs-, Import-/Export- und Dashboard-Aufgaben erweitert **VERBESSERT**: Adapter-Implementierungsplan mit abgeschlossenen und offenen Arbeiten aktualisiert",
+                "ru": "**ИСПРАВЛЕНО**: Устаревшие поля (например, valveOrder), которые ранее удалялись только из памяти, теперь запускают однократную очистку и перезапись automation.plansData **УЛУЧШЕНО**: Отладочное логирование plansData сокращено до краткого подсчёта вместо полного дампа JSON **УЛУЧШЕНО**: Синхронизация планов и клапанов выделена в тестируемую чистую функцию, охватывающую регрессии при добавлении/удалении/переименовании клапанов **ИСПРАВЛЕНО**: Удалена устаревшая подсказка порядка таблицы клапанов плана и вводящий в заблуждение столбец номеров строк, противоречащий глобальному порядку на вкладке \"Клапаны\" **УЛУЧШЕНО**: Обновлён статус архитектуры с учётом текущих функций орошения **НОВОЕ**: Добавлена автоматическая приостановка и возобновление планов полива во время дождя **УЛУЧШЕНО**: Добавлены пункты дорожной карты: ветер, осадки, ET и мониторинг расхода **УЛУЧШЕНО**: Дорожная карта адаптера расширена задачами по эксплуатации, импорту/экспорту и панели управления **УЛУЧШЕНО**: Обновлён план реализации адаптера с завершёнными и открытыми задачами",
+                "pt": "**CORRIGIDO**: Campos legados (por exemplo, valveOrder) que eram removidos apenas na memória agora acionam uma reescrita de limpeza única de automation.plansData **MELHORADO**: Registro de depuração de plansData reduzido a uma contagem concisa em vez de um despejo JSON completo **MELHORADO**: Sincronização de plano/válvula extraída para uma função pura testada cobrindo regressões de adição/remoção/renomeação de válvulas **CORRIGIDO**: Removida dica de ordem da tabela de válvulas do plano obsoleta e coluna de número de linha enganosa que contradizia a ordem global da aba Válvulas **MELHORADO**: Atualizado o status da arquitetura com os recursos atuais de irrigação **NOVO**: Adicionada pausa e retomada automática de planos de rega durante a chuva **MELHORADO**: Adicionados itens de roteiro para vento, precipitação, ET e monitoramento de fluxo **MELHORADO**: Expandido o roteiro do adaptador com tarefas de operação, importação/exportação e painel **MELHORADO**: Atualizado o plano de implementação do adaptador com trabalhos concluídos e pendentes",
+                "nl": "**OPGELOST**: Legacy-velden (bijv. valveOrder) die alleen in het geheugen werden verwijderd, activeren nu een eenmalige opschoning en herschrijving van automation.plansData **VERBETERD**: Debug-logging van plansData teruggebracht tot een beknopt aantal in plaats van een volledige JSON-dump **VERBETERD**: Plan-/klepsynchronisatie geëxtraheerd naar een geteste pure functie die regressies bij toevoegen/verwijderen/hernoemen van kleppen dekt **OPGELOST**: Verouderde sorteertip voor plankleptabel en misleidende rijnummerkolom verwijderd die in tegenspraak was met de globale volgorde op het tabblad Kleppen **VERBETERD**: Architectuurstatus bijgewerkt met huidige irrigatiefuncties **NIEUW**: Automatisch pauzeren en hervatten van bewateringsplannen tijdens regen toegevoegd **VERBETERD**: Wind, neerslag, ET en stroommonitoringitems toegevoegd aan de roadmap **VERBETERD**: Adapterroadmap uitgebreid met operatie-, import-/export- en dashboardtaken **VERBETERD**: Implementatieplan van de adapter bijgewerkt met voltooide en openstaande werkzaamheden",
+                "fr": "**CORRIGÉ** : Les champs hérités (par exemple valveOrder) qui n'étaient supprimés qu'en mémoire déclenchent désormais une réécriture de nettoyage unique de automation.plansData **AMÉLIORÉ** : La journalisation de débogage de plansData a été réduite à un décompte concis au lieu d'un vidage JSON complet **AMÉLIORÉ** : La synchronisation plan/vanne a été extraite dans une fonction pure testée couvrant les régressions d'ajout/suppression/renommage de vannes **CORRIGÉ** : Suppression de l'indication d'ordre de table de vannes de plan obsolète et de la colonne de numéro de ligne trompeuse qui contredisait l'ordre global de l'onglet \"Vannes\" **AMÉLIORÉ** : Mise à jour du statut de l'architecture avec les fonctionnalités d'irrigation actuelles **NOUVEAU** : Ajout de la pause et de la reprise automatiques des plans d'arrosage pendant la pluie **AMÉLIORÉ** : Ajout d'éléments de feuille de route pour le vent, les précipitations, l'ET et la surveillance du débit **AMÉLIORÉ** : Extension de la feuille de route de l'adaptateur avec des tâches d'exploitation, d'import/export et de tableau de bord **AMÉLIORÉ** : Mise à jour du plan de mise en œuvre de l'adaptateur avec les travaux terminés et en cours",
+                "it": "**CORRETTO**: I campi legacy (ad es. valveOrder) che venivano eliminati solo in memoria ora attivano una riscrittura di pulizia una tantum di automation.plansData **MIGLIORATO**: Il logging di debug di plansData è stato ridotto a un conteggio conciso invece di un dump JSON completo **MIGLIORATO**: La sincronizzazione piano/valvola è stata estratta in una funzione pura testata che copre le regressioni di aggiunta/rimozione/rinomina delle valvole **CORRETTO**: Rimosso il suggerimento di ordinamento della tabella valvole del piano obsoleto e la colonna del numero di riga fuorviante che contraddiceva l'ordine globale della scheda Valvole **MIGLIORATO**: Aggiornato lo stato dell'architettura con le funzionalità di irrigazione attuali **NUOVO**: Aggiunta la pausa e la ripresa automatica dei piani di irrigazione durante la pioggia **MIGLIORATO**: Aggiunti elementi della roadmap per vento, precipitazioni, ET e monitoraggio del flusso **MIGLIORATO**: Ampliata la roadmap dell'adattatore con attività di gestione, importazione/esportazione e dashboard **MIGLIORATO**: Aggiornato il piano di implementazione dell'adattatore con i lavori completati e aperti",
+                "es": "**CORREGIDO**: Los campos heredados (por ejemplo, valveOrder) que solo se eliminaban en memoria ahora activan una reescritura de limpieza única de automation.plansData **MEJORADO**: El registro de depuración de plansData se ha reducido a un recuento conciso en lugar de un volcado JSON completo **MEJORADO**: La sincronización de plan/válvula se ha extraído en una función pura probada que cubre regresiones de agregar/eliminar/renombrar válvulas **CORREGIDO**: Se eliminó la sugerencia de orden de tabla de válvulas de plan obsoleta y la columna de número de fila engañosa que contradecía el orden global de la pestaña \"Válvulas\" **MEJORADO**: Se actualizó el estado de la arquitectura con las características actuales de riego **NUEVO**: Se agregó la pausa y reanudación automática de planes de riego durante la lluvia **MEJORADO**: Se agregaron elementos de hoja de ruta para viento, precipitación, ET y monitoreo de flujo **MEJORADO**: Se amplió la hoja de ruta del adaptador con tareas de operación, importación/exportación y panel de control **MEJORADO**: Se actualizó el plan de implementación del adaptador con trabajos completados y pendientes",
+                "pl": "**NAPRAWIONO**: Przestarzałe pola (np. valveOrder), które były usuwane tylko z pamięci, teraz uruchamiają jednorazowe czyszczenie i przepisanie automation.plansData **ULEPSZONE**: Logowanie debugowania plansData zostało zredukowane do zwięzłego licznika zamiast pełnego zrzutu JSON **ULEPSZONE**: Synchronizacja planu/zaworu została wyodrębniona do przetestowanej czystej funkcji obejmującej regresje dodawania/usuwania/zmiany nazwy zaworów **NAPRAWIONO**: Usunięto przestarzałą wskazówkę kolejności tabeli zaworów planu i mylącą kolumnę numeru wiersza, która była sprzeczna z globalną kolejnością na karcie \"Zawory\" **ULEPSZONE**: Zaktualizowano status architektury o aktualne funkcje nawadniania **NOWE**: Dodano automatyczne wstrzymywanie i wznawianie planów podlewania podczas deszczu **ULEPSZONE**: Dodano elementy mapy drogowej dla wiatru, opadów, ET i monitorowania przepływu **ULEPSZONE**: Rozszerzono mapę drogową adaptera o zadania operacyjne, importu/eksportu i pulpitu nawigacyjnego **ULEPSZONE**: Zaktualizowano plan implementacji adaptera o ukończone i otwarte prace",
+                "uk": "**ВИПРАВЛЕНО**: Застарілі поля (наприклад, valveOrder), які раніше видалялися лише з пам'яті, тепер запускають одноразове очищення та перезапис automation.plansData **ПОКРАЩЕНО**: Налагоджувальне логування plansData скорочено до стислого підрахунку замість повного дампу JSON **ПОКРАЩЕНО**: Синхронізацію плану/клапана виділено в тестовану чисту функцію, що охоплює регресії додавання/видалення/перейменування клапанів **ВИПРАВЛЕНО**: Видалено застарілу підказку порядку таблиці клапанів плану та оманливу колонку номерів рядків, що суперечила глобальному порядку на вкладці \"Клапани\" **ПОКРАЩЕНО**: Оновлено статус архітектури з урахуванням поточних функцій зрошення **НОВЕ**: Додано автоматичну паузу та відновлення планів поливу під час дощу **ПОКРАЩЕНО**: Додано пункти дорожньої карти: вітер, опади, ET та моніторинг витрати **ПОКРАЩЕНО**: Дорожню карту адаптера розширено завданнями з експлуатації, імпорту/експорту та панелі керування **ПОКРАЩЕНО**: Оновлено план реалізації адаптера із завершеними та відкритими завданнями",
+                "zh-cn": "**修复**：仅在内存中删除的旧字段(例如 valveOrder)现在会触发一次性清理并重写 automation.plansData **增强**：将 plansData 调试日志减少为简洁的计数，而不是完整的 JSON 转储 **增强**：将计划/阀门同步提取为经过测试的纯函数，涵盖阀门添加/删除/重命名的回归问题 **修复**：删除了过时的计划阀门表排序提示和误导性的行号列，该列与全局\"阀门\"选项卡顺序相矛盾 **增强**：更新了架构状态，包含当前的灌溉功能 **新增**：添加了在下雨期间自动暂停和恢复浇水计划的功能 **增强**：添加了风力、降水、ET 和流量监测路线图项目 **增强**：扩展了适配器路线图，包含操作、导入/导出和仪表板任务 **增强**：更新了适配器实施计划，包含已完成和未完成的工作"
+            },
+            "0.2.55": {
+                "en": "**ENHANCED**: Unified sequential plan execution order with the Valves tab order\n**FIXED**: Reserved space for all valve table action buttons",
+                "de": "**VERBESSERT**: Einheitliche sequenzielle Planausführungsreihenfolge entsprechend der Reihenfolge im Ventile-Tab\n**BEHOBEN**: Reservierter Platz für alle Aktionsschaltflächen in der Ventiltabelle",
+                "ru": "**УЛУЧШЕНО**: Унифицирован последовательный порядок выполнения плана с порядком вкладки клапанов\n**ИСПРАВЛЕНО**: Зарезервировано место для всех кнопок действий в таблице клапанов",
+                "pt": "**MELHORADO**: Ordem de execução sequencial do plano unificada com a ordem da aba de válvulas\n**CORRIGIDO**: Espaço reservado para todos os botões de ação da tabela de válvulas",
+                "nl": "**VERBETERD**: Uniforme sequentiële planuitvoeringsvolgorde met de volgorde van het Kleppen-tabblad\n**OPGELOST**: Gereserveerde ruimte voor alle actieknoppen in de kleppenlijst",
+                "fr": "**AMÉLIORÉ**: Ordre d'exécution séquentielle du plan unifié avec l'ordre de l'onglet Vannes\n**CORRIGÉ**: Espace réservé pour tous les boutons d'action du tableau des vannes",
+                "it": "**MIGLIORATO**: Ordine di esecuzione sequenziale del piano unificato con l'ordine della scheda Valvole\n**CORRETTO**: Spazio riservato per tutti i pulsanti di azione della tabella valvole",
+                "es": "**MEJORADO**: Orden de ejecución secuencial del plan unificado con el orden de la pestaña de Válvulas\n**CORREGIDO**: Espacio reservado para todos los botones de acción de la tabla de válvulas",
+                "pl": "**ULEPSZONE**: Ujednolicona kolejność sekwencyjnego wykonywania planu z kolejnością zakładki Zawory\n**NAPRAWIONO**: Zarezerwowano miejsce dla wszystkich przycisków akcji w tabeli zaworów",
+                "uk": "**ПОКРАЩЕНО**: Уніфіковано послідовний порядок виконання плану з порядком вкладки клапанів\n**ВИПРАВЛЕНО**: Зарезервовано місце для всіх кнопок дій у таблиці клапанів",
+                "zh-cn": "**增强**：统一了顺序计划执行顺序与阀门选项卡顺序\n**修复**：为所有阀门表操作按钮预留了空间"
+            },
+            "0.2.54": {
+                "en": "**FIXED**: Kept valve reorder arrows available by disabling valve table sorting",
+                "de": "**BEHOBEN**: Pfeile zum Neuordnen der Ventile verfügbar gehalten, indem die Sortierung der Ventiltabelle deaktiviert wurde",
+                "ru": "**ИСПРАВЛЕНО**: Стрелки изменения порядка клапанов оставлены доступными путём отключения сортировки таблицы клапанов",
+                "pt": "**CORRIGIDO**: Mantidas as setas de reordenação de válvulas disponíveis ao desativar a ordenação da tabela de válvulas",
+                "nl": "**OPGELOST**: Pijlen voor het herschikken van kleppen beschikbaar gehouden door het sorteren van de kleppenlijst uit te schakelen",
+                "fr": "**CORRIGÉ** : Les flèches de réorganisation des vannes restent disponibles en désactivant le tri du tableau des vannes",
+                "it": "**RISOLTO**: Mantenute disponibili le frecce di riordino delle valvole disabilitando l'ordinamento della tabella delle valvole",
+                "es": "**SOLUCIONADO**: Se mantuvieron disponibles las flechas de reordenación de válvulas al deshabilitar la ordenación de la tabla de válvulas",
+                "pl": "**NAPRAWIONO**: Zachowano dostępność strzałek zmiany kolejności zaworów poprzez wyłączenie sortowania tabeli zaworów",
+                "uk": "**ВИПРАВЛЕНО**: Збережено доступність стрілок зміни порядку клапанів шляхом вимкнення сортування таблиці клапанів",
+                "zh-cn": "**已修复**：通过禁用阀门表排序保持阀门重新排序箭头可用"
+            },
+            "0.2.53": {
+                "en": "**FIXED**: Enabled both table reorder arrows for valves",
+                "de": "**BEHOBEN**: Beide Pfeile zum Neuordnen der Tabelle für Ventile aktiviert",
+                "ru": "**ИСПРАВЛЕНО**: Включены обе стрелки изменения порядка таблицы для клапанов",
+                "pt": "**CORRIGIDO**: Ativadas ambas as setas de reordenação da tabela para válvulas",
+                "nl": "**OPGELOST**: Beide pijlen voor het herschikken van de tabel voor kleppen ingeschakeld",
+                "fr": "**CORRIGÉ**: Activation des deux flèches de réorganisation du tableau pour les vannes",
+                "it": "**RISOLTO**: Abilitate entrambe le frecce di riordino della tabella per le valvole",
+                "es": "**SOLUCIONADO**: Habilitadas ambas flechas de reordenación de tabla para válvulas",
+                "pl": "**NAPRAWIONO**: Włączono obie strzałki zmiany kolejności tabeli dla zaworów",
+                "uk": "**ВИПРАВЛЕНО**: Увімкнено обидві стрілки зміни порядку таблиці для клапанів",
+                "zh-cn": "**已修复**：启用了阀门表格重新排序的两个箭头"
+            },
+            "0.2.52": {
+                "en": "**ENHANCED**: Disabled manual release review prompts for automated releases",
+                "de": "**VERBESSERT**: Manuelle Release-Überprüfungsaufforderungen für automatisierte Releases deaktiviert",
+                "ru": "**УЛУЧШЕНО**: Отключены запросы на ручную проверку релизов для автоматических релизов",
+                "pt": "**MELHORADO**: Desativadas as solicitações de revisão manual de lançamento para lançamentos automatizados",
+                "nl": "**VERBETERD**: Handmatige release-beoordelingsprompts uitgeschakeld voor geautomatiseerde releases",
+                "fr": "**AMÉLIORÉ**: Désactivation des invites de révision manuelle des versions pour les versions automatisées",
+                "it": "**MIGLIORATO**: Disattivati i prompt di revisione manuale del rilascio per i rilasci automatizzati",
+                "es": "**MEJORADO**: Desactivadas las solicitudes de revisión manual de versiones para lanzamientos automatizados",
+                "pl": "**ULEPSZONE**: Wyłączono monity o ręczny przegląd wydań dla zautomatyzowanych wydań",
+                "uk": "**ПОКРАЩЕНО**: Вимкнено запити на ручний перегляд релізів для автоматизованих релізів",
+                "zh-cn": "**增强**：已禁用自动发布的手动发布审查提示"
+            }
         },
-        "type": "boolean",
-        "read": true,
-        "write": false,
-        "def": false
-      },
-      "native": {}
-    }
-  ]
+        "titleLang": {
+            "en": "Irrigation",
+            "de": "Bewässerung",
+            "ru": "Орошение",
+            "pt": "Irrigação",
+            "nl": "Irrigatie",
+            "fr": "Irrigation",
+            "it": "Irrigazione",
+            "es": "Riego",
+            "pl": "Nawadnianie",
+            "uk": "зрошення",
+            "zh-cn": "灌溉"
+        },
+        "desc": {
+            "en": "Controls irrigation zones, valves and watering schedules based on sensors and weather data",
+            "de": "Steuert Bewässerungszonen, Ventile und Bewässerungspläne basierend auf Sensoren und Wetterdaten",
+            "ru": "Управляет зонами орошения, клапанами и графиками полива на основе датчиков и погодных данных.",
+            "pt": "Controla zonas de irrigação, válvulas e cronogramas de irrigação com base em sensores e dados meteorológicos",
+            "nl": "Regelt irrigatiezones, kleppen en bewateringsschema's op basis van sensoren en weergegevens",
+            "fr": "Contrôle les zones d'irrigation, les vannes et les programmes d'arrosage en fonction de capteurs et de données météorologiques.",
+            "it": "Controlla le zone di irrigazione, le valvole e i programmi di irrigazione in base a sensori e dati meteorologici",
+            "es": "Controla zonas de riego, válvulas y programas de riego basados ​​en sensores y datos meteorológicos.",
+            "pl": "Kontroluje strefy nawadniania, zawory i harmonogramy nawadniania w oparciu o czujniki i dane pogodowe",
+            "uk": "Controls irrigation zones, valves and watering schedules based on sensors and weather data",
+            "zh-cn": "根据传感器和天气数据控制灌溉区、阀门和浇水时间表"
+        },
+        "authors": [
+            "Gerhard Steinwedel <dev@steinwedel.de>"
+        ],
+        "keywords": [
+            "irrigation",
+            "garden",
+            "watering",
+            "sprinkler",
+            "zones",
+            "valves",
+            "sensor",
+            "weather",
+            "smart home"
+        ],
+        "licenseInformation": {
+            "type": "free",
+            "license": "MIT"
+        },
+        "platform": "Javascript/Node.js",
+        "icon": "irrigation.png",
+        "enabled": true,
+        "extIcon": "https://raw.githubusercontent.com/steinwedel/ioBroker.irrigation/main/admin/irrigation.png",
+        "readme": "https://github.com/steinwedel/ioBroker.irrigation/blob/main/README.md",
+        "loglevel": "info",
+        "tier": 3,
+        "mode": "daemon",
+        "type": "garden",
+        "compact": true,
+        "connectionType": "local",
+        "dataSource": "poll",
+        "messagebox": true,
+        "supportedMessages": {
+            "custom": true
+        },
+        "adminUI": {
+            "config": "json"
+        },
+        "dependencies": [
+            {
+                "js-controller": ">=6.0.11"
+            }
+        ],
+        "globalDependencies": [
+            {
+                "admin": ">=7.0.23"
+            }
+        ]
+    },
+    "native": {
+        "expertMode": false,
+        "valves": [],
+        "plans": [
+            {
+                "name": "Alle",
+                "valveIndexes": []
+            }
+        ],
+        "scheduler": {
+            "autoMode": false,
+            "pauseOnRain": false,
+            "windPauseEnabled": false,
+            "windSpeedStateId": "",
+            "windSpeedLimit": 0,
+            "windGustStateId": "",
+            "windGustLimit": 0,
+            "windHysteresisMinutes": 10,
+            "timerTimes": [],
+            "extensionFactor": 1,
+            "temperatureAdjustmentEnabled": false,
+            "temperatureAdjustmentStateId": "",
+            "pumpCapacity": 0,
+            "zonePause": 0,
+            "seasonEnabled": false,
+            "seasonStart": 4,
+            "seasonEnd": 10,
+            "frostEnabled": false,
+            "frostMinTemp": 2,
+            "icalAdapterInstance": "",
+            "icalTriggerState": "",
+            "icalTitlePrefix": "Bewässerung"
+        },
+        "sensors": {
+            "rainId": "",
+            "soilMoistureId": "",
+            "temperatureId": ""
+        },
+        "weather": {
+            "enabled": false,
+            "apiType": "openweathermap",
+            "apiKey": "",
+            "latitude": 0,
+            "longitude": 0,
+            "pollInterval": 30
+        },
+        "legalRestriction": {
+            "enabled": false,
+            "stationId": "10400",
+            "temperatureStateId": "",
+            "startDate": "1.6",
+            "endDate": "30.9",
+            "startTime": "11:00",
+            "endTime": "17:00",
+            "minTemperature": 27,
+            "checkInterval": 10
+        },
+        "notifications": {
+            "pushoverInstance": "",
+            "telegramInstance": ""
+        },
+        "waterConsumption": {
+            "enabled": false
+        }
+    },
+    "encryptedNative": [
+        "weather.apiKey"
+    ],
+    "protectedNative": [
+        "weather.apiKey"
+    ],
+    "objects": [],
+    "instanceObjects": [
+        {
+            "_id": "valves",
+            "type": "folder",
+            "common": {
+                "name": {
+                    "en": "Valves",
+                    "de": "Ventile"
+                }
+            },
+            "native": {}
+        },
+        {
+            "_id": "zones",
+            "type": "folder",
+            "common": {
+                "name": {
+                    "en": "Zones",
+                    "de": "Zonen"
+                }
+            },
+            "native": {}
+        },
+        {
+            "_id": "automation",
+            "type": "channel",
+            "common": {
+                "name": {
+                    "en": "Automation",
+                    "de": "Automatik"
+                }
+            },
+            "native": {}
+        },
+        {
+            "_id": "sensors",
+            "type": "channel",
+            "common": {
+                "name": {
+                    "en": "Sensors",
+                    "de": "Sensoren"
+                }
+            },
+            "native": {}
+        },
+        {
+            "_id": "weather",
+            "type": "channel",
+            "common": {
+                "name": {
+                    "en": "Weather",
+                    "de": "Wetter"
+                }
+            },
+            "native": {}
+        },
+        {
+            "_id": "legalRestriction",
+            "type": "channel",
+            "common": {
+                "name": {
+                    "en": "Legal restriction",
+                    "de": "Beregnungssperre"
+                }
+            },
+            "native": {}
+        },
+        {
+            "_id": "watchdog",
+            "type": "channel",
+            "common": {
+                "name": {
+                    "en": "Watchdog",
+                    "de": "Watchdog"
+                }
+            },
+            "native": {}
+        },
+        {
+            "_id": "waterConsumption",
+            "type": "channel",
+            "common": {
+                "name": {
+                    "en": "Water consumption",
+                    "de": "Wasserverbrauch"
+                }
+            },
+            "native": {}
+        },
+        {
+            "_id": "info",
+            "type": "channel",
+            "common": {
+                "name": {
+                    "en": "Information",
+                    "de": "Information"
+                }
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.connection",
+            "type": "state",
+            "common": {
+                "role": "indicator.connected",
+                "name": {
+                    "en": "If connected to control system",
+                    "de": "Verbindung zum Steuerungssystem"
+                },
+                "type": "boolean",
+                "read": true,
+                "write": false,
+                "def": false
+            },
+            "native": {}
+        }
+    ]
 }
