@@ -1,5 +1,6 @@
 # Changelog
 ## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **NEW**: Added formatted duration display (`remainingDurationMin`) showing remaining time in mm:ss format for both automation and individual valves — improves readability in UI compared to raw seconds
 
 ## 0.3.6 (2026-07-25)
 * (Gerhard Steinwedel) **FIXED**: Deleted or renamed plans no longer linger in `automation.planSelect` and `automation.startPlan` dropdowns — `extendObjectAsync` deep-merges `common.states` instead of replacing it, so old plan entries would persist forever. New `replaceObjectStates()` method explicitly replaces the entire `states` map to ensure stale entries are removed
