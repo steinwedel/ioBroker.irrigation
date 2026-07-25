@@ -1,5 +1,6 @@
 # Changelog
 ## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **ENHANCED**: Valve duration formatting centralized in `formatValvesForNative()` method to ensure consistent conversion of numeric seconds to "HH:MM:SS"/"MM:SS" display strings whenever valves are written to native config or returned to admin UI — eliminates duplication across migration, write, and scan-response code paths.
 
 ## 0.3.2 (2026-07-25)
 * (Gerhard Steinwedel) **ENHANCED**: Scan progress message now remains visible for 10 seconds after scan completion before being automatically cleared — admin UI hides the progress field when empty. Timer is cleaned up on new scans and adapter shutdown.
