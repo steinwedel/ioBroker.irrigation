@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.3.7 (2026-07-25)
 * (Gerhard Steinwedel) **NEW**: Added formatted duration display (`remainingDurationMin`) showing remaining time in mm:ss format for both automation and individual valves — improves readability in UI compared to raw seconds
 
 ## 0.3.6 (2026-07-25)
