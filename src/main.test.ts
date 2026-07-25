@@ -554,6 +554,7 @@ describe('dwd.DwdRestriction.check', () => {
         return {
             expertMode: false,
             valves: [],
+            nextValveId: 0,
             plans: [{ name: 'Alle', valveIndexes: [] }],
             scheduler: {
                 autoMode: false,
@@ -729,6 +730,8 @@ describe('dwd.DwdRestriction.check', () => {
  * the unique, stable `valveNumber` field instead of the row's position.
  */
 describe('main.parsePlanValveTableRows', () => {
+    const valves4 = Array.from({ length: 4 }, (_, id) => ({ id }));
+
     it('maps rows to valve indexes via valveNumber when rows are in natural order', () => {
         const rows = [
             { valveNumber: '000', assigned: false },
@@ -736,7 +739,7 @@ describe('main.parsePlanValveTableRows', () => {
             { valveNumber: '002', assigned: false },
             { valveNumber: '003', assigned: true },
         ];
-        expect(parsePlanValveTableRows(rows, 4)).to.deep.equal([1, 3]);
+        expect(parsePlanValveTableRows(rows, valves4)).to.deep.equal([1, 3]);
     });
 
     it('still returns the correct valve indexes after rows have been reordered (e.g. by sorting a column)', () => {
@@ -750,7 +753,7 @@ describe('main.parsePlanValveTableRows', () => {
             { valveNumber: '002', assigned: false },
             { valveNumber: '001', assigned: true },
         ];
-        expect(parsePlanValveTableRows(rows, 4)).to.deep.equal([3, 1]);
+        expect(parsePlanValveTableRows(rows, valves4)).to.deep.equal([3, 1]);
     });
 
     it('ignores rows with an out-of-range or malformed valveNumber', () => {
@@ -760,7 +763,7 @@ describe('main.parsePlanValveTableRows', () => {
             { valveNumber: 'abc', assigned: true },
             { valveNumber: undefined, assigned: true },
         ];
-        expect(parsePlanValveTableRows(rows, 4)).to.deep.equal([0]);
+        expect(parsePlanValveTableRows(rows, valves4)).to.deep.equal([0]);
     });
 
     it('returns an empty array when no row is assigned', () => {
@@ -768,7 +771,7 @@ describe('main.parsePlanValveTableRows', () => {
             { valveNumber: '000', assigned: false },
             { valveNumber: '001', assigned: false },
         ];
-        expect(parsePlanValveTableRows(rows, 2)).to.deep.equal([]);
+        expect(parsePlanValveTableRows(rows, valves4.slice(0, 2))).to.deep.equal([]);
     });
 });
 
@@ -860,6 +863,7 @@ describe('automation temperature-controlled irrigation adjustment (full plan run
         return {
             expertMode: false,
             valves: [makeValve({ name: 'Rasen', duration: 600 })],
+            nextValveId: 0,
             plans: [{ name: 'Alle', valveIndexes: [] }],
             scheduler: {
                 autoMode: false,
@@ -1051,6 +1055,7 @@ describe('automation.recoverAfterRestart', () => {
         return {
             expertMode: false,
             valves: Array.from({ length: valveCount }, () => makeValve()),
+            nextValveId: 0,
             plans: [{ name: 'Alle', valveIndexes: [] }],
             scheduler: {
                 autoMode: false,

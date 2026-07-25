@@ -8,6 +8,7 @@ import type { IrrigationNativeConfig } from './types';
 export const DEFAULT_CONFIG: IrrigationNativeConfig = {
     expertMode: false,
     valves: [],
+    nextValveId: 0,
     plans: [{ name: 'Alle', valveIndexes: [] }],
     scheduler: {
         autoMode: false,
@@ -95,7 +96,7 @@ export function normalizeConfig(config: Partial<IrrigationNativeConfig>): Irriga
 
     return {
         expertMode: config.expertMode ?? DEFAULT_CONFIG.expertMode,
-        valves: (config.valves ?? []).map(valve => {
+        valves: (config.valves ?? []).map((valve, index) => {
             const legacyRunFor = (valve as Partial<IrrigationNativeConfig['valves'][number]> & { runFor?: number })
                 .runFor;
             const duration =
@@ -103,6 +104,11 @@ export function normalizeConfig(config: Partial<IrrigationNativeConfig>): Irriga
                     ? Math.max(1, Math.round(valve.duration * 60))
                     : parseDuration(valve.duration ?? (legacyRunFor !== undefined ? legacyRunFor : '10'));
             return {
+                // Falls back to the current array index only for pre-existing entries
+                // that predate this field, so their real ioBroker object id (which is
+                // derived from `id`, see formatValveNumber()) stays exactly what it
+                // already was - see the IValveConfig.id doc comment.
+                id: typeof valve.id === 'number' ? valve.id : index,
                 name: valve.name ?? '',
                 type: valve.type ?? 'Generic',
                 stateId: valve.stateId ?? '',
@@ -122,6 +128,7 @@ export function normalizeConfig(config: Partial<IrrigationNativeConfig>): Irriga
                 days: valve.days ?? [],
             };
         }),
+        nextValveId: config.nextValveId ?? DEFAULT_CONFIG.nextValveId,
         plans:
             config.plans && config.plans.length > 0
                 ? config.plans.map(p => ({ name: p.name ?? '', valveIndexes: p.valveIndexes ?? [] }))

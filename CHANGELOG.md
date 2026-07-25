@@ -1,4 +1,6 @@
 # Changelog
+## **WORK IN PROGRESS**
+
 ## 0.3.4 (2026-07-25)
 *(No user-visible changes — documentation and asset updates only)*
 

@@ -184,20 +184,31 @@ class Irrigation extends utils.Adapter {
      * admin config table shows real, editable/readable values for existing entries
      * instead of blanks. Only writes when something actually changed, since
      * updating our own instance's `native` triggers an adapter restart.
+     *
+     * Also assigns each pre-existing valve a stable `id` (defaulting to its
+     * current array index, so its real object id/state history is preserved
+     * across the upgrade - see the `IValveConfig.id` doc comment) and
+     * initializes `nextValveId` so future newly-added valves get ids that
+     * never collide with or get reused from an existing one.
      */
     private async migrateNativeConfig(): Promise<void> {
         const rawValves = (this.config as unknown as { valves?: Record<string, unknown>[] }).valves ?? [];
-        const migratedValves = this.formatValvesForNative(this.config2.valves).map((valve, index) => ({
+        const formattedValves = this.formatValvesForNative(this.config2.valves);
+        const migratedValves = formattedValves.map((valve, index) => ({
             ...valve,
-            valveNumber: `valve_${formatValveNumber(index)}`,
+            valveNumber: `valve_${formatValveNumber(this.config2.valves[index].id ?? index)}`,
         }));
+        const needsIdMigration = rawValves.some(raw => typeof raw.id !== 'number');
         const needsValveMigration =
             rawValves.length !== migratedValves.length ||
-            rawValves.some(raw => !raw.valveNumber || 'runFor' in raw || typeof raw.duration === 'number');
+            rawValves.some(raw => !raw.valveNumber || 'runFor' in raw || typeof raw.duration === 'number') ||
+            needsIdMigration;
 
         if (needsValveMigration) {
-            this.log.info('Migrating native.valves to remove runFor and include valveNumber.');
-            await this.writeNativeAsync({ valves: migratedValves as unknown as IValveConfig[] });
+            this.log.info('Migrating native.valves to remove runFor, include valveNumber and stable id.');
+            const maxAssignedId = this.config2.valves.reduce((max, valve) => Math.max(max, valve.id ?? -1), -1);
+            const nextValveId = Math.max(this.config2.nextValveId, maxAssignedId + 1);
+            await this.writeNativeAsync({ valves: migratedValves as unknown as IValveConfig[], nextValveId });
         }
     }
 
@@ -765,7 +776,7 @@ class Irrigation extends utils.Adapter {
         const assignedIndexes = this.getPlanValveIndexes(planIndex);
         const assignedSet = new Set(assignedIndexes);
         return allValveIndexes.map(index => ({
-            valveNumber: formatValveNumber(index),
+            valveNumber: formatValveNumber(this.config2.valves[index].id ?? index),
             name: this.config2.valves[index].name || 'unnamed',
             assigned: assignedSet.has(index),
         }));
@@ -834,25 +845,35 @@ class Irrigation extends utils.Adapter {
             const existingStateIds = new Set(this.config2.valves.map(valve => valve.stateId));
             const newValves = result.valves.filter(valve => !existingStateIds.has(valve.stateId));
             let updatedNames = 0;
-            const mergedValves = [...this.config2.valves, ...newValves].map((valve, index) => {
-                const scannedValve = scannedValvesByStateId.get(valve.stateId);
-                const name = scannedValve?.name || valve.name;
-                if (index < this.config2.valves.length && name !== valve.name) {
-                    updatedNames++;
-                }
-                return {
-                    ...valve,
-                    name,
-                    valveNumber: `valve_${formatValveNumber(index)}`,
-                };
-            });
+            // Newly scanned valves get freshly assigned, never-reused stable ids from
+            // the nextValveId counter; existing valves keep their current id
+            // unchanged so their real object id/state history survives the merge -
+            // see the IValveConfig.id doc comment.
+            let nextId = this.config2.nextValveId;
+            const mergedValves = [...this.config2.valves, ...newValves.map(valve => ({ ...valve, id: nextId++ }))].map(
+                (valve, index) => {
+                    const scannedValve = scannedValvesByStateId.get(valve.stateId);
+                    const name = scannedValve?.name || valve.name;
+                    if (index < this.config2.valves.length && name !== valve.name) {
+                        updatedNames++;
+                    }
+                    return {
+                        ...valve,
+                        name,
+                        valveNumber: `valve_${formatValveNumber(valve.id ?? index)}`,
+                    };
+                },
+            );
 
             this.log.info(
                 `Valve scan (${payload.type}): found ${result.valves.length}, added ${newValves.length} new, updated ${updatedNames} name(s), ${result.errors.length} error(s)`,
             );
 
             if (newValves.length > 0 || updatedNames > 0) {
-                await this.writeValvesToNative(mergedValves);
+                await this.writeNativeAsync({
+                    valves: this.formatValvesForNative(mergedValves) as unknown as IValveConfig[],
+                    nextValveId: nextId,
+                });
             }
 
             const doneMessage =
@@ -1074,7 +1095,7 @@ class Irrigation extends utils.Adapter {
                 return;
             }
             const rows = (msg?.planValveTable as Array<{ valveNumber?: string; assigned?: boolean }> | undefined) ?? [];
-            const selectedIndexes = parsePlanValveTableRows(rows, this.config2.valves.length);
+            const selectedIndexes = parsePlanValveTableRows(rows, this.config2.valves);
             const updatedPlans = this.config2.plans.map((p, i) =>
                 i === planIndex
                     ? {

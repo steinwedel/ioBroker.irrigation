@@ -5,41 +5,51 @@
 export type ValveType = 'Gardena' | 'Homematic' | 'Rainbird' | 'Hydrawise' | 'Generic';
 
 /**
- * Formats a zero-based valve array index into its display/id suffix, e.g.
+ * Formats a numeric id into its display/object-id suffix, e.g.
  * `formatValveNumber(0) === "000"`, `formatValveNumber(10) === "010"`.
  * Used both for the real ioBroker object id (`valves.valve_XXX`) and the
  * `valveNumber` display field in `native.valves[]`, so both always match and
  * sort correctly as plain strings (fixed-width, always 3 digits).
  *
- * @param index
+ * Historically this was called with the valve's array index, which made the
+ * real ioBroker object id (and thus all state history) change whenever a
+ * valve was reordered in the admin table. It is now called with the valve's
+ * stable, never-reused `id` field instead (see `IValveConfig.id`), so moving
+ * a valve up/down no longer changes its object id.
+ *
+ * @param id
  */
-export function formatValveNumber(index: number): string {
-    return String(index).padStart(3, '0');
+export function formatValveNumber(id: number): string {
+    return String(id).padStart(3, '0');
 }
 
 /**
  * Converts the admin UI's `planValveTable` rows (as sent back by the
- * "Apply valve assignment" button) into the list of assigned valve indexes.
+ * "Apply valve assignment" button) into the list of assigned valve indexes
+ * (positions in `valves`, in its current/current-array order).
  *
- * Rows are matched back to real valve indexes via the unique, stable
- * `valveNumber` field (e.g. "007" -> 7) rather than the row's position in
- * the array. The admin UI's `table` component allows reordering/deleting
- * rows (sortable columns, move up/down, delete-row buttons), so after such
- * an interaction the row order no longer matches `this.config2.valves`
- * order - using the row index directly would silently assign the wrong
- * valves to the plan.
+ * Rows are matched back to valves via the unique, stable `valveNumber`
+ * field, which mirrors each valve's stable `id` (not its array position) -
+ * see `formatValveNumber()`. The admin UI's `table` component allows
+ * reordering/deleting rows (sortable columns, move up/down, delete-row
+ * buttons), so after such an interaction the row order no longer matches
+ * `valves`' order, and a valve's array index can differ from the id encoded
+ * in `valveNumber` - using either the row index or the raw parsed number as
+ * an index directly would silently assign the wrong valves to the plan.
  *
  * @param rows
- * @param valveCount
+ * @param valves
  */
 export function parsePlanValveTableRows(
     rows: Array<{ valveNumber?: string; assigned?: boolean }>,
-    valveCount: number,
+    valves: Array<{ id?: number }>,
 ): number[] {
     return rows
         .filter(row => row?.assigned)
         .map(row => Number.parseInt(row.valveNumber ?? '', 10))
-        .filter(index => Number.isInteger(index) && index >= 0 && index < valveCount);
+        .filter(id => Number.isInteger(id))
+        .map(id => valves.findIndex(valve => valve.id === id))
+        .filter(index => index >= 0);
 }
 
 /**
@@ -96,6 +106,19 @@ export function synchronizePlanWithValves(plan: IPlanConfig, currentStateIds: st
 export type ScanType = ValveType | 'All';
 
 export interface IValveConfig {
+    /**
+     * Stable, never-reused numeric id assigned once when the valve is
+     * created (see `IrrigationNativeConfig.nextValveId`). Used to build the
+     * valve's real ioBroker object id (`valves.valve_XXX`, via
+     * `formatValveNumber()`) and the read-only `valveNumber` display field,
+     * so both stay constant even if the valve's row is later moved up/down
+     * in the admin Valves table. Optional only for backwards compatibility
+     * with configs/tests predating this field; `normalizeConfig()` always
+     * fills it in (falling back to the valve's current array index for
+     * pre-existing entries so their existing object id/state history is
+     * preserved across the upgrade).
+     */
+    id?: number;
     name: string;
     type: ValveType;
     /** Meaning depends on `type`, see plan "stateId-Konvention pro Typ" */
@@ -203,6 +226,13 @@ export interface IWaterConsumptionConfig {
 export interface IrrigationNativeConfig {
     expertMode: boolean;
     valves: IValveConfig[];
+    /**
+     * Counter used to assign the next new valve's stable `IValveConfig.id`.
+     * Always increments, never reused (even after valves are deleted), so a
+     * deleted valve's old object id/state history can never be silently
+     * inherited by an unrelated, later-added valve.
+     */
+    nextValveId: number;
     plans: IPlanConfig[];
     scheduler: ISchedulerConfig;
     sensors: ISensorsConfig;

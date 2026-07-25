@@ -147,7 +147,12 @@ export class ValveController {
     }
 
     public get id(): string {
-        return `valves.valve_${formatValveNumber(this.index)}`;
+        // Prefer the valve's stable, never-reused config id (see IValveConfig.id)
+        // over the constructor's `index` param, so this object id (and thus all
+        // state history under it) stays constant even if the valve's row is
+        // later reordered in the admin Valves table. `index` remains as a
+        // fallback for configs/tests predating this field.
+        return `valves.valve_${formatValveNumber(this.config.id ?? this.index)}`;
     }
 
     public getConfig(): IValveConfig {
