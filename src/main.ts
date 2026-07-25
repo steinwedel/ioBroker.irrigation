@@ -187,10 +187,8 @@ class Irrigation extends utils.Adapter {
      */
     private async migrateNativeConfig(): Promise<void> {
         const rawValves = (this.config as unknown as { valves?: Record<string, unknown>[] }).valves ?? [];
-        const migratedValves = this.config2.valves.map((valve, index) => ({
+        const migratedValves = this.formatValvesForNative(this.config2.valves).map((valve, index) => ({
             ...valve,
-            duration: formatDuration(valve.duration),
-            manualDuration: formatDuration(valve.manualDuration),
             valveNumber: `valve_${formatValveNumber(index)}`,
         }));
         const needsValveMigration =
@@ -724,8 +722,27 @@ class Irrigation extends utils.Adapter {
         }
     }
 
+    /**
+     * Converts valve durations (stored in `this.config2`/`IValveConfig` as
+     * numeric seconds) back into the "HH:MM:SS"/"MM:SS" display string the
+     * admin table's `duration`/`manualDuration` text fields expect (see
+     * migrateNativeConfig() and admin/jsonConfig.json). Every write path that
+     * persists valves to `native.valves` - or hands them back to an open
+     * admin dialog via a `sendTo` response - must go through this so the
+     * table never shows raw seconds.
+     *
+     * @param valves
+     */
+    private formatValvesForNative(valves: IValveConfig[]): Record<string, unknown>[] {
+        return valves.map(valve => ({
+            ...valve,
+            duration: formatDuration(valve.duration),
+            manualDuration: formatDuration(valve.manualDuration),
+        }));
+    }
+
     private async writeValvesToNative(valves: IValveConfig[]): Promise<void> {
-        await this.writeNativeAsync({ valves });
+        await this.writeNativeAsync({ valves: this.formatValvesForNative(valves) as unknown as IValveConfig[] });
     }
 
     private getPlanValveIndexes(planIndex: number | undefined): number[] {
@@ -862,7 +879,7 @@ class Irrigation extends utils.Adapter {
                         // configuration?" dialog (that is only triggered by saveConfig: true,
                         // which we deliberately omit since persistence already happened above
                         // via writeValvesToNative/setForeignObjectAsync).
-                        native: { valves: mergedValves },
+                        native: { valves: this.formatValvesForNative(mergedValves) },
                         result: result.errors.length > 0 ? 'scanErrors' : 'scanDone',
                         error: undefined,
                         args: [String(newValves.length), String(result.valves.length)],

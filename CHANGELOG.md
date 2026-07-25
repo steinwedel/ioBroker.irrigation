@@ -1,4 +1,6 @@
 # Changelog
+## **WORK IN PROGRESS**
+
 ## 0.3.2 (2026-07-25)
 * (Gerhard Steinwedel) **ENHANCED**: Scan progress message now remains visible for 10 seconds after scan completion before being automatically cleared — admin UI hides the progress field when empty. Timer is cleaned up on new scans and adapter shutdown.
 
