@@ -2,6 +2,7 @@ import type { IValveConfig } from './types';
 import { formatValveNumber } from './types';
 import type { RateLimiter } from './rate-limiter';
 import { CancelledError } from './rate-limiter';
+import { formatDuration } from './duration';
 
 /**
  * Parses the Gardena "duration_leftover_i" state value into remaining
@@ -227,6 +228,14 @@ export class ValveController {
         // "value" role instead. setObjectNotExistsAsync above does not update
         // existing objects, so force the role change here.
         await this.adapter.extendObjectAsync(`${this.id}.remainingTime`, { common: { role: 'value', unit: 's' } });
+        await this.ensureState('remainingDurationMin', {
+            name: 'Remaining time (mm:ss)',
+            type: 'string',
+            role: 'text',
+            read: true,
+            write: false,
+            def: '00:00',
+        });
         await this.ensureState('timestampStart', {
             name: 'Start timestamp (ms, epoch)',
             type: 'number',
@@ -616,6 +625,10 @@ export class ValveController {
                 val: Math.max(0, remainingSecs),
                 ack: true,
             });
+            await this.adapter.setStateAsync(`${this.id}.remainingDurationMin`, {
+                val: formatDuration(remainingSecs),
+                ack: true,
+            });
         }
     }
 
@@ -803,6 +816,16 @@ export class ValveController {
                 .catch(error =>
                     this.adapter.log.warn(
                         `Valve ${this.config.name}: failed to update remainingTime: ${(error as Error).message}`,
+                    ),
+                );
+            this.adapter
+                .setStateAsync(`${this.id}.remainingDurationMin`, {
+                    val: formatDuration(this.remainingSecs),
+                    ack: true,
+                })
+                .catch(error =>
+                    this.adapter.log.warn(
+                        `Valve ${this.config.name}: failed to update remainingDurationMin: ${(error as Error).message}`,
                     ),
                 );
             if (this.remainingSecs <= 0) {

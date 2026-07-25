@@ -1,4 +1,6 @@
 # Changelog
+## **WORK IN PROGRESS**
+
 ## 0.3.6 (2026-07-25)
 * (Gerhard Steinwedel) **FIXED**: Deleted or renamed plans no longer linger in `automation.planSelect` and `automation.startPlan` dropdowns — `extendObjectAsync` deep-merges `common.states` instead of replacing it, so old plan entries would persist forever. New `replaceObjectStates()` method explicitly replaces the entire `states` map to ensure stale entries are removed
 

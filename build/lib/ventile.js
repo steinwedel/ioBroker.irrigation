@@ -24,6 +24,7 @@ __export(ventile_exports, {
 module.exports = __toCommonJS(ventile_exports);
 var import_types = require("./types");
 var import_rate_limiter = require("./rate-limiter");
+var import_duration = require("./duration");
 function parseGardenaLeftoverMinutes(val) {
   let minutes = 0;
   if (typeof val === "number" && Number.isFinite(val)) {
@@ -183,6 +184,14 @@ class ValveController {
       def: 0
     });
     await this.adapter.extendObjectAsync(`${this.id}.remainingTime`, { common: { role: "value", unit: "s" } });
+    await this.ensureState("remainingDurationMin", {
+      name: "Remaining time (mm:ss)",
+      type: "string",
+      role: "text",
+      read: true,
+      write: false,
+      def: "00:00"
+    });
     await this.ensureState("timestampStart", {
       name: "Start timestamp (ms, epoch)",
       type: "number",
@@ -522,6 +531,10 @@ class ValveController {
         val: Math.max(0, remainingSecs),
         ack: true
       });
+      await this.adapter.setStateAsync(`${this.id}.remainingDurationMin`, {
+        val: (0, import_duration.formatDuration)(remainingSecs),
+        ack: true
+      });
     }
   }
   /**
@@ -674,6 +687,14 @@ class ValveController {
       this.adapter.setStateAsync(`${this.id}.remainingTime`, { val: this.remainingSecs, ack: true }).catch(
         (error) => this.adapter.log.warn(
           `Valve ${this.config.name}: failed to update remainingTime: ${error.message}`
+        )
+      );
+      this.adapter.setStateAsync(`${this.id}.remainingDurationMin`, {
+        val: (0, import_duration.formatDuration)(this.remainingSecs),
+        ack: true
+      }).catch(
+        (error) => this.adapter.log.warn(
+          `Valve ${this.config.name}: failed to update remainingDurationMin: ${error.message}`
         )
       );
       if (this.remainingSecs <= 0) {

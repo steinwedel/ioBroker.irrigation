@@ -24,6 +24,7 @@ __export(automation_exports, {
 });
 module.exports = __toCommonJS(automation_exports);
 var import_ventile = require("./ventile");
+var import_duration = require("./duration");
 function calculateTemperatureAdjustmentFactor(temperature) {
   return 1.07 ** (temperature - 20);
 }
@@ -640,6 +641,7 @@ class AutomationEngine {
     this.temperatureAdjustmentFactor = 1;
     await this.deps.adapter.setStateAsync("automation.elapsedTime", { val: 0, ack: true });
     await this.deps.adapter.setStateAsync("automation.remainingTime", { val: 0, ack: true });
+    await this.deps.adapter.setStateAsync("automation.remainingDurationMin", { val: (0, import_duration.formatDuration)(0), ack: true });
     await this.deps.adapter.setStateAsync("automation.totalDuration", { val: 0, ack: true });
     await this.deps.adapter.setStateAsync("automation.temperatureAdjustmentFactor", { val: 1, ack: true });
   }
@@ -649,8 +651,8 @@ class AutomationEngine {
     let text = `Mode: ${this.status}`;
     if (this.manualRun) {
       const valve = config.valves[this.manualRun.valveIndex];
-      const remainingSecs = Math.max(0, Math.round((this.manualRun.endsAt - Date.now()) / 1e3));
-      text = `Mode: manual (${(_a = valve == null ? void 0 : valve.name) != null ? _a : this.manualRun.valveIndex}, noch ${Math.ceil(remainingSecs / 60)}min)`;
+      const remainingSecs2 = Math.max(0, Math.round((this.manualRun.endsAt - Date.now()) / 1e3));
+      text = `Mode: manual (${(_a = valve == null ? void 0 : valve.name) != null ? _a : this.manualRun.valveIndex}, noch ${Math.ceil(remainingSecs2 / 60)}min)`;
     } else if (this.status !== "idle" && this.activePlanName) {
       text += ` (Plan: ${this.activePlanName})`;
       if (this.pauseReason === "legalRestriction") {
@@ -678,9 +680,14 @@ class AutomationEngine {
     });
     const elapsedSecs = this.startedAtMs > 0 ? Math.floor((Date.now() - this.startedAtMs) / 1e3) : 0;
     const totalDurationSecs = this.totalDurationMin * 60;
+    const remainingSecs = Math.max(0, totalDurationSecs - elapsedSecs);
     await this.deps.adapter.setStateAsync("automation.elapsedTime", { val: elapsedSecs, ack: true });
     await this.deps.adapter.setStateAsync("automation.remainingTime", {
-      val: Math.max(0, totalDurationSecs - elapsedSecs),
+      val: remainingSecs,
+      ack: true
+    });
+    await this.deps.adapter.setStateAsync("automation.remainingDurationMin", {
+      val: (0, import_duration.formatDuration)(remainingSecs),
       ack: true
     });
     await this.deps.adapter.setStateAsync("automation.totalDuration", { val: totalDurationSecs, ack: true });

@@ -1,6 +1,7 @@
 import type { IrrigationNativeConfig, IValveConfig, IPlanConfig, AutomationStatus, PauseReason, Batch } from './types';
 import type { ValveController } from './ventile';
 import { rainbirdInstanceOf } from './ventile';
+import { formatDuration } from './duration';
 
 export function calculateTemperatureAdjustmentFactor(temperature: number): number {
     return 1.07 ** (temperature - 20);
@@ -729,6 +730,7 @@ export class AutomationEngine {
         this.temperatureAdjustmentFactor = 1;
         await this.deps.adapter.setStateAsync('automation.elapsedTime', { val: 0, ack: true });
         await this.deps.adapter.setStateAsync('automation.remainingTime', { val: 0, ack: true });
+        await this.deps.adapter.setStateAsync('automation.remainingDurationMin', { val: formatDuration(0), ack: true });
         await this.deps.adapter.setStateAsync('automation.totalDuration', { val: 0, ack: true });
         await this.deps.adapter.setStateAsync('automation.temperatureAdjustmentFactor', { val: 1, ack: true });
     }
@@ -770,9 +772,14 @@ export class AutomationEngine {
 
         const elapsedSecs = this.startedAtMs > 0 ? Math.floor((Date.now() - this.startedAtMs) / 1000) : 0;
         const totalDurationSecs = this.totalDurationMin * 60;
+        const remainingSecs = Math.max(0, totalDurationSecs - elapsedSecs);
         await this.deps.adapter.setStateAsync('automation.elapsedTime', { val: elapsedSecs, ack: true });
         await this.deps.adapter.setStateAsync('automation.remainingTime', {
-            val: Math.max(0, totalDurationSecs - elapsedSecs),
+            val: remainingSecs,
+            ack: true,
+        });
+        await this.deps.adapter.setStateAsync('automation.remainingDurationMin', {
+            val: formatDuration(remainingSecs),
             ack: true,
         });
         await this.deps.adapter.setStateAsync('automation.totalDuration', { val: totalDurationSecs, ack: true });
