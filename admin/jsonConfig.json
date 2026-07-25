@@ -150,6 +150,7 @@
                             "label": "Progress",
                             "oid": "scan.progress",
                             "control": "text",
+                            "hidden": "return !(await _socket.getState(`irrigation.${_instance}.scan.progress`))?.val",
                             "xs": 12,
                             "sm": 12,
                             "md": 8,

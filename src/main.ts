@@ -73,6 +73,7 @@ class Irrigation extends utils.Adapter {
     private flowMonitor!: FlowMonitor;
     private rateLimiter!: RateLimiter;
     private rateLimiterPoll: ReturnType<ioBroker.Adapter['setInterval']> | undefined;
+    private scanProgressClearTimer: ReturnType<ioBroker.Adapter['setTimeout']> | undefined;
 
     public constructor(options: Partial<utils.AdapterOptions> = {}) {
         super({
@@ -555,6 +556,10 @@ class Irrigation extends utils.Adapter {
                 this.clearInterval(this.rateLimiterPoll);
                 this.rateLimiterPoll = undefined;
             }
+            if (this.scanProgressClearTimer) {
+                this.clearTimeout(this.scanProgressClearTimer);
+                this.scanProgressClearTimer = undefined;
+            }
             this.rateLimiter?.destroy();
             this.automation?.destroy();
             this.scheduler?.destroy();
@@ -783,9 +788,26 @@ class Irrigation extends utils.Adapter {
             }
 
             const setProgress = (message: string): void => {
+                if (this.scanProgressClearTimer) {
+                    this.clearTimeout(this.scanProgressClearTimer);
+                    this.scanProgressClearTimer = undefined;
+                }
                 this.setState('scan.progress', { val: message, ack: true }).catch(() => {
                     /* best-effort progress display */
                 });
+            };
+
+            const finishProgress = (message: string): void => {
+                setProgress(message);
+                // Keep the progress display visible for a short grace period after the
+                // scan finishes (see admin/jsonConfig.json "scanProgress" hidden formula,
+                // which hides the field once this state is empty again), then clear it.
+                this.scanProgressClearTimer = this.setTimeout(() => {
+                    this.scanProgressClearTimer = undefined;
+                    this.setState('scan.progress', { val: '', ack: true }).catch(() => {
+                        /* best-effort progress display */
+                    });
+                }, 10_000);
             };
 
             setProgress(`Scanning ${payload.type}...`);
@@ -824,7 +846,7 @@ class Irrigation extends utils.Adapter {
                       : updatedNames > 0
                         ? `Updated ${updatedNames} valve name(s).`
                         : 'Scan finished, no new valves found.';
-            setProgress(doneMessage);
+            finishProgress(doneMessage);
 
             if (obj.callback) {
                 this.sendTo(
