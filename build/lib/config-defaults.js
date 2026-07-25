@@ -22,6 +22,7 @@ __export(config_defaults_exports, {
   normalizeConfig: () => normalizeConfig
 });
 module.exports = __toCommonJS(config_defaults_exports);
+var import_duration = require("./duration");
 const DEFAULT_CONFIG = {
   expertMode: false,
   valves: [],
@@ -98,9 +99,9 @@ function normalizeConfig(config) {
   return {
     expertMode: (_m = config.expertMode) != null ? _m : DEFAULT_CONFIG.expertMode,
     valves: ((_n = config.valves) != null ? _n : []).map((valve) => {
-      var _a2, _b2, _c2, _d2, _e2, _f2, _g2, _h2, _i2, _j2, _k2;
+      var _a2, _b2, _c2, _d2, _e2, _f2, _g2, _h2, _i2, _j2;
       const legacyRunFor = valve.runFor;
-      const duration = (_a2 = valve.duration) != null ? _a2 : legacyRunFor !== void 0 ? legacyRunFor / 60 : 10;
+      const duration = typeof valve.duration === "number" ? Math.max(1, Math.round(valve.duration * 60)) : (0, import_duration.parseDuration)((_a2 = valve.duration) != null ? _a2 : legacyRunFor !== void 0 ? legacyRunFor : "10");
       return {
         name: (_b2 = valve.name) != null ? _b2 : "",
         type: (_c2 = valve.type) != null ? _c2 : "Generic",
@@ -111,9 +112,9 @@ function normalizeConfig(config) {
         duration,
         rainIndependent: (_g2 = valve.rainIndependent) != null ? _g2 : false,
         moistureThreshold: (_h2 = valve.moistureThreshold) != null ? _h2 : 0,
-        manualDuration: (_i2 = valve.manualDuration) != null ? _i2 : duration,
-        flowSensorId: (_j2 = valve.flowSensorId) != null ? _j2 : "",
-        days: (_k2 = valve.days) != null ? _k2 : []
+        manualDuration: typeof valve.manualDuration === "number" ? Math.max(1, Math.round(valve.manualDuration * 60)) : valve.manualDuration === void 0 ? duration : (0, import_duration.parseDuration)(valve.manualDuration),
+        flowSensorId: (_i2 = valve.flowSensorId) != null ? _i2 : "",
+        days: (_j2 = valve.days) != null ? _j2 : []
       };
     }),
     plans: config.plans && config.plans.length > 0 ? config.plans.map((p) => {

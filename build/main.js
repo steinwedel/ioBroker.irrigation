@@ -23,6 +23,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 ));
 var utils = __toESM(require("@iobroker/adapter-core"));
 var import_config_defaults = require("./lib/config-defaults");
+var import_duration = require("./lib/duration");
 var import_types = require("./lib/types");
 var import_states = require("./lib/states");
 var import_ventile = require("./lib/ventile");
@@ -159,9 +160,11 @@ class Irrigation extends utils.Adapter {
     const rawValves = (_a = this.config.valves) != null ? _a : [];
     const migratedValves = this.config2.valves.map((valve, index) => ({
       ...valve,
+      duration: (0, import_duration.formatDuration)(valve.duration),
+      manualDuration: (0, import_duration.formatDuration)(valve.manualDuration),
       valveNumber: `valve_${(0, import_types.formatValveNumber)(index)}`
     }));
-    const needsValveMigration = rawValves.length !== migratedValves.length || rawValves.some((raw) => !raw.valveNumber || "runFor" in raw);
+    const needsValveMigration = rawValves.length !== migratedValves.length || rawValves.some((raw) => !raw.valveNumber || "runFor" in raw || typeof raw.duration === "number");
     if (needsValveMigration) {
       this.log.info("Migrating native.valves to remove runFor and include valveNumber.");
       await this.writeNativeAsync({ valves: migratedValves });

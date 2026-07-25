@@ -233,10 +233,10 @@ class ValveController {
       def: this.config.flowRateLpm
     });
     await this.ensureState("duration", {
-      name: "Scheduled duration (min)",
+      name: "Scheduled duration",
       type: "number",
       role: "level.timer",
-      unit: "min",
+      unit: "s",
       read: true,
       write: true,
       min: 1,
@@ -270,10 +270,10 @@ class ValveController {
       def: false
     });
     await this.ensureState("manualDuration", {
-      name: "Manual run duration (min)",
+      name: "Manual run duration",
       type: "number",
       role: "level.timer",
-      unit: "min",
+      unit: "s",
       read: true,
       write: true,
       min: 1,
@@ -436,7 +436,7 @@ class ValveController {
         return;
       }
       this.clearTickTimer();
-      const durationSecs = Math.round(this.config.duration * 60);
+      const durationSecs = this.config.duration;
       this.durationSecs = durationSecs;
       this.remainingSecs = durationSecs;
       this.startedAt = Date.now();
@@ -537,7 +537,7 @@ class ValveController {
       return;
     }
     this.clearTickTimer();
-    const effectiveDurationSecs = typeof durationSecs === "number" && durationSecs > 0 ? durationSecs : Math.round(this.config.duration * 60);
+    const effectiveDurationSecs = typeof durationSecs === "number" && durationSecs > 0 ? durationSecs : this.config.duration;
     this.durationSecs = effectiveDurationSecs;
     this.remainingSecs = effectiveDurationSecs;
     this.startedAt = Date.now();

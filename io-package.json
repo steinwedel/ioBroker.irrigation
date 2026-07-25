@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "news": {
+      "0.3.1": {
+        "en": "**ENHANCED**: Valve durations now stored and processed in seconds instead of minutes — admin UI accepts flexible input formats (minutes, MM:SS, HH:MM:SS) and normalizes to display format. Legacy migration converts old minute values automatically. State units changed from `min` to `s`.",
+        "de": "**VERBESSERT**: Ventillaufzeiten werden jetzt in Sekunden statt in Minuten gespeichert und verarbeitet – die Admin-Oberfläche akzeptiert flexible Eingabeformate (Minuten, MM:SS, HH:MM:SS) und normalisiert zur Anzeige. Legacy-Migration konvertiert alte Minutenwerte automatisch. Zustandseinheiten von `min` auf `s` geändert.",
+        "ru": "**УЛУЧШЕНО**: Длительность работы клапанов теперь хранится и обрабатывается в секундах вместо минут — интерфейс администратора принимает гибкие форматы ввода (минуты, MM:SS, HH:MM:SS) и нормализует для отображения. Миграция автоматически конвертирует старые значения в минутах. Единицы измерения состояний изменены с `min` на `s`.",
+        "pt": "**MELHORADO**: As durações das válvulas agora são armazenadas e processadas em segundos em vez de minutos — a interface de administração aceita formatos de entrada flexíveis (minutos, MM:SS, HH:MM:SS) e normaliza para o formato de exibição. A migração legada converte valores antigos em minutos automaticamente. Unidades de estado alteradas de `min` para `s`.",
+        "nl": "**VERBETERD**: Klepduurtijden worden nu opgeslagen en verwerkt in seconden in plaats van minuten — de beheerinterface accepteert flexibele invoerformaten (minuten, MM:SS, HH:MM:SS) en normaliseert naar weergaveformaat. Legacy-migratie converteert oude minutenwaarden automatisch. Statuseenheden gewijzigd van `min` naar `s`.",
+        "fr": "**AMÉLIORÉ** : Les durées de vanne sont désormais stockées et traitées en secondes au lieu de minutes — l'interface d'administration accepte des formats d'entrée flexibles (minutes, MM:SS, HH:MM:SS) et normalise vers le format d'affichage. La migration héritée convertit automatiquement les anciennes valeurs en minutes. Unités d'état changées de `min` à `s`.",
+        "it": "**MIGLIORATO**: Le durate delle valvole ora sono memorizzate ed elaborate in secondi anziché in minuti — l'interfaccia di amministrazione accetta formati di input flessibili (minuti, MM:SS, HH:MM:SS) e normalizza al formato di visualizzazione. La migrazione legacy converte automaticamente i vecchi valori in minuti. Unità degli stati cambiate da `min` a `s`.",
+        "es": "**MEJORADO**: Las duraciones de las válvulas ahora se almacenan y procesan en segundos en lugar de minutos — la interfaz de administración acepta formatos de entrada flexibles (minutos, MM:SS, HH:MM:SS) y normaliza al formato de visualización. La migración heredada convierte automáticamente los valores antiguos en minutos. Unidades de estado cambiadas de `min` a `s`.",
+        "pl": "**ULEPSZONE**: Czasy trwania zaworów są teraz przechowywane i przetwarzane w sekundach zamiast w minutach — interfejs administratora akceptuje elastyczne formaty wejściowe (minuty, MM:SS, HH:MM:SS) i normalizuje do formatu wyświetlania. Migracja starszych wersji automatycznie konwertuje stare wartości w minutach. Jednostki stanów zmienione z `min` na `s`.",
+        "uk": "**ПОКРАЩЕНО**: Тривалість роботи клапанів тепер зберігається та обробляється в секундах замість хвилин — інтерфейс адміністратора приймає гнучкі формати введення (хвилини, MM:SS, HH:MM:SS) і нормалізує для відображення. Міграція автоматично конвертує старі значення в хвилинах. Одиниці вимірювання станів змінено з `min` на `s`.",
+        "zh-cn": "**增强**：阀门持续时间现在以秒而非分钟存储和处理——管理界面接受灵活的输入格式（分钟、MM:SS、HH:MM:SS）并规范化为显示格式。旧版迁移会自动转换旧的分钟值。状态单位从 `min` 更改为 `s`。"
+      },
       "0.3.0": {
         "en": "**NEW**: Added wind speed/gust limits with resume hysteresis as an automatic pause condition\n**ENHANCED**: Added unit tests for per-valve-type start/stop/status (Gardena, Homematic, Hydrawise, Generic), the DWD/local/no-source legal restriction, and a full-plan-run test for the temperature-controlled irrigation adjustment\n**ENHANCED**: Added build.sh --dry-run/--no-deploy/--help and an admin hint that the Valves tab order is authoritative\n**FIXED**: Legacy fields (e.g. valveOrder) that were only dropped in memory now trigger a one-time cleanup rewrite of automation.plansData\n**ENHANCED**: Reduced plansData debug logging to a concise count instead of a full JSON dump\n**ENHANCED**: Extracted plan/valve synchronization into a tested pure function covering valve add/remove/rename regressions\n**FIXED**: Removed stale plan valve table order hint and misleading row-number column that contradicted the global Valves tab order\n**ENHANCED**: Updated the architecture status with current irrigation features\n**NEW**: Added automatic pause and resume of watering plans during rain\n**ENHANCED**: Added wind, precipitation, ET and flow-monitoring roadmap items\n**ENHANCED**: Expanded the adapter roadmap with operation, import/export and dashboard tasks\n**ENHANCED**: Updated the adapter implementation plan with completed and open work",
         "de": "**NEU**: Windgeschwindigkeits-/Böenlimits mit Wiederaufnahme-Hysterese als automatische Pausenbedingung hinzugefügt **ERWEITERT**: Unit-Tests für Start/Stopp/Status pro Ventiltyp (Gardena, Homematic, Hydrawise, Generic), die DWD/lokale/keine-Quelle gesetzliche Einschränkung und einen vollständigen Plandurchlauf-Test für die temperaturgesteuerte Bewässerungsanpassung hinzugefügt **ERWEITERT**: build.sh --dry-run/--no-deploy/--help und einen Admin-Hinweis hinzugefügt, dass die Reihenfolge im Ventile-Tab maßgeblich ist **BEHOBEN**: Legacy-Felder (z. B. valveOrder), die bisher nur im Speicher entfernt wurden, lösen nun ein einmaliges Aufräumen und Neuschreiben von automation.plansData aus **ERWEITERT**: plansData-Debug-Logging auf eine kompakte Anzahl reduziert statt eines vollständigen JSON-Dumps **ERWEITERT**: Plan-/Ventil-Synchronisation in eine getestete reine Funktion extrahiert, die Ventil-Hinzufügen/Entfernen/Umbenennen-Regressionen abdeckt **BEHOBEN**: Veralteten Hinweis zur Reihenfolge der Plan-Ventil-Tabelle und irreführende Zeilennummer-Spalte entfernt, die der globalen Ventile-Tab-Reihenfolge widersprach **ERWEITERT**: Architekturstatus mit aktuellen Bewässerungsfunktionen aktualisiert **NEU**: Automatisches Pausieren und Fortsetzen von Bewässerungsplänen bei Regen hinzugefügt **ERWEITERT**: Wind-, Niederschlags-, ET- und Durchflussüberwachungs-Roadmap-Punkte hinzugefügt **ERWEITERT**: Adapter-Roadmap um Betriebs-, Import/Export- und Dashboard-Aufgaben erweitert **ERWEITERT**: Adapter-Implementierungsplan mit abgeschlossenen und offenen Arbeiten aktualisiert",
@@ -80,19 +93,6 @@
         "pl": "**ULEPSZONE**: Wyłączono monity o ręczny przegląd wydań dla zautomatyzowanych wydań",
         "uk": "**ПОКРАЩЕНО**: Вимкнено запити на ручний перегляд релізів для автоматизованих релізів",
         "zh-cn": "**增强**：已禁用自动发布的手动发布审查提示"
-      },
-      "0.2.51": {
-        "en": "**FIXED**: Restored reliable plan valve order serialization in the admin table",
-        "de": "**BEHOBEN**: Zuverlässige Serialisierung der Planventil-Reihenfolge in der Admin-Tabelle wiederhergestellt",
-        "ru": "**ИСПРАВЛЕНО**: Восстановлена надежная сериализация порядка клапанов плана в таблице администратора",
-        "pt": "**CORRIGIDO**: Restaurada a serialização confiável da ordem das válvulas do plano na tabela de administração",
-        "nl": "**OPGELOST**: Betrouwbare serialisatie van de volgorde van planventielen in de beheerderstabel hersteld",
-        "fr": "**CORRIGÉ**: Restauration de la sérialisation fiable de l'ordre des vannes du plan dans le tableau d'administration",
-        "it": "**RISOLTO**: Ripristinata la serializzazione affidabile dell'ordine delle valvole del piano nella tabella di amministrazione",
-        "es": "**SOLUCIONADO**: Restaurada la serialización confiable del orden de las válvulas del plan en la tabla de administración",
-        "pl": "**NAPRAWIONO**: Przywrócono niezawodną serializację kolejności zaworów planu w tabeli administratora",
-        "uk": "**ВИПРАВЛЕНО**: Відновлено надійну серіалізацію порядку клапанів плану в таблиці адміністратора",
-        "zh-cn": "**已修复**：恢复了管理表中计划阀门顺序的可靠序列化"
       }
     },
     "titleLang": {

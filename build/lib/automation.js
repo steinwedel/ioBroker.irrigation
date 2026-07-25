@@ -277,15 +277,14 @@ class AutomationEngine {
     return result;
   }
   computeTotalDurationMin(config) {
-    let total = 0;
+    let totalSeconds = 0;
     for (const batch of this.batches) {
-      const batchDuration = Math.max(...batch.map((idx) => this.effectiveDuration(config, idx)));
-      total += batchDuration;
+      totalSeconds += Math.max(...batch.map((idx) => this.effectiveDuration(config, idx)));
     }
     if (config.scheduler.valvePause > 0 && this.batches.length > 1) {
-      total += config.scheduler.valvePause * (this.batches.length - 1);
+      totalSeconds += config.scheduler.valvePause * 60 * (this.batches.length - 1);
     }
-    return total;
+    return totalSeconds / 60;
   }
   effectiveDuration(config, valveIndex) {
     return config.valves[valveIndex].duration * config.scheduler.extensionFactor * this.temperatureAdjustmentFactor;
@@ -302,7 +301,7 @@ class AutomationEngine {
     this.runningValves = new Set(batch);
     this.inBatchPause = false;
     for (const valveIndex of batch) {
-      const durationSecs = Math.round(this.effectiveDuration(config, valveIndex) * 60);
+      const durationSecs = Math.round(this.effectiveDuration(config, valveIndex));
       this.valveDurationSecs.set(valveIndex, durationSecs);
       this.valveEndsAt.set(valveIndex, Date.now() + durationSecs * 1e3);
       await this.deps.valves[valveIndex].start(durationSecs);
@@ -562,7 +561,7 @@ class AutomationEngine {
       this.pauseReason = "manual";
       this.wasAutomationPausedForManual = true;
     }
-    const durationSecs = Math.round(valve.manualDuration * 60);
+    const durationSecs = Math.round(valve.manualDuration);
     this.manualRun = { valveIndex, endsAt: Date.now() + durationSecs * 1e3 };
     await this.deps.valves[valveIndex].start(durationSecs);
     (_b = (_a = this.deps).onValveFlowChange) == null ? void 0 : _b.call(_a, valveIndex, true);
