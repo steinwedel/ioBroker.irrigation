@@ -57,6 +57,7 @@ class Irrigation extends utils.Adapter {
   flowMonitor;
   rateLimiter;
   rateLimiterPoll;
+  scanProgressClearTimer;
   constructor(options = {}) {
     super({
       ...options,
@@ -494,6 +495,10 @@ class Irrigation extends utils.Adapter {
         this.clearInterval(this.rateLimiterPoll);
         this.rateLimiterPoll = void 0;
       }
+      if (this.scanProgressClearTimer) {
+        this.clearTimeout(this.scanProgressClearTimer);
+        this.scanProgressClearTimer = void 0;
+      }
       (_a = this.rateLimiter) == null ? void 0 : _a.destroy();
       (_b = this.automation) == null ? void 0 : _b.destroy();
       (_c = this.scheduler) == null ? void 0 : _c.destroy();
@@ -678,8 +683,20 @@ class Irrigation extends utils.Adapter {
           break;
       }
       const setProgress = (message) => {
+        if (this.scanProgressClearTimer) {
+          this.clearTimeout(this.scanProgressClearTimer);
+          this.scanProgressClearTimer = void 0;
+        }
         this.setState("scan.progress", { val: message, ack: true }).catch(() => {
         });
+      };
+      const finishProgress = (message) => {
+        setProgress(message);
+        this.scanProgressClearTimer = this.setTimeout(() => {
+          this.scanProgressClearTimer = void 0;
+          this.setState("scan.progress", { val: "", ack: true }).catch(() => {
+          });
+        }, 1e4);
       };
       setProgress(`Scanning ${payload.type}...`);
       const result = await (0, import_valvescanner.scanForValves)(this, payload.type, effectiveInstance, payload.locationId, setProgress);
@@ -706,7 +723,7 @@ class Irrigation extends utils.Adapter {
         await this.writeValvesToNative(mergedValves);
       }
       const doneMessage = result.errors.length > 0 ? `Scan finished with errors: ${result.errors.join("; ")}` : newValves.length > 0 ? `Found and added ${newValves.length} new valve(s).` : updatedNames > 0 ? `Updated ${updatedNames} valve name(s).` : "Scan finished, no new valves found.";
-      setProgress(doneMessage);
+      finishProgress(doneMessage);
       if (obj.callback) {
         this.sendTo(
           obj.from,
