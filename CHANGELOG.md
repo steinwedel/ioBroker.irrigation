@@ -1,5 +1,6 @@
 # Changelog
 ## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **FIXED**: Deleted or renamed plans no longer linger in `automation.planSelect` and `automation.startPlan` dropdowns — `extendObjectAsync` deep-merges `common.states` instead of replacing it, so old plan entries would persist forever. New `replaceObjectStates()` method explicitly replaces the entire `states` map to ensure stale entries are removed
 
 ## 0.3.5 (2026-07-25)
 * (Gerhard Steinwedel) **ENHANCED**: Valves now have stable, never-reused IDs that persist across reordering — moving a valve up/down in the admin table no longer changes its ioBroker object ID (`valves.valve_XXX`) or state history. Existing configurations are automatically migrated, with each valve receiving its current array position as its initial ID to preserve existing object IDs and history
