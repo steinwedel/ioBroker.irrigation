@@ -142,15 +142,20 @@ function repairJsonWithUnescapedQuotes(text, keys) {
     // Try to fix the common failure mode: a value contains raw " characters
     // (e.g. "Selected plan") instead of \". Walk key by key and escape stray
     // quotes that are not part of the key/value delimiters.
+    //
+    // A naive heuristic ("a quote followed by , or }" ends the value) breaks
+    // when the translated text itself contains an ASCII comma right after an
+    // inner quote (e.g. Chinese text mixing full-width and ASCII punctuation:
+    // `..."All",与项目...`). To avoid that, a candidate closing quote is only
+    // accepted if what follows (after optional comma/whitespace) genuinely
+    // looks like the next JSON key or the object's closing brace - otherwise
+    // the quote is treated as an inner quote and escaped instead.
     let repaired = text;
     for (const key of keys) {
         const keyPattern = new RegExp(`"${key}"\\s*:\\s*"`, 'g');
         let match;
         while ((match = keyPattern.exec(repaired))) {
             const valueStart = match.index + match[0].length;
-            // Find the end of this value: the next `",` or `"}` at the start of
-            // a new key, scanning forward and escaping any quote that isn't
-            // immediately followed by a JSON structural character.
             let i = valueStart;
             let out = '';
             let closed = false;
@@ -162,8 +167,10 @@ function repairJsonWithUnescapedQuotes(text, keys) {
                     continue;
                 }
                 if (ch === '"') {
-                    const rest = repaired.slice(i + 1).match(/^\s*[,}]/);
-                    if (rest) {
+                    const after = repaired.slice(i + 1);
+                    const isEnd =
+                        /^\s*\}/.test(after) || /^\s*,\s*"(?:[^"\\]|\\.)*"\s*:/.test(after);
+                    if (isEnd) {
                         out += '"';
                         i += 1;
                         closed = true;
