@@ -26,6 +26,7 @@ var import_duration = require("./duration");
 const DEFAULT_CONFIG = {
   expertMode: false,
   valves: [],
+  nextValveId: 0,
   plans: [{ name: "Alle", valveIndexes: [] }],
   scheduler: {
     autoMode: false,
@@ -84,7 +85,7 @@ const DEFAULT_CONFIG = {
   }
 };
 function normalizeConfig(config) {
-  var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n;
+  var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o;
   const legacyRestriction = config.legalRestriction;
   const legacyStartMonth = (_a = legacyRestriction == null ? void 0 : legacyRestriction.monthStart) != null ? _a : 6;
   const legacyEndMonth = (_b = legacyRestriction == null ? void 0 : legacyRestriction.monthEnd) != null ? _b : 9;
@@ -98,11 +99,16 @@ function normalizeConfig(config) {
   };
   return {
     expertMode: (_m = config.expertMode) != null ? _m : DEFAULT_CONFIG.expertMode,
-    valves: ((_n = config.valves) != null ? _n : []).map((valve) => {
+    valves: ((_n = config.valves) != null ? _n : []).map((valve, index) => {
       var _a2, _b2, _c2, _d2, _e2, _f2, _g2, _h2, _i2, _j2;
       const legacyRunFor = valve.runFor;
       const duration = typeof valve.duration === "number" ? Math.max(1, Math.round(valve.duration * 60)) : (0, import_duration.parseDuration)((_a2 = valve.duration) != null ? _a2 : legacyRunFor !== void 0 ? legacyRunFor : "10");
       return {
+        // Falls back to the current array index only for pre-existing entries
+        // that predate this field, so their real ioBroker object id (which is
+        // derived from `id`, see formatValveNumber()) stays exactly what it
+        // already was - see the IValveConfig.id doc comment.
+        id: typeof valve.id === "number" ? valve.id : index,
         name: (_b2 = valve.name) != null ? _b2 : "",
         type: (_c2 = valve.type) != null ? _c2 : "Generic",
         stateId: (_d2 = valve.stateId) != null ? _d2 : "",
@@ -117,6 +123,7 @@ function normalizeConfig(config) {
         days: (_j2 = valve.days) != null ? _j2 : []
       };
     }),
+    nextValveId: (_o = config.nextValveId) != null ? _o : DEFAULT_CONFIG.nextValveId,
     plans: config.plans && config.plans.length > 0 ? config.plans.map((p) => {
       var _a2, _b2;
       return { name: (_a2 = p.name) != null ? _a2 : "", valveIndexes: (_b2 = p.valveIndexes) != null ? _b2 : [] };

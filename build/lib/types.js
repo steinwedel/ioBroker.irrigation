@@ -24,14 +24,14 @@ __export(types_exports, {
   synchronizePlanWithValves: () => synchronizePlanWithValves
 });
 module.exports = __toCommonJS(types_exports);
-function formatValveNumber(index) {
-  return String(index).padStart(3, "0");
+function formatValveNumber(id) {
+  return String(id).padStart(3, "0");
 }
-function parsePlanValveTableRows(rows, valveCount) {
+function parsePlanValveTableRows(rows, valves) {
   return rows.filter((row) => row == null ? void 0 : row.assigned).map((row) => {
     var _a;
     return Number.parseInt((_a = row.valveNumber) != null ? _a : "", 10);
-  }).filter((index) => Number.isInteger(index) && index >= 0 && index < valveCount);
+  }).filter((id) => Number.isInteger(id)).map((id) => valves.findIndex((valve) => valve.id === id)).filter((index) => index >= 0);
 }
 const NONE_SENTINEL = -1;
 function synchronizePlanWithValves(plan, currentStateIds) {

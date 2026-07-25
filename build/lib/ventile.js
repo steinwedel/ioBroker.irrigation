@@ -118,7 +118,8 @@ class ValveController {
     this.getAllValves = getAllValves != null ? getAllValves : (() => [this]);
   }
   get id() {
-    return `valves.valve_${(0, import_types.formatValveNumber)(this.index)}`;
+    var _a;
+    return `valves.valve_${(0, import_types.formatValveNumber)((_a = this.config.id) != null ? _a : this.index)}`;
   }
   getConfig() {
     return this.config;

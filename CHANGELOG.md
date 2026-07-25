@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.3.5 (2026-07-25)
 * (Gerhard Steinwedel) **ENHANCED**: Valves now have stable, never-reused IDs that persist across reordering — moving a valve up/down in the admin table no longer changes its ioBroker object ID (`valves.valve_XXX`) or state history. Existing configurations are automatically migrated, with each valve receiving its current array position as its initial ID to preserve existing object IDs and history
 
 ## 0.3.4 (2026-07-25)
