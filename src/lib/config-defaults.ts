@@ -1,3 +1,4 @@
+import { parseDuration } from './duration';
 import type { IrrigationNativeConfig } from './types';
 
 /**
@@ -97,7 +98,10 @@ export function normalizeConfig(config: Partial<IrrigationNativeConfig>): Irriga
         valves: (config.valves ?? []).map(valve => {
             const legacyRunFor = (valve as Partial<IrrigationNativeConfig['valves'][number]> & { runFor?: number })
                 .runFor;
-            const duration = valve.duration ?? (legacyRunFor !== undefined ? legacyRunFor / 60 : 10);
+            const duration =
+                typeof valve.duration === 'number'
+                    ? Math.max(1, Math.round(valve.duration * 60))
+                    : parseDuration(valve.duration ?? (legacyRunFor !== undefined ? legacyRunFor : '10'));
             return {
                 name: valve.name ?? '',
                 type: valve.type ?? 'Generic',
@@ -108,7 +112,12 @@ export function normalizeConfig(config: Partial<IrrigationNativeConfig>): Irriga
                 duration,
                 rainIndependent: valve.rainIndependent ?? false,
                 moistureThreshold: valve.moistureThreshold ?? 0,
-                manualDuration: valve.manualDuration ?? duration,
+                manualDuration:
+                    typeof valve.manualDuration === 'number'
+                        ? Math.max(1, Math.round(valve.manualDuration * 60))
+                        : valve.manualDuration === undefined
+                          ? duration
+                          : parseDuration(valve.manualDuration),
                 flowSensorId: valve.flowSensorId ?? '',
                 days: valve.days ?? [],
             };

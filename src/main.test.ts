@@ -6,6 +6,7 @@
 
 import { expect } from 'chai';
 import { AutomationEngine, buildBatches, calculateTemperatureAdjustmentFactor } from './lib/automation';
+import { parseDuration, formatDuration } from './lib/duration';
 import { DwdRestriction, parseDwdTemperature } from './lib/dwd';
 import { resolvePlanFromIcalTitle } from './lib/scheduler';
 import { parsePlanValveTableRows, synchronizePlanWithValves } from './lib/types';
@@ -30,6 +31,19 @@ function makeValve(overrides: Partial<IValveConfig> = {}): IValveConfig {
         ...overrides,
     };
 }
+
+describe('duration parsing and formatting', () => {
+    it('accepts minutes, MM:SS and HH:MM:SS and stores seconds', () => {
+        expect(parseDuration('10')).to.equal(600);
+        expect(parseDuration('01:30')).to.equal(90);
+        expect(parseDuration('01:02:03')).to.equal(3723);
+    });
+
+    it('formats durations as MM:SS or HH:MM:SS', () => {
+        expect(formatDuration(90)).to.equal('01:30');
+        expect(formatDuration(3723)).to.equal('01:02:03');
+    });
+});
 
 describe('automation.calculateTemperatureAdjustmentFactor', () => {
     it('uses 20 °C as the neutral factor', () => {
@@ -845,7 +859,7 @@ describe('automation temperature-controlled irrigation adjustment (full plan run
     function makeAdjustmentConfig(temperatureAdjustmentEnabled: boolean): IrrigationNativeConfig {
         return {
             expertMode: false,
-            valves: [makeValve({ name: 'Rasen', duration: 10 })],
+            valves: [makeValve({ name: 'Rasen', duration: 600 })],
             plans: [{ name: 'Alle', valveIndexes: [] }],
             scheduler: {
                 autoMode: false,
@@ -914,7 +928,7 @@ describe('automation temperature-controlled irrigation adjustment (full plan run
         await engine.requestRun('Alle', 'manual-button');
 
         const expectedFactor = calculateTemperatureAdjustmentFactor(27);
-        const expectedDurationSecs = Math.round(10 * 1 * expectedFactor * 60);
+        const expectedDurationSecs = Math.round(600 * expectedFactor);
         expect(valve.startCalls).to.deep.equal([expectedDurationSecs]);
         expect(
             (adapter as unknown as { states: Map<string, ioBroker.StateValue> }).states.get(
@@ -940,7 +954,7 @@ describe('automation temperature-controlled irrigation adjustment (full plan run
 
         await engine.requestRun('Alle', 'manual-button');
 
-        expect(valve.startCalls).to.deep.equal([Math.round(10 * 60)]); // unadjusted duration
+        expect(valve.startCalls).to.deep.equal([600]); // unadjusted duration
         expect(
             (adapter as unknown as { states: Map<string, ioBroker.StateValue> }).states.get(
                 'automation.temperatureAdjustmentFactor',
@@ -965,7 +979,7 @@ describe('automation temperature-controlled irrigation adjustment (full plan run
 
         await engine.requestRun('Alle', 'manual-button');
 
-        expect(valve.startCalls).to.deep.equal([Math.round(10 * 60)]);
+        expect(valve.startCalls).to.deep.equal([600]);
     });
 });
 

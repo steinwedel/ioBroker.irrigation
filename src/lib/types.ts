@@ -106,13 +106,13 @@ export interface IValveConfig {
     enabled: boolean;
     /** Flow rate in liters per minute for water consumption calculation (0 = disabled) */
     flowRateLpm: number;
-    /** Scheduled duration in minutes */
+    /** Scheduled duration in seconds */
     duration: number;
     // --- expert fields (always present, neutral defaults when expert mode is off) ---
     rainIndependent: boolean;
     /** Percent, 0 = disabled */
     moistureThreshold: number;
-    /** Manual single-valve run duration in minutes */
+    /** Manual single-valve run duration in seconds */
     manualDuration: number;
     /** Optional flow sensor state id (liters/min or pulses) */
     flowSensorId: string;

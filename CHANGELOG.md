@@ -1,4 +1,6 @@
 # Changelog
+## **WORK IN PROGRESS**
+
 ## 0.3.0 (2026-07-25)
 * (Gerhard Steinwedel) **NEW**: Added wind speed/gust limits with resume hysteresis as an automatic pause condition
 * (Gerhard Steinwedel) **ENHANCED**: Added unit tests for per-valve-type start/stop/status (Gardena, Homematic, Hydrawise, Generic), the DWD/local/no-source legal restriction, and a full-plan-run test for the temperature-controlled irrigation adjustment

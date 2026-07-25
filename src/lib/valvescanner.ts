@@ -8,10 +8,10 @@ export interface ScanResult {
 const VALVE_DEFAULTS = {
     enabled: true,
     flowRateLpm: 0,
-    duration: 10,
+    duration: 600,
     rainIndependent: false,
     moistureThreshold: 0,
-    manualDuration: 10,
+    manualDuration: 600,
     flowSensorId: '',
     days: [] as number[],
 };

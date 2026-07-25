@@ -199,12 +199,13 @@
                             ]
                         },
                         {
-                            "type": "number",
+                            "type": "text",
                             "attr": "duration",
-                            "title": "Watering duration (min)",
+                            "title": "Watering duration",
                             "width": "14%",
-                            "min": 1,
-                            "default": 10
+                            "default": "10:00",
+                            "validator": "/^(?:\\d+|(?:\\d+:)?[0-5]\\d:[0-5]\\d)$/.test(data.duration)",
+                            "tooltip": "Enter minutes, MM:SS or HH:MM:SS"
                         },
                         {
                             "type": "objectId",

@@ -5,6 +5,7 @@
 
 import * as utils from '@iobroker/adapter-core';
 import { normalizeConfig } from './lib/config-defaults';
+import { formatDuration } from './lib/duration';
 import type { IPlanConfig, IrrigationNativeConfig, IValveConfig, ScanType } from './lib/types';
 import { formatValveNumber, NONE_SENTINEL, parsePlanValveTableRows, synchronizePlanWithValves } from './lib/types';
 import { createBaseStates, applyConfigToStates } from './lib/states';
@@ -187,14 +188,17 @@ class Irrigation extends utils.Adapter {
         const rawValves = (this.config as unknown as { valves?: Record<string, unknown>[] }).valves ?? [];
         const migratedValves = this.config2.valves.map((valve, index) => ({
             ...valve,
+            duration: formatDuration(valve.duration),
+            manualDuration: formatDuration(valve.manualDuration),
             valveNumber: `valve_${formatValveNumber(index)}`,
         }));
         const needsValveMigration =
-            rawValves.length !== migratedValves.length || rawValves.some(raw => !raw.valveNumber || 'runFor' in raw);
+            rawValves.length !== migratedValves.length ||
+            rawValves.some(raw => !raw.valveNumber || 'runFor' in raw || typeof raw.duration === 'number');
 
         if (needsValveMigration) {
             this.log.info('Migrating native.valves to remove runFor and include valveNumber.');
-            await this.writeNativeAsync({ valves: migratedValves });
+            await this.writeNativeAsync({ valves: migratedValves as unknown as IValveConfig[] });
         }
     }
 

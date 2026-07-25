@@ -1,11 +1,11 @@
 # Context
 
 ## Current Task
-Priorität 5 (Wetter/Verdunstung) teilweise umgesetzt: Windgrenze, Böengrenze und Hysterese ergänzt.
+Ventil-Bewässerungsdauer auf Sekundenbetrieb umgestellt und im Admin als Zeitwert formatierbar gemacht.
 
 ## Key Decisions
-- Neues `WindMonitor`-Modul spiegelt SensorManager/DwdRestriction-Muster; `evaluateWindPause()` ist eine reine, getestete Entscheidungsfunktion.
-- `AutomationEngine.setWindPause()` ist strukturell identisch zu `setRainPause()`, mit eigenem `pauseReason: 'wind'`.
+- Die Laufzeiten werden zur Ausführung und in States ausschließlich als Sekundenwerte verwendet.
+- Die Admin-Eingabe akzeptiert Minuten, MM:SS und HH:MM:SS und wird in die kurze Anzeigeform normalisiert.
 
 ## Next Steps
-- Niederschlagsprognose, ET-/Verdunstungsfaktor und Durchflussminimum/-maximum aus Priorität 5 bleiben offen.
+- Keine offenen Schritte.

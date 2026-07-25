@@ -343,15 +343,14 @@ export class AutomationEngine {
     }
 
     private computeTotalDurationMin(config: IrrigationNativeConfig): number {
-        let total = 0;
+        let totalSeconds = 0;
         for (const batch of this.batches) {
-            const batchDuration = Math.max(...batch.map(idx => this.effectiveDuration(config, idx)));
-            total += batchDuration;
+            totalSeconds += Math.max(...batch.map(idx => this.effectiveDuration(config, idx)));
         }
         if (config.scheduler.valvePause > 0 && this.batches.length > 1) {
-            total += config.scheduler.valvePause * (this.batches.length - 1);
+            totalSeconds += config.scheduler.valvePause * 60 * (this.batches.length - 1);
         }
-        return total;
+        return totalSeconds / 60;
     }
 
     private effectiveDuration(config: IrrigationNativeConfig, valveIndex: number): number {
@@ -371,7 +370,7 @@ export class AutomationEngine {
         this.inBatchPause = false;
 
         for (const valveIndex of batch) {
-            const durationSecs = Math.round(this.effectiveDuration(config, valveIndex) * 60);
+            const durationSecs = Math.round(this.effectiveDuration(config, valveIndex));
             this.valveDurationSecs.set(valveIndex, durationSecs);
             this.valveEndsAt.set(valveIndex, Date.now() + durationSecs * 1000);
             await this.deps.valves[valveIndex].start(durationSecs);
@@ -645,7 +644,7 @@ export class AutomationEngine {
             this.wasAutomationPausedForManual = true;
         }
 
-        const durationSecs = Math.round(valve.manualDuration * 60);
+        const durationSecs = Math.round(valve.manualDuration);
         this.manualRun = { valveIndex, endsAt: Date.now() + durationSecs * 1000 };
         await this.deps.valves[valveIndex].start(durationSecs);
         this.deps.onValveFlowChange?.(valveIndex, true);
