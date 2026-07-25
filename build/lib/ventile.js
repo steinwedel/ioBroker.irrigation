@@ -61,7 +61,7 @@ class ValveController {
    */
   getAllValves;
   /**
-   * 1s tick used to count down remainingTime for adapter-owned timer types
+   * 1s tick used to count down remainingDuration for adapter-owned timer types
    * (Homematic/Generic). This is the single source of truth for the
    * auto-stop: when the countdown reaches 0 the tick itself calls stop().
    */
@@ -174,8 +174,9 @@ class ValveController {
     });
     await this.adapter.extendObjectAsync(`${this.id}.state`, { common: { write: true } });
     await this.adapter.delObjectAsync(`${this.id}.runFor`).catch(() => void 0);
-    await this.ensureState("remainingTime", {
-      name: "Remaining time (seconds)",
+    await this.adapter.delObjectAsync(`${this.id}.remainingTime`).catch(() => void 0);
+    await this.ensureState("remainingDuration", {
+      name: "Remaining duration (seconds)",
       type: "number",
       role: "value",
       unit: "s",
@@ -183,7 +184,7 @@ class ValveController {
       write: false,
       def: 0
     });
-    await this.adapter.extendObjectAsync(`${this.id}.remainingTime`, { common: { role: "value", unit: "s" } });
+    await this.adapter.extendObjectAsync(`${this.id}.remainingDuration`, { common: { role: "value", unit: "s" } });
     await this.ensureState("remainingDurationMin", {
       name: "Remaining time (mm:ss)",
       type: "string",
@@ -435,7 +436,7 @@ class ValveController {
    * feedback, so if we detect an external "on" while we were not already
    * tracking a run, we must start our own countdown here too: default to
    * the configured duration, arm the adapter-owned auto-stop, and tick down
-   * remainingTime, exactly like a start() triggered from within the adapter.
+   * remainingDuration, exactly like a start() triggered from within the adapter.
    *
    * @param hardwareOn
    */
@@ -527,7 +528,7 @@ class ValveController {
     this.pendingEchoCount++;
     await this.adapter.setStateAsync(`${this.id}.state`, { val: running, ack: true });
     if (remainingSecs !== void 0) {
-      await this.adapter.setStateAsync(`${this.id}.remainingTime`, {
+      await this.adapter.setStateAsync(`${this.id}.remainingDuration`, {
         val: Math.max(0, remainingSecs),
         ack: true
       });
@@ -541,7 +542,7 @@ class ValveController {
    * Start this valve for the given duration in seconds. For device-internal
    * timer types (Gardena/Rainbird) the device handles the shutoff itself.
    * For Homematic/Generic the adapter must schedule the stop itself and
-   * count down remainingTime every second.
+   * count down remainingDuration every second.
    *
    * @param durationSecs Duration in seconds. Defaults to the configured duration when omitted.
    */
@@ -672,7 +673,7 @@ class ValveController {
     }
   }
   /**
-   * Ticks remainingTime down every second for adapter-owned timer types
+   * Ticks remainingDuration down every second for adapter-owned timer types
    * (Homematic/Generic) and for Gardena valves (whose
    * duration_leftover_i is only pushed by smartgarden every 60 s).
    *
@@ -684,9 +685,9 @@ class ValveController {
     this.clearTickTimer();
     this.tickTimer = this.adapter.setInterval(() => {
       this.remainingSecs = Math.max(0, this.remainingSecs - 1);
-      this.adapter.setStateAsync(`${this.id}.remainingTime`, { val: this.remainingSecs, ack: true }).catch(
+      this.adapter.setStateAsync(`${this.id}.remainingDuration`, { val: this.remainingSecs, ack: true }).catch(
         (error) => this.adapter.log.warn(
-          `Valve ${this.config.name}: failed to update remainingTime: ${error.message}`
+          `Valve ${this.config.name}: failed to update remainingDuration: ${error.message}`
         )
       );
       this.adapter.setStateAsync(`${this.id}.remainingDurationMin`, {
@@ -707,7 +708,7 @@ class ValveController {
             return;
           }
           this.adapter.log.error(
-            `Valve ${this.config.name}: auto-stop at remainingTime=0 failed: ${error.message}`
+            `Valve ${this.config.name}: auto-stop at remainingDuration=0 failed: ${error.message}`
           );
         });
       }

@@ -82,7 +82,7 @@ export class ValveController {
      */
     private readonly getAllValves: () => ValveController[];
     /**
-     * 1s tick used to count down remainingTime for adapter-owned timer types
+     * 1s tick used to count down remainingDuration for adapter-owned timer types
      * (Homematic/Generic). This is the single source of truth for the
      * auto-stop: when the countdown reaches 0 the tick itself calls stop().
      */
@@ -213,8 +213,11 @@ export class ValveController {
         // above does not update existing objects, so force the permission change here.
         await this.adapter.extendObjectAsync(`${this.id}.state`, { common: { write: true } });
         await this.adapter.delObjectAsync(`${this.id}.runFor`).catch(() => undefined);
-        await this.ensureState('remainingTime', {
-            name: 'Remaining time (seconds)',
+        // Migration: "remainingTime" was renamed to "remainingDuration". Remove the
+        // stale object so it does not linger in the Objects view.
+        await this.adapter.delObjectAsync(`${this.id}.remainingTime`).catch(() => undefined);
+        await this.ensureState('remainingDuration', {
+            name: 'Remaining duration (seconds)',
             type: 'number',
             role: 'value',
             unit: 's',
@@ -222,12 +225,12 @@ export class ValveController {
             write: false,
             def: 0,
         });
-        // Migration: "remainingTime" used to have role "value.timer". In this admin
-        // version that role causes the Objects view to render the value as a
-        // formatted date/time string instead of a plain number, so use the generic
-        // "value" role instead. setObjectNotExistsAsync above does not update
-        // existing objects, so force the role change here.
-        await this.adapter.extendObjectAsync(`${this.id}.remainingTime`, { common: { role: 'value', unit: 's' } });
+        // Migration: "remainingDuration" (formerly "remainingTime") used to have role
+        // "value.timer". In this admin version that role causes the Objects view to
+        // render the value as a formatted date/time string instead of a plain number,
+        // so use the generic "value" role instead. setObjectNotExistsAsync above does
+        // not update existing objects, so force the role change here.
+        await this.adapter.extendObjectAsync(`${this.id}.remainingDuration`, { common: { role: 'value', unit: 's' } });
         await this.ensureState('remainingDurationMin', {
             name: 'Remaining time (mm:ss)',
             type: 'string',
@@ -503,7 +506,7 @@ export class ValveController {
      * feedback, so if we detect an external "on" while we were not already
      * tracking a run, we must start our own countdown here too: default to
      * the configured duration, arm the adapter-owned auto-stop, and tick down
-     * remainingTime, exactly like a start() triggered from within the adapter.
+     * remainingDuration, exactly like a start() triggered from within the adapter.
      *
      * @param hardwareOn
      */
@@ -621,7 +624,7 @@ export class ValveController {
         this.pendingEchoCount++;
         await this.adapter.setStateAsync(`${this.id}.state`, { val: running, ack: true });
         if (remainingSecs !== undefined) {
-            await this.adapter.setStateAsync(`${this.id}.remainingTime`, {
+            await this.adapter.setStateAsync(`${this.id}.remainingDuration`, {
                 val: Math.max(0, remainingSecs),
                 ack: true,
             });
@@ -636,7 +639,7 @@ export class ValveController {
      * Start this valve for the given duration in seconds. For device-internal
      * timer types (Gardena/Rainbird) the device handles the shutoff itself.
      * For Homematic/Generic the adapter must schedule the stop itself and
-     * count down remainingTime every second.
+     * count down remainingDuration every second.
      *
      * @param durationSecs Duration in seconds. Defaults to the configured duration when omitted.
      */
@@ -677,7 +680,7 @@ export class ValveController {
                     // different name or not at all): a failure here must not prevent the
                     // actual STATE=true switch command, and - crucially - must not skip
                     // arming the adapter-owned countdown timer below. Without the timer,
-                    // remainingTime would never count down and the valve would never be
+                    // remainingDuration would never count down and the valve would never be
                     // auto-stopped by the adapter.
                     try {
                         await this.adapter.setForeignStateAsync(
@@ -799,7 +802,7 @@ export class ValveController {
     }
 
     /**
-     * Ticks remainingTime down every second for adapter-owned timer types
+     * Ticks remainingDuration down every second for adapter-owned timer types
      * (Homematic/Generic) and for Gardena valves (whose
      * duration_leftover_i is only pushed by smartgarden every 60 s).
      *
@@ -812,10 +815,10 @@ export class ValveController {
         this.tickTimer = this.adapter.setInterval(() => {
             this.remainingSecs = Math.max(0, this.remainingSecs - 1);
             this.adapter
-                .setStateAsync(`${this.id}.remainingTime`, { val: this.remainingSecs, ack: true })
+                .setStateAsync(`${this.id}.remainingDuration`, { val: this.remainingSecs, ack: true })
                 .catch(error =>
                     this.adapter.log.warn(
-                        `Valve ${this.config.name}: failed to update remainingTime: ${(error as Error).message}`,
+                        `Valve ${this.config.name}: failed to update remainingDuration: ${(error as Error).message}`,
                     ),
                 );
             this.adapter
@@ -845,7 +848,7 @@ export class ValveController {
                             return;
                         }
                         this.adapter.log.error(
-                            `Valve ${this.config.name}: auto-stop at remainingTime=0 failed: ${(error as Error).message}`,
+                            `Valve ${this.config.name}: auto-stop at remainingDuration=0 failed: ${(error as Error).message}`,
                         );
                     });
             }

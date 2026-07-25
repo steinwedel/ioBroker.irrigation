@@ -246,7 +246,8 @@ All IDs below are relative to the adapter instance, e.g. `<instance>` is normall
 | `automation.currentZone` | number, R | Zero-based index of the first currently running valve; `-1` if none is running. |
 | `automation.currentBatch` / `automation.totalBatches` | number, R | Current one-based batch number and total calculated batches; `currentBatch` is `0` while idle. |
 | `automation.batchZones` | JSON string, R | Zero-based valve indexes in the active batch, e.g. `[0,2]`; `[]` while idle. |
-| `automation.totalDuration` / `automation.elapsedTime` / `automation.remainingTime` | number, seconds, R | Planned duration, elapsed wall-clock time and remaining duration of the current automatic run. All three reset to `0` when `automation.stop` is used. |
+| `automation.totalDuration` / `automation.elapsedTime` / `automation.remainingDuration` | number, seconds, R | Planned duration, elapsed wall-clock time and remaining duration of the current automatic run. All three reset to `0` when `automation.stop` is used. |
+| `automation.remainingDurationMin` | string, R | Same value as `automation.remainingDuration`, formatted as `mm:ss` (or `hh:mm:ss`). |
 | `automation.activePlan` | string, R | Name of the currently active plan; empty while idle. |
 | `automation.planSelect` | string, R/W | Selectable plan-name value for external UIs. It is kept in sync with the available plans; use `startPlan` to execute a choice directly. |
 | `automation.plansList` | JSON string, R | Available plan names, e.g. `["Alle","Rasen"]`. Use this to populate scripts or external UI selectors. |
@@ -268,7 +269,8 @@ All IDs below are relative to the adapter instance, e.g. `<instance>` is normall
 | `.name` | string, R/W | Display name of the valve. |
 | `.type`, `.stateId`, `.allOffId` | string, R | Configured valve type, underlying adapter state, and optional Rainbird all-off command state. |
 | `.state` | boolean, R/W | Direct valve control. Write `true` to run for `.duration` minutes; write `false` to stop. It also reports actual valve activity. |
-| `.remainingTime` | number, seconds, R | Remaining runtime of the valve. |
+| `.remainingDuration` | number, seconds, R | Remaining runtime of the valve. |
+| `.remainingDurationMin` | string, R | Same value as `.remainingDuration`, formatted as `mm:ss` (or `hh:mm:ss`). |
 | `.timestampStart` | number, Unix milliseconds, R | Start timestamp of the most recent/active valve run. |
 | `.online` | boolean, R | Reachability indicator, initially `true`. |
 | `.errorLast` | string, R | Most recent start or stop error; cleared after a successful start. |

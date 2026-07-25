@@ -36,7 +36,7 @@ irrigation.0
 │   │   ├── state            (boolean, ack=true/read+write)
 │   │   ├── enabled          (boolean, ack=true)
 │   │   ├── duration         (number, ack=true)
-│   │   ├── remainingTime    (number, ack=true)
+│   │   ├── remainingDuration (number, ack=true)
 │   │   ├── flowRateLpm      (number, ack=true)
 │   │   ├── manualStart      (boolean, ack=false button)
 │   │   ├── calibrateFlow    (boolean, ack=false button)

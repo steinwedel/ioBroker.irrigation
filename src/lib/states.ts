@@ -197,8 +197,8 @@ export async function createBaseStates(adapter: ioBroker.Adapter): Promise<void>
         write: false,
         def: 0,
     });
-    await setObj(adapter, 'automation.remainingTime', {
-        name: 'Remaining time',
+    await setObj(adapter, 'automation.remainingDuration', {
+        name: 'Remaining duration',
         type: 'number',
         role: 'value',
         unit: 's',
@@ -216,7 +216,10 @@ export async function createBaseStates(adapter: ioBroker.Adapter): Promise<void>
     });
     await adapter.extendObjectAsync('automation.totalDuration', { common: { role: 'value', unit: 's' } });
     await adapter.extendObjectAsync('automation.elapsedTime', { common: { role: 'value', unit: 's' } });
-    await adapter.extendObjectAsync('automation.remainingTime', { common: { role: 'value', unit: 's' } });
+    await adapter.extendObjectAsync('automation.remainingDuration', { common: { role: 'value', unit: 's' } });
+    // Migration: "remainingTime" was renamed to "remainingDuration". Remove the
+    // stale object so it does not linger in the Objects view.
+    await adapter.delObjectAsync('automation.remainingTime').catch(() => undefined);
     await setObj(adapter, 'automation.activePlan', {
         name: 'Active plan name',
         type: 'string',

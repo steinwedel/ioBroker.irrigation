@@ -358,6 +358,50 @@ export class AutomationEngine {
         return config.valves[valveIndex].duration * config.scheduler.extensionFactor * this.temperatureAdjustmentFactor;
     }
 
+    /**
+     * Computes the "logical" elapsed time (in seconds) that would have passed
+     * once `targetBatchIndex` batches have completed and the batch at that
+     * index is about to start: the sum of the (max) durations of all batches
+     * before `targetBatchIndex`, plus one `valvePause` for each transition
+     * between them. This mirrors the pause/duration accounting used by
+     * `computeTotalDurationMin()`.
+     *
+     * @param config
+     * @param targetBatchIndex
+     */
+    private computeElapsedSecsUpToBatch(config: IrrigationNativeConfig, targetBatchIndex: number): number {
+        let secs = 0;
+        for (let i = 0; i < targetBatchIndex && i < this.batches.length; i++) {
+            secs += Math.round(Math.max(...this.batches[i].map(idx => this.effectiveDuration(config, idx))));
+        }
+        if (config.scheduler.valvePause > 0) {
+            const pauseCount = Math.max(0, Math.min(targetBatchIndex, this.batches.length - 1));
+            secs += config.scheduler.valvePause * 60 * pauseCount;
+        }
+        return secs;
+    }
+
+    /**
+     * Resyncs `startedAtMs` so that `automation.remainingTime`/`automation.elapsedTime`
+     * (computed from `startedAtMs` and `totalDurationMin` in `publishStatus()`) reflect
+     * the batches actually still ahead after a manual Next/Back skip, rather than the
+     * real wall-clock time elapsed since the run originally started. Without this, Next
+     * jumping ahead (or Back jumping behind) would leave the remaining-time estimate
+     * based on the original linear timeline, which no longer matches reality once
+     * batches are skipped or repeated.
+     *
+     * @param targetBatchIndex Index of the batch that is about to start (or, when
+     *   paused, the batch that will start once resumed).
+     */
+    private resyncStartedAtForBatchIndex(targetBatchIndex: number): void {
+        if (this.batches.length === 0) {
+            return;
+        }
+        const config = this.deps.getConfig();
+        const elapsedSecs = this.computeElapsedSecsUpToBatch(config, targetBatchIndex);
+        this.startedAtMs = Date.now() - elapsedSecs * 1000;
+    }
+
     private async startNextBatch(): Promise<void> {
         this.currentBatchIndex++;
         if (this.currentBatchIndex >= this.batches.length) {
@@ -585,9 +629,11 @@ export class AutomationEngine {
         if (this.status === 'paused') {
             // stay paused, do not auto-start the next batch (see plan Next/Back rules)
             this.currentBatchIndex++;
+            this.resyncStartedAtForBatchIndex(this.currentBatchIndex);
             await this.publishStatus();
             return;
         }
+        this.resyncStartedAtForBatchIndex(this.currentBatchIndex + 1);
         await this.startNextBatch();
     }
 
@@ -611,9 +657,11 @@ export class AutomationEngine {
         }
         if (this.status === 'paused') {
             this.currentBatchIndex++;
+            this.resyncStartedAtForBatchIndex(this.currentBatchIndex);
             await this.publishStatus();
             return;
         }
+        this.resyncStartedAtForBatchIndex(this.currentBatchIndex + 1);
         await this.startNextBatch();
     }
 
@@ -729,7 +777,7 @@ export class AutomationEngine {
         this.totalDurationMin = 0;
         this.temperatureAdjustmentFactor = 1;
         await this.deps.adapter.setStateAsync('automation.elapsedTime', { val: 0, ack: true });
-        await this.deps.adapter.setStateAsync('automation.remainingTime', { val: 0, ack: true });
+        await this.deps.adapter.setStateAsync('automation.remainingDuration', { val: 0, ack: true });
         await this.deps.adapter.setStateAsync('automation.remainingDurationMin', { val: formatDuration(0), ack: true });
         await this.deps.adapter.setStateAsync('automation.totalDuration', { val: 0, ack: true });
         await this.deps.adapter.setStateAsync('automation.temperatureAdjustmentFactor', { val: 1, ack: true });
@@ -774,7 +822,7 @@ export class AutomationEngine {
         const totalDurationSecs = this.totalDurationMin * 60;
         const remainingSecs = Math.max(0, totalDurationSecs - elapsedSecs);
         await this.deps.adapter.setStateAsync('automation.elapsedTime', { val: elapsedSecs, ack: true });
-        await this.deps.adapter.setStateAsync('automation.remainingTime', {
+        await this.deps.adapter.setStateAsync('automation.remainingDuration', {
             val: remainingSecs,
             ack: true,
         });

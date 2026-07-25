@@ -212,8 +212,8 @@ async function createBaseStates(adapter) {
     write: false,
     def: 0
   });
-  await setObj(adapter, "automation.remainingTime", {
-    name: "Remaining time",
+  await setObj(adapter, "automation.remainingDuration", {
+    name: "Remaining duration",
     type: "number",
     role: "value",
     unit: "s",
@@ -231,7 +231,8 @@ async function createBaseStates(adapter) {
   });
   await adapter.extendObjectAsync("automation.totalDuration", { common: { role: "value", unit: "s" } });
   await adapter.extendObjectAsync("automation.elapsedTime", { common: { role: "value", unit: "s" } });
-  await adapter.extendObjectAsync("automation.remainingTime", { common: { role: "value", unit: "s" } });
+  await adapter.extendObjectAsync("automation.remainingDuration", { common: { role: "value", unit: "s" } });
+  await adapter.delObjectAsync("automation.remainingTime").catch(() => void 0);
   await setObj(adapter, "automation.activePlan", {
     name: "Active plan name",
     type: "string",
