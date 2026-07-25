@@ -297,8 +297,24 @@ class Irrigation extends utils.Adapter {
     const planNames = plans.map((plan) => plan.name);
     const states = Object.fromEntries(planNames.map((planName) => [planName, planName]));
     await this.setStateAsync("automation.plansList", { val: JSON.stringify(planNames), ack: true });
-    await this.extendObjectAsync("automation.planSelect", { common: { states } });
-    await this.extendObjectAsync("automation.startPlan", { common: { states } });
+    await this.replaceObjectStates("automation.planSelect", states);
+    await this.replaceObjectStates("automation.startPlan", states);
+  }
+  /**
+   * Fully replaces `common.states` on the given object instead of merging
+   * it, since `extendObjectAsync` deep-merges nested objects and would
+   * otherwise never drop keys for plans that were deleted or renamed.
+   *
+   * @param id
+   * @param states
+   */
+  async replaceObjectStates(id, states) {
+    const obj = await this.getObjectAsync(id);
+    if (!obj) {
+      return;
+    }
+    obj.common = { ...obj.common, states };
+    await this.setObjectAsync(id, obj);
   }
   /**
    * Creates the smartgarden rate limit monitoring states.
