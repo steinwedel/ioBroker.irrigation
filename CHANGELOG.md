@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.3.3 (2026-07-25)
 * (Gerhard Steinwedel) **ENHANCED**: Valve duration formatting centralized in `formatValvesForNative()` method to ensure consistent conversion of numeric seconds to "HH:MM:SS"/"MM:SS" display strings whenever valves are written to native config or returned to admin UI — eliminates duplication across migration, write, and scan-response code paths.
 
 ## 0.3.2 (2026-07-25)

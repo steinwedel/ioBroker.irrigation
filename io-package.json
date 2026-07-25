@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.3.2",
+    "version": "0.3.3",
     "news": {
+      "0.3.3": {
+        "en": "**ENHANCED**: Valve duration formatting centralized in `formatValvesForNative()` method to ensure consistent conversion of numeric seconds to \"HH:MM:SS\"/\"MM:SS\" display strings whenever valves are written to native config or returned to admin UI — eliminates duplication across migration, write, and scan-response code paths.",
+        "de": "**VERBESSERT**: Formatierung der Ventildauer zentralisiert in der Methode `formatValvesForNative()`, um eine konsistente Umwandlung numerischer Sekunden in \"HH:MM:SS\"/\"MM:SS\"-Anzeigestrings sicherzustellen, wann immer Ventile in die native Konfiguration geschrieben oder an die Admin-Oberfläche zurückgegeben werden – beseitigt Duplizierung über Migrations-, Schreib- und Scan-Antwort-Codepfade hinweg.",
+        "ru": "**УЛУЧШЕНО**: Форматирование длительности клапанов централизовано в методе `formatValvesForNative()` для обеспечения согласованного преобразования числовых секунд в строки отображения \"HH:MM:SS\"/\"MM:SS\" при записи клапанов в нативную конфигурацию или возврате в интерфейс администратора — устраняет дублирование в путях кода миграции, записи и ответа на сканирование.",
+        "pt": "**MELHORADO**: Formatação da duração das válvulas centralizada no método `formatValvesForNative()` para garantir conversão consistente de segundos numéricos para strings de exibição \"HH:MM:SS\"/\"MM:SS\" sempre que as válvulas são gravadas na configuração nativa ou retornadas à interface de administração — elimina duplicação nos caminhos de código de migração, gravação e resposta de varredura.",
+        "nl": "**VERBETERD**: Formattering van klepduurtijd gecentraliseerd in de methode `formatValvesForNative()` om consistente conversie van numerieke seconden naar \"HH:MM:SS\"/\"MM:SS\" weergavestrings te garanderen wanneer kleppen naar de native configuratie worden geschreven of naar de admin-UI worden geretourneerd — elimineert duplicatie over migratie-, schrijf- en scan-responscodepaden.",
+        "fr": "**AMÉLIORÉ** : Formatage de la durée des vannes centralisé dans la méthode `formatValvesForNative()` pour garantir une conversion cohérente des secondes numériques en chaînes d'affichage \"HH:MM:SS\"/\"MM:SS\" chaque fois que les vannes sont écrites dans la configuration native ou renvoyées à l'interface d'administration — élimine la duplication dans les chemins de code de migration, d'écriture et de réponse au scan.",
+        "it": "**MIGLIORATO**: Formattazione della durata delle valvole centralizzata nel metodo `formatValvesForNative()` per garantire una conversione coerente dei secondi numerici in stringhe di visualizzazione \"HH:MM:SS\"/\"MM:SS\" ogni volta che le valvole vengono scritte nella configurazione nativa o restituite all'interfaccia di amministrazione — elimina la duplicazione nei percorsi di codice di migrazione, scrittura e risposta alla scansione.",
+        "es": "**MEJORADO**: Formateo de duración de válvulas centralizado en el método `formatValvesForNative()` para garantizar la conversión consistente de segundos numéricos a cadenas de visualización \"HH:MM:SS\"/\"MM:SS\" cada vez que las válvulas se escriben en la configuración nativa o se devuelven a la interfaz de administración — elimina la duplicación en las rutas de código de migración, escritura y respuesta de escaneo.",
+        "pl": "**ULEPSZONE**: Formatowanie czasu trwania zaworów scentralizowane w metodzie `formatValvesForNative()` w celu zapewnienia spójnej konwersji sekund liczbowych na ciągi wyświetlania \"HH:MM:SS\"/\"MM:SS\" za każdym razem, gdy zawory są zapisywane do natywnej konfiguracji lub zwracane do interfejsu administratora — eliminuje duplikację w ścieżkach kodu migracji, zapisu i odpowiedzi na skanowanie.",
+        "uk": "**ПОКРАЩЕНО**: Форматування тривалості клапанів централізовано в методі `formatValvesForNative()` для забезпечення послідовного перетворення числових секунд у рядки відображення \"HH:MM:SS\"/\"MM:SS\" щоразу, коли клапани записуються в нативну конфігурацію або повертаються до інтерфейсу адміністратора — усуває дублювання в шляхах коду міграції, запису та відповіді на сканування.",
+        "zh-cn": "**增强**：阀门持续时间格式化集中在 `formatValvesForNative()` 方法中，以确保每当阀门写入原生配置或返回到管理界面时，数字秒数都能一致地转换为 \"HH:MM:SS\"/\"MM:SS\" 显示字符串 — 消除了迁移、写入和扫描响应代码路径中的重复。"
+      },
       "0.3.2": {
         "en": "**ENHANCED**: Scan progress message now remains visible for 10 seconds after scan completion before being automatically cleared — admin UI hides the progress field when empty. Timer is cleaned up on new scans and adapter shutdown.",
         "de": "**VERBESSERT**: Die Fortschrittsmeldung des Scans bleibt nun 10 Sekunden nach Abschluss des Scans sichtbar, bevor sie automatisch gelöscht wird — die Admin-Oberfläche blendet das Fortschrittsfeld aus, wenn es leer ist. Der Timer wird bei neuen Scans und beim Herunterfahren des Adapters bereinigt.",
@@ -80,19 +93,6 @@
         "pl": "**NAPRAWIONO**: Zachowano dostępność strzałek zmiany kolejności zaworów poprzez wyłączenie sortowania tabeli zaworów",
         "uk": "**ВИПРАВЛЕНО**: Збережено доступність стрілок зміни порядку клапанів шляхом вимкнення сортування таблиці клапанів",
         "zh-cn": "**已修复**：通过禁用阀门表排序保持阀门重新排序箭头可用"
-      },
-      "0.2.53": {
-        "en": "**FIXED**: Enabled both table reorder arrows for valves",
-        "de": "**BEHOBEN**: Beide Pfeile zum Neuordnen der Tabelle für Ventile aktiviert",
-        "ru": "**ИСПРАВЛЕНО**: Включены обе стрелки изменения порядка таблицы для клапанов",
-        "pt": "**CORRIGIDO**: Ativadas ambas as setas de reordenação da tabela para válvulas",
-        "nl": "**OPGELOST**: Beide pijlen voor het herschikken van de tabel voor kleppen ingeschakeld",
-        "fr": "**CORRIGÉ**: Activation des deux flèches de réorganisation du tableau pour les vannes",
-        "it": "**RISOLTO**: Abilitate entrambe le frecce di riordino della tabella per le valvole",
-        "es": "**SOLUCIONADO**: Habilitadas ambas flechas de reordenación de tabla para válvulas",
-        "pl": "**NAPRAWIONO**: Włączono obie strzałki zmiany kolejności tabeli dla zaworów",
-        "uk": "**ВИПРАВЛЕНО**: Увімкнено обидві стрілки зміни порядку таблиці для клапанів",
-        "zh-cn": "**已修复**：启用了阀门表格重新排序的两个箭头"
       }
     },
     "titleLang": {
