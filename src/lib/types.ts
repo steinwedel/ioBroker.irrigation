@@ -52,6 +52,43 @@ export function parsePlanValveTableRows(
 export const NONE_SENTINEL = -1;
 
 /**
+ * Reconciles a plan's stable-ID valve assignment against the current list of
+ * valve state IDs (in Valves-tab order). Handles:
+ * - Newly added valves: automatically included unless the plan was
+ *   explicitly emptied (valveIndexes === [NONE_SENTINEL]).
+ * - Removed valves: dropped from the assignment.
+ * - Renamed/reordered valves: unaffected, since matching is by stateId, not
+ *   by name or array index.
+ *
+ * @param plan
+ * @param currentStateIds
+ */
+export function synchronizePlanWithValves(plan: IPlanConfig, currentStateIds: string[]): IPlanConfig {
+    const explicitlyEmpty = plan.valveIndexes.includes(NONE_SENTINEL);
+    const legacySelectedStateIds = plan.valveIndexes
+        .map(index => currentStateIds[index])
+        .filter((stateId): stateId is string => Boolean(stateId));
+    const selectedStateIds = [
+        ...(plan.valveStateIds ?? (plan.valveIndexes.length === 0 ? currentStateIds : legacySelectedStateIds)),
+    ].filter(stateId => currentStateIds.includes(stateId));
+    const knownStateIds = plan.knownValveStateIds ?? currentStateIds;
+    if (!explicitlyEmpty) {
+        for (const stateId of currentStateIds) {
+            if (!knownStateIds.includes(stateId) && !selectedStateIds.includes(stateId)) {
+                selectedStateIds.push(stateId);
+            }
+        }
+    }
+    const valveIndexes = selectedStateIds.map(stateId => currentStateIds.indexOf(stateId));
+    return {
+        name: plan.name,
+        valveIndexes: explicitlyEmpty ? [NONE_SENTINEL] : valveIndexes,
+        valveStateIds: selectedStateIds,
+        knownValveStateIds: currentStateIds,
+    };
+}
+
+/**
  * Auto-discovery scan types. "Generic" additionally scans any adapter not
  * covered by a specific type. "All" runs every scan type (Gardena, Rainbird,
  * Homematic, Hydrawise, Generic) in one go, without any adapter instance restriction.
@@ -98,6 +135,16 @@ export interface IPlanConfig {
 
 export interface ISchedulerConfig {
     autoMode: boolean;
+    pauseOnRain: boolean;
+    windPauseEnabled: boolean;
+    windSpeedStateId: string;
+    /** km/h, 0 = disabled */
+    windSpeedLimit: number;
+    windGustStateId: string;
+    /** km/h, 0 = disabled */
+    windGustLimit: number;
+    /** Minutes wind/gust must stay below the limit before resuming */
+    windHysteresisMinutes: number;
     /** "HH:MM" strings */
     timerTimes: string[];
     extensionFactor: number;
@@ -169,7 +216,7 @@ export interface IrrigationNativeConfig {
 export type AutomationStatus = 'idle' | 'running' | 'paused';
 
 /** What caused the automation to be paused/blocked, for status text + resume logic */
-export type PauseReason = 'manual' | 'legalRestriction' | null;
+export type PauseReason = 'manual' | 'legalRestriction' | 'rain' | 'wind' | null;
 
 /** A batch of valve indexes that run in parallel */
 export type Batch = number[];

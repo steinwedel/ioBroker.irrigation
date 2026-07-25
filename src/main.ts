@@ -6,12 +6,13 @@
 import * as utils from '@iobroker/adapter-core';
 import { normalizeConfig } from './lib/config-defaults';
 import type { IPlanConfig, IrrigationNativeConfig, IValveConfig, ScanType } from './lib/types';
-import { formatValveNumber, NONE_SENTINEL, parsePlanValveTableRows } from './lib/types';
+import { formatValveNumber, NONE_SENTINEL, parsePlanValveTableRows, synchronizePlanWithValves } from './lib/types';
 import { createBaseStates, applyConfigToStates } from './lib/states';
 import { ValveController } from './lib/ventile';
 import { AutomationEngine } from './lib/automation';
 import { Scheduler, resolvePlanFromIcalTitle } from './lib/scheduler';
 import { SensorManager } from './lib/sensors';
+import { WindMonitor } from './lib/wind';
 import { DwdRestriction } from './lib/dwd';
 import { DWD_POI_STATIONS } from './lib/dwd-poi-stations';
 import { WaterConsumptionTracker } from './lib/water-consumption';
@@ -63,6 +64,7 @@ class Irrigation extends utils.Adapter {
     private automation!: AutomationEngine;
     private scheduler!: Scheduler;
     private sensorManager!: SensorManager;
+    private windMonitor!: WindMonitor;
     private dwd!: DwdRestriction;
     private waterConsumption!: WaterConsumptionTracker;
     private weatherApi!: WeatherApi;
@@ -104,8 +106,19 @@ class Irrigation extends utils.Adapter {
 
         this.notifications = new NotificationManager({ adapter: this, getConfig: () => this.config2 });
 
-        this.sensorManager = new SensorManager({ adapter: this, getConfig: () => this.config2 });
+        this.sensorManager = new SensorManager({
+            adapter: this,
+            getConfig: () => this.config2,
+            onRainChange: raining => this.automation?.setRainPause(raining),
+        });
         await this.sensorManager.init();
+
+        this.windMonitor = new WindMonitor({
+            adapter: this,
+            getConfig: () => this.config2,
+            onWindPauseChange: paused => this.automation?.setWindPause(paused) ?? Promise.resolve(),
+        });
+        await this.windMonitor.init();
 
         this.waterConsumption = new WaterConsumptionTracker({ adapter: this, getConfig: () => this.config2 });
         await this.waterConsumption.init();
@@ -124,6 +137,8 @@ class Irrigation extends utils.Adapter {
             valves: this.valves,
             isValveBlockedForAutoRun: valveIndex => this.sensorManager.isValveBlocked(valveIndex),
             isLegallyRestricted: () => this.dwd.isActive(),
+            isRaining: () => this.sensorManager.isRaining(),
+            isWindOverLimit: () => this.windMonitor.isOverLimit(),
             getTemperatureAdjustmentTemperature: () => this.sensorManager.getTemperatureAdjustmentTemperature(),
             onValveFlowChange: (valveIndex, flowing) => this.waterConsumption.onValveFlowChange(valveIndex, flowing),
         });
@@ -208,15 +223,12 @@ class Irrigation extends utils.Adapter {
 
         if (storedPlans && storedPlans.length > 0) {
             const synchronizedPlans = this.synchronizePlansWithValves(storedPlans);
-            this.log.debug(
-                `Loaded plan valve orders: ${JSON.stringify(
-                    synchronizedPlans.map(plan => ({
-                        name: plan.name,
-                        valveIndexes: plan.valveIndexes,
-                    })),
-                )}`,
-            );
-            if (JSON.stringify(synchronizedPlans) !== JSON.stringify(storedPlans)) {
+            this.log.debug(`Loaded ${synchronizedPlans.length} plan(s) from automation.plansData.`);
+            const hasLegacyFields = this.plansStateHasLegacyFields(plansState?.val);
+            if (hasLegacyFields || JSON.stringify(synchronizedPlans) !== JSON.stringify(storedPlans)) {
+                if (hasLegacyFields) {
+                    this.log.info('Removing legacy fields (e.g. valveOrder) from automation.plansData.');
+                }
                 await this.writePlansState(synchronizedPlans);
             } else {
                 this.config2.plans = synchronizedPlans;
@@ -256,32 +268,41 @@ class Irrigation extends utils.Adapter {
         }
     }
 
+    /**
+     * True if the raw automation.plansData JSON contains fields that are no
+     * longer part of IPlanConfig (e.g. the legacy `valveOrder`/`valveOrderStateIds`
+     * arrays used by an earlier per-plan ordering implementation). parsePlansState()
+     * silently drops such fields when parsing into memory, so comparing the
+     * in-memory representation before/after synchronization would never detect
+     * them and the stale fields would otherwise linger in the persisted state
+     * forever. Used by loadPlansState() to force one cleanup rewrite.
+     *
+     * @param raw
+     */
+    private plansStateHasLegacyFields(raw: unknown): boolean {
+        if (typeof raw !== 'string' || !raw) {
+            return false;
+        }
+        const knownFields = new Set<keyof IPlanConfig>(['name', 'valveIndexes', 'valveStateIds', 'knownValveStateIds']);
+        try {
+            const parsed = JSON.parse(raw);
+            return (
+                Array.isArray(parsed) &&
+                parsed.some(
+                    (p: unknown) =>
+                        typeof p === 'object' &&
+                        p !== null &&
+                        Object.keys(p).some(key => !knownFields.has(key as keyof IPlanConfig)),
+                )
+            );
+        } catch {
+            return false;
+        }
+    }
+
     private synchronizePlansWithValves(plans: IPlanConfig[]): IPlanConfig[] {
         const currentStateIds = this.config2.valves.map(valve => valve.stateId);
-        return plans.map(plan => {
-            const explicitlyEmpty = plan.valveIndexes.includes(NONE_SENTINEL);
-            const legacySelectedStateIds = plan.valveIndexes
-                .map(index => currentStateIds[index])
-                .filter((stateId): stateId is string => Boolean(stateId));
-            const selectedStateIds = [
-                ...(plan.valveStateIds ?? (plan.valveIndexes.length === 0 ? currentStateIds : legacySelectedStateIds)),
-            ].filter(stateId => currentStateIds.includes(stateId));
-            const knownStateIds = plan.knownValveStateIds ?? currentStateIds;
-            if (!explicitlyEmpty) {
-                for (const stateId of currentStateIds) {
-                    if (!knownStateIds.includes(stateId) && !selectedStateIds.includes(stateId)) {
-                        selectedStateIds.push(stateId);
-                    }
-                }
-            }
-            const valveIndexes = selectedStateIds.map(stateId => currentStateIds.indexOf(stateId));
-            return {
-                name: plan.name,
-                valveIndexes: explicitlyEmpty ? [NONE_SENTINEL] : valveIndexes,
-                valveStateIds: selectedStateIds,
-                knownValveStateIds: currentStateIds,
-            };
-        });
+        return plans.map(plan => synchronizePlanWithValves(plan, currentStateIds));
     }
 
     /**
@@ -296,14 +317,7 @@ class Irrigation extends utils.Adapter {
     private async writePlansState(plans: IPlanConfig[]): Promise<void> {
         const synchronizedPlans = this.synchronizePlansWithValves(plans);
         this.config2.plans = synchronizedPlans;
-        this.log.debug(
-            `Persisting plan valve orders: ${JSON.stringify(
-                synchronizedPlans.map(plan => ({
-                    name: plan.name,
-                    valveIndexes: plan.valveIndexes,
-                })),
-            )}`,
-        );
+        this.log.debug(`Persisting ${synchronizedPlans.length} plan(s) to automation.plansData.`);
         await this.setStateAsync('automation.plansData', { val: JSON.stringify(synchronizedPlans), ack: true });
         await this.publishPlanNames(synchronizedPlans);
     }
@@ -541,6 +555,7 @@ class Irrigation extends utils.Adapter {
             this.automation?.destroy();
             this.scheduler?.destroy();
             this.dwd?.destroy();
+            this.windMonitor?.destroy();
             this.weatherApi?.destroy();
             this.flowMonitor?.destroy();
             for (const valve of this.valves) {
@@ -566,8 +581,9 @@ class Irrigation extends utils.Adapter {
                 }
             }
             const handledBySensor = await this.sensorManager.onForeignStateChange(id, state);
+            const handledByWind = await this.windMonitor.onForeignStateChange(id, state);
             const handledByRestriction = await this.dwd.onForeignStateChange(id, state);
-            if (handledBySensor || handledByRestriction) {
+            if (handledBySensor || handledByWind || handledByRestriction) {
                 return;
             }
             if (await this.scheduler.onForeignStateChange(id, state)) {

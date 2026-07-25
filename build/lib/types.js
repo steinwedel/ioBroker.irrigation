@@ -20,7 +20,8 @@ var types_exports = {};
 __export(types_exports, {
   NONE_SENTINEL: () => NONE_SENTINEL,
   formatValveNumber: () => formatValveNumber,
-  parsePlanValveTableRows: () => parsePlanValveTableRows
+  parsePlanValveTableRows: () => parsePlanValveTableRows,
+  synchronizePlanWithValves: () => synchronizePlanWithValves
 });
 module.exports = __toCommonJS(types_exports);
 function formatValveNumber(index) {
@@ -33,10 +34,34 @@ function parsePlanValveTableRows(rows, valveCount) {
   }).filter((index) => Number.isInteger(index) && index >= 0 && index < valveCount);
 }
 const NONE_SENTINEL = -1;
+function synchronizePlanWithValves(plan, currentStateIds) {
+  var _a, _b;
+  const explicitlyEmpty = plan.valveIndexes.includes(NONE_SENTINEL);
+  const legacySelectedStateIds = plan.valveIndexes.map((index) => currentStateIds[index]).filter((stateId) => Boolean(stateId));
+  const selectedStateIds = [
+    ...(_a = plan.valveStateIds) != null ? _a : plan.valveIndexes.length === 0 ? currentStateIds : legacySelectedStateIds
+  ].filter((stateId) => currentStateIds.includes(stateId));
+  const knownStateIds = (_b = plan.knownValveStateIds) != null ? _b : currentStateIds;
+  if (!explicitlyEmpty) {
+    for (const stateId of currentStateIds) {
+      if (!knownStateIds.includes(stateId) && !selectedStateIds.includes(stateId)) {
+        selectedStateIds.push(stateId);
+      }
+    }
+  }
+  const valveIndexes = selectedStateIds.map((stateId) => currentStateIds.indexOf(stateId));
+  return {
+    name: plan.name,
+    valveIndexes: explicitlyEmpty ? [NONE_SENTINEL] : valveIndexes,
+    valveStateIds: selectedStateIds,
+    knownValveStateIds: currentStateIds
+  };
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   NONE_SENTINEL,
   formatValveNumber,
-  parsePlanValveTableRows
+  parsePlanValveTableRows,
+  synchronizePlanWithValves
 });
 //# sourceMappingURL=types.js.map

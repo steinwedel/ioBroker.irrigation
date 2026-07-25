@@ -129,6 +129,9 @@ Central scheduling and behavior settings.
 | Setting | Description |
 |---------|-------------|
 | Automatic mode enabled | Master switch for all automatic watering. When disabled, only manual starts are possible. |
+| Pause automatic watering when raining | Requires a configured rain sensor. A running automatic plan pauses when rain is detected and resumes with its remaining durations when rain stops. Manual runs are unaffected. |
+| Wind speed/gust state, Wind speed/gust limit (km/h), Wind resume hysteresis (min) | Expert. Numeric ioBroker states for wind speed and/or gust, and the km/h limit for each (0 disables that check). A running automatic plan pauses immediately once speed or gust reaches its limit, and only resumes once both have stayed below their limits continuously for the configured hysteresis time (avoids rapid pause/resume in gusty conditions). |
+| Pause automatic watering when windy | Expert. Enables the wind/gust pause above. Requires at least one of the wind states to be configured. Manual runs are unaffected. |
 | Timer times | One or more times in `HH:MM` format. At each time, the first plan in the Plans table is triggered. |
 | Temperature state for irrigation adjustment | Numeric ioBroker temperature state in °C used for automatic plan duration adjustment. It must be selected before the adjustment can be enabled. |
 | Temperature-controlled irrigation adjustment | Enables a factor fixed when each automatic plan starts: `1.07^(T - 20)`, where `T` is the selected temperature in °C. At 20 °C the factor is 1.00; each degree above increases duration by 7%, each degree below decreases it by 7%. The factor multiplies the configured duration extension factor and applies to all valves in that plan. Manual valve starts are not adjusted. |

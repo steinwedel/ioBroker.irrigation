@@ -29,6 +29,7 @@ var import_ventile = require("./lib/ventile");
 var import_automation = require("./lib/automation");
 var import_scheduler = require("./lib/scheduler");
 var import_sensors = require("./lib/sensors");
+var import_wind = require("./lib/wind");
 var import_dwd = require("./lib/dwd");
 var import_dwd_poi_stations = require("./lib/dwd-poi-stations");
 var import_water_consumption = require("./lib/water-consumption");
@@ -47,6 +48,7 @@ class Irrigation extends utils.Adapter {
   automation;
   scheduler;
   sensorManager;
+  windMonitor;
   dwd;
   waterConsumption;
   weatherApi;
@@ -81,8 +83,24 @@ class Irrigation extends utils.Adapter {
       await valve.init();
     }
     this.notifications = new import_notifications.NotificationManager({ adapter: this, getConfig: () => this.config2 });
-    this.sensorManager = new import_sensors.SensorManager({ adapter: this, getConfig: () => this.config2 });
+    this.sensorManager = new import_sensors.SensorManager({
+      adapter: this,
+      getConfig: () => this.config2,
+      onRainChange: (raining) => {
+        var _a;
+        return (_a = this.automation) == null ? void 0 : _a.setRainPause(raining);
+      }
+    });
     await this.sensorManager.init();
+    this.windMonitor = new import_wind.WindMonitor({
+      adapter: this,
+      getConfig: () => this.config2,
+      onWindPauseChange: (paused) => {
+        var _a, _b;
+        return (_b = (_a = this.automation) == null ? void 0 : _a.setWindPause(paused)) != null ? _b : Promise.resolve();
+      }
+    });
+    await this.windMonitor.init();
     this.waterConsumption = new import_water_consumption.WaterConsumptionTracker({ adapter: this, getConfig: () => this.config2 });
     await this.waterConsumption.init();
     this.flowMonitor = new import_flow_monitor.FlowMonitor({
@@ -98,6 +116,8 @@ class Irrigation extends utils.Adapter {
       valves: this.valves,
       isValveBlockedForAutoRun: (valveIndex) => this.sensorManager.isValveBlocked(valveIndex),
       isLegallyRestricted: () => this.dwd.isActive(),
+      isRaining: () => this.sensorManager.isRaining(),
+      isWindOverLimit: () => this.windMonitor.isOverLimit(),
       getTemperatureAdjustmentTemperature: () => this.sensorManager.getTemperatureAdjustmentTemperature(),
       onValveFlowChange: (valveIndex, flowing) => this.waterConsumption.onValveFlowChange(valveIndex, flowing)
     });
@@ -171,15 +191,12 @@ class Irrigation extends utils.Adapter {
     const storedPlans = this.parsePlansState(plansState == null ? void 0 : plansState.val);
     if (storedPlans && storedPlans.length > 0) {
       const synchronizedPlans = this.synchronizePlansWithValves(storedPlans);
-      this.log.debug(
-        `Loaded plan valve orders: ${JSON.stringify(
-          synchronizedPlans.map((plan) => ({
-            name: plan.name,
-            valveIndexes: plan.valveIndexes
-          }))
-        )}`
-      );
-      if (JSON.stringify(synchronizedPlans) !== JSON.stringify(storedPlans)) {
+      this.log.debug(`Loaded ${synchronizedPlans.length} plan(s) from automation.plansData.`);
+      const hasLegacyFields = this.plansStateHasLegacyFields(plansState == null ? void 0 : plansState.val);
+      if (hasLegacyFields || JSON.stringify(synchronizedPlans) !== JSON.stringify(storedPlans)) {
+        if (hasLegacyFields) {
+          this.log.info("Removing legacy fields (e.g. valveOrder) from automation.plansData.");
+        }
         await this.writePlansState(synchronizedPlans);
       } else {
         this.config2.plans = synchronizedPlans;
@@ -213,31 +230,34 @@ class Irrigation extends utils.Adapter {
       return void 0;
     }
   }
+  /**
+   * True if the raw automation.plansData JSON contains fields that are no
+   * longer part of IPlanConfig (e.g. the legacy `valveOrder`/`valveOrderStateIds`
+   * arrays used by an earlier per-plan ordering implementation). parsePlansState()
+   * silently drops such fields when parsing into memory, so comparing the
+   * in-memory representation before/after synchronization would never detect
+   * them and the stale fields would otherwise linger in the persisted state
+   * forever. Used by loadPlansState() to force one cleanup rewrite.
+   *
+   * @param raw
+   */
+  plansStateHasLegacyFields(raw) {
+    if (typeof raw !== "string" || !raw) {
+      return false;
+    }
+    const knownFields = /* @__PURE__ */ new Set(["name", "valveIndexes", "valveStateIds", "knownValveStateIds"]);
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) && parsed.some(
+        (p) => typeof p === "object" && p !== null && Object.keys(p).some((key) => !knownFields.has(key))
+      );
+    } catch {
+      return false;
+    }
+  }
   synchronizePlansWithValves(plans) {
     const currentStateIds = this.config2.valves.map((valve) => valve.stateId);
-    return plans.map((plan) => {
-      var _a, _b;
-      const explicitlyEmpty = plan.valveIndexes.includes(import_types.NONE_SENTINEL);
-      const legacySelectedStateIds = plan.valveIndexes.map((index) => currentStateIds[index]).filter((stateId) => Boolean(stateId));
-      const selectedStateIds = [
-        ...(_a = plan.valveStateIds) != null ? _a : plan.valveIndexes.length === 0 ? currentStateIds : legacySelectedStateIds
-      ].filter((stateId) => currentStateIds.includes(stateId));
-      const knownStateIds = (_b = plan.knownValveStateIds) != null ? _b : currentStateIds;
-      if (!explicitlyEmpty) {
-        for (const stateId of currentStateIds) {
-          if (!knownStateIds.includes(stateId) && !selectedStateIds.includes(stateId)) {
-            selectedStateIds.push(stateId);
-          }
-        }
-      }
-      const valveIndexes = selectedStateIds.map((stateId) => currentStateIds.indexOf(stateId));
-      return {
-        name: plan.name,
-        valveIndexes: explicitlyEmpty ? [import_types.NONE_SENTINEL] : valveIndexes,
-        valveStateIds: selectedStateIds,
-        knownValveStateIds: currentStateIds
-      };
-    });
+    return plans.map((plan) => (0, import_types.synchronizePlanWithValves)(plan, currentStateIds));
   }
   /**
    * Persists `plans` to the `automation.plansData` state and refreshes
@@ -251,14 +271,7 @@ class Irrigation extends utils.Adapter {
   async writePlansState(plans) {
     const synchronizedPlans = this.synchronizePlansWithValves(plans);
     this.config2.plans = synchronizedPlans;
-    this.log.debug(
-      `Persisting plan valve orders: ${JSON.stringify(
-        synchronizedPlans.map((plan) => ({
-          name: plan.name,
-          valveIndexes: plan.valveIndexes
-        }))
-      )}`
-    );
+    this.log.debug(`Persisting ${synchronizedPlans.length} plan(s) to automation.plansData.`);
     await this.setStateAsync("automation.plansData", { val: JSON.stringify(synchronizedPlans), ack: true });
     await this.publishPlanNames(synchronizedPlans);
   }
@@ -472,7 +485,7 @@ class Irrigation extends utils.Adapter {
     }
   }
   onUnload(callback) {
-    var _a, _b, _c, _d, _e, _f;
+    var _a, _b, _c, _d, _e, _f, _g;
     try {
       if (this.rateLimiterPoll) {
         this.clearInterval(this.rateLimiterPoll);
@@ -482,8 +495,9 @@ class Irrigation extends utils.Adapter {
       (_b = this.automation) == null ? void 0 : _b.destroy();
       (_c = this.scheduler) == null ? void 0 : _c.destroy();
       (_d = this.dwd) == null ? void 0 : _d.destroy();
-      (_e = this.weatherApi) == null ? void 0 : _e.destroy();
-      (_f = this.flowMonitor) == null ? void 0 : _f.destroy();
+      (_e = this.windMonitor) == null ? void 0 : _e.destroy();
+      (_f = this.weatherApi) == null ? void 0 : _f.destroy();
+      (_g = this.flowMonitor) == null ? void 0 : _g.destroy();
       for (const valve of this.valves) {
         valve.destroy();
       }
@@ -505,8 +519,9 @@ class Irrigation extends utils.Adapter {
         }
       }
       const handledBySensor = await this.sensorManager.onForeignStateChange(id, state);
+      const handledByWind = await this.windMonitor.onForeignStateChange(id, state);
       const handledByRestriction = await this.dwd.onForeignStateChange(id, state);
-      if (handledBySensor || handledByRestriction) {
+      if (handledBySensor || handledByWind || handledByRestriction) {
         return;
       }
       if (await this.scheduler.onForeignStateChange(id, state)) {

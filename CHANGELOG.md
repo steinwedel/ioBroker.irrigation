@@ -1,4 +1,18 @@
 # Changelog
+## 0.3.0 (2026-07-25)
+* (Gerhard Steinwedel) **NEW**: Added wind speed/gust limits with resume hysteresis as an automatic pause condition
+* (Gerhard Steinwedel) **ENHANCED**: Added unit tests for per-valve-type start/stop/status (Gardena, Homematic, Hydrawise, Generic), the DWD/local/no-source legal restriction, and a full-plan-run test for the temperature-controlled irrigation adjustment
+* (Gerhard Steinwedel) **ENHANCED**: Added build.sh --dry-run/--no-deploy/--help and an admin hint that the Valves tab order is authoritative
+* (Gerhard Steinwedel) **FIXED**: Legacy fields (e.g. valveOrder) that were only dropped in memory now trigger a one-time cleanup rewrite of automation.plansData
+* (Gerhard Steinwedel) **ENHANCED**: Reduced plansData debug logging to a concise count instead of a full JSON dump
+* (Gerhard Steinwedel) **ENHANCED**: Extracted plan/valve synchronization into a tested pure function covering valve add/remove/rename regressions
+* (Gerhard Steinwedel) **FIXED**: Removed stale plan valve table order hint and misleading row-number column that contradicted the global Valves tab order
+* (Gerhard Steinwedel) **ENHANCED**: Updated the architecture status with current irrigation features
+* (Gerhard Steinwedel) **NEW**: Added automatic pause and resume of watering plans during rain
+* (Gerhard Steinwedel) **ENHANCED**: Added wind, precipitation, ET and flow-monitoring roadmap items
+* (Gerhard Steinwedel) **ENHANCED**: Expanded the adapter roadmap with operation, import/export and dashboard tasks
+* (Gerhard Steinwedel) **ENHANCED**: Updated the adapter implementation plan with completed and open work
+
 ## 0.2.55 (2026-07-24)
 * (Gerhard Steinwedel) **ENHANCED**: Unified sequential plan execution order with the Valves tab order
 * (Gerhard Steinwedel) **FIXED**: Reserved space for all valve table action buttons

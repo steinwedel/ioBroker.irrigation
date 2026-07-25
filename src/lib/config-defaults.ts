@@ -10,6 +10,13 @@ export const DEFAULT_CONFIG: IrrigationNativeConfig = {
     plans: [{ name: 'Alle', valveIndexes: [] }],
     scheduler: {
         autoMode: false,
+        pauseOnRain: false,
+        windPauseEnabled: false,
+        windSpeedStateId: '',
+        windSpeedLimit: 0,
+        windGustStateId: '',
+        windGustLimit: 0,
+        windHysteresisMinutes: 10,
         timerTimes: [],
         extensionFactor: 1,
         temperatureAdjustmentEnabled: false,

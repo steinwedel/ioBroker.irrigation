@@ -3,6 +3,7 @@ import type { IrrigationNativeConfig } from './types';
 export interface SensorsDeps {
     adapter: ioBroker.Adapter;
     getConfig: () => IrrigationNativeConfig;
+    onRainChange?: (raining: boolean) => Promise<void>;
 }
 
 /**
@@ -51,6 +52,7 @@ export class SensorManager {
         if (id === config.sensors.rainId) {
             this.rainState = state?.val === true;
             await this.deps.adapter.setStateAsync('sensors.rain', { val: this.rainState, ack: true });
+            await this.deps.onRainChange?.(this.rainState);
             return true;
         }
         if (id === config.sensors.soilMoistureId) {

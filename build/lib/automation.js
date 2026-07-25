@@ -417,11 +417,75 @@ class AutomationEngine {
         this.deps.adapter.log.warn("Resume refused: legal restriction still active.");
         return;
       }
+      if (this.pauseReason === "rain" && this.deps.isRaining()) {
+        this.deps.adapter.log.warn("Resume refused: rain is still detected.");
+        return;
+      }
+      if (this.pauseReason === "wind" && this.deps.isWindOverLimit()) {
+        this.deps.adapter.log.warn("Resume refused: wind speed/gust is still over the configured limit.");
+        return;
+      }
       this.status = "running";
       this.pauseReason = null;
       for (const idx of this.runningValves) {
         const remaining = Math.max(0, Math.round((((_a = this.valveEndsAt.get(idx)) != null ? _a : 0) - Date.now()) / 1e3));
         await this.deps.valves[idx].start(remaining);
+      }
+      await this.publishStatus();
+    }
+  }
+  async setRainPause(raining) {
+    var _a, _b, _c, _d, _e;
+    if (this.manualRun || !this.deps.getConfig().scheduler.pauseOnRain) {
+      return;
+    }
+    if (raining && this.status === "running") {
+      for (const idx of this.runningValves) {
+        await this.deps.valves[idx].stop();
+        (_b = (_a = this.deps).onValveFlowChange) == null ? void 0 : _b.call(_a, idx, false);
+      }
+      this.status = "paused";
+      this.pauseReason = "rain";
+      await this.publishStatus();
+      return;
+    }
+    if (!raining && this.status === "paused" && this.pauseReason === "rain") {
+      this.status = "running";
+      this.pauseReason = null;
+      for (const idx of this.runningValves) {
+        const remaining = Math.max(0, Math.round((((_c = this.valveEndsAt.get(idx)) != null ? _c : 0) - Date.now()) / 1e3));
+        if (remaining > 0) {
+          await this.deps.valves[idx].start(remaining);
+          (_e = (_d = this.deps).onValveFlowChange) == null ? void 0 : _e.call(_d, idx, true);
+        }
+      }
+      await this.publishStatus();
+    }
+  }
+  async setWindPause(paused) {
+    var _a, _b, _c, _d, _e;
+    if (this.manualRun || !this.deps.getConfig().scheduler.windPauseEnabled) {
+      return;
+    }
+    if (paused && this.status === "running") {
+      for (const idx of this.runningValves) {
+        await this.deps.valves[idx].stop();
+        (_b = (_a = this.deps).onValveFlowChange) == null ? void 0 : _b.call(_a, idx, false);
+      }
+      this.status = "paused";
+      this.pauseReason = "wind";
+      await this.publishStatus();
+      return;
+    }
+    if (!paused && this.status === "paused" && this.pauseReason === "wind") {
+      this.status = "running";
+      this.pauseReason = null;
+      for (const idx of this.runningValves) {
+        const remaining = Math.max(0, Math.round((((_c = this.valveEndsAt.get(idx)) != null ? _c : 0) - Date.now()) / 1e3));
+        if (remaining > 0) {
+          await this.deps.valves[idx].start(remaining);
+          (_e = (_d = this.deps).onValveFlowChange) == null ? void 0 : _e.call(_d, idx, true);
+        }
       }
       await this.publishStatus();
     }

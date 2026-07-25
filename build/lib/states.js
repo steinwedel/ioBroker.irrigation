@@ -32,12 +32,71 @@ async function createBaseStates(adapter) {
     def: ""
   });
   await setObj(adapter, "automation.active", {
-    name: "Auto mode on/off",
+    name: "Automatic mode enabled",
     type: "boolean",
-    role: "switch.mode.auto",
+    role: "switch",
     read: true,
     write: true,
     def: false
+  });
+  await setObj(adapter, "automation.pauseOnRain", {
+    name: "Pause automatic watering when raining",
+    type: "boolean",
+    role: "switch",
+    read: true,
+    write: true,
+    def: false
+  });
+  await setObj(adapter, "automation.windPauseEnabled", {
+    name: "Pause automatic watering when windy",
+    type: "boolean",
+    role: "switch",
+    read: true,
+    write: true,
+    def: false
+  });
+  await setObj(adapter, "automation.windSpeedStateId", {
+    name: "Wind speed state id",
+    type: "string",
+    role: "text",
+    read: true,
+    write: false,
+    def: ""
+  });
+  await setObj(adapter, "automation.windSpeedLimit", {
+    name: "Wind speed limit",
+    type: "number",
+    role: "value",
+    unit: "km/h",
+    read: true,
+    write: false,
+    def: 0
+  });
+  await setObj(adapter, "automation.windGustStateId", {
+    name: "Wind gust state id",
+    type: "string",
+    role: "text",
+    read: true,
+    write: false,
+    def: ""
+  });
+  await setObj(adapter, "automation.windGustLimit", {
+    name: "Wind gust limit",
+    type: "number",
+    role: "value",
+    unit: "km/h",
+    read: true,
+    write: false,
+    def: 0
+  });
+  await setObj(adapter, "automation.windHysteresisMinutes", {
+    name: "Wind resume hysteresis",
+    type: "number",
+    role: "value",
+    unit: "min",
+    read: true,
+    write: false,
+    def: 10
   });
   await setObj(adapter, "automation.running", {
     name: "Automation running",
@@ -590,6 +649,16 @@ async function createBaseStates(adapter) {
 }
 async function applyConfigToStates(adapter, config) {
   await adapter.setStateAsync("automation.active", { val: config.scheduler.autoMode, ack: true });
+  await adapter.setStateAsync("automation.pauseOnRain", { val: config.scheduler.pauseOnRain, ack: true });
+  await adapter.setStateAsync("automation.windPauseEnabled", { val: config.scheduler.windPauseEnabled, ack: true });
+  await adapter.setStateAsync("automation.windSpeedStateId", { val: config.scheduler.windSpeedStateId, ack: true });
+  await adapter.setStateAsync("automation.windSpeedLimit", { val: config.scheduler.windSpeedLimit, ack: true });
+  await adapter.setStateAsync("automation.windGustStateId", { val: config.scheduler.windGustStateId, ack: true });
+  await adapter.setStateAsync("automation.windGustLimit", { val: config.scheduler.windGustLimit, ack: true });
+  await adapter.setStateAsync("automation.windHysteresisMinutes", {
+    val: config.scheduler.windHysteresisMinutes,
+    ack: true
+  });
   await adapter.setStateAsync("automation.extensionFactor", { val: config.scheduler.extensionFactor, ack: true });
   await adapter.setStateAsync("automation.temperatureAdjustmentEnabled", {
     val: config.scheduler.temperatureAdjustmentEnabled,

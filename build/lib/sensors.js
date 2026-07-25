@@ -53,10 +53,12 @@ class SensorManager {
     }
   }
   async onForeignStateChange(id, state) {
+    var _a, _b;
     const config = this.deps.getConfig();
     if (id === config.sensors.rainId) {
       this.rainState = (state == null ? void 0 : state.val) === true;
       await this.deps.adapter.setStateAsync("sensors.rain", { val: this.rainState, ack: true });
+      await ((_b = (_a = this.deps).onRainChange) == null ? void 0 : _b.call(_a, this.rainState));
       return true;
     }
     if (id === config.sensors.soilMoistureId) {
