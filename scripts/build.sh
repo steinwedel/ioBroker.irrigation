@@ -2,6 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 DRY_RUN=false
 NO_DEPLOY=false
@@ -11,12 +12,13 @@ usage() {
     cat <<'EOF'
 Usage: ./build.sh [options] [patch|minor|major]
 
-Runs "npm run release <bump>" and, on success, "scripts/deploy.sh".
+Runs "npm run release <bump>" and, on success, "scripts/deploy.sh" (deploy.sh
+next to this script).
 
 Options:
   --dry-run     Only check and describe the release (no commit/tag/push).
                 deploy.sh is never run in this mode, since nothing is released.
-  --no-deploy   Perform a real release, but skip scripts/deploy.sh afterwards.
+  --no-deploy   Perform a real release, but skip deploy.sh afterwards.
   -h, --help    Show this help and exit without doing anything.
 
 Arguments:
@@ -47,7 +49,7 @@ for arg in "$@"; do
     esac
 done
 
-cd "$SCRIPT_DIR"
+cd "$PROJECT_DIR"
 
 if [ "$DRY_RUN" = true ]; then
     npm run release "$BUMP" -- --dry-run
@@ -58,8 +60,8 @@ fi
 npm run release "$BUMP"
 
 if [ "$NO_DEPLOY" = true ]; then
-    echo "Release finished; --no-deploy set, skipping scripts/deploy.sh."
+    echo "Release finished; --no-deploy set, skipping deploy.sh."
     exit 0
 fi
 
-"$SCRIPT_DIR/scripts/deploy.sh"
+"$SCRIPT_DIR/deploy.sh"
