@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.3.3",
+    "version": "0.3.4",
     "news": {
+      "0.3.4": {
+        "en": "(No user-visible changes — documentation and asset updates only)*",
+        "de": "(Keine für Benutzer sichtbaren Änderungen — nur Dokumentations- und Asset-Updates)*",
+        "ru": "(Нет видимых для пользователя изменений — только обновления документации и ресурсов)*",
+        "pt": "(Sem alterações visíveis ao usuário — apenas atualizações de documentação e recursos)*",
+        "nl": "(Geen voor gebruikers zichtbare wijzigingen — alleen documentatie- en asset-updates)*",
+        "fr": "(Aucun changement visible par l'utilisateur — mises à jour de la documentation et des ressources uniquement)*",
+        "it": "(Nessuna modifica visibile all'utente — solo aggiornamenti di documentazione e risorse)*",
+        "es": "(Sin cambios visibles para el usuario — solo actualizaciones de documentación y recursos)*",
+        "pl": "(Brak widocznych dla użytkownika zmian — tylko aktualizacje dokumentacji i zasobów)*",
+        "uk": "(Немає видимих для користувача змін — лише оновлення документації та ресурсів)*",
+        "zh-cn": "(无用户可见更改 — 仅文档和资源更新)*"
+      },
       "0.3.3": {
         "en": "**ENHANCED**: Valve duration formatting centralized in `formatValvesForNative()` method to ensure consistent conversion of numeric seconds to \"HH:MM:SS\"/\"MM:SS\" display strings whenever valves are written to native config or returned to admin UI — eliminates duplication across migration, write, and scan-response code paths.",
         "de": "**VERBESSERT**: Formatierung der Ventildauer zentralisiert in der Methode `formatValvesForNative()`, um eine konsistente Umwandlung numerischer Sekunden in \"HH:MM:SS\"/\"MM:SS\"-Anzeigestrings sicherzustellen, wann immer Ventile in die native Konfiguration geschrieben oder an die Admin-Oberfläche zurückgegeben werden – beseitigt Duplizierung über Migrations-, Schreib- und Scan-Antwort-Codepfade hinweg.",
@@ -80,19 +93,6 @@
         "pl": "**ULEPSZONE**: Ujednolicona kolejność sekwencyjnego wykonywania planu z kolejnością zakładki Zawory\n**NAPRAWIONO**: Zarezerwowano miejsce dla wszystkich przycisków akcji w tabeli zaworów",
         "uk": "**ПОКРАЩЕНО**: Уніфіковано послідовний порядок виконання плану з порядком вкладки клапанів\n**ВИПРАВЛЕНО**: Зарезервовано місце для всіх кнопок дій у таблиці клапанів",
         "zh-cn": "**增强**：统一了顺序计划执行顺序与阀门选项卡顺序\n**修复**：为所有阀门表操作按钮预留了空间"
-      },
-      "0.2.54": {
-        "en": "**FIXED**: Kept valve reorder arrows available by disabling valve table sorting",
-        "de": "**BEHOBEN**: Pfeile zum Neuordnen der Ventile verfügbar gehalten, indem die Sortierung der Ventiltabelle deaktiviert wurde",
-        "ru": "**ИСПРАВЛЕНО**: Стрелки изменения порядка клапанов оставлены доступными путём отключения сортировки таблицы клапанов",
-        "pt": "**CORRIGIDO**: Mantidas as setas de reordenação de válvulas disponíveis ao desativar a ordenação da tabela de válvulas",
-        "nl": "**OPGELOST**: Pijlen voor het herschikken van kleppen beschikbaar gehouden door het sorteren van de kleppenlijst uit te schakelen",
-        "fr": "**CORRIGÉ** : Les flèches de réorganisation des vannes restent disponibles en désactivant le tri du tableau des vannes",
-        "it": "**RISOLTO**: Mantenute disponibili le frecce di riordino delle valvole disabilitando l'ordinamento della tabella delle valvole",
-        "es": "**SOLUCIONADO**: Se mantuvieron disponibles las flechas de reordenación de válvulas al deshabilitar la ordenación de la tabla de válvulas",
-        "pl": "**NAPRAWIONO**: Zachowano dostępność strzałek zmiany kolejności zaworów poprzez wyłączenie sortowania tabeli zaworów",
-        "uk": "**ВИПРАВЛЕНО**: Збережено доступність стрілок зміни порядку клапанів шляхом вимкнення сортування таблиці клапанів",
-        "zh-cn": "**已修复**：通过禁用阀门表排序保持阀门重新排序箭头可用"
       }
     },
     "titleLang": {
