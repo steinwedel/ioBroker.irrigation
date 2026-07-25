@@ -552,7 +552,7 @@ class Irrigation extends utils.Adapter {
     }
   }
   async onStateChange(id, state) {
-    var _a, _b;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
     if (!state) {
       return;
     }
@@ -562,16 +562,16 @@ class Irrigation extends utils.Adapter {
           return;
         }
       }
-      const handledBySensor = await this.sensorManager.onForeignStateChange(id, state);
-      const handledByWind = await this.windMonitor.onForeignStateChange(id, state);
-      const handledByRestriction = await this.dwd.onForeignStateChange(id, state);
+      const handledBySensor = (_b = await ((_a = this.sensorManager) == null ? void 0 : _a.onForeignStateChange(id, state))) != null ? _b : false;
+      const handledByWind = (_d = await ((_c = this.windMonitor) == null ? void 0 : _c.onForeignStateChange(id, state))) != null ? _d : false;
+      const handledByRestriction = (_f = await ((_e = this.dwd) == null ? void 0 : _e.onForeignStateChange(id, state))) != null ? _f : false;
       if (handledBySensor || handledByWind || handledByRestriction) {
         return;
       }
-      if (await this.scheduler.onForeignStateChange(id, state)) {
+      if (await ((_g = this.scheduler) == null ? void 0 : _g.onForeignStateChange(id, state))) {
         return;
       }
-      if (await this.flowMonitor.onForeignStateChange(id, state)) {
+      if (await ((_h = this.flowMonitor) == null ? void 0 : _h.onForeignStateChange(id, state))) {
         return;
       }
       return;
@@ -592,7 +592,7 @@ class Irrigation extends utils.Adapter {
     switch (localId) {
       case "automation.start":
         await this.setStateAsync(id, { val: false, ack: true });
-        await this.automation.requestRun((_b = (_a = this.config2.plans[0]) == null ? void 0 : _a.name) != null ? _b : "All", "manual-button");
+        await this.automation.requestRun((_j = (_i = this.config2.plans[0]) == null ? void 0 : _i.name) != null ? _j : "All", "manual-button");
         return;
       case "automation.startPlan": {
         const planName = typeof state.val === "string" ? state.val.trim() : "";

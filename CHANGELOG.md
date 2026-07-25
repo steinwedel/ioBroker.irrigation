@@ -1,4 +1,6 @@
 # Changelog
+## **WORK IN PROGRESS**
+
 ## 0.3.9 (2026-07-25)
 * (Gerhard Steinwedel) **FIXED**: `FlowMonitor.getExpectedFlow()`/calibration built the `flowExpected` object id from a valve's raw array index instead of its stable `id`, so both could read/write the wrong valve's calibration data once valves were reordered/deleted/re-added in the admin Valves table
 * (Gerhard Steinwedel) **FIXED**: Flow calibration now explicitly runs the valve for the calibration window's own fixed duration instead of the valve's configured watering `duration` - previously a short configured duration could let the valve auto-stop mid-calibration while sampling continued (now at zero flow) for the rest of the window, skewing the calibrated rate down

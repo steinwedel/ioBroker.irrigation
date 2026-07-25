@@ -634,16 +634,16 @@ class Irrigation extends utils.Adapter {
                     return;
                 }
             }
-            const handledBySensor = await this.sensorManager.onForeignStateChange(id, state);
-            const handledByWind = await this.windMonitor.onForeignStateChange(id, state);
-            const handledByRestriction = await this.dwd.onForeignStateChange(id, state);
+            const handledBySensor = (await this.sensorManager?.onForeignStateChange(id, state)) ?? false;
+            const handledByWind = (await this.windMonitor?.onForeignStateChange(id, state)) ?? false;
+            const handledByRestriction = (await this.dwd?.onForeignStateChange(id, state)) ?? false;
             if (handledBySensor || handledByWind || handledByRestriction) {
                 return;
             }
-            if (await this.scheduler.onForeignStateChange(id, state)) {
+            if (await this.scheduler?.onForeignStateChange(id, state)) {
                 return;
             }
-            if (await this.flowMonitor.onForeignStateChange(id, state)) {
+            if (await this.flowMonitor?.onForeignStateChange(id, state)) {
                 return;
             }
             return;
