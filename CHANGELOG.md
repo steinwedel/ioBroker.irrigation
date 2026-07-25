@@ -1,5 +1,6 @@
 # Changelog
 ## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **FIXED**: Added null-safety checks to `onForeignStateChange()` calls for optional manager instances (`sensorManager`, `windMonitor`, `dwd`, `scheduler`, `flowMonitor`) to prevent NullPointerExceptions if these instances are not initialized
 
 ## 0.3.9 (2026-07-25)
 * (Gerhard Steinwedel) **FIXED**: `FlowMonitor.getExpectedFlow()`/calibration built the `flowExpected` object id from a valve's raw array index instead of its stable `id`, so both could read/write the wrong valve's calibration data once valves were reordered/deleted/re-added in the admin Valves table
