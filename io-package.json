@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.3.13",
+    "version": "0.3.14",
     "news": {
+      "0.3.14": {
+        "en": "**ENHANCED**: Added a dedicated valve detail editor that keeps the main valve table compact while allowing all valve settings to be edited before saving the adapter configuration",
+        "de": "**VERBESSERT**: Ein dedizierter Ventildetail-Editor wurde hinzugefügt, der die Hauptventiltabelle kompakt hält und gleichzeitig ermöglicht, alle Ventileinstellungen zu bearbeiten, bevor die Adapterkonfiguration gespeichert wird",
+        "ru": "**УЛУЧШЕНО**: Добавлен специальный редактор деталей клапана, который сохраняет основную таблицу клапанов компактной и позволяет редактировать все настройки клапана перед сохранением конфигурации адаптера",
+        "pt": "**MELHORADO**: Adicionado um editor dedicado de detalhes de válvula que mantém a tabela principal de válvulas compacta, permitindo que todas as configurações de válvula sejam editadas antes de salvar a configuração do adaptador",
+        "nl": "**VERBETERD**: Een speciale ventieldetaileditor toegevoegd die de hoofdventieltabel compact houdt en tegelijkertijd alle ventielinstellingen laat bewerken voordat de adapterconfiguratie wordt opgeslagen",
+        "fr": "**AMÉLIORÉ**: Ajout d'un éditeur dédié aux détails des vannes qui maintient le tableau principal des vannes compact tout en permettant de modifier tous les paramètres des vannes avant d'enregistrer la configuration de l'adaptateur",
+        "it": "**MIGLIORATO**: Aggiunto un editor dedicato ai dettagli delle valvole che mantiene compatta la tabella principale delle valvole consentendo di modificare tutte le impostazioni delle valvole prima di salvare la configurazione dell'adattatore",
+        "es": "**MEJORADO**: Se agregó un editor dedicado de detalles de válvula que mantiene compacta la tabla principal de válvulas mientras permite editar todas las configuraciones de válvula antes de guardar la configuración del adaptador",
+        "pl": "**ULEPSZONE**: Dodano dedykowany edytor szczegółów zaworu, który utrzymuje główną tabelę zaworów w zwartej formie, jednocześnie umożliwiając edycję wszystkich ustawień zaworu przed zapisaniem konfiguracji adaptera",
+        "uk": "**ПОКРАЩЕНО**: Додано спеціальний редактор деталей клапана, який зберігає основну таблицю клапанів компактною та дозволяє редагувати всі налаштування клапана перед збереженням конфігурації адаптера",
+        "zh-cn": "**增强**：添加了专用的阀门详细信息编辑器，使主阀门表保持紧凑，同时允许在保存适配器配置之前编辑所有阀门设置"
+      },
       "0.3.13": {
         "en": "**FIXED**: Reverted the broken \"Valve details (expert)\" accordion (0.3.12) that showed no fields at all, because JSONConfig's `accordion` type does not support pointing at a different attribute via `attr` — it always binds to its own item key. Expert-only valve fields (enabled, flow rate, rain independence, moisture threshold, manual duration, Rainbird all-off state) are shown as columns in the main valves table again, hidden unless expert mode is enabled",
         "de": "**BEHOBEN**: Das defekte Akkordeon \"Ventildetails (Experte)\" (0.3.12) wurde rückgängig gemacht, das überhaupt keine Felder anzeigte, da der `accordion`-Typ von JSONConfig das Verweisen auf ein anderes Attribut über `attr` nicht unterstützt – es bindet immer an seinen eigenen Item-Schlüssel. Nur für Experten sichtbare Ventilfelder (Aktiviert, Durchflussrate, Regenunabhängigkeit, Feuchtigkeitsschwelle, Manuelle Dauer, Rainbird Alle-Aus-Status) werden wieder als Spalten in der Hauptventiltabelle angezeigt, ausgeblendet, sofern der Expertenmodus nicht aktiviert ist",
@@ -80,19 +93,6 @@
         "pl": "**NAPRAWIONO**: `automation.remainingDuration`/`remainingDurationMin` są teraz przeliczane, gdy używane są przyciski partii „Dalej\"/„Wstecz\" (`automation.next`/`automation.back`) — wcześniej szacowany czas pozostały pozostawał oparty na oryginalnej liniowej osi czasu i stawał się nieprawidłowy po pominięciu lub powtórzeniu partii **ULEPSZONE**: Zmieniono nazwę stanu `remainingTime` na `remainingDuration` (zarówno `automation.remainingTime`, jak i dla każdego zaworu `valves.valve_XXX.remainingTime`) dla spójności z `remainingDurationMin`; przestarzałe obiekty `remainingTime` są automatycznie usuwane przy starcie",
         "uk": "**ВИПРАВЛЕНО**: `automation.remainingDuration`/`remainingDurationMin` тепер перераховуються при використанні кнопок пакетного переходу \"Далі\"/\"Назад\" (`automation.next`/`automation.back`) — раніше оцінка часу, що залишився, залишалася заснованою на початковій лінійній часовій шкалі виконання і ставала неправильною після пропуску або повторення пакета **ПОКРАЩЕНО**: Стан `remainingTime` перейменовано на `remainingDuration` (як `automation.remainingTime`, так і для кожного клапана `valves.valve_XXX.remainingTime`) для узгодженості з `remainingDurationMin`; застарілі об'єкти `remainingTime` автоматично видаляються при запуску",
         "zh-cn": "**修复**：现在当使用\"下一个\"/\"上一个\"批次按钮（`automation.next`/`automation.back`）时，`automation.remainingDuration`/`remainingDurationMin` 会重新计算——以前剩余时间估算仍基于原始线性运行时间线，一旦跳过或重复批次就会变得不正确 **增强**：将 `remainingTime` 状态重命名为 `remainingDuration`（包括 `automation.remainingTime` 和每个阀门的 `valves.valve_XXX.remainingTime`），以与 `remainingDurationMin` 保持一致；启动时会自动删除过时的 `remainingTime` 对象"
-      },
-      "0.3.7": {
-        "en": "**NEW**: Added formatted duration display (`remainingDurationMin`) showing remaining time in mm:ss format for both automation and individual valves — improves readability in UI compared to raw seconds",
-        "de": "**NEU**: Formatierte Daueranzeige (`remainingDurationMin`) hinzugefügt, die die verbleibende Zeit im Format mm:ss sowohl für die Automatisierung als auch für einzelne Ventile anzeigt – verbessert die Lesbarkeit in der Benutzeroberfläche im Vergleich zu reinen Sekundenwerten",
-        "ru": "**НОВОЕ**: Добавлено форматированное отображение длительности (`remainingDurationMin`), показывающее оставшееся время в формате мм:сс как для автоматизации, так и для отдельных клапанов — улучшает читаемость в интерфейсе по сравнению с секундами",
-        "pt": "**NOVO**: Adicionada exibição de duração formatada (`remainingDurationMin`) mostrando o tempo restante no formato mm:ss tanto para automação quanto para válvulas individuais — melhora a legibilidade na interface em comparação com segundos brutos",
-        "nl": "**NIEUW**: Geformatteerde duurweergave (`remainingDurationMin`) toegevoegd die de resterende tijd in mm:ss-formaat toont voor zowel automatisering als individuele kleppen — verbetert de leesbaarheid in de UI vergeleken met ruwe seconden",
-        "fr": "**NOUVEAU** : Ajout d'un affichage de durée formaté (`remainingDurationMin`) indiquant le temps restant au format mm:ss pour l'automatisation et les vannes individuelles — améliore la lisibilité dans l'interface par rapport aux secondes brutes",
-        "it": "**NOVITÀ**: Aggiunta visualizzazione formattata della durata (`remainingDurationMin`) che mostra il tempo rimanente in formato mm:ss sia per l'automazione che per le singole valvole — migliora la leggibilità nell'interfaccia rispetto ai secondi grezzi",
-        "es": "**NUEVO**: Se agregó visualización de duración formateada (`remainingDurationMin`) que muestra el tiempo restante en formato mm:ss tanto para la automatización como para válvulas individuales — mejora la legibilidad en la interfaz en comparación con los segundos sin formato",
-        "pl": "**NOWOŚĆ**: Dodano sformatowane wyświetlanie czasu trwania (`remainingDurationMin`) pokazujące pozostały czas w formacie mm:ss zarówno dla automatyzacji, jak i poszczególnych zaworów — poprawia czytelność w interfejsie w porównaniu z surowymi sekundami",
-        "uk": "**НОВЕ**: Додано форматоване відображення тривалості (`remainingDurationMin`), що показує час, який залишився, у форматі мм:сс як для автоматизації, так і для окремих клапанів — покращує читабельність в інтерфейсі порівняно з необробленими секундами",
-        "zh-cn": "**新增**：添加了格式化的持续时间显示（`remainingDurationMin`），以 mm:ss 格式显示自动化和单个阀门的剩余时间——与原始秒数相比，提高了用户界面的可读性"
       }
     },
     "titleLang": {

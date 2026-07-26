@@ -24,6 +24,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var utils = __toESM(require("@iobroker/adapter-core"));
 var import_config_defaults = require("./lib/config-defaults");
 var import_duration = require("./lib/duration");
+var import_valve_editor = require("./lib/valve-editor");
 var import_types = require("./lib/types");
 var import_states = require("./lib/states");
 var import_ventile = require("./lib/ventile");
@@ -839,7 +840,7 @@ class Irrigation extends utils.Adapter {
     }
   }
   async handleMessage(obj) {
-    var _a;
+    var _a, _b;
     if (obj === null || typeof obj !== "object" || !obj.command) {
       return;
     }
@@ -904,6 +905,52 @@ class Irrigation extends utils.Adapter {
         value: i
       }));
       this.sendTo(obj.from, obj.command, options, obj.callback);
+      return;
+    }
+    if (obj.command === "listValveEditorValves" && obj.callback) {
+      const rawValves = (_b = obj.message) == null ? void 0 : _b.valves;
+      this.sendTo(obj.from, obj.command, (0, import_valve_editor.buildValveEditorOptions)(rawValves), obj.callback);
+      return;
+    }
+    if (obj.command === "loadValveEditor" && obj.callback) {
+      const message = obj.message;
+      const valveId = message == null ? void 0 : message._editValveId;
+      if (typeof valveId !== "number" || !Number.isInteger(valveId) || valveId < 0) {
+        this.sendTo(obj.from, obj.command, { error: "noValveSelected" }, obj.callback);
+        return;
+      }
+      const fields = (0, import_valve_editor.getValveEditorFields)(message == null ? void 0 : message.valves, valveId);
+      if (!fields) {
+        this.sendTo(obj.from, obj.command, { error: "valveNotFound" }, obj.callback);
+        return;
+      }
+      this.sendTo(obj.from, obj.command, { native: { _editValveId: valveId, ...fields } }, obj.callback);
+      return;
+    }
+    if (obj.command === "applyValveEditor" && obj.callback) {
+      const message = obj.message;
+      const result = (0, import_valve_editor.applyValveEditorFields)(message == null ? void 0 : message.valves, message == null ? void 0 : message._editValveId, message);
+      if ("error" in result) {
+        this.sendTo(obj.from, obj.command, { error: result.error }, obj.callback);
+        return;
+      }
+      const fields = (0, import_valve_editor.getValveEditorFields)(result.valves, message == null ? void 0 : message._editValveId);
+      if (!fields) {
+        this.sendTo(obj.from, obj.command, { error: "valveNotFound" }, obj.callback);
+        return;
+      }
+      this.sendTo(
+        obj.from,
+        obj.command,
+        {
+          native: {
+            valves: this.formatValvesForNative(result.valves),
+            _editValveId: message == null ? void 0 : message._editValveId,
+            ...fields
+          }
+        },
+        obj.callback
+      );
       return;
     }
     if (obj.command === "listPlans" && obj.callback) {

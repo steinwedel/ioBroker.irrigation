@@ -7,6 +7,7 @@
 import { expect } from 'chai';
 import { AutomationEngine, buildBatches, calculateTemperatureAdjustmentFactor } from './lib/automation';
 import { parseDuration, formatDuration } from './lib/duration';
+import { applyValveEditorFields, buildValveEditorOptions, getValveEditorFields } from './lib/valve-editor';
 import { DwdRestriction, parseDwdTemperature } from './lib/dwd';
 import { resolvePlanFromIcalTitle } from './lib/scheduler';
 import { parsePlanValveTableRows, synchronizePlanWithValves } from './lib/types';
@@ -42,6 +43,97 @@ describe('duration parsing and formatting', () => {
     it('formats durations as MM:SS or HH:MM:SS', () => {
         expect(formatDuration(90)).to.equal('01:30');
         expect(formatDuration(3723)).to.equal('01:02:03');
+    });
+});
+
+describe('valve detail editor', () => {
+    const valves = [
+        makeValve({
+            id: 8,
+            name: 'Front lawn',
+            stateId: 'garden.0.front',
+            duration: 600,
+            manualDuration: 90,
+            days: [6, 2],
+        }),
+        makeValve({ id: 3, name: 'Back lawn', stateId: 'garden.0.back', duration: 300, manualDuration: 120, days: [] }),
+    ];
+
+    it('uses stable IDs in options even when table rows have been reordered', () => {
+        expect(buildValveEditorOptions([valves[1], valves[0]])).to.deep.equal([
+            { value: 3, label: '[003] Back lawn' },
+            { value: 8, label: '[008] Front lawn' },
+        ]);
+    });
+
+    it('loads formatted durations and sorted weekdays for the selected stable ID', () => {
+        expect(getValveEditorFields(valves, 8)).to.include({
+            _valveEditorName: 'Front lawn',
+            _valveEditorDuration: '10:00',
+            _valveEditorManualDuration: '01:30',
+            _valveEditorDays: '2,6',
+        });
+    });
+
+    it('updates only the selected valve and preserves table order', () => {
+        const result = applyValveEditorFields([valves[1], valves[0]], 8, {
+            _valveEditorName: 'Front lawn updated',
+            _valveEditorType: 'Generic',
+            _valveEditorStateId: 'garden.0.front',
+            _valveEditorDuration: '12:00',
+            _valveEditorEnabled: false,
+            _valveEditorFlowRateLpm: 4.5,
+            _valveEditorRainIndependent: true,
+            _valveEditorMoistureThreshold: 40,
+            _valveEditorManualDuration: '01:30',
+            _valveEditorDays: '6, 2,2,0',
+            _valveEditorAllOffId: '',
+        });
+        expect(result).to.not.have.property('error');
+        if ('error' in result) {
+            throw new Error(result.error);
+        }
+        expect(result.valves.map(valve => valve.id)).to.deep.equal([3, 8]);
+        expect(result.valves[0].name).to.equal('Back lawn');
+        expect(result.valves[1]).to.include({
+            name: 'Front lawn updated',
+            duration: 720,
+            enabled: false,
+            flowRateLpm: 4.5,
+            rainIndependent: true,
+            moistureThreshold: 40,
+            manualDuration: 90,
+        });
+        expect(result.valves[1].days).to.deep.equal([0, 2, 6]);
+    });
+
+    it('accepts empty weekdays as every day', () => {
+        const fields = getValveEditorFields(valves, 3);
+        expect(fields).to.not.equal(undefined);
+        const result = applyValveEditorFields(valves, 3, { ...fields, _valveEditorDays: '' });
+        expect(result).to.not.have.property('error');
+        if ('error' in result) {
+            throw new Error(result.error);
+        }
+        expect(result.valves[1].days).to.deep.equal([]);
+    });
+
+    it('rejects invalid input without changing a valve', () => {
+        const fields = getValveEditorFields(valves, 8);
+        expect(fields).to.not.equal(undefined);
+        expect(applyValveEditorFields(valves, 8, { ...fields, _valveEditorDays: '7' })).to.deep.equal({
+            error: 'invalidDays',
+        });
+        expect(applyValveEditorFields(valves, 8, { ...fields, _valveEditorFlowRateLpm: -1 })).to.deep.equal({
+            error: 'invalidNumbers',
+        });
+        expect(applyValveEditorFields(valves, 8, { ...fields, _valveEditorMoistureThreshold: 101 })).to.deep.equal({
+            error: 'invalidNumbers',
+        });
+        expect(applyValveEditorFields(valves, 8, { ...fields, _valveEditorDuration: 'invalid' })).to.deep.equal({
+            error: 'invalidDuration',
+        });
+        expect(applyValveEditorFields(valves, 999, fields)).to.deep.equal({ error: 'valveNotFound' });
     });
 });
 
