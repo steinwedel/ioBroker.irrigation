@@ -1,4 +1,7 @@
 # Changelog
+## 0.3.23 (2026-07-26)
+* (Gerhard Steinwedel) **FIXED**: Removed the completed one-time manual-duration migration while retaining the 10-minute defaults for new valves
+
 ## 0.3.22 (2026-07-26)
 * (Gerhard Steinwedel) **ENHANCED**: Set manual watering duration to 10 minutes for existing valves once; new valves now consistently default to 10 minutes for both planned and manual watering
 

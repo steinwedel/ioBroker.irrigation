@@ -134,7 +134,6 @@ class Irrigation extends utils.Adapter {
     private async onReady(): Promise<void> {
         this.config2 = normalizeConfig(this.config);
         await this.migrateNativeConfig();
-        await this.migrateManualDurationsToTenMinutes();
         await this.cleanupStaleValveObjects();
         await this.cleanupStaleZoneObjects();
 
@@ -265,16 +264,6 @@ class Irrigation extends utils.Adapter {
             const nextValveId = Math.max(this.config2.nextValveId, maxAssignedId + 1);
             await this.writeNativeAsync({ valves: migratedValves as unknown as IValveConfig[], nextValveId });
         }
-    }
-
-    private async migrateManualDurationsToTenMinutes(): Promise<void> {
-        const valves = this.config2.valves.map(valve => ({ ...valve, manualDuration: 600 }));
-        if (this.config2.valves.every(valve => valve.manualDuration === 600)) {
-            return;
-        }
-        this.log.info(`Setting the manual duration of ${valves.length} valve(s) to 10 minutes.`);
-        this.config2 = { ...this.config2, valves };
-        await this.writeValvesToNative(valves);
     }
 
     /**

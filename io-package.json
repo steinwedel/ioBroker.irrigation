@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.3.22",
+    "version": "0.3.23",
     "news": {
+      "0.3.23": {
+        "en": "**FIXED**: Removed the completed one-time manual-duration migration while retaining the 10-minute defaults for new valves",
+        "de": "**BEHOBEN**: Die abgeschlossene einmalige Migration der manuellen Dauer wurde entfernt, wobei die 10-Minuten-Standardwerte für neue Ventile beibehalten wurden",
+        "ru": "**ИСПРАВЛЕНО**: Удалена завершённая одноразовая миграция ручной длительности с сохранением 10-минутных значений по умолчанию для новых клапанов",
+        "pt": "**CORRIGIDO**: Removida a migração única concluída da duração manual, mantendo os padrões de 10 minutos para novas válvulas",
+        "nl": "**OPGELOST**: De voltooide eenmalige migratie van handmatige duur is verwijderd, waarbij de standaardwaarden van 10 minuten voor nieuwe kleppen behouden blijven",
+        "fr": "**CORRIGÉ**: Suppression de la migration ponctuelle terminée de la durée manuelle tout en conservant les valeurs par défaut de 10 minutes pour les nouvelles vannes",
+        "it": "**RISOLTO**: Rimossa la migrazione una tantum completata della durata manuale mantenendo i valori predefiniti di 10 minuti per le nuove valvole",
+        "es": "**SOLUCIONADO**: Se eliminó la migración única completada de duración manual manteniendo los valores predeterminados de 10 minutos para las nuevas válvulas",
+        "pl": "**NAPRAWIONO**: Usunięto zakończoną jednorazową migrację czasu trwania ręcznego, zachowując domyślne wartości 10 minut dla nowych zaworów",
+        "uk": "**ВИПРАВЛЕНО**: Видалено завершену одноразову міграцію ручної тривалості зі збереженням 10-хвилинних значень за замовчуванням для нових клапанів",
+        "zh-cn": "**已修复**：移除了已完成的一次性手动持续时间迁移，同时保留新阀门的10分钟默认值"
+      },
       "0.3.22": {
         "en": "**ENHANCED**: Set manual watering duration to 10 minutes for existing valves once; new valves now consistently default to 10 minutes for both planned and manual watering",
         "de": "**VERBESSERT**: Manuelle Bewässerungsdauer für bestehende Ventile einmalig auf 10 Minuten gesetzt; neue Ventile verwenden nun einheitlich 10 Minuten als Standard für geplante und manuelle Bewässerung",
@@ -80,19 +93,6 @@
         "pl": "**ULEPSZONE**: Dodano opcjonalny czujnik wilgotności gleby wybieralny w drzewie obiektów dla każdego zaworu; jego próg wilgotności jest włączany tylko wtedy, gdy do tego zaworu przypisany jest czujnik",
         "uk": "**ПОКРАЩЕНО**: Додано опціональний датчик вологості ґрунту, що вибирається в дереві об'єктів, для кожного клапана; його поріг вологості активується лише тоді, коли цьому клапану призначено датчик",
         "zh-cn": "**增强**：为每个阀门添加了可在对象树中选择的可选土壤湿度传感器；仅当该阀门分配了传感器时，其湿度阈值才会启用"
-      },
-      "0.3.16": {
-        "en": "**FIXED**: Disable a valve's flow-rate editor until the global flow monitor is enabled and a flow-sensor state ID is configured",
-        "de": "**BEHOBEN**: Der Durchflussraten-Editor eines Ventils wird deaktiviert, bis die globale Durchflussüberwachung aktiviert und eine Durchflusssensor-Status-ID konfiguriert ist",
-        "ru": "**ИСПРАВЛЕНО**: Редактор расхода клапана отключен до тех пор, пока не будет включен глобальный монитор расхода и не настроен ID состояния датчика расхода",
-        "pt": "**CORRIGIDO**: Desativa o editor de taxa de fluxo de uma válvula até que o monitor de fluxo global seja ativado e um ID de estado do sensor de fluxo seja configurado",
-        "nl": "**OPGELOST**: De stroomsnelheidseditor van een klep wordt uitgeschakeld totdat de globale stroommonitor is ingeschakeld en een stroomsensor-status-ID is geconfigureerd",
-        "fr": "**CORRIGÉ**: Désactive l'éditeur de débit d'une vanne jusqu'à ce que le moniteur de débit global soit activé et qu'un ID d'état de capteur de débit soit configuré",
-        "it": "**RISOLTO**: Disabilita l'editor della portata di una valvola finché il monitor di flusso globale non è abilitato e non è configurato un ID di stato del sensore di flusso",
-        "es": "**SOLUCIONADO**: Deshabilita el editor de caudal de una válvula hasta que se active el monitor de flujo global y se configure un ID de estado del sensor de flujo",
-        "pl": "**NAPRAWIONO**: Wyłączenie edytora natężenia przepływu zaworu do czasu włączenia globalnego monitora przepływu i skonfigurowania ID stanu czujnika przepływu",
-        "uk": "**ВИПРАВЛЕНО**: Редактор швидкості потоку клапана вимкнено, доки не буде увімкнено глобальний монітор потоку та не налаштовано ID стану датчика потоку",
-        "zh-cn": "**已修复**：禁用阀门的流量编辑器，直到启用全局流量监控并配置流量传感器状态ID"
       }
     },
     "titleLang": {
