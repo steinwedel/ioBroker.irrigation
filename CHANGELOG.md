@@ -1,4 +1,7 @@
 # Changelog
+## 0.3.15 (2026-07-26)
+* (Gerhard Steinwedel) **FIXED**: Starting a valve through its adapter `state` now runs it for the configured manual duration and stopping that state ends the manual run cleanly
+
 ## 0.3.14 (2026-07-26)
 * (Gerhard Steinwedel) **ENHANCED**: Added a dedicated valve detail editor that keeps the main valve table compact while allowing all valve settings to be edited before saving the adapter configuration
 

@@ -145,7 +145,15 @@ class Irrigation extends utils.Adapter {
         await this.createRateLimitStates();
 
         this.valves = this.config2.valves.map(
-            (valveConfig, index) => new ValveController(this, index, valveConfig, this.rateLimiter, () => this.valves),
+            (valveConfig, index) =>
+                new ValveController(
+                    this,
+                    index,
+                    valveConfig,
+                    this.rateLimiter,
+                    () => this.valves,
+                    requestedOn => this.automation.manualSetValveState(index, requestedOn),
+                ),
         );
         for (const valve of this.valves) {
             await valve.init();

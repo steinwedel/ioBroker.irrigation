@@ -753,6 +753,19 @@ export class AutomationEngine {
     // Manual single-valve runs
     // ------------------------------------------------------------------
 
+    public async manualSetValveState(valveIndex: number, requestedOn: boolean): Promise<void> {
+        if (requestedOn) {
+            await this.manualStartValve(valveIndex);
+            return;
+        }
+        if (this.manualRun?.valveIndex === valveIndex) {
+            await this.stopManualRun();
+            return;
+        }
+        await this.deps.valves[valveIndex]?.stop();
+        this.deps.onValveFlowChange?.(valveIndex, false);
+    }
+
     public async manualStartValve(valveIndex: number): Promise<void> {
         if (this.manualRun) {
             this.deps.adapter.log.warn('Manual valve start ignored: another manual run is already active.');

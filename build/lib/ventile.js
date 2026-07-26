@@ -60,6 +60,7 @@ class ValveController {
    * `ValveController[]` list only after constructing each instance.
    */
   getAllValves;
+  onManualStateCommand;
   /**
    * 1s tick used to count down remainingDuration for adapter-owned timer types
    * (Homematic/Generic). This is the single source of truth for the
@@ -111,12 +112,13 @@ class ValveController {
    * via a different pair of racing callers than the original bug.
    */
   commandChain = Promise.resolve();
-  constructor(adapter, index, config, rateLimiter, getAllValves) {
+  constructor(adapter, index, config, rateLimiter, getAllValves, onManualStateCommand) {
     this.adapter = adapter;
     this.index = index;
     this.config = config;
     this.rateLimiter = rateLimiter;
     this.getAllValves = getAllValves != null ? getAllValves : (() => [this]);
+    this.onManualStateCommand = onManualStateCommand;
   }
   get id() {
     var _a;
@@ -471,9 +473,10 @@ class ValveController {
   }
   /**
    * Handles a command on one of this valve's own states, i.e. a manual
-   * start/stop via the "state" mirror state, or an update of the duration
-   * manual-start duration. Returns true if the change was consumed (belongs
-   * to this valve).
+   * start/stop via the "state" mirror state or an update of the scheduled
+   * duration. State commands are delegated to the automation engine when a
+   * manual-state handler was supplied. Returns true if the change belongs to
+   * this valve.
    *
    * Normally only ack=false changes are commands (a user/script explicitly
    * requesting an action), while ack=true changes are just our own status
@@ -507,7 +510,9 @@ class ValveController {
           return false;
         }
       }
-      this.commandChain = this.commandChain.then(() => requestedOn ? this.start() : this.stop()).catch((error) => {
+      this.commandChain = this.commandChain.then(
+        () => this.onManualStateCommand ? this.onManualStateCommand(requestedOn) : requestedOn ? this.start() : this.stop()
+      ).catch((error) => {
         if (error instanceof import_rate_limiter.CancelledError) {
           return;
         }

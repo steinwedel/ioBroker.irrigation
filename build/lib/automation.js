@@ -648,6 +648,19 @@ class AutomationEngine {
   // ------------------------------------------------------------------
   // Manual single-valve runs
   // ------------------------------------------------------------------
+  async manualSetValveState(valveIndex, requestedOn) {
+    var _a, _b, _c, _d;
+    if (requestedOn) {
+      await this.manualStartValve(valveIndex);
+      return;
+    }
+    if (((_a = this.manualRun) == null ? void 0 : _a.valveIndex) === valveIndex) {
+      await this.stopManualRun();
+      return;
+    }
+    await ((_b = this.deps.valves[valveIndex]) == null ? void 0 : _b.stop());
+    (_d = (_c = this.deps).onValveFlowChange) == null ? void 0 : _d.call(_c, valveIndex, false);
+  }
   async manualStartValve(valveIndex) {
     var _a, _b;
     if (this.manualRun) {

@@ -588,6 +588,27 @@ describe('ValveController per-type start/stop/status', () => {
         expect(valve.isRunning()).to.equal(false);
     });
 
+    it('forwards direct adapter state commands to the manual-run handler', async () => {
+        const adapter = makeFakeAdapter();
+        const commands: boolean[] = [];
+        const valve = new ValveController(
+            adapter,
+            0,
+            makeValve({ type: 'Generic', stateId: 'alias.0.mySwitch' }),
+            undefined,
+            undefined,
+            requestedOn => {
+                commands.push(requestedOn);
+                return Promise.resolve();
+            },
+        );
+
+        await valve.onOwnStateChange('valves.valve_000.state', { val: true, ack: false } as ioBroker.State);
+        await valve.onOwnStateChange('valves.valve_000.state', { val: false, ack: false } as ioBroker.State);
+
+        expect(commands).to.deep.equal([true, false]);
+    });
+
     it('Generic: start sets the state to true, stop sets it to false', async () => {
         const adapter = makeFakeAdapter();
         const valve = new ValveController(adapter, 0, makeValve({ type: 'Generic', stateId: 'alias.0.mySwitch' }));
@@ -1520,6 +1541,32 @@ describe('automation pause/resume: correct remaining time and overlapping blocke
         await engine.setRainPause(false);
         expect(engine.getStatus()).to.equal('running');
         expect(valve.startCalls.length).to.equal(2);
+    });
+
+    it('manual state start uses the configured manual duration and state stop ends that run', async () => {
+        const config = makeConfig();
+        const adapter = makeFakeAdapter();
+        const valve = new FakeValve();
+        const engine = new AutomationEngine({
+            adapter,
+            getConfig: () => config,
+            valves: [valve] as unknown as AutomationDeps['valves'],
+            isValveBlockedForAutoRun: () => ({ blocked: false }),
+            isLegallyRestricted: () => false,
+            isRaining: () => false,
+            isWindOverLimit: () => false,
+            getTemperatureAdjustmentTemperature: () => Promise.resolve(undefined),
+        });
+
+        await engine.manualSetValveState(0, true);
+
+        expect(valve.startCalls).to.deep.equal([60]);
+        expect(engine.isManualRunActive()).to.equal(true);
+
+        await engine.manualSetValveState(0, false);
+
+        expect(valve.stopCalls).to.equal(1);
+        expect(engine.isManualRunActive()).to.equal(false);
     });
 
     it('manualStartValve() refuses to start a disabled valve without pausing the running automation', async () => {

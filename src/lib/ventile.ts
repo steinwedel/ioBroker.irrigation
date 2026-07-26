@@ -81,6 +81,7 @@ export class ValveController {
      * `ValveController[]` list only after constructing each instance.
      */
     private readonly getAllValves: () => ValveController[];
+    private readonly onManualStateCommand: ((requestedOn: boolean) => Promise<void>) | undefined;
     /**
      * 1s tick used to count down remainingDuration for adapter-owned timer types
      * (Homematic/Generic). This is the single source of truth for the
@@ -139,12 +140,14 @@ export class ValveController {
         config: IValveConfig,
         rateLimiter?: RateLimiter,
         getAllValves?: () => ValveController[],
+        onManualStateCommand?: (requestedOn: boolean) => Promise<void>,
     ) {
         this.adapter = adapter;
         this.index = index;
         this.config = config;
         this.rateLimiter = rateLimiter;
         this.getAllValves = getAllValves ?? (() => [this]);
+        this.onManualStateCommand = onManualStateCommand;
     }
 
     public get id(): string {
@@ -547,9 +550,10 @@ export class ValveController {
 
     /**
      * Handles a command on one of this valve's own states, i.e. a manual
-     * start/stop via the "state" mirror state, or an update of the duration
-     * manual-start duration. Returns true if the change was consumed (belongs
-     * to this valve).
+     * start/stop via the "state" mirror state or an update of the scheduled
+     * duration. State commands are delegated to the automation engine when a
+     * manual-state handler was supplied. Returns true if the change belongs to
+     * this valve.
      *
      * Normally only ack=false changes are commands (a user/script explicitly
      * requesting an action), while ack=true changes are just our own status
@@ -604,7 +608,13 @@ export class ValveController {
             // - i.e. all subsequent valve commands would stop having any effect
             // at all, with no error surfaced anywhere.
             this.commandChain = this.commandChain
-                .then(() => (requestedOn ? this.start() : this.stop()))
+                .then(() =>
+                    this.onManualStateCommand
+                        ? this.onManualStateCommand(requestedOn)
+                        : requestedOn
+                          ? this.start()
+                          : this.stop(),
+                )
                 .catch(error => {
                     if (error instanceof CancelledError) {
                         return;
