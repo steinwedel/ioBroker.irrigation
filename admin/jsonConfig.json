@@ -403,6 +403,16 @@
                     "md": 8,
                     "lg": 6
                 },
+                "valveEditorDaysHint": {
+                    "type": "staticText",
+                    "text": "Enter comma-separated digits: 0=Sunday, 1=Monday, 2=Tuesday, 3=Wednesday, 4=Thursday, 5=Friday, 6=Saturday. Leave empty to allow watering every day.",
+                    "newLine": true,
+                    "hidden": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 8
+                },
                 "_valveEditorAllOffId": {
                     "type": "objectId",
                     "label": "All-off command state (Gardena/Rainbird)",

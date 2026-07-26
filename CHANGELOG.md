@@ -1,4 +1,7 @@
 # Changelog
+## 0.3.19 (2026-07-26)
+* (Gerhard Steinwedel) **ENHANCED**: Added a persistent explanation of the allowed-weekdays input format and its weekday-to-digit mapping in the valve editor
+
 ## 0.3.18 (2026-07-26)
 * (Gerhard Steinwedel) **ENHANCED**: Grouped the enabled switch, planned watering duration, and manual-start watering duration in the valve editor and clarified their labels
 

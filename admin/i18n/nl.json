@@ -44,6 +44,7 @@
     "Enter a valid time as HH:MM, e.g. 15:10.": "Voer een geldige tijd in als UU:MM, b.v. 15:10.",
     "Enter both dates as valid D.M values or leave both empty.": "Voer beide datums in als geldige DM-waarden of laat beide leeg.",
     "Enter both times as valid HH:MM values or leave both empty.": "Voer beide tijden in als geldige HH:MM-waarden of laat beide leeg.",
+    "Enter comma-separated digits: 0=Sunday, 1=Monday, 2=Tuesday, 3=Wednesday, 4=Thursday, 5=Friday, 6=Saturday. Leave empty to allow watering every day.": "Voer door komma's gescheiden cijfers in: 0=zondag, 1=maandag, 2=dinsdag, 3=woensdag, 4=donderdag, 5=vrijdag, 6=zaterdag. Laat het leeg zodat u elke dag water kunt geven.",
     "Enter minutes, MM:SS or HH:MM:SS": "Voer minuten in, MM:SS of UU:MM:SS",
     "Enter valid numeric values for flow rate and moisture threshold.": "Voer geldige numerieke waarden in voor debiet en vochtdrempel.",
     "Enter weekdays as comma-separated values from 0 (Sunday) to 6 (Saturday), or leave empty for every day.": "Voer weekdagen in als door komma's gescheiden waarden van 0 (zondag) tot 6 (zaterdag), of laat elke dag leeg.",

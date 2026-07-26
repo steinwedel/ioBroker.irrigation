@@ -41,6 +41,7 @@
     "The selected valve no longer exists.": "The selected valve no longer exists.",
     "Enter a valid duration.": "Enter a valid duration.",
     "Allowed weekdays": "Allowed weekdays",
+    "Enter comma-separated digits: 0=Sunday, 1=Monday, 2=Tuesday, 3=Wednesday, 4=Thursday, 5=Friday, 6=Saturday. Leave empty to allow watering every day.": "Enter comma-separated digits: 0=Sunday, 1=Monday, 2=Tuesday, 3=Wednesday, 4=Thursday, 5=Friday, 6=Saturday. Leave empty to allow watering every day.",
     "Enter 0=Sunday through 6=Saturday as comma-separated values, or leave empty for every day.": "Enter 0=Sunday through 6=Saturday as comma-separated values, or leave empty for every day.",
     "Enter weekdays as comma-separated values from 0 (Sunday) to 6 (Saturday), or leave empty for every day.": "Enter weekdays as comma-separated values from 0 (Sunday) to 6 (Saturday), or leave empty for every day.",
     "Enter valid numeric values for flow rate and moisture threshold.": "Enter valid numeric values for flow rate and moisture threshold.",

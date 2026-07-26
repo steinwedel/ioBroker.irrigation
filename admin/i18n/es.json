@@ -44,6 +44,7 @@
     "Enter a valid time as HH:MM, e.g. 15:10.": "Introduzca una hora válida como HH:MM, p.e. 15:10.",
     "Enter both dates as valid D.M values or leave both empty.": "Ingrese ambas fechas como valores D.M válidos o déjelas vacías.",
     "Enter both times as valid HH:MM values or leave both empty.": "Ingrese ambas horas como valores válidos de HH:MM o déjelas vacías.",
+    "Enter comma-separated digits: 0=Sunday, 1=Monday, 2=Tuesday, 3=Wednesday, 4=Thursday, 5=Friday, 6=Saturday. Leave empty to allow watering every day.": "Ingrese dígitos separados por comas: 0=domingo, 1=lunes, 2=martes, 3=miércoles, 4=jueves, 5=viernes, 6=sábado. Déjelo vacío para permitir el riego todos los días.",
     "Enter minutes, MM:SS or HH:MM:SS": "Introduzca los minutos, MM:SS o HH:MM:SS",
     "Enter valid numeric values for flow rate and moisture threshold.": "Introduzca valores numéricos válidos para el caudal y el umbral de humedad.",
     "Enter weekdays as comma-separated values from 0 (Sunday) to 6 (Saturday), or leave empty for every day.": "Introduzca los días de la semana como valores separados por comas de 0 (domingo) a 6 (sábado) o déjelos vacíos para todos los días.",
