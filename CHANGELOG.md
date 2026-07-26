@@ -1,4 +1,7 @@
 # Changelog
+## 0.3.12 (2026-07-26)
+* (Gerhard Steinwedel) **ENHANCED**: Valves table now shows only the core columns (number, name, type, duration, state id) with sorting/filtering on name, type and state id, plus a compact/card layout on small screens; expert-only fields (enabled, flow rate, rain independence, moisture threshold, manual duration, Rainbird all-off state) are now edited per valve in a collapsible "Valve details (expert)" accordion instead of cramming extra columns into the main table
+
 ## 0.3.11 (2026-07-26)
 * (Gerhard Steinwedel) **FIXED**: Pause/resume now tracks four independent blocker flags (rain, wind, legal restriction, manual) instead of a single `pauseReason` enum, so overlapping blockers (e.g. rain + legal restriction) are handled correctly and resume only happens when *all* blockers have cleared
 * (Gerhard Steinwedel) **FIXED**: Valve `endsAt` timestamps now refresh on every resume to reflect actual remaining time — previously each pause/resume cycle silently shortened watering duration because `tick()` compared against the original (stale) end time
