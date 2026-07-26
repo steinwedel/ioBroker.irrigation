@@ -20,6 +20,8 @@
     "Target run duration (s)": "Target run duration (s)",
     "State id": "State id",
     "Watering duration": "Watering duration",
+    "Watering duration (plan)": "Watering duration (plan)",
+    "Watering duration (manual start)": "Watering duration (manual start)",
     "Enter minutes, MM:SS or HH:MM:SS": "Enter minutes, MM:SS or HH:MM:SS",
     "Zones": "Zones",
     "Valve index": "Valve index",

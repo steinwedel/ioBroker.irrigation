@@ -209,7 +209,7 @@
                         {
                             "type": "text",
                             "attr": "duration",
-                            "title": "Watering duration",
+                            "title": "Watering duration (plan)",
                             "width": "20%",
                             "default": "10:00",
                             "validator": "/^(?:\\d+|(?:\\d+:)?[0-5]\\d:[0-5]\\d)$/.test(data.duration)",
@@ -307,12 +307,9 @@
                     "md": 8,
                     "lg": 6
                 },
-                "_valveEditorDuration": {
-                    "type": "text",
-                    "label": "Watering duration",
-                    "tooltip": "Enter minutes, MM:SS or HH:MM:SS",
-                    "validator": "/^(?:\\d+|(?:\\d+:)?[0-5]\\d:[0-5]\\d)$/.test(data._valveEditorDuration ?? '')",
-                    "validatorErrorText": "Enter a valid duration.",
+                "_valveEditorEnabled": {
+                    "type": "checkbox",
+                    "label": "Enabled",
                     "doNotSave": true,
                     "newLine": true,
                     "hidden": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
@@ -321,9 +318,25 @@
                     "md": 4,
                     "lg": 3
                 },
-                "_valveEditorEnabled": {
-                    "type": "checkbox",
-                    "label": "Enabled",
+                "_valveEditorDuration": {
+                    "type": "text",
+                    "label": "Watering duration (plan)",
+                    "tooltip": "Enter minutes, MM:SS or HH:MM:SS",
+                    "validator": "/^(?:\\d+|(?:\\d+:)?[0-5]\\d:[0-5]\\d)$/.test(data._valveEditorDuration ?? '')",
+                    "validatorErrorText": "Enter a valid duration.",
+                    "doNotSave": true,
+                    "hidden": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
+                    "disabled": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
+                    "sm": 6,
+                    "md": 4,
+                    "lg": 3
+                },
+                "_valveEditorManualDuration": {
+                    "type": "text",
+                    "label": "Watering duration (manual start)",
+                    "tooltip": "Enter minutes, MM:SS or HH:MM:SS",
+                    "validator": "/^(?:\\d+|(?:\\d+:)?[0-5]\\d:[0-5]\\d)$/.test(data._valveEditorManualDuration ?? '')",
+                    "validatorErrorText": "Enter a valid duration.",
                     "doNotSave": true,
                     "hidden": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
                     "disabled": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
@@ -373,19 +386,6 @@
                     "alsoDependsOn": ["_valveEditorSoilMoistureId"],
                     "hidden": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
                     "disabled": "data._editValveId === undefined || data._editValveId === null || data._editValveId === '' || !data._valveEditorSoilMoistureId || !data._valveEditorSoilMoistureId.trim()",
-                    "sm": 6,
-                    "md": 4,
-                    "lg": 3
-                },
-                "_valveEditorManualDuration": {
-                    "type": "text",
-                    "label": "Manual duration (min)",
-                    "tooltip": "Enter minutes, MM:SS or HH:MM:SS",
-                    "validator": "/^(?:\\d+|(?:\\d+:)?[0-5]\\d:[0-5]\\d)$/.test(data._valveEditorManualDuration ?? '')",
-                    "validatorErrorText": "Enter a valid duration.",
-                    "doNotSave": true,
-                    "hidden": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
-                    "disabled": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
                     "sm": 6,
                     "md": 4,
                     "lg": 3

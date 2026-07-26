@@ -1,12 +1,11 @@
 # Context
 
 ## Current Task
-Ventilbezogene Bodenfeuchtesensoren im Detaileditor und in der Bewässerungsblockierung unterstützen.
+Reihenfolge und Benennung der Laufzeitfelder im Ventil-Detaileditor verbessern.
 
 ## Key Decisions
-- Jedes Ventil kann optional einen eigenen Bodenfeuchte-State aus dem Objektbaum erhalten.
-- Der Feuchteschwellwert ist ohne diese Zuordnung deaktiviert.
-- Bisherige globale Bodenfeuchtesensoren werden bei der Konfigurationsnormalisierung als Ventilzuordnung übernommen.
+- Aktiviert, geplante Bewässerungsdauer und manuelle Bewässerungsdauer stehen direkt nebeneinander.
+- Laufzeiten sind eindeutig nach Plan und manuellem Start benannt.
 
 ## Next Steps
 - Keine offenen Schritte.

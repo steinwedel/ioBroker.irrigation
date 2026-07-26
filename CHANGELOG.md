@@ -1,4 +1,7 @@
 # Changelog
+## 0.3.18 (2026-07-26)
+* (Gerhard Steinwedel) **ENHANCED**: Grouped the enabled switch, planned watering duration, and manual-start watering duration in the valve editor and clarified their labels
+
 ## 0.3.17 (2026-07-26)
 * (Gerhard Steinwedel) **ENHANCED**: Added an optional object-tree selectable soil-moisture sensor per valve; its moisture threshold is enabled only when that valve has a sensor assignment
 
