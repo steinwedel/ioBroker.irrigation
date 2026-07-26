@@ -132,7 +132,6 @@
     "Valve assignment": "Ventilzuordnung",
     "Valve index": "Ventil-Index",
     "Valve to move": "Zu verschiebendes Ventil",
-    "Valve details (expert)": "Ventildetails (Experte)",
     "Valves": "Ventile",
     "Valves in selected plan": "Ventile im ausgewählten Plan",
     "Water consumption tracking enabled": "Wasserverbrauchs-Tracking aktiviert",
@@ -153,6 +152,5 @@
     "iCal adapter instance": "iCal-Adapter-Instanz",
     "iCal event title prefix": "iCal-Titel-Präfix",
     "iCal trigger state id": "iCal-Trigger State-ID",
-    "irrigation adapter settings": "Adaptereinstellungen für Bewässerung",
-    "Expert fields (enabled, flow rate, rain independence, moisture threshold, manual duration, Rainbird all-off state) are edited per valve below.": "Expertenfelder (Aktiviert, Durchflussrate, Niederschlagsunabhängigkeit, Bodenfeuchte-Schwellwert, Manuelle Laufzeit, Rainbird Alle-aus-State) werden unten pro Ventil bearbeitet."
+    "irrigation adapter settings": "Adaptereinstellungen für Bewässerung"
 }

@@ -30,8 +30,6 @@
     "Manual duration (min)": "Manual duration (min)",
     "Flow rate (l/min)": "Flow rate (l/min)",
     "All-off command state (Rainbird)": "All-off command state (Rainbird)",
-    "Valve details (expert)": "Valve details (expert)",
-    "Expert fields (enabled, flow rate, rain independence, moisture threshold, manual duration, Rainbird all-off state) are edited per valve below.": "Expert fields (enabled, flow rate, rain independence, moisture threshold, manual duration, Rainbird all-off state) are edited per valve below.",
     "Groups (comma separated)": "Groups (comma separated)",
     "Weekdays (0=Sun..6=Sat, comma separated)": "Weekdays (0=Sun..6=Sat, comma separated)",
     "Plans": "Plans",

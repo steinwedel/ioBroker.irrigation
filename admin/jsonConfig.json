@@ -180,14 +180,14 @@
                             "type": "text",
                             "attr": "valveNumber",
                             "title": "Valve",
-                            "width": "8%",
+                            "width": "6%",
                             "readOnly": true
                         },
                         {
                             "type": "text",
                             "attr": "name",
                             "title": "Display name",
-                            "width": "26%",
+                            "width": "18%",
                             "sort": true,
                             "filter": true
                         },
@@ -195,7 +195,7 @@
                             "type": "select",
                             "attr": "type",
                             "title": "Type",
-                            "width": "16%",
+                            "width": "12%",
                             "sort": true,
                             "filter": true,
                             "options": [
@@ -210,7 +210,7 @@
                             "type": "text",
                             "attr": "duration",
                             "title": "Watering duration",
-                            "width": "20%",
+                            "width": "14%",
                             "default": "10:00",
                             "validator": "/^(?:\\d+|(?:\\d+:)?[0-5]\\d:[0-5]\\d)$/.test(data.duration)",
                             "tooltip": "Enter minutes, MM:SS or HH:MM:SS"
@@ -219,101 +219,58 @@
                             "type": "objectId",
                             "attr": "stateId",
                             "title": "State id",
-                            "width": "30%",
+                            "width": "20%",
                             "sort": true,
                             "filter": true
-                        }
-                    ]
-                },
-                "valvesExpertHint": {
-                    "type": "staticText",
-                    "text": "Expert fields (enabled, flow rate, rain independence, moisture threshold, manual duration, Rainbird all-off state) are edited per valve below.",
-                    "newLine": true,
-                    "hidden": "!data.expertMode",
-                    "sm": 12,
-                    "md": 12,
-                    "lg": 8
-                },
-                "valvesExpert": {
-                    "type": "accordion",
-                    "label": "Valve details (expert)",
-                    "attr": "valves",
-                    "titleAttr": "name",
-                    "newLine": true,
-                    "noDelete": true,
-                    "hidden": "!data.expertMode",
-                    "items": [
-                        {
-                            "type": "text",
-                            "attr": "name",
-                            "title": "Display name",
-                            "readOnly": true,
-                            "xs": 12,
-                            "sm": 6,
-                            "md": 4,
-                            "lg": 3
                         },
                         {
                             "type": "checkbox",
                             "attr": "enabled",
                             "title": "Enabled",
+                            "width": "6%",
                             "default": true,
-                            "xs": 12,
-                            "sm": 6,
-                            "md": 4,
-                            "lg": 3
+                            "hidden": "!data.expertMode"
                         },
                         {
                             "type": "number",
                             "attr": "flowRateLpm",
                             "title": "Flow rate (l/min)",
+                            "width": "8%",
                             "default": 0,
-                            "xs": 12,
-                            "sm": 6,
-                            "md": 4,
-                            "lg": 3
+                            "hidden": "!data.expertMode"
                         },
                         {
                             "type": "checkbox",
                             "attr": "rainIndependent",
                             "title": "Rain independent",
+                            "width": "8%",
                             "default": false,
-                            "xs": 12,
-                            "sm": 6,
-                            "md": 4,
-                            "lg": 3
+                            "hidden": "!data.expertMode"
                         },
                         {
                             "type": "number",
                             "attr": "moistureThreshold",
                             "title": "Moisture threshold (%)",
+                            "width": "8%",
                             "default": 0,
-                            "xs": 12,
-                            "sm": 6,
-                            "md": 4,
-                            "lg": 3
+                            "hidden": "!data.expertMode"
                         },
                         {
                             "type": "text",
                             "attr": "manualDuration",
                             "title": "Manual duration (min)",
+                            "width": "10%",
                             "default": "10:00",
                             "validator": "/^(?:\\d+|(?:\\d+:)?[0-5]\\d:[0-5]\\d)$/.test(data.manualDuration)",
                             "tooltip": "Enter minutes, MM:SS or HH:MM:SS",
-                            "xs": 12,
-                            "sm": 6,
-                            "md": 4,
-                            "lg": 3
+                            "hidden": "!data.expertMode"
                         },
                         {
                             "type": "objectId",
                             "attr": "allOffId",
                             "title": "All-off command state (Rainbird)",
-                            "newLine": true,
-                            "xs": 12,
-                            "sm": 12,
-                            "md": 6,
-                            "lg": 4
+                            "width": "12%",
+                            "hidden": "!data.expertMode"
                         }
                     ]
                 },

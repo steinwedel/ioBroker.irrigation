@@ -1,4 +1,7 @@
 # Changelog
+## 0.3.13 (2026-07-26)
+* (Gerhard Steinwedel) **FIXED**: Reverted the broken "Valve details (expert)" accordion (0.3.12) that showed no fields at all, because JSONConfig's `accordion` type does not support pointing at a different attribute via `attr` — it always binds to its own item key. Expert-only valve fields (enabled, flow rate, rain independence, moisture threshold, manual duration, Rainbird all-off state) are shown as columns in the main valves table again, hidden unless expert mode is enabled
+
 ## 0.3.12 (2026-07-26)
 * (Gerhard Steinwedel) **ENHANCED**: Valves table now shows only the core columns (number, name, type, duration, state id) with sorting/filtering on name, type and state id, plus a compact/card layout on small screens; expert-only fields (enabled, flow rate, rain independence, moisture threshold, manual duration, Rainbird all-off state) are now edited per valve in a collapsible "Valve details (expert)" accordion instead of cramming extra columns into the main table
 
