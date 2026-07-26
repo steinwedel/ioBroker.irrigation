@@ -442,27 +442,6 @@
                     "sm": 6,
                     "md": 4,
                     "lg": 3
-                },
-                "deleteAllValves": {
-                    "type": "sendTo",
-                    "label": "Delete all valves",
-                    "command": "deleteAllValves",
-                    "icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0Ij48cGF0aCBkPSJNNiAxOWMwIDEuMS45IDIgMiAyaDhjMS4xIDAgMi0uOSAyLTJWN0g2djEyek0xOSA0aC0zLjVsLTEtMWgtNWwtMSAxSDV2MmgxNFY0eiIvPjwvc3ZnPg==",
-                    "color": "secondary",
-                    "useNative": true,
-                    "confirm": {
-                        "text": "This deletes all valves from the configuration. This cannot be undone.",
-                        "title": "Delete all valves?",
-                        "type": "warning",
-                        "ok": "Delete",
-                        "cancel": "Cancel"
-                    },
-                    "newLine": true,
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 4,
-                    "lg": 3,
-                    "xl": 3
                 }
             }
         },

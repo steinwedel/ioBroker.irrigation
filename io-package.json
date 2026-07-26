@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.3.19",
+    "version": "0.3.20",
     "news": {
+      "0.3.20": {
+        "en": "**FIXED**: Removed the destructive delete-all-valves action from the valve configuration page",
+        "de": "**BEHOBEN**: Die destruktive Aktion zum Löschen aller Ventile wurde von der Ventilkonfigurationsseite entfernt",
+        "ru": "**ИСПРАВЛЕНО**: Удалено деструктивное действие удаления всех клапанов со страницы конфигурации клапанов",
+        "pt": "**CORRIGIDO**: Removida a ação destrutiva de excluir todas as válvulas da página de configuração de válvulas",
+        "nl": "**OPGELOST**: De destructieve actie om alle kleppen te verwijderen is verwijderd van de klepconfiguratieapagina",
+        "fr": "**CORRIGÉ**: Suppression de l'action destructive de suppression de toutes les vannes de la page de configuration des vannes",
+        "it": "**RISOLTO**: Rimossa l'azione distruttiva di eliminazione di tutte le valvole dalla pagina di configurazione delle valvole",
+        "es": "**SOLUCIONADO**: Eliminada la acción destructiva de borrar todas las válvulas de la página de configuración de válvulas",
+        "pl": "**NAPRAWIONO**: Usunięto destrukcyjną akcję usuwania wszystkich zaworów ze strony konfiguracji zaworów",
+        "uk": "**ВИПРАВЛЕНО**: Видалено деструктивну дію видалення всіх клапанів зі сторінки конфігурації клапанів",
+        "zh-cn": "**已修复**：从阀门配置页面中移除了删除所有阀门的破坏性操作"
+      },
       "0.3.19": {
         "en": "**ENHANCED**: Added a persistent explanation of the allowed-weekdays input format and its weekday-to-digit mapping in the valve editor",
         "de": "**VERBESSERT**: Eine dauerhafte Erklärung des Eingabeformats für erlaubte Wochentage und deren Wochentag-zu-Ziffer-Zuordnung wurde im Ventil-Editor hinzugefügt",
@@ -80,19 +93,6 @@
         "pl": "**ULEPSZONE**: Dodano dedykowany edytor szczegółów zaworu, który utrzymuje główną tabelę zaworów w zwartej formie, jednocześnie umożliwiając edycję wszystkich ustawień zaworu przed zapisaniem konfiguracji adaptera",
         "uk": "**ПОКРАЩЕНО**: Додано спеціальний редактор деталей клапана, який зберігає основну таблицю клапанів компактною та дозволяє редагувати всі налаштування клапана перед збереженням конфігурації адаптера",
         "zh-cn": "**增强**：添加了专用的阀门详细信息编辑器，使主阀门表保持紧凑，同时允许在保存适配器配置之前编辑所有阀门设置"
-      },
-      "0.3.13": {
-        "en": "**FIXED**: Reverted the broken \"Valve details (expert)\" accordion (0.3.12) that showed no fields at all, because JSONConfig's `accordion` type does not support pointing at a different attribute via `attr` — it always binds to its own item key. Expert-only valve fields (enabled, flow rate, rain independence, moisture threshold, manual duration, Rainbird all-off state) are shown as columns in the main valves table again, hidden unless expert mode is enabled",
-        "de": "**BEHOBEN**: Das defekte Akkordeon \"Ventildetails (Experte)\" (0.3.12) wurde rückgängig gemacht, das überhaupt keine Felder anzeigte, da der `accordion`-Typ von JSONConfig das Verweisen auf ein anderes Attribut über `attr` nicht unterstützt – es bindet immer an seinen eigenen Item-Schlüssel. Nur für Experten sichtbare Ventilfelder (Aktiviert, Durchflussrate, Regenunabhängigkeit, Feuchtigkeitsschwelle, Manuelle Dauer, Rainbird Alle-Aus-Status) werden wieder als Spalten in der Hauptventiltabelle angezeigt, ausgeblendet, sofern der Expertenmodus nicht aktiviert ist",
-        "ru": "**ИСПРАВЛЕНО**: Отменён неработающий аккордеон \"Детали клапана (эксперт)\" (0.3.12), который вообще не показывал полей, поскольку тип `accordion` в JSONConfig не поддерживает указание на другой атрибут через `attr` — он всегда привязывается к собственному ключу элемента. Поля клапанов только для экспертов (включено, расход, независимость от дождя, порог влажности, ручная продолжительность, состояние Rainbird все выключены) снова отображаются как столбцы в основной таблице клапанов, скрытые, если не включён экспертный режим",
-        "pt": "**CORRIGIDO**: Revertido o acordeão \"Detalhes da válvula (especialista)\" quebrado (0.3.12) que não mostrava nenhum campo, porque o tipo `accordion` do JSONConfig não suporta apontar para um atributo diferente via `attr` — ele sempre se vincula à sua própria chave de item. Os campos de válvula exclusivos para especialistas (ativado, taxa de fluxo, independência de chuva, limite de umidade, duração manual, estado Rainbird todos desligados) são mostrados novamente como colunas na tabela principal de válvulas, ocultos a menos que o modo especialista esteja ativado",
-        "nl": "**OPGELOST**: De kapotte accordeon \"Klepdetails (expert)\" (0.3.12) die helemaal geen velden toonde, is teruggedraaid, omdat het `accordion`-type van JSONConfig het verwijzen naar een ander attribuut via `attr` niet ondersteunt — het bindt altijd aan zijn eigen itemsleutel. Alleen voor experts zichtbare klepvelden (ingeschakeld, stroomsnelheid, regen-onafhankelijkheid, vochtdrempel, handmatige duur, Rainbird alles-uit-status) worden weer als kolommen in de hoofdkleptabel getoond, verborgen tenzij de expertmodus is ingeschakeld",
-        "fr": "**CORRIGÉ** : L'accordéon \"Détails de la vanne (expert)\" cassé (0.3.12) qui n'affichait aucun champ a été annulé, car le type `accordion` de JSONConfig ne prend pas en charge le pointage vers un attribut différent via `attr` — il se lie toujours à sa propre clé d'élément. Les champs de vanne réservés aux experts (activé, débit, indépendance de la pluie, seuil d'humidité, durée manuelle, état Rainbird tout éteint) sont à nouveau affichés sous forme de colonnes dans le tableau principal des vannes, masqués sauf si le mode expert est activé",
-        "it": "**RISOLTO**: Ripristinato l'accordion \"Dettagli valvola (esperto)\" non funzionante (0.3.12) che non mostrava alcun campo, perché il tipo `accordion` di JSONConfig non supporta il puntamento a un attributo diverso tramite `attr` — si lega sempre alla propria chiave dell'elemento. I campi valvola riservati agli esperti (abilitato, portata, indipendenza dalla pioggia, soglia di umidità, durata manuale, stato Rainbird tutto spento) vengono nuovamente mostrati come colonne nella tabella principale delle valvole, nascosti a meno che la modalità esperto non sia abilitata",
-        "es": "**CORREGIDO**: Se revirtió el acordeón \"Detalles de válvula (experto)\" roto (0.3.12) que no mostraba ningún campo, porque el tipo `accordion` de JSONConfig no admite apuntar a un atributo diferente mediante `attr` — siempre se vincula a su propia clave de elemento. Los campos de válvula exclusivos para expertos (habilitado, caudal, independencia de lluvia, umbral de humedad, duración manual, estado Rainbird todo apagado) se muestran nuevamente como columnas en la tabla principal de válvulas, ocultos a menos que el modo experto esté habilitado",
-        "pl": "**NAPRAWIONO**: Cofnięto zepsutą zakładkę \"Szczegóły zaworu (ekspert)\" (0.3.12), która w ogóle nie pokazywała żadnych pól, ponieważ typ `accordion` w JSONConfig nie obsługuje wskazywania na inny atrybut przez `attr` — zawsze wiąże się z własnym kluczem elementu. Pola zaworu widoczne tylko dla ekspertów (włączony, przepływ, niezależność od deszczu, próg wilgotności, czas trwania ręcznego, stan Rainbird wszystko wyłączone) są ponownie wyświetlane jako kolumny w głównej tabeli zaworów, ukryte, chyba że tryb eksperta jest włączony",
-        "uk": "**ВИПРАВЛЕНО**: Скасовано зламаний акордеон \"Деталі клапана (експерт)\" (0.3.12), який взагалі не показував жодних полів, оскільки тип `accordion` у JSONConfig не підтримує вказівку на інший атрибут через `attr` — він завжди прив'язується до власного ключа елемента. Поля клапанів тільки для експертів (увімкнено, швидкість потоку, незалежність від дощу, поріг вологості, ручна тривалість, стан Rainbird усі вимкнені) знову відображаються як стовпці в основній таблиці клапанів, приховані, якщо не ввімкнено експертний режим",
-        "zh-cn": "**已修复**：还原了损坏的\"阀门详情（专家）\"折叠面板（0.3.12），该面板完全不显示任何字段，因为 JSONConfig 的 `accordion` 类型不支持通过 `attr` 指向不同的属性——它始终绑定到自己的项键。仅限专家的阀门字段（已启用、流速、雨水独立性、湿度阈值、手动持续时间、Rainbird 全部关闭状态）再次作为列显示在主阀门表中，除非启用专家模式否则隐藏"
       }
     },
     "titleLang": {

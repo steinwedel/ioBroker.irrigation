@@ -1,4 +1,7 @@
 # Changelog
+## 0.3.20 (2026-07-26)
+* (Gerhard Steinwedel) **FIXED**: Removed the destructive delete-all-valves action from the valve configuration page
+
 ## 0.3.19 (2026-07-26)
 * (Gerhard Steinwedel) **ENHANCED**: Added a persistent explanation of the allowed-weekdays input format and its weekday-to-digit mapping in the valve editor
 

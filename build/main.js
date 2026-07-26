@@ -876,17 +876,6 @@ class Irrigation extends utils.Adapter {
       }
       return;
     }
-    if (obj.command === "deleteAllValves") {
-      const count = this.config2.valves.length;
-      this.log.info(`Deleting all ${count} valve(s) from configuration`);
-      if (count > 0) {
-        await this.writeValvesToNative([]);
-      }
-      if (obj.callback) {
-        this.sendTo(obj.from, obj.command, { native: { valves: [] } }, obj.callback);
-      }
-      return;
-    }
     if (obj.command === "deleteValvesByStateId") {
       const rawStateIds = (_a = obj.message) == null ? void 0 : _a.stateIds;
       const stateIds = Array.isArray(rawStateIds) ? rawStateIds.filter((v) => typeof v === "string") : [];

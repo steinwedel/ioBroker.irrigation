@@ -1,10 +1,10 @@
 # Context
 
 ## Current Task
-Erklärung für das Feld „Erlaubte Wochentage“ im Ventil-Detaileditor ergänzen.
+Destruktive Funktion „Alle Ventile löschen“ aus der Konfiguration entfernen.
 
 ## Key Decisions
-- Der Hinweis zeigt das kommagetrennte Eingabeformat, die Zuordnung 0–6 zu Sonntag–Samstag und die Bedeutung einer leeren Eingabe.
+- Der UI-Button und sein zugehöriger `deleteAllValves`-Message-Handler wurden entfernt.
 
 ## Next Steps
 - Keine offenen Schritte.
