@@ -336,8 +336,9 @@
                     "label": "Flow rate (l/min)",
                     "min": 0,
                     "doNotSave": true,
+                    "alsoDependsOn": ["flowMonitor.enabled", "flowMonitor.sensorId"],
                     "hidden": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
-                    "disabled": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
+                    "disabled": "data._editValveId === undefined || data._editValveId === null || data._editValveId === '' || !data.flowMonitor || !data.flowMonitor.enabled || !data.flowMonitor.sensorId || !data.flowMonitor.sensorId.trim()",
                     "sm": 6,
                     "md": 4,
                     "lg": 3

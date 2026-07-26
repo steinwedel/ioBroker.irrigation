@@ -1,11 +1,11 @@
 # Context
 
 ## Current Task
-Ventil-Bewässerungsdauer auf Sekundenbetrieb umgestellt und im Admin als Zeitwert formatierbar gemacht.
+Durchflussrate im Ventil-Detaileditor abhängig von der globalen Durchflussmonitor-Konfiguration sperren.
 
 ## Key Decisions
-- Die Laufzeiten werden zur Ausführung und in States ausschließlich als Sekundenwerte verwendet.
-- Die Admin-Eingabe akzeptiert Minuten, MM:SS und HH:MM:SS und wird in die kurze Anzeigeform normalisiert.
+- Die Durchflussrate ist nur editierbar, wenn der Durchflussmonitor aktiv ist und eine Sensor-State-ID besitzt.
+- Bereits gespeicherte Durchflussraten bleiben bei deaktiviertem Feld unverändert erhalten.
 
 ## Next Steps
 - Keine offenen Schritte.

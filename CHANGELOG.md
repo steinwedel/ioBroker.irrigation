@@ -1,4 +1,7 @@
 # Changelog
+## 0.3.16 (2026-07-26)
+* (Gerhard Steinwedel) **FIXED**: Disable a valve's flow-rate editor until the global flow monitor is enabled and a flow-sensor state ID is configured
+
 ## 0.3.15 (2026-07-26)
 * (Gerhard Steinwedel) **FIXED**: Starting a valve through its adapter `state` now runs it for the configured manual duration and stopping that state ends the manual run cleanly
 
