@@ -1,4 +1,16 @@
 # Changelog
+## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **FIXED**: Pause/resume now tracks four independent blocker flags (rain, wind, legal restriction, manual) instead of a single `pauseReason` enum, so overlapping blockers (e.g. rain + legal restriction) are handled correctly and resume only happens when *all* blockers have cleared
+* (Gerhard Steinwedel) **FIXED**: Valve `endsAt` timestamps now refresh on every resume to reflect actual remaining time — previously each pause/resume cycle silently shortened watering duration because `tick()` compared against the original (stale) end time
+* (Gerhard Steinwedel) **ENHANCED**: DWD restriction date parsing now accepts zero-padded dates (e.g. "01.06") and validates date/time ranges with meaningful error messages; fetch timeout added (15s)
+* (Gerhard Steinwedel) **ENHANCED**: SensorManager loads current sensor values immediately after (re)start instead of waiting for first push; tracks timestamp per sensor and validates incoming values more strictly
+* (Gerhard Steinwedel) **ENHANCED**: WeatherApi and WindMonitor add fetch timeout (15s), API key masking in logs, and immediate value loading after (re)start; poll interval and hysteresis minutes validated for finiteness
+* (Gerhard Steinwedel) **FIXED**: FlowMonitor now aborts calibration cleanly if configuration changes mid-calibration; improved error handling in `finishCalibration()`
+* (Gerhard Steinwedel) **ENHANCED**: NotificationManager sends Pushover and Telegram notifications in parallel with `Promise.allSettled()` instead of sequentially, so one missing channel cannot block the other
+* (Gerhard Steinwedel) **FIXED**: WaterConsumptionTracker serializes all state writes with `writeChain` to prevent race conditions when multiple valves change simultaneously
+* (Gerhard Steinwedel) **FIXED**: ValveController Rainbird stop command error handling corrected — now sets `running=true` and logs error instead of `running=false` when stop command cannot be verified
+* (Gerhard Steinwedel) **FIXED**: `parseDuration` now explicitly handles null/empty strings and negative values correctly, clamping to 1s minimum instead of falling back to default
+
 ## 0.3.10 (2026-07-25)
 * (Gerhard Steinwedel) **FIXED**: Added null-safety checks to `onForeignStateChange()` calls for optional manager instances (`sensorManager`, `windMonitor`, `dwd`, `scheduler`, `flowMonitor`) to prevent NullPointerExceptions if these instances are not initialized
 
