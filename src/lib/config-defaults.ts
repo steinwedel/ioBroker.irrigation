@@ -98,6 +98,8 @@ export function normalizeConfig(config: Partial<IrrigationNativeConfig>): Irriga
         endTime: config.legalRestriction?.endTime ?? `${String(legacyRestriction?.hourEnd ?? 17).padStart(2, '0')}:00`,
     };
 
+    const legacySoilMoistureId = config.sensors?.soilMoistureId?.trim() || undefined;
+
     return {
         expertMode: config.expertMode ?? DEFAULT_CONFIG.expertMode,
         valves: (Array.isArray(config.valves) ? config.valves : []).map((valve, index) => {
@@ -122,6 +124,7 @@ export function normalizeConfig(config: Partial<IrrigationNativeConfig>): Irriga
                 duration,
                 rainIndependent: valve.rainIndependent ?? false,
                 moistureThreshold: valve.moistureThreshold ?? 0,
+                soilMoistureId: valve.soilMoistureId?.trim() || legacySoilMoistureId,
                 manualDuration:
                     typeof valve.manualDuration === 'number'
                         ? Math.max(1, Math.round(valve.manualDuration * 60))

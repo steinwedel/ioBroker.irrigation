@@ -29,6 +29,7 @@ class SensorManager {
   temperatureState = 0;
   rainStateTs;
   soilMoistureTs;
+  soilMoistureValues = /* @__PURE__ */ new Map();
   temperatureTs;
   subscribedIds = [];
   constructor(deps) {
@@ -43,9 +44,15 @@ class SensorManager {
     }
     this.subscribedIds = [];
     const config = this.deps.getConfig();
+    const soilMoistureIds = new Set(
+      [config.sensors.soilMoistureId, ...config.valves.map((valve) => {
+        var _a;
+        return (_a = valve.soilMoistureId) != null ? _a : "";
+      })].filter(Boolean)
+    );
     const stateIds = /* @__PURE__ */ new Set([
       config.sensors.rainId,
-      config.sensors.soilMoistureId,
+      ...soilMoistureIds,
       config.sensors.temperatureId,
       config.legalRestriction.temperatureStateId
     ]);
@@ -63,11 +70,17 @@ class SensorManager {
         await this.deps.adapter.setStateAsync("sensors.rain", { val: this.rainState, ack: true });
       }
     }
-    if (config.sensors.soilMoistureId) {
-      const state = await this.deps.adapter.getForeignStateAsync(config.sensors.soilMoistureId);
-      if (typeof (state == null ? void 0 : state.val) === "number" && Number.isFinite(state.val)) {
+    this.soilMoistureValues.clear();
+    for (const id of soilMoistureIds) {
+      const state = await this.deps.adapter.getForeignStateAsync(id);
+      if (typeof (state == null ? void 0 : state.val) !== "number" || !Number.isFinite(state.val)) {
+        continue;
+      }
+      const ts = typeof state.ts === "number" ? state.ts : Date.now();
+      this.soilMoistureValues.set(id, { value: state.val, ts });
+      if (id === config.sensors.soilMoistureId) {
         this.soilMoistureState = state.val;
-        this.soilMoistureTs = typeof state.ts === "number" ? state.ts : Date.now();
+        this.soilMoistureTs = ts;
         await this.deps.adapter.setStateAsync("sensors.soilMoisture", {
           val: this.soilMoistureState,
           ack: true
@@ -102,16 +115,25 @@ class SensorManager {
       await ((_b = (_a = this.deps).onRainChange) == null ? void 0 : _b.call(_a, this.rainState));
       return true;
     }
-    if (id === config.sensors.soilMoistureId) {
-      if (typeof (state == null ? void 0 : state.val) === "number" && Number.isFinite(state.val)) {
-        this.soilMoistureState = state.val;
-      } else {
+    const isGlobalSoilMoistureSensor = id === config.sensors.soilMoistureId;
+    const isValveSoilMoistureSensor = config.valves.some((valve) => valve.soilMoistureId === id);
+    if (isGlobalSoilMoistureSensor || isValveSoilMoistureSensor) {
+      if (typeof (state == null ? void 0 : state.val) !== "number" || !Number.isFinite(state.val)) {
         this.deps.adapter.log.warn(
-          `Soil moisture sensor state ${id} has no valid numeric value; keeping previous value (${this.soilMoistureState}).`
+          `Soil moisture sensor state ${id} has no valid numeric value; keeping previous value.`
         );
+        return true;
       }
-      this.soilMoistureTs = Date.now();
-      await this.deps.adapter.setStateAsync("sensors.soilMoisture", { val: this.soilMoistureState, ack: true });
+      const ts = typeof state.ts === "number" ? state.ts : Date.now();
+      this.soilMoistureValues.set(id, { value: state.val, ts });
+      if (isGlobalSoilMoistureSensor) {
+        this.soilMoistureState = state.val;
+        this.soilMoistureTs = ts;
+        await this.deps.adapter.setStateAsync("sensors.soilMoisture", {
+          val: this.soilMoistureState,
+          ack: true
+        });
+      }
       return true;
     }
     if (id === config.sensors.temperatureId) {
@@ -180,10 +202,11 @@ class SensorManager {
       );
       return { blocked: true, reason: "rain sensor data is stale" };
     }
-    if (config.sensors.soilMoistureId && valve.moistureThreshold > 0 && this.soilMoistureState >= valve.moistureThreshold) {
+    const soilMoisture = valve.soilMoistureId ? this.soilMoistureValues.get(valve.soilMoistureId) : void 0;
+    if (soilMoisture && valve.moistureThreshold > 0 && soilMoisture.value >= valve.moistureThreshold) {
       return {
         blocked: true,
-        reason: `soil moisture ${this.soilMoistureState}% >= threshold ${valve.moistureThreshold}%`
+        reason: `soil moisture ${soilMoisture.value}% >= threshold ${valve.moistureThreshold}%`
       };
     }
     return { blocked: false };

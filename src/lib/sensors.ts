@@ -21,6 +21,7 @@ export class SensorManager {
     private temperatureState = 0;
     private rainStateTs: number | undefined;
     private soilMoistureTs: number | undefined;
+    private readonly soilMoistureValues = new Map<string, { value: number; ts: number }>();
     private temperatureTs: number | undefined;
     private subscribedIds: string[] = [];
 
@@ -39,9 +40,12 @@ export class SensorManager {
         this.subscribedIds = [];
 
         const config = this.deps.getConfig();
+        const soilMoistureIds = new Set(
+            [config.sensors.soilMoistureId, ...config.valves.map(valve => valve.soilMoistureId ?? '')].filter(Boolean),
+        );
         const stateIds = new Set([
             config.sensors.rainId,
-            config.sensors.soilMoistureId,
+            ...soilMoistureIds,
             config.sensors.temperatureId,
             config.legalRestriction.temperatureStateId,
         ]);
@@ -64,11 +68,17 @@ export class SensorManager {
                 await this.deps.adapter.setStateAsync('sensors.rain', { val: this.rainState, ack: true });
             }
         }
-        if (config.sensors.soilMoistureId) {
-            const state = await this.deps.adapter.getForeignStateAsync(config.sensors.soilMoistureId);
-            if (typeof state?.val === 'number' && Number.isFinite(state.val)) {
+        this.soilMoistureValues.clear();
+        for (const id of soilMoistureIds) {
+            const state = await this.deps.adapter.getForeignStateAsync(id);
+            if (typeof state?.val !== 'number' || !Number.isFinite(state.val)) {
+                continue;
+            }
+            const ts = typeof state.ts === 'number' ? state.ts : Date.now();
+            this.soilMoistureValues.set(id, { value: state.val, ts });
+            if (id === config.sensors.soilMoistureId) {
                 this.soilMoistureState = state.val;
-                this.soilMoistureTs = typeof state.ts === 'number' ? state.ts : Date.now();
+                this.soilMoistureTs = ts;
                 await this.deps.adapter.setStateAsync('sensors.soilMoisture', {
                     val: this.soilMoistureState,
                     ack: true,
@@ -103,16 +113,25 @@ export class SensorManager {
             await this.deps.onRainChange?.(this.rainState);
             return true;
         }
-        if (id === config.sensors.soilMoistureId) {
-            if (typeof state?.val === 'number' && Number.isFinite(state.val)) {
-                this.soilMoistureState = state.val;
-            } else {
+        const isGlobalSoilMoistureSensor = id === config.sensors.soilMoistureId;
+        const isValveSoilMoistureSensor = config.valves.some(valve => valve.soilMoistureId === id);
+        if (isGlobalSoilMoistureSensor || isValveSoilMoistureSensor) {
+            if (typeof state?.val !== 'number' || !Number.isFinite(state.val)) {
                 this.deps.adapter.log.warn(
-                    `Soil moisture sensor state ${id} has no valid numeric value; keeping previous value (${this.soilMoistureState}).`,
+                    `Soil moisture sensor state ${id} has no valid numeric value; keeping previous value.`,
                 );
+                return true;
             }
-            this.soilMoistureTs = Date.now();
-            await this.deps.adapter.setStateAsync('sensors.soilMoisture', { val: this.soilMoistureState, ack: true });
+            const ts = typeof state.ts === 'number' ? state.ts : Date.now();
+            this.soilMoistureValues.set(id, { value: state.val, ts });
+            if (isGlobalSoilMoistureSensor) {
+                this.soilMoistureState = state.val;
+                this.soilMoistureTs = ts;
+                await this.deps.adapter.setStateAsync('sensors.soilMoisture', {
+                    val: this.soilMoistureState,
+                    ack: true,
+                });
+            }
             return true;
         }
         if (id === config.sensors.temperatureId) {
@@ -189,14 +208,11 @@ export class SensorManager {
             );
             return { blocked: true, reason: 'rain sensor data is stale' };
         }
-        if (
-            config.sensors.soilMoistureId &&
-            valve.moistureThreshold > 0 &&
-            this.soilMoistureState >= valve.moistureThreshold
-        ) {
+        const soilMoisture = valve.soilMoistureId ? this.soilMoistureValues.get(valve.soilMoistureId) : undefined;
+        if (soilMoisture && valve.moistureThreshold > 0 && soilMoisture.value >= valve.moistureThreshold) {
             return {
                 blocked: true,
-                reason: `soil moisture ${this.soilMoistureState}% >= threshold ${valve.moistureThreshold}%`,
+                reason: `soil moisture ${soilMoisture.value}% >= threshold ${valve.moistureThreshold}%`,
             };
         }
         return { blocked: false };

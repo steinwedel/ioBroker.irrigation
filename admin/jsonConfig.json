@@ -353,14 +353,26 @@
                     "md": 4,
                     "lg": 3
                 },
+                "_valveEditorSoilMoistureId": {
+                    "type": "objectId",
+                    "label": "Soil moisture sensor state id",
+                    "doNotSave": true,
+                    "newLine": true,
+                    "hidden": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
+                    "disabled": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
+                    "sm": 12,
+                    "md": 8,
+                    "lg": 6
+                },
                 "_valveEditorMoistureThreshold": {
                     "type": "number",
                     "label": "Moisture threshold (%)",
                     "min": 0,
                     "max": 100,
                     "doNotSave": true,
+                    "alsoDependsOn": ["_valveEditorSoilMoistureId"],
                     "hidden": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
-                    "disabled": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
+                    "disabled": "data._editValveId === undefined || data._editValveId === null || data._editValveId === '' || !data._valveEditorSoilMoistureId || !data._valveEditorSoilMoistureId.trim()",
                     "sm": 6,
                     "md": 4,
                     "lg": 3
@@ -405,8 +417,8 @@
                     "type": "sendTo",
                     "label": "Apply valve changes",
                     "command": "applyValveEditor",
-                    "jsonData": "{\"valves\": ${JSON.stringify(data.valves ?? [])}, \"_editValveId\": ${JSON.stringify(data._editValveId ?? null)}, \"_valveEditorName\": ${JSON.stringify(data._valveEditorName ?? '')}, \"_valveEditorType\": ${JSON.stringify(data._valveEditorType ?? '')}, \"_valveEditorStateId\": ${JSON.stringify(data._valveEditorStateId ?? '')}, \"_valveEditorDuration\": ${JSON.stringify(data._valveEditorDuration ?? '')}, \"_valveEditorEnabled\": ${JSON.stringify(data._valveEditorEnabled ?? false)}, \"_valveEditorFlowRateLpm\": ${JSON.stringify(data._valveEditorFlowRateLpm ?? 0)}, \"_valveEditorRainIndependent\": ${JSON.stringify(data._valveEditorRainIndependent ?? false)}, \"_valveEditorMoistureThreshold\": ${JSON.stringify(data._valveEditorMoistureThreshold ?? 0)}, \"_valveEditorManualDuration\": ${JSON.stringify(data._valveEditorManualDuration ?? '')}, \"_valveEditorDays\": ${JSON.stringify(data._valveEditorDays ?? '')}, \"_valveEditorAllOffId\": ${JSON.stringify(data._valveEditorAllOffId ?? '')}}",
-                    "alsoDependsOn": ["valves", "_editValveId", "_valveEditorName", "_valveEditorType", "_valveEditorStateId", "_valveEditorDuration", "_valveEditorEnabled", "_valveEditorFlowRateLpm", "_valveEditorRainIndependent", "_valveEditorMoistureThreshold", "_valveEditorManualDuration", "_valveEditorDays", "_valveEditorAllOffId"],
+                    "jsonData": "{\"valves\": ${JSON.stringify(data.valves ?? [])}, \"_editValveId\": ${JSON.stringify(data._editValveId ?? null)}, \"_valveEditorName\": ${JSON.stringify(data._valveEditorName ?? '')}, \"_valveEditorType\": ${JSON.stringify(data._valveEditorType ?? '')}, \"_valveEditorStateId\": ${JSON.stringify(data._valveEditorStateId ?? '')}, \"_valveEditorDuration\": ${JSON.stringify(data._valveEditorDuration ?? '')}, \"_valveEditorEnabled\": ${JSON.stringify(data._valveEditorEnabled ?? false)}, \"_valveEditorFlowRateLpm\": ${JSON.stringify(data._valveEditorFlowRateLpm ?? 0)}, \"_valveEditorRainIndependent\": ${JSON.stringify(data._valveEditorRainIndependent ?? false)}, \"_valveEditorMoistureThreshold\": ${JSON.stringify(data._valveEditorMoistureThreshold ?? 0)}, \"_valveEditorSoilMoistureId\": ${JSON.stringify(data._valveEditorSoilMoistureId ?? '')}, \"_valveEditorManualDuration\": ${JSON.stringify(data._valveEditorManualDuration ?? '')}, \"_valveEditorDays\": ${JSON.stringify(data._valveEditorDays ?? '')}, \"_valveEditorAllOffId\": ${JSON.stringify(data._valveEditorAllOffId ?? '')}}",
+                    "alsoDependsOn": ["valves", "_editValveId", "_valveEditorName", "_valveEditorType", "_valveEditorStateId", "_valveEditorDuration", "_valveEditorEnabled", "_valveEditorFlowRateLpm", "_valveEditorRainIndependent", "_valveEditorMoistureThreshold", "_valveEditorSoilMoistureId", "_valveEditorManualDuration", "_valveEditorDays", "_valveEditorAllOffId"],
                     "useNative": true,
                     "disabled": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
                     "error": {

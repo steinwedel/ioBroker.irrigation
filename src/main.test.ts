@@ -85,6 +85,7 @@ describe('valve detail editor', () => {
             _valveEditorFlowRateLpm: 4.5,
             _valveEditorRainIndependent: true,
             _valveEditorMoistureThreshold: 40,
+            _valveEditorSoilMoistureId: 'sensors.frontLawn',
             _valveEditorManualDuration: '01:30',
             _valveEditorDays: '6, 2,2,0',
             _valveEditorAllOffId: '',
@@ -102,6 +103,7 @@ describe('valve detail editor', () => {
             flowRateLpm: 4.5,
             rainIndependent: true,
             moistureThreshold: 40,
+            soilMoistureId: 'sensors.frontLawn',
             manualDuration: 90,
         });
         expect(result.valves[1].days).to.deep.equal([0, 2, 6]);
@@ -1923,6 +1925,30 @@ describe('sensors.SensorManager initial read and stale-data detection', () => {
         await sensors.init();
 
         expect(sensors.isFrostBlocked()).to.equal(false);
+    });
+
+    it('uses the soil moisture sensor assigned to a valve instead of the global sensor', async () => {
+        const config = makeSensorsConfig();
+        config.sensors.soilMoistureId = 'sensors.globalSoil';
+        config.valves[0].soilMoistureId = 'sensors.zoneOneSoil';
+        config.valves[0].rainIndependent = true;
+        config.valves[0].moistureThreshold = 40;
+        const adapter = makeFakeAdapter({
+            'sensors.globalSoil': { val: 10, ts: Date.now() },
+            'sensors.zoneOneSoil': { val: 55, ts: Date.now() },
+        });
+        const sensors = new SensorManager({ adapter, getConfig: () => config });
+
+        await sensors.init();
+
+        expect(sensors.isValveBlocked(0)).to.deep.include({
+            blocked: true,
+            reason: 'soil moisture 55% >= threshold 40%',
+        });
+
+        await sensors.onForeignStateChange('sensors.zoneOneSoil', { val: 30, ts: Date.now() } as ioBroker.State);
+
+        expect(sensors.isValveBlocked(0).blocked).to.equal(false);
     });
 
     it('keeps the previous rain value and logs a warning when a state-change delivers an invalid (non-boolean) value', async () => {

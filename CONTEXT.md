@@ -1,11 +1,12 @@
 # Context
 
 ## Current Task
-Durchflussrate im Ventil-Detaileditor abhängig von der globalen Durchflussmonitor-Konfiguration sperren.
+Ventilbezogene Bodenfeuchtesensoren im Detaileditor und in der Bewässerungsblockierung unterstützen.
 
 ## Key Decisions
-- Die Durchflussrate ist nur editierbar, wenn der Durchflussmonitor aktiv ist und eine Sensor-State-ID besitzt.
-- Bereits gespeicherte Durchflussraten bleiben bei deaktiviertem Feld unverändert erhalten.
+- Jedes Ventil kann optional einen eigenen Bodenfeuchte-State aus dem Objektbaum erhalten.
+- Der Feuchteschwellwert ist ohne diese Zuordnung deaktiviert.
+- Bisherige globale Bodenfeuchtesensoren werden bei der Konfigurationsnormalisierung als Ventilzuordnung übernommen.
 
 ## Next Steps
 - Keine offenen Schritte.

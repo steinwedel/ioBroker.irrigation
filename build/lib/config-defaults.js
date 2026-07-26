@@ -89,7 +89,7 @@ const DEFAULT_CONFIG = {
   }
 };
 function normalizeConfig(config) {
-  var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n;
+  var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p;
   const legacyRestriction = config.legalRestriction;
   const legacyStartMonth = (_a = legacyRestriction == null ? void 0 : legacyRestriction.monthStart) != null ? _a : 6;
   const legacyEndMonth = (_b = legacyRestriction == null ? void 0 : legacyRestriction.monthEnd) != null ? _b : 9;
@@ -101,10 +101,11 @@ function normalizeConfig(config) {
     startTime: (_i = (_g = config.legalRestriction) == null ? void 0 : _g.startTime) != null ? _i : `${String((_h = legacyRestriction == null ? void 0 : legacyRestriction.hourStart) != null ? _h : 11).padStart(2, "0")}:00`,
     endTime: (_l = (_j = config.legalRestriction) == null ? void 0 : _j.endTime) != null ? _l : `${String((_k = legacyRestriction == null ? void 0 : legacyRestriction.hourEnd) != null ? _k : 17).padStart(2, "0")}:00`
   };
+  const legacySoilMoistureId = ((_n = (_m = config.sensors) == null ? void 0 : _m.soilMoistureId) == null ? void 0 : _n.trim()) || void 0;
   return {
-    expertMode: (_m = config.expertMode) != null ? _m : DEFAULT_CONFIG.expertMode,
+    expertMode: (_o = config.expertMode) != null ? _o : DEFAULT_CONFIG.expertMode,
     valves: (Array.isArray(config.valves) ? config.valves : []).map((valve, index) => {
-      var _a2, _b2, _c2, _d2, _e2, _f2, _g2, _h2, _i2;
+      var _a2, _b2, _c2, _d2, _e2, _f2, _g2, _h2, _i2, _j2;
       const legacyRunFor = valve.runFor;
       const duration = typeof valve.duration === "number" ? Math.max(1, Math.round(valve.duration * 60)) : Math.max(1, (0, import_duration.parseDuration)((_a2 = valve.duration) != null ? _a2 : legacyRunFor !== void 0 ? legacyRunFor : "10"));
       return {
@@ -122,11 +123,12 @@ function normalizeConfig(config) {
         duration,
         rainIndependent: (_g2 = valve.rainIndependent) != null ? _g2 : false,
         moistureThreshold: (_h2 = valve.moistureThreshold) != null ? _h2 : 0,
+        soilMoistureId: ((_i2 = valve.soilMoistureId) == null ? void 0 : _i2.trim()) || legacySoilMoistureId,
         manualDuration: typeof valve.manualDuration === "number" ? Math.max(1, Math.round(valve.manualDuration * 60)) : valve.manualDuration === void 0 ? duration : Math.max(1, (0, import_duration.parseDuration)(valve.manualDuration)),
-        days: (_i2 = valve.days) != null ? _i2 : []
+        days: (_j2 = valve.days) != null ? _j2 : []
       };
     }),
-    nextValveId: (_n = config.nextValveId) != null ? _n : DEFAULT_CONFIG.nextValveId,
+    nextValveId: (_p = config.nextValveId) != null ? _p : DEFAULT_CONFIG.nextValveId,
     plans: config.plans && config.plans.length > 0 ? config.plans.map((p) => {
       var _a2, _b2;
       return { name: (_a2 = p.name) != null ? _a2 : "", valveIndexes: (_b2 = p.valveIndexes) != null ? _b2 : [] };

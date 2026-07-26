@@ -86,7 +86,7 @@ function buildValveEditorOptions(rawValves) {
   });
 }
 function getValveEditorFields(rawValves, rawValveId) {
-  var _a;
+  var _a, _b;
   const valves = normalizeEditorValves(rawValves);
   const valveId = readValveId(rawValveId);
   if (!valves || valveId === void 0) {
@@ -108,9 +108,10 @@ function getValveEditorFields(rawValves, rawValveId) {
     _valveEditorFlowRateLpm: valve.flowRateLpm,
     _valveEditorRainIndependent: valve.rainIndependent,
     _valveEditorMoistureThreshold: valve.moistureThreshold,
+    _valveEditorSoilMoistureId: (_a = valve.soilMoistureId) != null ? _a : "",
     _valveEditorManualDuration: (0, import_duration.formatDuration)(valve.manualDuration),
     _valveEditorDays: [...valve.days].sort((a, b) => a - b).join(","),
-    _valveEditorAllOffId: (_a = valve.allOffId) != null ? _a : ""
+    _valveEditorAllOffId: (_b = valve.allOffId) != null ? _b : ""
   };
 }
 function applyValveEditorFields(rawValves, rawValveId, rawFields) {
@@ -133,6 +134,7 @@ function applyValveEditorFields(rawValves, rawValveId, rawFields) {
   const name = readTrimmedString(fields._valveEditorName);
   const type = fields._valveEditorType;
   const stateId = readTrimmedString(fields._valveEditorStateId);
+  const soilMoistureId = readTrimmedString(fields._valveEditorSoilMoistureId);
   const allOffId = readTrimmedString(fields._valveEditorAllOffId);
   const duration = parseEditorDuration(fields._valveEditorDuration);
   const manualDuration = parseEditorDuration(fields._valveEditorManualDuration);
@@ -148,7 +150,7 @@ function applyValveEditorFields(rawValves, rawValveId, rawFields) {
   if (typeof flowRateLpm !== "number" || !Number.isFinite(flowRateLpm) || flowRateLpm < 0 || typeof moistureThreshold !== "number" || !Number.isFinite(moistureThreshold) || moistureThreshold < 0 || moistureThreshold > 100) {
     return { error: "invalidNumbers" };
   }
-  if (name === void 0 || stateId === void 0 || allOffId === void 0 || !isValveType(type) || typeof fields._valveEditorEnabled !== "boolean" || typeof fields._valveEditorRainIndependent !== "boolean") {
+  if (name === void 0 || stateId === void 0 || soilMoistureId === void 0 || allOffId === void 0 || !isValveType(type) || typeof fields._valveEditorEnabled !== "boolean" || typeof fields._valveEditorRainIndependent !== "boolean") {
     return { error: "valveNotFound" };
   }
   const updatedValve = {
@@ -162,6 +164,7 @@ function applyValveEditorFields(rawValves, rawValveId, rawFields) {
     flowRateLpm,
     rainIndependent: fields._valveEditorRainIndependent,
     moistureThreshold,
+    soilMoistureId: soilMoistureId || void 0,
     manualDuration,
     days
   };

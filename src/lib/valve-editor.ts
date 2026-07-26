@@ -12,6 +12,7 @@ export interface ValveEditorFields {
     _valveEditorFlowRateLpm: number;
     _valveEditorRainIndependent: boolean;
     _valveEditorMoistureThreshold: number;
+    _valveEditorSoilMoistureId: string;
     _valveEditorManualDuration: string;
     _valveEditorDays: string;
     _valveEditorAllOffId: string;
@@ -113,6 +114,7 @@ export function getValveEditorFields(rawValves: unknown, rawValveId: unknown): V
         _valveEditorFlowRateLpm: valve.flowRateLpm,
         _valveEditorRainIndependent: valve.rainIndependent,
         _valveEditorMoistureThreshold: valve.moistureThreshold,
+        _valveEditorSoilMoistureId: valve.soilMoistureId ?? '',
         _valveEditorManualDuration: formatDuration(valve.manualDuration),
         _valveEditorDays: [...valve.days].sort((a, b) => a - b).join(','),
         _valveEditorAllOffId: valve.allOffId ?? '',
@@ -141,6 +143,7 @@ export function applyValveEditorFields(
     const name = readTrimmedString(fields._valveEditorName);
     const type = fields._valveEditorType;
     const stateId = readTrimmedString(fields._valveEditorStateId);
+    const soilMoistureId = readTrimmedString(fields._valveEditorSoilMoistureId);
     const allOffId = readTrimmedString(fields._valveEditorAllOffId);
     const duration = parseEditorDuration(fields._valveEditorDuration);
     const manualDuration = parseEditorDuration(fields._valveEditorManualDuration);
@@ -168,6 +171,7 @@ export function applyValveEditorFields(
     if (
         name === undefined ||
         stateId === undefined ||
+        soilMoistureId === undefined ||
         allOffId === undefined ||
         !isValveType(type) ||
         typeof fields._valveEditorEnabled !== 'boolean' ||
@@ -187,6 +191,7 @@ export function applyValveEditorFields(
         flowRateLpm,
         rainIndependent: fields._valveEditorRainIndependent,
         moistureThreshold,
+        soilMoistureId: soilMoistureId || undefined,
         manualDuration,
         days,
     };

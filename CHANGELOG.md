@@ -1,4 +1,7 @@
 # Changelog
+## 0.3.17 (2026-07-26)
+* (Gerhard Steinwedel) **ENHANCED**: Added an optional object-tree selectable soil-moisture sensor per valve; its moisture threshold is enabled only when that valve has a sensor assignment
+
 ## 0.3.16 (2026-07-26)
 * (Gerhard Steinwedel) **FIXED**: Disable a valve's flow-rate editor until the global flow monitor is enabled and a flow-sensor state ID is configured
 

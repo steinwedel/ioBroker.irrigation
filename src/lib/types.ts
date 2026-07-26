@@ -135,6 +135,8 @@ export interface IValveConfig {
     rainIndependent: boolean;
     /** Percent, 0 = disabled */
     moistureThreshold: number;
+    /** Optional foreign state id of the soil moisture sensor assigned to this valve */
+    soilMoistureId?: string;
     /** Manual single-valve run duration in seconds */
     manualDuration: number;
     /** 0=Sunday..6=Saturday, empty array = every day */
