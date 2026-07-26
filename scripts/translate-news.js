@@ -168,8 +168,7 @@ function repairJsonWithUnescapedQuotes(text, keys) {
                 }
                 if (ch === '"') {
                     const after = repaired.slice(i + 1);
-                    const isEnd =
-                        /^\s*\}/.test(after) || /^\s*,\s*"(?:[^"\\]|\\.)*"\s*:/.test(after);
+                    const isEnd = /^\s*\}/.test(after) || /^\s*,\s*"(?:[^"\\]|\\.)*"\s*:/.test(after);
                     if (isEnd) {
                         out += '"';
                         i += 1;

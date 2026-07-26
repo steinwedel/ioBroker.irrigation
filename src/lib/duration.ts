@@ -1,8 +1,27 @@
+/**
+ * Parses a duration value into seconds.
+ *
+ * `fallback` is only used when *no* value was actually provided (undefined,
+ * null, or a non-numeric/malformed string, e.g. an empty string or garbage
+ * input) - in that case we have no explicit user intent to go on, so the
+ * configured fallback (typically 600s) is used.
+ *
+ * If a value *was* explicitly provided but parses to 0 or a negative number
+ * of seconds (e.g. an explicit "0" or "00:00"), that is a deliberate,
+ * well-formed input, not "no value" - silently replacing it with the
+ * (often much longer) fallback would be surprising and has previously
+ * caused unwanted long irrigation runs. Instead, such an explicit
+ * zero/negative value is clamped to a minimum of 1 second rather than
+ * falling back.
+ *
+ * @param value
+ * @param fallback
+ */
 export function parseDuration(value: unknown, fallback = 600): number {
     if (typeof value === 'number' && Number.isFinite(value)) {
         return Math.max(1, Math.round(value));
     }
-    if (typeof value !== 'string') {
+    if (typeof value !== 'string' || value.trim() === '') {
         return fallback;
     }
 
@@ -20,7 +39,10 @@ export function parseDuration(value: unknown, fallback = 600): number {
     } else {
         seconds = values[0] * 3600 + values[1] * 60 + values[2];
     }
-    return seconds > 0 ? seconds : fallback;
+    // The string was explicitly provided and well-formed - clamp explicit
+    // zero/negative results to a minimum of 1s rather than silently
+    // substituting the (often much longer) fallback duration.
+    return seconds > 0 ? seconds : 1;
 }
 
 export function formatDuration(seconds: number): string {

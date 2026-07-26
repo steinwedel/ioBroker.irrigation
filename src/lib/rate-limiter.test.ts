@@ -92,4 +92,68 @@ describe('RateLimiter concurrency', () => {
         }
         expect(rejectedWithCancelledError).to.equal(true);
     });
+
+    it('throws a plain Error (not CancelledError) once the 7-day limit is exhausted', async function () {
+        this.timeout(15_000);
+        const limiter = new RateLimiter();
+        // Directly seed the 7-day window past the limit so the test does not
+        // have to actually issue 699 requests / wait out real time.
+        (limiter as unknown as { timestamps7d: number[] }).timestamps7d = new Array(699).fill(Date.now());
+
+        let caughtError: unknown;
+        try {
+            await limiter.acquire('valve-exhausted');
+        } catch (error) {
+            caughtError = error;
+        }
+
+        expect(caughtError).to.be.instanceOf(Error);
+        expect(caughtError).to.not.be.instanceOf(CancelledError);
+        limiter.destroy();
+    });
+
+    it('getState() reports window10sCount, weeklyCount and queueLength', async function () {
+        this.timeout(15_000);
+        const limiter = new RateLimiter();
+
+        const initial = limiter.getState();
+        expect(initial.window10sCount).to.equal(0);
+        expect(initial.weeklyCount).to.equal(0);
+        expect(initial.queueLength).to.equal(0);
+
+        await limiter.acquire('valve-0');
+        const afterOne = limiter.getState();
+        expect(afterOne.window10sCount).to.equal(1);
+        expect(afterOne.weeklyCount).to.equal(1);
+        expect(afterOne.queueLength).to.equal(0);
+
+        // Saturate the 10s window so the next acquire() has to queue, letting
+        // us observe a non-zero queueLength while it is pending.
+        for (let i = 0; i < 8; i++) {
+            await limiter.acquire(`filler-${i}`);
+        }
+        const queuedCall = limiter.acquire('valve-queued');
+        const whileQueued = limiter.getState();
+        expect(whileQueued.queueLength).to.equal(1);
+
+        limiter.destroy();
+        try {
+            await queuedCall;
+        } catch {
+            // expected: rejected by destroy()
+        }
+    });
+
+    it('acquire() called after destroy() rejects immediately', async () => {
+        const limiter = new RateLimiter();
+        limiter.destroy();
+
+        let rejectedWithCancelledError = false;
+        try {
+            await limiter.acquire('valve-after-destroy');
+        } catch (error) {
+            rejectedWithCancelledError = error instanceof CancelledError;
+        }
+        expect(rejectedWithCancelledError).to.equal(true);
+    });
 });

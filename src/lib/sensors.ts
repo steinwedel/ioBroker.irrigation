@@ -1,5 +1,8 @@
 import type { IrrigationNativeConfig } from './types';
 
+/** Sensor values older than this are considered stale and trigger conservative blocking. */
+const MAX_SENSOR_AGE_MS = 2 * 60 * 60 * 1000;
+
 export interface SensorsDeps {
     adapter: ioBroker.Adapter;
     getConfig: () => IrrigationNativeConfig;
@@ -16,6 +19,9 @@ export class SensorManager {
     private rainState = false;
     private soilMoistureState = 0;
     private temperatureState = 0;
+    private rainStateTs: number | undefined;
+    private soilMoistureTs: number | undefined;
+    private temperatureTs: number | undefined;
     private subscribedIds: string[] = [];
 
     public constructor(deps: SensorsDeps) {
@@ -45,23 +51,79 @@ export class SensorManager {
                 this.subscribedIds.push(id);
             }
         }
+
+        // Read the current value of each subscribed state immediately so
+        // rain/soilMoisture/temperature reflect reality right after (re)start,
+        // instead of staying at their fail-open defaults (e.g. rainState=false)
+        // until the next foreign-state push from the sensor.
+        if (config.sensors.rainId) {
+            const state = await this.deps.adapter.getForeignStateAsync(config.sensors.rainId);
+            if (typeof state?.val === 'boolean') {
+                this.rainState = state.val;
+                this.rainStateTs = typeof state.ts === 'number' ? state.ts : Date.now();
+                await this.deps.adapter.setStateAsync('sensors.rain', { val: this.rainState, ack: true });
+            }
+        }
+        if (config.sensors.soilMoistureId) {
+            const state = await this.deps.adapter.getForeignStateAsync(config.sensors.soilMoistureId);
+            if (typeof state?.val === 'number' && Number.isFinite(state.val)) {
+                this.soilMoistureState = state.val;
+                this.soilMoistureTs = typeof state.ts === 'number' ? state.ts : Date.now();
+                await this.deps.adapter.setStateAsync('sensors.soilMoisture', {
+                    val: this.soilMoistureState,
+                    ack: true,
+                });
+            }
+        }
+        if (config.sensors.temperatureId) {
+            const state = await this.deps.adapter.getForeignStateAsync(config.sensors.temperatureId);
+            if (typeof state?.val === 'number' && Number.isFinite(state.val)) {
+                this.temperatureState = state.val;
+                this.temperatureTs = typeof state.ts === 'number' ? state.ts : Date.now();
+                await this.deps.adapter.setStateAsync('sensors.temperature', {
+                    val: this.temperatureState,
+                    ack: true,
+                });
+            }
+        }
     }
 
     public async onForeignStateChange(id: string, state: ioBroker.State | null | undefined): Promise<boolean> {
         const config = this.deps.getConfig();
         if (id === config.sensors.rainId) {
-            this.rainState = state?.val === true;
+            if (typeof state?.val === 'boolean') {
+                this.rainState = state.val;
+            } else {
+                this.deps.adapter.log.warn(
+                    `Rain sensor state ${id} has no valid boolean value; keeping previous value (${this.rainState}).`,
+                );
+            }
+            this.rainStateTs = Date.now();
             await this.deps.adapter.setStateAsync('sensors.rain', { val: this.rainState, ack: true });
             await this.deps.onRainChange?.(this.rainState);
             return true;
         }
         if (id === config.sensors.soilMoistureId) {
-            this.soilMoistureState = typeof state?.val === 'number' ? state.val : 0;
+            if (typeof state?.val === 'number' && Number.isFinite(state.val)) {
+                this.soilMoistureState = state.val;
+            } else {
+                this.deps.adapter.log.warn(
+                    `Soil moisture sensor state ${id} has no valid numeric value; keeping previous value (${this.soilMoistureState}).`,
+                );
+            }
+            this.soilMoistureTs = Date.now();
             await this.deps.adapter.setStateAsync('sensors.soilMoisture', { val: this.soilMoistureState, ack: true });
             return true;
         }
         if (id === config.sensors.temperatureId) {
-            this.temperatureState = typeof state?.val === 'number' ? state.val : 0;
+            if (typeof state?.val === 'number' && Number.isFinite(state.val)) {
+                this.temperatureState = state.val;
+            } else {
+                this.deps.adapter.log.warn(
+                    `Temperature sensor state ${id} has no valid numeric value; keeping previous value (${this.temperatureState}).`,
+                );
+            }
+            this.temperatureTs = Date.now();
             await this.deps.adapter.setStateAsync('sensors.temperature', { val: this.temperatureState, ack: true });
             return true;
         }
@@ -78,6 +140,10 @@ export class SensorManager {
 
     public getTemperature(): number {
         return this.temperatureState;
+    }
+
+    private isStale(ts: number | undefined): boolean {
+        return ts === undefined || Date.now() - ts > MAX_SENSOR_AGE_MS;
     }
 
     public async getTemperatureAdjustmentTemperature(): Promise<number | undefined> {
@@ -117,6 +183,12 @@ export class SensorManager {
         if (config.sensors.rainId && this.rainState && !valve.rainIndependent) {
             return { blocked: true, reason: 'rain detected' };
         }
+        if (config.sensors.rainId && !valve.rainIndependent && this.isStale(this.rainStateTs)) {
+            this.deps.adapter.log.warn(
+                `Rain sensor value is stale (older than ${MAX_SENSOR_AGE_MS / 60_000} minutes); blocking valve as a precaution.`,
+            );
+            return { blocked: true, reason: 'rain sensor data is stale' };
+        }
         if (
             config.sensors.soilMoistureId &&
             valve.moistureThreshold > 0 &&
@@ -139,6 +211,12 @@ export class SensorManager {
         const temp = config.sensors.temperatureId ? this.temperatureState : undefined;
         if (temp === undefined) {
             return false;
+        }
+        if (config.sensors.temperatureId && this.isStale(this.temperatureTs)) {
+            this.deps.adapter.log.warn(
+                `Temperature sensor value is stale (older than ${MAX_SENSOR_AGE_MS / 60_000} minutes); assuming frost protection is active as a precaution.`,
+            );
+            return true;
         }
         return temp < config.scheduler.frostMinTemp;
     }

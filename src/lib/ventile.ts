@@ -831,10 +831,18 @@ export class ValveController {
                     await this.adapter.setForeignStateAsync(this.config.stateId, false);
                     break;
             }
-            await this.setRunningState(false, 0);
-            if (!commandIssued) {
+            if (commandIssued) {
+                await this.setRunningState(false, 0);
+            } else {
+                // No hardware command could be issued to actually close the Rainbird
+                // station: do NOT report "stopped" (running=false) here, since that
+                // would make the admin UI show the valve as safely off while the
+                // physical station may still be running. Keep `running` (and thus the
+                // "state" datapoint) as-is and surface an error instead, so the user
+                // can see the stop was not verified.
+                this.running = true;
                 await this.adapter.setStateAsync(`${this.id}.errorLast`, {
-                    val: 'Stop requested but no allOffId configured - physical Rainbird station may still be running.',
+                    val: 'Stop requested but no allOffId configured - physical Rainbird station may still be running. Valve state left unchanged.',
                     ack: true,
                 });
             }

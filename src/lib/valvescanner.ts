@@ -376,6 +376,16 @@ async function scanRainbird(adapter: ioBroker.Adapter, instance: string): Promis
             const objects = await adapter.getForeignObjectsAsync(`${inst}.device.stations.*`, 'state');
             const stopId = `${inst}.device.commands.stopIrrigation`;
             const stopExists = await adapter.getForeignObjectAsync(stopId).catch(() => null);
+            if (!stopExists) {
+                // Rainbird has no per-zone stop command, only the controller-wide
+                // `allOffId` ("stopIrrigation"). Without it the adapter can never
+                // reliably stop a Rainbird zone once started - warn loudly so this is
+                // not discovered only later, when a stop() silently cannot verify it.
+                adapter.log.warn(
+                    `Rainbird scan: instance="${inst}" has no "${stopId}" state - valves discovered on this ` +
+                        'instance will be created without allOffId and cannot be reliably stopped by the adapter.',
+                );
+            }
             const runZoneIds = Object.keys(objects).filter(id => id.endsWith('.runZone'));
             for (const runZoneId of runZoneIds) {
                 const basePath = runZoneId.slice(0, -'.runZone'.length);

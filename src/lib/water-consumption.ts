@@ -20,6 +20,13 @@ export class WaterConsumptionTracker {
     private currentDay = new Date().getDate();
     private currentWeekKey = weekKeyOf(new Date());
     private currentMonthKey = monthKeyOf(new Date());
+    /**
+     * Serializes all state writes done by recordConsumption() so that
+     * concurrent calls for different valves can never interleave their
+     * setStateAsync() writes and persist a stale/too-low value. See
+     * ventile.ts's `commandChain` for the same pattern.
+     */
+    private writeChain: Promise<void> = Promise.resolve();
 
     public constructor(deps: WaterConsumptionDeps) {
         this.deps = deps;
@@ -48,18 +55,27 @@ export class WaterConsumptionTracker {
      * @param flowing
      */
     public onValveFlowChange(valveIndex: number, flowing: boolean): void {
-        if (!this.deps.getConfig().waterConsumption.enabled) {
-            return;
-        }
         if (flowing) {
+            if (!this.deps.getConfig().waterConsumption.enabled) {
+                return;
+            }
             this.valveStartedAt.set(valveIndex, Date.now());
         } else {
             const startedAt = this.valveStartedAt.get(valveIndex);
+            // Always delete, regardless of the enabled flag or whether a start
+            // timestamp exists, so that toggling "enabled" off mid-run (or a
+            // missing start timestamp) never leaks an entry in this map.
+            this.valveStartedAt.delete(valveIndex);
             if (startedAt === undefined) {
+                this.deps.adapter.log.warn(
+                    `Water consumption for valve ${valveIndex} could not be calculated: start time unknown, likely due to adapter restart during valve run.`,
+                );
                 return;
             }
-            this.valveStartedAt.delete(valveIndex);
-            const elapsedMin = (Date.now() - startedAt) / 60000;
+            if (!this.deps.getConfig().waterConsumption.enabled) {
+                return;
+            }
+            const elapsedMin = Math.max(0, (Date.now() - startedAt) / 60000);
             const config = this.deps.getConfig();
             const valve = config.valves[valveIndex];
             const liters = elapsedMin * (valve?.flowRateLpm ?? 0);
@@ -70,6 +86,22 @@ export class WaterConsumptionTracker {
     }
 
     private async recordConsumption(valveIndex: number, liters: number): Promise<void> {
+        // Chain onto writeChain rather than writing state directly, so that
+        // concurrent recordConsumption() calls for different valves never
+        // interleave their setStateAsync() writes (which would otherwise risk
+        // persisting a stale/too-low total). See ventile.ts's `commandChain`
+        // field comment for the same pattern and rationale for the .catch().
+        this.writeChain = this.writeChain
+            .then(() => this.doRecordConsumption(valveIndex, liters))
+            .catch(error => {
+                this.deps.adapter.log.error(
+                    `Failed to record water consumption for valve ${valveIndex}: ${(error as Error).message}`,
+                );
+            });
+        await this.writeChain;
+    }
+
+    private async doRecordConsumption(valveIndex: number, liters: number): Promise<void> {
         this.rolloverIfNeeded();
 
         this.dayTotal += liters;

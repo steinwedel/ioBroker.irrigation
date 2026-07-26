@@ -1,5 +1,16 @@
 import type { IrrigationNativeConfig } from './types';
 
+const FETCH_TIMEOUT_MS = 15_000;
+
+/**
+ * Masks the OpenWeatherMap API key in a URL or error message before logging.
+ *
+ * @param message The raw URL or error message that may contain an `appid=` API key.
+ */
+function maskApiKey(message: string): string {
+    return message.replace(/appid=[^&\s"]+/gi, 'appid=***');
+}
+
 export interface WeatherApiDeps {
     adapter: ioBroker.Adapter;
     getConfig: () => IrrigationNativeConfig;
@@ -24,7 +35,8 @@ export class WeatherApi {
             return;
         }
 
-        const intervalMs = Math.max(1, config.weather.pollInterval) * 60 * 1000;
+        const pollIntervalMinutes = Number.isFinite(config.weather.pollInterval) ? config.weather.pollInterval : 30;
+        const intervalMs = Math.max(1, pollIntervalMinutes) * 60 * 1000;
         this.pollTimer = this.deps.adapter.setInterval(() => {
             this.poll().catch(error =>
                 this.deps.adapter.log.error(`Weather API poll failed: ${(error as Error).message}`),
@@ -42,9 +54,11 @@ export class WeatherApi {
 
     private async poll(): Promise<void> {
         const config = this.deps.getConfig().weather;
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
         try {
             const url = `https://api.openweathermap.org/data/2.5/weather?lat=${config.latitude}&lon=${config.longitude}&appid=${config.apiKey}&units=metric`;
-            const response = await fetch(url);
+            const response = await fetch(url, { signal: controller.signal });
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
@@ -73,8 +87,14 @@ export class WeatherApi {
             await this.deps.adapter.setStateAsync('weather.lastUpdate', { val: Date.now(), ack: true });
             await this.deps.adapter.setStateAsync('info.connection', { val: true, ack: true });
         } catch (error) {
-            this.deps.adapter.log.warn(`Weather API request failed: ${(error as Error).message}`);
+            const isAbort = (error as { name?: string }).name === 'AbortError';
+            const message = isAbort
+                ? `Request timed out after ${FETCH_TIMEOUT_MS / 1000}s`
+                : maskApiKey((error as Error).message);
+            this.deps.adapter.log.warn(`Weather API request failed: ${message}`);
             await this.deps.adapter.setStateAsync('info.connection', { val: false, ack: true });
+        } finally {
+            clearTimeout(timeout);
         }
     }
 }

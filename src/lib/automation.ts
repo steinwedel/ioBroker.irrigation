@@ -116,6 +116,20 @@ export class AutomationEngine {
 
     private status: AutomationStatus = 'idle';
     private pauseReason: PauseReason = null;
+    /**
+     * Internal, independently tracked blocker flags. Unlike the single
+     * `pauseReason` enum (still maintained above for status-text
+     * compatibility), these can all be active at the same time - e.g. a
+     * legal restriction and rain can both be in effect simultaneously. Every
+     * resume path (pause(), setRainPause(), setWindPause(),
+     * finishManualRun(), onLegalRestrictionChanged()) must re-check all four
+     * flags/conditions before actually resuming, so ending one blocker never
+     * resumes watering while another is still active.
+     */
+    private blockedByRain = false;
+    private blockedByWind = false;
+    private blockedByLegalRestriction = false;
+    private blockedManually = false;
     private activePlanName: string | null = null;
     private batches: Batch[] = [];
     private currentBatchIndex = -1;
@@ -192,13 +206,88 @@ export class AutomationEngine {
             await valve.stop();
         }
         this.status = 'idle';
-        this.pauseReason = null;
+        this.clearAllBlockers();
         this.activePlanName = null;
         this.batches = [];
         this.currentBatchIndex = -1;
         this.runningValves.clear();
         this.manualRun = null;
         await this.publishStatus();
+    }
+
+    /**
+     * Clears all independently tracked blocker flags. Used when a run
+     * finishes/is reset entirely (recoverAfterRestart, finishRun) so no
+     * stale blocker from a previous run can affect the next one.
+     */
+    private clearAllBlockers(): void {
+        this.blockedByRain = false;
+        this.blockedByWind = false;
+        this.blockedByLegalRestriction = false;
+        this.blockedManually = false;
+        this.pauseReason = null;
+    }
+
+    /**
+     * The single most relevant blocker for status-text display purposes,
+     * derived from the independently tracked flags. Priority order:
+     * legal restriction, then rain, then wind, then manual - matches the
+     * previous single-`pauseReason` behavior's display priority as closely
+     * as possible while allowing multiple blockers to be tracked
+     * internally at once.
+     */
+    private computeDisplayPauseReason(): PauseReason {
+        if (this.blockedByLegalRestriction) {
+            return 'legalRestriction';
+        }
+        if (this.blockedByRain) {
+            return 'rain';
+        }
+        if (this.blockedByWind) {
+            return 'wind';
+        }
+        if (this.blockedManually) {
+            return 'manual';
+        }
+        return null;
+    }
+
+    /** True if any blocker is currently active. */
+    private hasActiveBlocker(): boolean {
+        return this.blockedByRain || this.blockedByWind || this.blockedByLegalRestriction || this.blockedManually;
+    }
+
+    /**
+     * Re-checks all four blocker conditions live (rain/wind/legal
+     * restriction sensors plus the manual flag) and resumes the paused run
+     * only if none of them are (still) active. Called from every
+     * resume-triggering path (pause(), setRainPause(), setWindPause(),
+     * onLegalRestrictionChanged(), finishManualRun()) after clearing the one
+     * blocker that just ended, so overlapping blockers can never be papered
+     * over by resuming while another one is still in effect.
+     */
+    private async tryResume(): Promise<void> {
+        if (this.status !== 'paused' || this.manualRun) {
+            return;
+        }
+        this.blockedByLegalRestriction = this.deps.isLegallyRestricted();
+        this.blockedByRain = this.deps.getConfig().scheduler.pauseOnRain && this.deps.isRaining();
+        this.blockedByWind = this.deps.getConfig().scheduler.windPauseEnabled && this.deps.isWindOverLimit();
+        if (this.hasActiveBlocker()) {
+            this.pauseReason = this.computeDisplayPauseReason();
+            this.deps.adapter.log.warn(`Resume refused: still blocked (${this.pauseReason ?? 'unknown reason'}).`);
+            await this.publishStatus();
+            return;
+        }
+        this.pauseReason = null;
+        this.status = 'running';
+        if (this.currentBatchIndex === -1) {
+            // was prepared but never started (see runPlan())
+            await this.startNextBatch();
+        } else {
+            await this.resumeRunningValves();
+            await this.publishStatus();
+        }
     }
 
     // ------------------------------------------------------------------
@@ -261,7 +350,8 @@ export class AutomationEngine {
         if (this.deps.isLegallyRestricted()) {
             this.deps.adapter.log.warn(`Plan "${plan.name}" prepared but legal restriction is active - waiting.`);
             this.status = 'paused';
-            this.pauseReason = 'legalRestriction';
+            this.blockedByLegalRestriction = true;
+            this.pauseReason = this.computeDisplayPauseReason();
             await this.publishStatus();
             return;
         }
@@ -417,7 +507,7 @@ export class AutomationEngine {
 
     private async finishRun(): Promise<void> {
         this.status = 'idle';
-        this.pauseReason = null;
+        this.clearAllBlockers();
         this.activePlanName = null;
         this.batches = [];
         this.currentBatchIndex = -1;
@@ -505,10 +595,7 @@ export class AutomationEngine {
             return;
         }
 
-        for (const idx of this.runningValves) {
-            await this.deps.valves[idx].stop();
-            this.deps.onValveFlowChange?.(idx, false);
-        }
+        await this.stopRunningValves();
         this.runningValves.clear();
         await this.resetDurationStates();
         await this.finishRun();
@@ -516,9 +603,10 @@ export class AutomationEngine {
 
     /**
      * Stops every valve currently in `runningValves` and notifies
-     * `onValveFlowChange(idx, false)` for each. Shared by pause(),
-     * manualStartValve(), and onLegalRestrictionChanged() so this
-     * stop-and-notify sequence cannot silently diverge between the three.
+     * `onValveFlowChange(idx, false)` for each. Shared by stop(), pause(),
+     * setRainPause(), setWindPause(), next(), back(), manualStartValve(),
+     * and onLegalRestrictionChanged() so this stop-and-notify sequence
+     * cannot silently diverge between callers.
      */
     private async stopRunningValves(): Promise<void> {
         for (const idx of this.runningValves) {
@@ -530,16 +618,26 @@ export class AutomationEngine {
     /**
      * Restarts every valve currently in `runningValves` with its remaining
      * time (from `valveEndsAt`) and notifies `onValveFlowChange(idx, true)`
-     * for each. Shared by pause()'s resume path, finishManualRun(), and
-     * onLegalRestrictionChanged()'s resume path. Valves whose remaining time
-     * has already elapsed are skipped rather than restarted with 0/negative
-     * duration.
+     * for each. Shared by tryResume() (used by pause()/setRainPause()/
+     * setWindPause()/onLegalRestrictionChanged()'s resume paths) and
+     * finishManualRun(). Valves whose remaining time has already elapsed
+     * are skipped rather than restarted with 0/negative duration.
      */
     private async resumeRunningValves(): Promise<void> {
         for (const idx of this.runningValves) {
             const remaining = Math.max(0, Math.round(((this.valveEndsAt.get(idx) ?? 0) - Date.now()) / 1000));
             if (remaining > 0) {
                 await this.deps.valves[idx].start(remaining);
+                // CRITICAL: valveEndsAt was set as an absolute timestamp when the
+                // batch originally started (startNextBatch()) and must be
+                // refreshed here to reflect the actual remaining time just
+                // restarted with. Without this, every pause/resume cycle silently
+                // shortens the real watering time: tick() compares
+                // Date.now() < valveEndsAt to decide whether a valve is still
+                // running, using the *original* (now stale) end time, so it would
+                // consider the valve finished as soon as that original timestamp
+                // passes - regardless of how long it was actually paused for.
+                this.valveEndsAt.set(idx, Date.now() + remaining * 1000);
                 this.deps.onValveFlowChange?.(idx, true);
             }
         }
@@ -552,25 +650,12 @@ export class AutomationEngine {
         if (this.status === 'running') {
             await this.stopRunningValves();
             this.status = 'paused';
-            this.pauseReason = 'manual';
+            this.blockedManually = true;
+            this.pauseReason = this.computeDisplayPauseReason();
             await this.publishStatus();
         } else if (this.status === 'paused') {
-            if (this.pauseReason === 'legalRestriction' && this.deps.isLegallyRestricted()) {
-                this.deps.adapter.log.warn('Resume refused: legal restriction still active.');
-                return;
-            }
-            if (this.pauseReason === 'rain' && this.deps.isRaining()) {
-                this.deps.adapter.log.warn('Resume refused: rain is still detected.');
-                return;
-            }
-            if (this.pauseReason === 'wind' && this.deps.isWindOverLimit()) {
-                this.deps.adapter.log.warn('Resume refused: wind speed/gust is still over the configured limit.');
-                return;
-            }
-            this.status = 'running';
-            this.pauseReason = null;
-            await this.resumeRunningValves();
-            await this.publishStatus();
+            this.blockedManually = false;
+            await this.tryResume();
         }
     }
 
@@ -578,18 +663,21 @@ export class AutomationEngine {
         if (this.manualRun || !this.deps.getConfig().scheduler.pauseOnRain) {
             return;
         }
-        if (raining && this.status === 'running') {
-            await this.stopRunningValves();
-            this.status = 'paused';
-            this.pauseReason = 'rain';
-            await this.publishStatus();
+        if (raining) {
+            if (this.status === 'running') {
+                await this.stopRunningValves();
+                this.status = 'paused';
+            }
+            if (this.status === 'paused') {
+                this.blockedByRain = true;
+                this.pauseReason = this.computeDisplayPauseReason();
+                await this.publishStatus();
+            }
             return;
         }
-        if (!raining && this.status === 'paused' && this.pauseReason === 'rain') {
-            this.status = 'running';
-            this.pauseReason = null;
-            await this.resumeRunningValves();
-            await this.publishStatus();
+        if (this.blockedByRain) {
+            this.blockedByRain = false;
+            await this.tryResume();
         }
     }
 
@@ -597,18 +685,21 @@ export class AutomationEngine {
         if (this.manualRun || !this.deps.getConfig().scheduler.windPauseEnabled) {
             return;
         }
-        if (paused && this.status === 'running') {
-            await this.stopRunningValves();
-            this.status = 'paused';
-            this.pauseReason = 'wind';
-            await this.publishStatus();
+        if (paused) {
+            if (this.status === 'running') {
+                await this.stopRunningValves();
+                this.status = 'paused';
+            }
+            if (this.status === 'paused') {
+                this.blockedByWind = true;
+                this.pauseReason = this.computeDisplayPauseReason();
+                await this.publishStatus();
+            }
             return;
         }
-        if (!paused && this.status === 'paused' && this.pauseReason === 'wind') {
-            this.status = 'running';
-            this.pauseReason = null;
-            await this.resumeRunningValves();
-            await this.publishStatus();
+        if (this.blockedByWind) {
+            this.blockedByWind = false;
+            await this.tryResume();
         }
     }
 
@@ -619,10 +710,7 @@ export class AutomationEngine {
         if (this.status !== 'running' && this.status !== 'paused') {
             return;
         }
-        for (const idx of this.runningValves) {
-            await this.deps.valves[idx].stop();
-            this.deps.onValveFlowChange?.(idx, false);
-        }
+        await this.stopRunningValves();
         this.runningValves.clear();
         this.inBatchPause = false;
         if (this.status === 'paused') {
@@ -643,10 +731,7 @@ export class AutomationEngine {
         if (this.status !== 'running' && this.status !== 'paused') {
             return;
         }
-        for (const idx of this.runningValves) {
-            await this.deps.valves[idx].stop();
-            this.deps.onValveFlowChange?.(idx, false);
-        }
+        await this.stopRunningValves();
         this.runningValves.clear();
         this.inBatchPause = false;
         if (this.currentBatchIndex > 0) {
@@ -680,12 +765,19 @@ export class AutomationEngine {
             this.deps.adapter.log.error(`Manual start for valve ${valveIndex} failed: valve not found.`);
             return;
         }
+        if (!valve.enabled) {
+            this.deps.adapter.log.warn(
+                `Manual start for valve ${valve.name} ignored: valve is disabled. The running automation, if any, was left untouched.`,
+            );
+            return;
+        }
 
         this.wasAutomationPausedForManual = false;
         if (this.status === 'running') {
             await this.stopRunningValves();
             this.status = 'paused';
-            this.pauseReason = 'manual';
+            this.blockedManually = true;
+            this.pauseReason = this.computeDisplayPauseReason();
             this.wasAutomationPausedForManual = true;
         }
 
@@ -706,16 +798,15 @@ export class AutomationEngine {
         this.manualRun = null;
 
         if (this.wasAutomationPausedForManual) {
-            this.status = 'running';
-            this.pauseReason = null;
+            this.wasAutomationPausedForManual = false;
+            this.blockedManually = false;
             // Resume the batch that was interrupted for the manual run, exactly as
             // pause()/resume does: restart the same valves (still tracked in
             // runningValves/valveEndsAt, never cleared for a manual-run interruption)
-            // with their remaining time. Do NOT go through startNextBatch() here - it
-            // unconditionally increments currentBatchIndex, which would skip the
-            // interrupted batch entirely instead of resuming it.
-            await this.resumeRunningValves();
-            await this.publishStatus();
+            // with their remaining time - but only if no other blocker (rain, wind,
+            // legal restriction) became active in the meantime, since tryResume()
+            // re-checks all of them live rather than blindly resuming.
+            await this.tryResume();
         } else {
             await this.publishStatus();
         }
@@ -742,24 +833,17 @@ export class AutomationEngine {
             if (this.status === 'running') {
                 await this.stopRunningValves();
                 this.status = 'paused';
-                this.pauseReason = 'legalRestriction';
-                await this.publishStatus();
-            } else if (this.status === 'paused' && this.pauseReason === null) {
-                this.pauseReason = 'legalRestriction';
             }
-        } else if (this.pauseReason === 'legalRestriction') {
-            this.pauseReason = null;
             if (this.status === 'paused') {
-                if (this.currentBatchIndex === -1) {
-                    // was prepared but never started (see runPlan())
-                    this.status = 'running';
-                    await this.startNextBatch();
-                } else {
-                    this.status = 'running';
-                    await this.resumeRunningValves();
-                    await this.publishStatus();
-                }
+                this.blockedByLegalRestriction = true;
+                this.pauseReason = this.computeDisplayPauseReason();
+                await this.publishStatus();
             }
+            return;
+        }
+        if (this.blockedByLegalRestriction) {
+            this.blockedByLegalRestriction = false;
+            await this.tryResume();
         }
     }
 

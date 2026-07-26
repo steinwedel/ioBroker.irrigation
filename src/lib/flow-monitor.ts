@@ -37,6 +37,22 @@ export class FlowMonitor {
     }
 
     public async resubscribe(): Promise<void> {
+        if (this.calibratingValveIndex !== undefined) {
+            // The configuration is changing (e.g. sensor id) while a calibration is
+            // still running - abort it cleanly instead of letting its timer fire
+            // later against a state that may no longer be valid.
+            const abortedValveIndex = this.calibratingValveIndex;
+            if (this.calibrationTimer) {
+                this.deps.adapter.clearTimeout(this.calibrationTimer);
+                this.calibrationTimer = undefined;
+            }
+            this.calibratingValveIndex = undefined;
+            this.calibrationSamples = [];
+            this.deps.adapter.log.warn(
+                `Calibration for valve ${abortedValveIndex} aborted: configuration changed while calibration was running.`,
+            );
+        }
+
         if (this.subscribedId) {
             await this.deps.adapter.unsubscribeForeignStatesAsync(this.subscribedId);
             this.subscribedId = undefined;
@@ -220,10 +236,18 @@ export class FlowMonitor {
     }
 
     private async finishCalibration(valveIndex: number, closeValve: () => Promise<void>): Promise<void> {
-        await closeValve();
-        const samples = this.calibrationSamples;
-        this.calibratingValveIndex = undefined;
-        this.calibrationSamples = [];
+        let samples: number[];
+        try {
+            await closeValve();
+        } catch (error) {
+            this.deps.adapter.log.error(
+                `Calibration for valve ${valveIndex} failed to close the valve: ${(error as Error).message}`,
+            );
+        } finally {
+            samples = this.calibrationSamples;
+            this.calibratingValveIndex = undefined;
+            this.calibrationSamples = [];
+        }
 
         if (samples.length === 0) {
             this.deps.adapter.log.warn(`Calibration for valve ${valveIndex} yielded no samples.`);

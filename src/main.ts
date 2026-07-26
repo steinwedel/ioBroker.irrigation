@@ -57,11 +57,12 @@ function readPlanName(message: unknown): string | undefined {
 }
 
 /**
- * Key-order-independent shallow equality check for two plain objects (e.g.
- * IValveConfig entries). Used instead of JSON.stringify comparison, since
- * JSON.stringify is sensitive to property insertion order and can report
- * two structurally identical objects as different, causing unnecessary
- * (and potentially repeated/looping) native config migrations.
+ * Key-order-independent structural (deep) equality check for two JSON-like
+ * values (plain objects, arrays, and primitives - e.g. IPlanConfig/IValveConfig
+ * entries). Used instead of JSON.stringify comparison, since JSON.stringify is
+ * sensitive to property insertion order and can report two structurally
+ * identical objects as different, causing unnecessary (and potentially
+ * repeated/looping) native config migrations or plan-state rewrites.
  *
  * Keys whose value is `undefined` are treated as absent on both sides, since
  * `{...obj, allOffId: undefined}`-style spreads (as done by normalizeConfig)
@@ -73,6 +74,34 @@ function readPlanName(message: unknown): string | undefined {
  * @param a
  * @param b
  */
+function deepEqual(a: unknown, b: unknown): boolean {
+    if (a === b) {
+        return true;
+    }
+    if (typeof a !== typeof b) {
+        return false;
+    }
+    if (Array.isArray(a) || Array.isArray(b)) {
+        if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) {
+            return false;
+        }
+        return a.every((item, index) => deepEqual(item, b[index]));
+    }
+    if (a !== null && b !== null && typeof a === 'object' && typeof b === 'object') {
+        const aObj = a as Record<string, unknown>;
+        const bObj = b as Record<string, unknown>;
+        const aKeys = Object.keys(aObj).filter(key => aObj[key] !== undefined);
+        const bKeys = Object.keys(bObj).filter(key => bObj[key] !== undefined);
+        if (aKeys.length !== bKeys.length) {
+            return false;
+        }
+        return aKeys.every(key => Object.prototype.hasOwnProperty.call(bObj, key) && deepEqual(aObj[key], bObj[key]));
+    }
+    // Different primitives (including one being null/undefined and the other
+    // not, already excluded by the `a === b` check above) or NaN.
+    return typeof a === 'number' && typeof b === 'number' && Number.isNaN(a) && Number.isNaN(b);
+}
+
 class Irrigation extends utils.Adapter {
     private config2!: IrrigationNativeConfig;
     private valves: ValveController[] = [];
@@ -88,6 +117,7 @@ class Irrigation extends utils.Adapter {
     private rateLimiter!: RateLimiter;
     private rateLimiterPoll: ReturnType<ioBroker.Adapter['setInterval']> | undefined;
     private scanProgressClearTimer: ReturnType<ioBroker.Adapter['setTimeout']> | undefined;
+    private isScanning = false;
 
     public constructor(options: Partial<utils.AdapterOptions> = {}) {
         super({
@@ -254,7 +284,7 @@ class Irrigation extends utils.Adapter {
             const synchronizedPlans = this.synchronizePlansWithValves(storedPlans);
             this.log.debug(`Loaded ${synchronizedPlans.length} plan(s) from automation.plansData.`);
             const hasLegacyFields = this.plansStateHasLegacyFields(plansState?.val);
-            if (hasLegacyFields || JSON.stringify(synchronizedPlans) !== JSON.stringify(storedPlans)) {
+            if (hasLegacyFields || !deepEqual(synchronizedPlans, storedPlans)) {
                 if (hasLegacyFields) {
                     this.log.info('Removing legacy fields (e.g. valveOrder) from automation.plansData.');
                 }
@@ -594,7 +624,24 @@ class Irrigation extends utils.Adapter {
         }
     }
 
-    private onUnload(callback: () => void): void {
+    /**
+     * Runs a single cleanup step, logging (but never throwing) any error so
+     * that one module's failed destroy() can never prevent the cleanup of
+     * all subsequent modules. Awaits the result in case destroy() ever
+     * starts returning a Promise.
+     *
+     * @param label Name of the module being destroyed, used in the log message.
+     * @param destroyFn The cleanup callback to run.
+     */
+    private async safeDestroy(label: string, destroyFn: () => void | Promise<void>): Promise<void> {
+        try {
+            await destroyFn();
+        } catch (error) {
+            this.log.error(`Error destroying ${label} during unload: ${(error as Error).message}`);
+        }
+    }
+
+    private async onUnload(callback: () => void): Promise<void> {
         try {
             if (this.rateLimiterPoll) {
                 this.clearInterval(this.rateLimiterPoll);
@@ -604,35 +651,58 @@ class Irrigation extends utils.Adapter {
                 this.clearTimeout(this.scanProgressClearTimer);
                 this.scanProgressClearTimer = undefined;
             }
-            this.rateLimiter?.destroy();
-            this.automation?.destroy();
-            this.scheduler?.destroy();
-            this.dwd?.destroy();
-            this.windMonitor?.destroy();
-            this.weatherApi?.destroy();
-            this.flowMonitor?.destroy();
-            this.sensorManager?.destroy();
+            await this.safeDestroy('rateLimiter', () => this.rateLimiter?.destroy());
+            await this.safeDestroy('automation', () => this.automation?.destroy());
+            await this.safeDestroy('scheduler', () => this.scheduler?.destroy());
+            await this.safeDestroy('dwd', () => this.dwd?.destroy());
+            await this.safeDestroy('windMonitor', () => this.windMonitor?.destroy());
+            await this.safeDestroy('weatherApi', () => this.weatherApi?.destroy());
+            await this.safeDestroy('flowMonitor', () => this.flowMonitor?.destroy());
+            await this.safeDestroy('sensorManager', () => this.sensorManager?.destroy());
             for (const valve of this.valves) {
-                valve.destroy();
+                await this.safeDestroy(`valve ${valve.id}`, () => valve.destroy());
             }
-            callback();
         } catch (error) {
             this.log.error(`Error during unloading: ${(error as Error).message}`);
+        } finally {
             callback();
         }
     }
 
     private async onStateChange(id: string, state: ioBroker.State | null | undefined): Promise<void> {
+        try {
+            await this.handleStateChange(id, state);
+        } catch (error) {
+            this.log.error(`Error handling state change for "${id}": ${(error as Error).message}`);
+        }
+    }
+
+    private async handleStateChange(id: string, state: ioBroker.State | null | undefined): Promise<void> {
         if (!state) {
             return;
         }
 
         // Foreign state changes (valves, sensors, ical trigger, flow sensors)
         if (!id.startsWith(`${this.namespace}.`)) {
-            for (const valve of this.valves) {
-                if (await valve.onForeignStateChange(id, state)) {
-                    return;
-                }
+            // Each valve's onForeignStateChange() is internally safe to run
+            // concurrently: matching actions are chained onto that valve's own
+            // commandChain and any error is caught and logged there (see
+            // ValveController.onForeignStateChange()/commandChain). Running them
+            // in parallel (instead of sequentially awaiting each one) means a
+            // rejected/slow handler for one valve can no longer delay or block
+            // delivery of this foreign state change to the other valves.
+            const matches = await Promise.all(
+                this.valves.map(valve =>
+                    valve.onForeignStateChange(id, state).catch(error => {
+                        this.log.error(
+                            `Valve ${valve.id}: error handling foreign state change for "${id}": ${(error as Error).message}`,
+                        );
+                        return false;
+                    }),
+                ),
+            );
+            if (matches.some(matched => matched)) {
+                return;
             }
             const handledBySensor = (await this.sensorManager?.onForeignStateChange(id, state)) ?? false;
             const handledByWind = (await this.windMonitor?.onForeignStateChange(id, state)) ?? false;
@@ -855,130 +925,40 @@ class Irrigation extends utils.Adapter {
     }
 
     private async onMessage(obj: ioBroker.Message): Promise<void> {
+        try {
+            await this.handleMessage(obj);
+        } catch (error) {
+            this.log.error(`Error handling message "${obj?.command}": ${(error as Error).message}`);
+        }
+    }
+
+    private async handleMessage(obj: ioBroker.Message): Promise<void> {
         if (obj === null || typeof obj !== 'object' || !obj.command) {
             return;
         }
 
         if (obj.command === 'scanValves') {
-            const payload = obj.message as {
-                type: ScanType;
-                instance: string;
-                instanceRainbird?: string;
-                instanceHomematic?: string;
-                instanceHydrawise?: string;
-                locationId?: string;
-            };
-            let effectiveInstance: string;
-            switch (payload.type) {
-                case 'All':
-                    effectiveInstance = '';
-                    break;
-                case 'Homematic':
-                    effectiveInstance = payload.instanceHomematic ?? '';
-                    break;
-                case 'Rainbird':
-                    effectiveInstance = payload.instanceRainbird ?? '';
-                    break;
-                case 'Hydrawise':
-                    effectiveInstance = payload.instanceHydrawise ?? '';
-                    break;
-                default:
-                    effectiveInstance = payload.instance;
-                    break;
-            }
-
-            const setProgress = (message: string): void => {
-                if (this.scanProgressClearTimer) {
-                    this.clearTimeout(this.scanProgressClearTimer);
-                    this.scanProgressClearTimer = undefined;
+            if (this.isScanning) {
+                this.log.warn('Valve scan requested while another scan is still running - rejecting.');
+                if (obj.callback) {
+                    this.sendTo(
+                        obj.from,
+                        obj.command,
+                        {
+                            error: 'scanInProgress',
+                            result: 'scanErrors',
+                            errors: ['A valve scan is already running.'],
+                        },
+                        obj.callback,
+                    );
                 }
-                this.setState('scan.progress', { val: message, ack: true }).catch(() => {
-                    /* best-effort progress display */
-                });
-            };
-
-            const finishProgress = (message: string): void => {
-                setProgress(message);
-                // Keep the progress display visible for a short grace period after the
-                // scan finishes (see admin/jsonConfig.json "scanProgress" hidden formula,
-                // which hides the field once this state is empty again), then clear it.
-                this.scanProgressClearTimer = this.setTimeout(() => {
-                    this.scanProgressClearTimer = undefined;
-                    this.setState('scan.progress', { val: '', ack: true }).catch(() => {
-                        /* best-effort progress display */
-                    });
-                }, 10_000);
-            };
-
-            setProgress(`Scanning ${payload.type}...`);
-            const result = await scanForValves(this, payload.type, effectiveInstance, payload.locationId, setProgress);
-
-            const scannedValvesByStateId = new Map(result.valves.map(valve => [valve.stateId, valve]));
-            const existingStateIds = new Set(this.config2.valves.map(valve => valve.stateId));
-            const newValves = result.valves.filter(valve => !existingStateIds.has(valve.stateId));
-            let updatedNames = 0;
-            // Newly scanned valves get freshly assigned, never-reused stable ids from
-            // the nextValveId counter; existing valves keep their current id
-            // unchanged so their real object id/state history survives the merge -
-            // see the IValveConfig.id doc comment.
-            let nextId = this.config2.nextValveId;
-            const mergedValves = [...this.config2.valves, ...newValves.map(valve => ({ ...valve, id: nextId++ }))].map(
-                (valve, index) => {
-                    const scannedValve = scannedValvesByStateId.get(valve.stateId);
-                    const name = scannedValve?.name || valve.name;
-                    if (index < this.config2.valves.length && name !== valve.name) {
-                        updatedNames++;
-                    }
-                    return {
-                        ...valve,
-                        name,
-                        valveNumber: `valve_${formatValveNumber(valve.id ?? index)}`,
-                    };
-                },
-            );
-
-            this.log.info(
-                `Valve scan (${payload.type}): found ${result.valves.length}, added ${newValves.length} new, updated ${updatedNames} name(s), ${result.errors.length} error(s)`,
-            );
-
-            if (newValves.length > 0 || updatedNames > 0) {
-                await this.writeNativeAsync({
-                    valves: this.formatValvesForNative(mergedValves) as unknown as IValveConfig[],
-                    nextValveId: nextId,
-                });
+                return;
             }
-
-            const doneMessage =
-                result.errors.length > 0
-                    ? `Scan finished with errors: ${result.errors.join('; ')}`
-                    : newValves.length > 0
-                      ? `Found and added ${newValves.length} new valve(s).`
-                      : updatedNames > 0
-                        ? `Updated ${updatedNames} valve name(s).`
-                        : 'Scan finished, no new valves found.';
-            finishProgress(doneMessage);
-
-            if (obj.callback) {
-                this.sendTo(
-                    obj.from,
-                    obj.command,
-                    {
-                        found: result.valves.length,
-                        new: newValves.length,
-                        errors: result.errors,
-                        // useNative (without saveConfig) merges the updated valves array into
-                        // the currently open settings dialog's form state and forces a
-                        // targeted re-render of the table, without triggering the "Save
-                        // configuration?" dialog (that is only triggered by saveConfig: true,
-                        // which we deliberately omit since persistence already happened above
-                        // via writeValvesToNative/setForeignObjectAsync).
-                        native: { valves: this.formatValvesForNative(mergedValves) },
-                        result: result.errors.length > 0 ? 'scanErrors' : 'scanDone',
-                        error: undefined,
-                        args: [String(newValves.length), String(result.valves.length)],
-                    },
-                    obj.callback,
-                );
+            this.isScanning = true;
+            try {
+                await this.handleScanValves(obj);
+            } finally {
+                this.isScanning = false;
             }
             return;
         }
@@ -1220,6 +1200,166 @@ class Irrigation extends utils.Adapter {
             this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
             return;
         }
+    }
+
+    /**
+     * Runs the actual valve scan for the `scanValves` message command. Split
+     * out of handleMessage() so the isScanning guard there stays simple.
+     * Bounded by a timeout so a hung foreign adapter/API can never leave
+     * isScanning stuck forever (see the caller in handleMessage()).
+     *
+     * @param obj
+     */
+    private async handleScanValves(obj: ioBroker.Message): Promise<void> {
+        const payload = obj.message as {
+            type: ScanType;
+            instance: string;
+            instanceRainbird?: string;
+            instanceHomematic?: string;
+            instanceHydrawise?: string;
+            locationId?: string;
+        };
+        let effectiveInstance: string;
+        switch (payload.type) {
+            case 'All':
+                effectiveInstance = '';
+                break;
+            case 'Homematic':
+                effectiveInstance = payload.instanceHomematic ?? '';
+                break;
+            case 'Rainbird':
+                effectiveInstance = payload.instanceRainbird ?? '';
+                break;
+            case 'Hydrawise':
+                effectiveInstance = payload.instanceHydrawise ?? '';
+                break;
+            default:
+                effectiveInstance = payload.instance;
+                break;
+        }
+
+        const setProgress = (message: string): void => {
+            if (this.scanProgressClearTimer) {
+                this.clearTimeout(this.scanProgressClearTimer);
+                this.scanProgressClearTimer = undefined;
+            }
+            this.setState('scan.progress', { val: message, ack: true }).catch(() => {
+                /* best-effort progress display */
+            });
+        };
+
+        const finishProgress = (message: string): void => {
+            setProgress(message);
+            // Keep the progress display visible for a short grace period after the
+            // scan finishes (see admin/jsonConfig.json "scanProgress" hidden formula,
+            // which hides the field once this state is empty again), then clear it.
+            this.scanProgressClearTimer = this.setTimeout(() => {
+                this.scanProgressClearTimer = undefined;
+                this.setState('scan.progress', { val: '', ack: true }).catch(() => {
+                    /* best-effort progress display */
+                });
+            }, 10_000);
+        };
+
+        setProgress(`Scanning ${payload.type}...`);
+
+        // Bound the scan with a timeout so a hung foreign adapter/API can never
+        // leave isScanning (and thus all future scans) stuck forever.
+        const SCAN_TIMEOUT_MS = 60_000;
+        let result: Awaited<ReturnType<typeof scanForValves>>;
+        try {
+            result = await Promise.race([
+                scanForValves(this, payload.type, effectiveInstance, payload.locationId, setProgress),
+                new Promise<never>((_resolve, reject) => {
+                    this.setTimeout(
+                        () => reject(new Error(`Valve scan timed out after ${SCAN_TIMEOUT_MS / 1000}s`)),
+                        SCAN_TIMEOUT_MS,
+                    );
+                }),
+            ]);
+        } catch (error) {
+            const message = (error as Error).message;
+            this.log.error(`Valve scan (${payload.type}) failed: ${message}`);
+            finishProgress(`Scan failed: ${message}`);
+            if (obj.callback) {
+                this.sendTo(
+                    obj.from,
+                    obj.command,
+                    { error: 'scanFailed', result: 'scanErrors', errors: [message] },
+                    obj.callback,
+                );
+            }
+            return;
+        }
+
+        const scannedValvesByStateId = new Map(result.valves.map(valve => [valve.stateId, valve]));
+        const existingStateIds = new Set(this.config2.valves.map(valve => valve.stateId));
+        const newValves = result.valves.filter(valve => !existingStateIds.has(valve.stateId));
+        let updatedNames = 0;
+        // Newly scanned valves get freshly assigned, never-reused stable ids from
+        // the nextValveId counter; existing valves keep their current id
+        // unchanged so their real object id/state history survives the merge -
+        // see the IValveConfig.id doc comment.
+        let nextId = this.config2.nextValveId;
+        const mergedValves = [...this.config2.valves, ...newValves.map(valve => ({ ...valve, id: nextId++ }))].map(
+            (valve, index) => {
+                const scannedValve = scannedValvesByStateId.get(valve.stateId);
+                const name = scannedValve?.name || valve.name;
+                if (index < this.config2.valves.length && name !== valve.name) {
+                    updatedNames++;
+                }
+                return {
+                    ...valve,
+                    name,
+                    valveNumber: `valve_${formatValveNumber(valve.id ?? index)}`,
+                };
+            },
+        );
+
+        this.log.info(
+            `Valve scan (${payload.type}): found ${result.valves.length}, added ${newValves.length} new, updated ${updatedNames} name(s), ${result.errors.length} error(s)`,
+        );
+
+        if (newValves.length > 0 || updatedNames > 0) {
+            await this.writeNativeAsync({
+                valves: this.formatValvesForNative(mergedValves) as unknown as IValveConfig[],
+                nextValveId: nextId,
+            });
+        }
+
+        const doneMessage =
+            result.errors.length > 0
+                ? `Scan finished with errors: ${result.errors.join('; ')}`
+                : newValves.length > 0
+                  ? `Found and added ${newValves.length} new valve(s).`
+                  : updatedNames > 0
+                    ? `Updated ${updatedNames} valve name(s).`
+                    : 'Scan finished, no new valves found.';
+        finishProgress(doneMessage);
+
+        if (obj.callback) {
+            this.sendTo(
+                obj.from,
+                obj.command,
+                {
+                    found: result.valves.length,
+                    new: newValves.length,
+                    errors: result.errors,
+                    // useNative (without saveConfig) merges the updated valves array into
+                    // the currently open settings dialog's form state and forces a
+                    // targeted re-render of the table, without triggering the "Save
+                    // configuration?" dialog (that is only triggered by saveConfig: true,
+                    // which we deliberately omit since persistence already happened above
+                    // via writeValvesToNative/setForeignObjectAsync).
+                    native: { valves: this.formatValvesForNative(mergedValves) },
+                    result: result.errors.length > 0 ? 'scanErrors' : 'scanDone',
+                    error: undefined,
+                    args: [String(newValves.length), String(result.valves.length)],
+                },
+                obj.callback,
+            );
+        }
+        return;
     }
 }
 

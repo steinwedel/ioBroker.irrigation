@@ -18,15 +18,22 @@ export class NotificationManager {
 
     public async send(title: string, message: string): Promise<void> {
         const config = this.deps.getConfig().notifications;
+        const sends: Promise<void>[] = [];
         if (config.pushoverInstance) {
-            await this.sendTo(config.pushoverInstance, { title, message });
+            sends.push(this.sendTo(config.pushoverInstance, { title, message }));
         }
         if (config.telegramInstance) {
-            await this.sendTo(config.telegramInstance, `${title}: ${message}`);
+            sends.push(this.sendTo(config.telegramInstance, `${title}: ${message}`));
         }
-        if (!config.pushoverInstance && !config.telegramInstance) {
+        if (sends.length === 0) {
             this.deps.adapter.log.debug(`Notification "${title}" not sent: no instance configured.`);
+            return;
         }
+        // Use allSettled (rather than Promise.all) so that a hanging/failing
+        // channel never prevents the other channel's send from completing -
+        // sendTo() already catches and logs its own errors, so there is
+        // nothing left to inspect on the settled results here.
+        await Promise.allSettled(sends);
     }
 
     private async sendTo(instance: string, message: unknown): Promise<void> {

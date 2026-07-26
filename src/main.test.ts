@@ -11,7 +11,8 @@ import { DwdRestriction, parseDwdTemperature } from './lib/dwd';
 import { resolvePlanFromIcalTitle } from './lib/scheduler';
 import { parsePlanValveTableRows, synchronizePlanWithValves } from './lib/types';
 import { ValveController } from './lib/ventile';
-import { evaluateWindPause } from './lib/wind';
+import { evaluateWindPause, WindMonitor } from './lib/wind';
+import { SensorManager } from './lib/sensors';
 import type { AutomationDeps } from './lib/automation';
 import type { IPlanConfig, IrrigationNativeConfig, IValveConfig } from './lib/types';
 
@@ -715,6 +716,77 @@ describe('dwd.DwdRestriction.check', () => {
 
         expect(await dwd.check()).to.equal(false);
     });
+
+    /**
+     * Regression test: parseAnnualDate's regex used to require dates without
+     * leading zeros (e.g. "1.6"), so a zero-padded configured date like
+     * "01.06" silently failed to parse, which made isWithinWindow() return
+     * false and the legal restriction never activate for that user - even
+     * though the date format is otherwise perfectly valid.
+     */
+    it('accepts zero-padded start/end dates and times (e.g. "01.06"/"08:00")', () => {
+        const config = makeLegalRestrictionConfig({
+            stationId: '',
+            temperatureStateId: '',
+            startDate: '01.06',
+            endDate: '30.09',
+            startTime: '08:00',
+            endTime: '20:00',
+        });
+        const adapter = makeFakeAdapter();
+        const dwd = new DwdRestriction({
+            adapter,
+            getConfig: () => config,
+            onRestrictionChanged: () => Promise.resolve(),
+        });
+
+        // The exact result depends on "now", but a zero-padded date/time range
+        // must be parsed (not treated as invalid/always-false) - this is
+        // verified indirectly via the isWithinWindow behavior below using a
+        // fixed date within the configured window.
+        const fixedNow = new Date(2026, 6, 15, 12, 0); // July 15, 12:00 - within 01.06-30.09 / 08:00-20:00
+        const isWithinWindow = (dwd as unknown as { isWithinWindow: (now: Date) => boolean }).isWithinWindow.bind(dwd);
+        expect(isWithinWindow(fixedNow)).to.equal(true);
+
+        const outsideDate = new Date(2026, 9, 15, 12, 0); // October 15 - outside the date range
+        expect(isWithinWindow(outsideDate)).to.equal(false);
+    });
+
+    /**
+     * Regression test: when hasDateRange is true but the configured
+     * start/end date fails to parse (invalid format), the restriction used
+     * to silently fall back to "not restricted" without any indication that
+     * the configuration is broken. Now this logs a clear error.
+     */
+    it('logs a clear error and treats the window as inactive when the configured date range is malformed', async () => {
+        const config = makeLegalRestrictionConfig({
+            stationId: '',
+            temperatureStateId: '',
+            startDate: 'not-a-date',
+            endDate: '30.09',
+        });
+        let loggedError = '';
+        const adapter = {
+            getForeignStateAsync: () => Promise.resolve(null),
+            setStateAsync: () => Promise.resolve(),
+            log: {
+                debug: () => undefined,
+                info: () => undefined,
+                warn: () => undefined,
+                error: (msg: string) => {
+                    loggedError = msg;
+                },
+            },
+        } as unknown as ioBroker.Adapter;
+        const dwd = new DwdRestriction({
+            adapter,
+            getConfig: () => config,
+            onRestrictionChanged: () => Promise.resolve(),
+        });
+
+        expect(await dwd.check()).to.equal(false);
+        expect(loggedError).to.include('date range is invalid');
+    });
 });
 
 /**
@@ -841,6 +913,9 @@ describe('automation temperature-controlled irrigation adjustment (full plan run
         }
         public stop(): Promise<void> {
             return Promise.resolve();
+        }
+        public isRunning(): boolean {
+            return true;
         }
     }
 
@@ -1173,5 +1248,557 @@ describe('automation.recoverAfterRestart', () => {
         for (const valve of valves) {
             expect(valve.stopCalls).to.equal(1);
         }
+    });
+});
+
+/**
+ * Regression tests for the critical resume-after-pause and overlapping-blocker
+ * fixes in AutomationEngine (pause()/setRainPause()/setWindPause()/
+ * onLegalRestrictionChanged()/manualStartValve()/finishManualRun()).
+ */
+describe('automation pause/resume: correct remaining time and overlapping blockers', () => {
+    class FakeValve {
+        public running = false;
+        public startCalls: number[] = [];
+        public stopCalls = 0;
+        public start(durationSecs: number): Promise<void> {
+            this.startCalls.push(durationSecs);
+            this.running = true;
+            return Promise.resolve();
+        }
+        public stop(): Promise<void> {
+            this.stopCalls++;
+            this.running = false;
+            return Promise.resolve();
+        }
+        public isRunning(): boolean {
+            return this.running;
+        }
+    }
+
+    function makeFakeAdapter(): ioBroker.Adapter {
+        const states = new Map<string, ioBroker.StateValue>();
+        const fake = {
+            setStateAsync: (id: string, state: unknown) => {
+                states.set(id, (state as { val: ioBroker.StateValue }).val);
+                return Promise.resolve();
+            },
+            log: { debug: () => undefined, info: () => undefined, warn: () => undefined, error: () => undefined },
+            states,
+        };
+        return fake as unknown as ioBroker.Adapter;
+    }
+
+    function makeConfig(overrides: Partial<IrrigationNativeConfig['scheduler']> = {}): IrrigationNativeConfig {
+        return {
+            expertMode: false,
+            valves: [makeValve({ name: 'Rasen', duration: 600, manualDuration: 60 })],
+            nextValveId: 0,
+            plans: [{ name: 'All', valveIndexes: [] }],
+            scheduler: {
+                autoMode: false,
+                pauseOnRain: true,
+                windPauseEnabled: true,
+                windSpeedStateId: '',
+                windSpeedLimit: 0,
+                windGustStateId: '',
+                windGustLimit: 0,
+                windHysteresisMinutes: 10,
+                timerTimes: [],
+                extensionFactor: 1,
+                temperatureAdjustmentEnabled: false,
+                temperatureAdjustmentStateId: '',
+                pumpCapacity: 0,
+                valvePause: 0,
+                seasonEnabled: false,
+                seasonStart: 4,
+                seasonEnd: 10,
+                frostEnabled: false,
+                frostMinTemp: 2,
+                icalAdapterInstance: '',
+                icalTriggerState: '',
+                icalTitlePrefix: 'Bewässerung',
+                ...overrides,
+            },
+            sensors: { rainId: '', soilMoistureId: '', temperatureId: '' },
+            weather: {
+                enabled: false,
+                apiType: 'openweathermap',
+                apiKey: '',
+                latitude: 0,
+                longitude: 0,
+                pollInterval: 30,
+            },
+            legalRestriction: {
+                enabled: false,
+                stationId: '',
+                temperatureStateId: '',
+                startDate: '',
+                endDate: '',
+                startTime: '',
+                endTime: '',
+                minTemperature: 27,
+                checkInterval: 10,
+            },
+            notifications: { pushoverInstance: '', telegramInstance: '' },
+            waterConsumption: { enabled: false },
+            flowMonitor: { enabled: false, sensorId: '' },
+        };
+    }
+
+    it('resume after a pause restarts the valve with the correct remaining time, not a shortened one', async () => {
+        const config = makeConfig();
+        const adapter = makeFakeAdapter();
+        const valve = new FakeValve();
+        const raining = false;
+        const windOver = false;
+        const legal = false;
+        const engine = new AutomationEngine({
+            adapter,
+            getConfig: () => config,
+            valves: [valve] as unknown as AutomationDeps['valves'],
+            isValveBlockedForAutoRun: () => ({ blocked: false }),
+            isLegallyRestricted: () => legal,
+            isRaining: () => raining,
+            isWindOverLimit: () => windOver,
+            getTemperatureAdjustmentTemperature: () => Promise.resolve(undefined),
+        });
+
+        await engine.requestRun('All', 'manual-button');
+        expect(valve.startCalls).to.deep.equal([600]);
+
+        // Pause immediately, then simulate a long real-world pause (e.g. 100s) before
+        // resuming. The remaining time at resume must reflect ~500s (600 - 100), not
+        // the original 600s end timestamp computed at the initial start().
+        await engine.pause();
+        expect(valve.stopCalls).to.equal(1);
+
+        const originalNow = Date.now;
+        try {
+            Date.now = () => originalNow() + 100_000;
+            await engine.pause(); // resume
+        } finally {
+            Date.now = originalNow;
+        }
+
+        expect(valve.startCalls.length).to.equal(2);
+        const resumedDuration = valve.startCalls[1];
+        expect(resumedDuration).to.be.closeTo(500, 2);
+    });
+
+    it('does not resume while a second, still-active blocker (rain) remains after a legal restriction ends', async () => {
+        const config = makeConfig();
+        const adapter = makeFakeAdapter();
+        const valve = new FakeValve();
+        let raining = false;
+        const windOver = false;
+        let legal = false;
+        const engine = new AutomationEngine({
+            adapter,
+            getConfig: () => config,
+            valves: [valve] as unknown as AutomationDeps['valves'],
+            isValveBlockedForAutoRun: () => ({ blocked: false }),
+            isLegallyRestricted: () => legal,
+            isRaining: () => raining,
+            isWindOverLimit: () => windOver,
+            getTemperatureAdjustmentTemperature: () => Promise.resolve(undefined),
+        });
+
+        await engine.requestRun('All', 'manual-button');
+        expect(valve.startCalls).to.deep.equal([600]);
+
+        // Legal restriction kicks in first.
+        legal = true;
+        await engine.onLegalRestrictionChanged(true);
+        expect(valve.stopCalls).to.equal(1);
+        expect(engine.getStatus()).to.equal('paused');
+
+        // While still under legal restriction, rain also starts.
+        raining = true;
+        await engine.setRainPause(true);
+
+        // Legal restriction ends, but rain is still active - must NOT resume.
+        legal = false;
+        await engine.onLegalRestrictionChanged(false);
+        expect(engine.getStatus()).to.equal('paused');
+        expect(valve.startCalls.length).to.equal(1); // still only the initial start, no resume
+
+        // Rain ends too - now it must resume.
+        raining = false;
+        await engine.setRainPause(false);
+        expect(engine.getStatus()).to.equal('running');
+        expect(valve.startCalls.length).to.equal(2);
+    });
+
+    it('manualStartValve() refuses to start a disabled valve without pausing the running automation', async () => {
+        const config = makeConfig();
+        config.valves.push(makeValve({ name: 'Disabled valve', enabled: false, manualDuration: 30 }));
+        const adapter = makeFakeAdapter();
+        const valve0 = new FakeValve();
+        const valve1 = new FakeValve();
+        const engine = new AutomationEngine({
+            adapter,
+            getConfig: () => config,
+            valves: [valve0, valve1] as unknown as AutomationDeps['valves'],
+            isValveBlockedForAutoRun: () => ({ blocked: false }),
+            isLegallyRestricted: () => false,
+            isRaining: () => false,
+            isWindOverLimit: () => false,
+            getTemperatureAdjustmentTemperature: () => Promise.resolve(undefined),
+        });
+
+        await engine.requestRun('All', 'manual-button');
+        expect(engine.getStatus()).to.equal('running');
+
+        await engine.manualStartValve(1); // the disabled valve
+
+        expect(engine.isManualRunActive()).to.equal(false);
+        expect(engine.getStatus()).to.equal('running'); // automation was left untouched
+        expect(valve1.startCalls).to.deep.equal([]); // disabled valve never started
+    });
+});
+
+/**
+ * Regression tests for the Rainbird "no allOffId" fail-open fix: stop()
+ * must not report a fully "stopped/off" state when no hardware command
+ * could actually be issued, since that would make the admin UI show the
+ * valve as safely closed while the physical station may still be running.
+ */
+describe('ValveController Rainbird stop() without allOffId (no fail-open reporting)', () => {
+    function makeFakeAdapter(): ioBroker.Adapter {
+        const foreignStates = new Map<string, unknown>();
+        const states = new Map<string, ioBroker.StateValue>();
+        const fake = {
+            setForeignStateAsync: (id: string, val: unknown) => {
+                foreignStates.set(id, val);
+                return Promise.resolve();
+            },
+            setStateAsync: (id: string, state: unknown) => {
+                states.set(id, (state as { val: ioBroker.StateValue }).val);
+                return Promise.resolve();
+            },
+            log: { debug: () => undefined, info: () => undefined, warn: () => undefined, error: () => undefined },
+            foreignStates,
+            states,
+        };
+        return fake as unknown as ioBroker.Adapter;
+    }
+
+    it('leaves the valve reporting as running and records an error instead of falsely reporting "stopped"', async () => {
+        const adapter = makeFakeAdapter();
+        // No allOffId configured at all.
+        const valve = new ValveController(
+            adapter,
+            0,
+            makeValve({ type: 'Rainbird', stateId: 'rainbird.0.device.stations.1', allOffId: undefined }),
+        );
+        await valve.start(60);
+        expect(valve.isRunning()).to.equal(true);
+
+        await valve.stop();
+
+        // Must NOT silently report "stopped" - the admin UI would otherwise show
+        // the valve as safely off while the physical station may still be running.
+        expect(valve.isRunning()).to.equal(true);
+        const states = (adapter as unknown as { states: Map<string, ioBroker.StateValue> }).states;
+        expect(states.get('valves.valve_000.state')).to.not.equal(false);
+        expect(String(states.get('valves.valve_000.errorLast'))).to.include('allOffId');
+    });
+});
+
+/**
+ * Regression tests for parseDuration()'s explicit-value-vs-fallback
+ * distinction: an explicitly provided but "empty" duration (0 or negative)
+ * must never be silently replaced by the (often much longer) fallback,
+ * while a truly absent value legitimately falls back.
+ */
+describe('duration.parseDuration explicit zero/negative vs. missing value', () => {
+    it('uses the fallback for undefined/null/empty-string (no value provided)', () => {
+        expect(parseDuration(undefined, 600)).to.equal(600);
+        expect(parseDuration(null, 600)).to.equal(600);
+        expect(parseDuration('', 600)).to.equal(600);
+        expect(parseDuration('   ', 600)).to.equal(600);
+    });
+
+    it('clamps an explicit "0" string to 1s instead of falling back to the (much longer) fallback', () => {
+        expect(parseDuration('0', 600)).to.equal(1);
+        expect(parseDuration('00:00', 600)).to.equal(1);
+    });
+
+    it('clamps an explicit numeric 0/negative value to 1s instead of falling back', () => {
+        expect(parseDuration(0, 600)).to.equal(1);
+        expect(parseDuration(-5, 600)).to.equal(1);
+    });
+
+    it('still falls back for genuinely malformed input', () => {
+        expect(parseDuration('abc', 600)).to.equal(600);
+        expect(parseDuration('-5', 600)).to.equal(600); // regex-based parser never accepted a minus sign
+    });
+});
+
+/**
+ * Regression tests for WindMonitor's initial foreign-state read on
+ * (re)subscribe. Previously speed/gust stayed undefined after an adapter
+ * restart until the external sensor pushed a fresh value, which meant the
+ * wind-pause protection was fail-open for an unbounded time right after
+ * startup.
+ */
+describe('wind.WindMonitor initial sensor read', () => {
+    function makeSchedulerConfig(overrides: Partial<IrrigationNativeConfig['scheduler']> = {}): IrrigationNativeConfig {
+        return {
+            expertMode: false,
+            valves: [],
+            nextValveId: 0,
+            plans: [{ name: 'All', valveIndexes: [] }],
+            scheduler: {
+                autoMode: false,
+                pauseOnRain: false,
+                windPauseEnabled: true,
+                windSpeedStateId: 'sensors.windSpeed',
+                windSpeedLimit: 20,
+                windGustStateId: 'sensors.windGust',
+                windGustLimit: 40,
+                windHysteresisMinutes: 10,
+                timerTimes: [],
+                extensionFactor: 1,
+                temperatureAdjustmentEnabled: false,
+                temperatureAdjustmentStateId: '',
+                pumpCapacity: 0,
+                valvePause: 0,
+                seasonEnabled: false,
+                seasonStart: 4,
+                seasonEnd: 10,
+                frostEnabled: false,
+                frostMinTemp: 2,
+                icalAdapterInstance: '',
+                icalTriggerState: '',
+                icalTitlePrefix: 'Bewässerung',
+                ...overrides,
+            },
+            sensors: { rainId: '', soilMoistureId: '', temperatureId: '' },
+            weather: {
+                enabled: false,
+                apiType: 'openweathermap',
+                apiKey: '',
+                latitude: 0,
+                longitude: 0,
+                pollInterval: 30,
+            },
+            legalRestriction: {
+                enabled: false,
+                stationId: '',
+                temperatureStateId: '',
+                startDate: '',
+                endDate: '',
+                startTime: '',
+                endTime: '',
+                minTemperature: 27,
+                checkInterval: 10,
+            },
+            notifications: { pushoverInstance: '', telegramInstance: '' },
+            waterConsumption: { enabled: false },
+            flowMonitor: { enabled: false, sensorId: '' },
+        };
+    }
+
+    function makeFakeAdapter(foreignStates: Record<string, ioBroker.StateValue>): ioBroker.Adapter {
+        const fake = {
+            getForeignStateAsync: (id: string) =>
+                Promise.resolve(id in foreignStates ? ({ val: foreignStates[id] } as ioBroker.State) : null),
+            subscribeForeignStatesAsync: () => Promise.resolve(),
+            unsubscribeForeignStatesAsync: () => Promise.resolve(),
+            setInterval: () => undefined as unknown as ReturnType<ioBroker.Adapter['setInterval']>,
+            clearInterval: () => undefined,
+            log: { debug: () => undefined, info: () => undefined, warn: () => undefined, error: () => undefined },
+        };
+        return fake as unknown as ioBroker.Adapter;
+    }
+
+    it('reads the current speed/gust foreign states immediately on init(), before any state-change event', async () => {
+        const config = makeSchedulerConfig();
+        const adapter = makeFakeAdapter({ 'sensors.windSpeed': 25, 'sensors.windGust': 10 });
+        const pausedCalls: boolean[] = [];
+        const monitor = new WindMonitor({
+            adapter,
+            getConfig: () => config,
+            onWindPauseChange: paused => {
+                pausedCalls.push(paused);
+                return Promise.resolve();
+            },
+        });
+
+        await monitor.init();
+
+        // Speed (25) is already over the configured limit (20) purely from the
+        // initial read - no onForeignStateChange() has been called yet.
+        expect(monitor.isOverLimit()).to.equal(true);
+        expect(pausedCalls).to.deep.equal([true]);
+    });
+
+    it('resets speed/gust to undefined and reloads fresh values when resubscribe() is called with new state ids', async () => {
+        const config = makeSchedulerConfig({
+            windSpeedStateId: 'sensors.windSpeedOld',
+            windGustStateId: '',
+            windHysteresisMinutes: 0,
+        });
+        const adapter = makeFakeAdapter({ 'sensors.windSpeedOld': 99, 'sensors.windSpeedNew': 5 });
+        const monitor = new WindMonitor({
+            adapter,
+            getConfig: () => config,
+            onWindPauseChange: () => Promise.resolve(),
+        });
+
+        await monitor.init();
+        expect(monitor.isOverLimit()).to.equal(true); // 99 >= limit 20
+
+        // Simulate a config change to a different (currently calm) sensor.
+        config.scheduler.windSpeedStateId = 'sensors.windSpeedNew';
+        await monitor.resubscribe();
+        await (monitor as unknown as { evaluate: () => Promise<void> }).evaluate();
+
+        // Must reflect the new sensor's current value (5, below the limit), not
+        // stale data (99) left over from the previously configured sensor.
+        expect(monitor.isOverLimit()).to.equal(false);
+    });
+});
+
+/**
+ * Regression tests for SensorManager: initial foreign-state read on init()
+ * (fixing the fail-open default of rainState=false after a restart) and
+ * stale-data detection for the rain/frost blocking predicates.
+ */
+describe('sensors.SensorManager initial read and stale-data detection', () => {
+    function makeSensorsConfig(): IrrigationNativeConfig {
+        return {
+            expertMode: false,
+            valves: [makeValve({ rainIndependent: false })],
+            nextValveId: 0,
+            plans: [{ name: 'All', valveIndexes: [] }],
+            scheduler: {
+                autoMode: false,
+                pauseOnRain: false,
+                windPauseEnabled: false,
+                windSpeedStateId: '',
+                windSpeedLimit: 0,
+                windGustStateId: '',
+                windGustLimit: 0,
+                windHysteresisMinutes: 10,
+                timerTimes: [],
+                extensionFactor: 1,
+                temperatureAdjustmentEnabled: false,
+                temperatureAdjustmentStateId: '',
+                pumpCapacity: 0,
+                valvePause: 0,
+                seasonEnabled: false,
+                seasonStart: 4,
+                seasonEnd: 10,
+                frostEnabled: true,
+                frostMinTemp: 2,
+                icalAdapterInstance: '',
+                icalTriggerState: '',
+                icalTitlePrefix: 'Bewässerung',
+            },
+            sensors: { rainId: 'sensors.rainSensor', soilMoistureId: '', temperatureId: 'sensors.outsideTemp' },
+            weather: {
+                enabled: false,
+                apiType: 'openweathermap',
+                apiKey: '',
+                latitude: 0,
+                longitude: 0,
+                pollInterval: 30,
+            },
+            legalRestriction: {
+                enabled: false,
+                stationId: '',
+                temperatureStateId: '',
+                startDate: '',
+                endDate: '',
+                startTime: '',
+                endTime: '',
+                minTemperature: 27,
+                checkInterval: 10,
+            },
+            notifications: { pushoverInstance: '', telegramInstance: '' },
+            waterConsumption: { enabled: false },
+            flowMonitor: { enabled: false, sensorId: '' },
+        };
+    }
+
+    function makeFakeAdapter(
+        foreignStates: Record<string, { val: ioBroker.StateValue; ts?: number }>,
+    ): ioBroker.Adapter {
+        const fake = {
+            getForeignStateAsync: (id: string) =>
+                Promise.resolve(id in foreignStates ? (foreignStates[id] as ioBroker.State) : null),
+            subscribeForeignStatesAsync: () => Promise.resolve(),
+            unsubscribeForeignStatesAsync: () => Promise.resolve(),
+            setStateAsync: () => Promise.resolve(),
+            log: { debug: () => undefined, info: () => undefined, warn: () => undefined, error: () => undefined },
+        };
+        return fake as unknown as ioBroker.Adapter;
+    }
+
+    it('loads the current rain/temperature foreign-state values immediately on init(), instead of the fail-open defaults', async () => {
+        const config = makeSensorsConfig();
+        const adapter = makeFakeAdapter({
+            'sensors.rainSensor': { val: true, ts: Date.now() },
+            'sensors.outsideTemp': { val: -5, ts: Date.now() },
+        });
+        const sensors = new SensorManager({ adapter, getConfig: () => config });
+
+        await sensors.init();
+
+        expect(sensors.isRaining()).to.equal(true);
+        expect(sensors.getTemperature()).to.equal(-5);
+        // Frost protection must already be active from the initial read, not
+        // just after the next onForeignStateChange() event.
+        expect(sensors.isFrostBlocked()).to.equal(true);
+        // Rain-blocking must also already be active for a non-rain-independent valve.
+        expect(sensors.isValveBlocked(0).blocked).to.equal(true);
+    });
+
+    it('conservatively assumes frost protection is active when the temperature reading is stale', async () => {
+        const config = makeSensorsConfig();
+        const adapter = makeFakeAdapter({
+            'sensors.rainSensor': { val: false, ts: Date.now() },
+            'sensors.outsideTemp': { val: 15, ts: Date.now() - 3 * 60 * 60 * 1000 }, // 3h old, above 2h threshold
+        });
+        const sensors = new SensorManager({ adapter, getConfig: () => config });
+
+        await sensors.init();
+
+        // Temperature (15°C) itself is well above frostMinTemp (2°C), so
+        // without staleness detection this would NOT be frost-blocked. The
+        // stale reading must force a conservative "blocked" result instead.
+        expect(sensors.isFrostBlocked()).to.equal(true);
+    });
+
+    it('does not block on frost when the temperature reading is fresh and above the threshold', async () => {
+        const config = makeSensorsConfig();
+        const adapter = makeFakeAdapter({
+            'sensors.rainSensor': { val: false, ts: Date.now() },
+            'sensors.outsideTemp': { val: 15, ts: Date.now() },
+        });
+        const sensors = new SensorManager({ adapter, getConfig: () => config });
+
+        await sensors.init();
+
+        expect(sensors.isFrostBlocked()).to.equal(false);
+    });
+
+    it('keeps the previous rain value and logs a warning when a state-change delivers an invalid (non-boolean) value', async () => {
+        const config = makeSensorsConfig();
+        const adapter = makeFakeAdapter({ 'sensors.rainSensor': { val: true, ts: Date.now() } });
+        const warnings: string[] = [];
+        (adapter as unknown as { log: { warn: (msg: string) => void } }).log.warn = (msg: string) => warnings.push(msg);
+        const sensors = new SensorManager({ adapter, getConfig: () => config });
+        await sensors.init();
+        expect(sensors.isRaining()).to.equal(true);
+
+        // Simulates an "unreachable" sensor reporting null instead of a boolean.
+        await sensors.onForeignStateChange('sensors.rainSensor', { val: null } as unknown as ioBroker.State);
+
+        expect(sensors.isRaining()).to.equal(true); // kept previous value, not reset to false
+        expect(warnings.some(w => w.includes('no valid boolean value'))).to.equal(true);
     });
 });

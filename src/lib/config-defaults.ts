@@ -100,13 +100,13 @@ export function normalizeConfig(config: Partial<IrrigationNativeConfig>): Irriga
 
     return {
         expertMode: config.expertMode ?? DEFAULT_CONFIG.expertMode,
-        valves: (config.valves ?? []).map((valve, index) => {
+        valves: (Array.isArray(config.valves) ? config.valves : []).map((valve, index) => {
             const legacyRunFor = (valve as Partial<IrrigationNativeConfig['valves'][number]> & { runFor?: number })
                 .runFor;
             const duration =
                 typeof valve.duration === 'number'
                     ? Math.max(1, Math.round(valve.duration * 60))
-                    : parseDuration(valve.duration ?? (legacyRunFor !== undefined ? legacyRunFor : '10'));
+                    : Math.max(1, parseDuration(valve.duration ?? (legacyRunFor !== undefined ? legacyRunFor : '10')));
             return {
                 // Falls back to the current array index only for pre-existing entries
                 // that predate this field, so their real ioBroker object id (which is
@@ -127,7 +127,7 @@ export function normalizeConfig(config: Partial<IrrigationNativeConfig>): Irriga
                         ? Math.max(1, Math.round(valve.manualDuration * 60))
                         : valve.manualDuration === undefined
                           ? duration
-                          : parseDuration(valve.manualDuration),
+                          : Math.max(1, parseDuration(valve.manualDuration)),
                 days: valve.days ?? [],
             };
         }),

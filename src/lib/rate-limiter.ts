@@ -113,6 +113,12 @@ export class RateLimiter {
     }
 
     private sleep(ms: number): Promise<void> {
+        // RateLimiter is a plain class with no adapter instance of its own (see
+        // main.ts), so it cannot use adapter.setTimeout/clearTimeout directly.
+        // The native setTimeout() is therefore tracked in `activeTimers` and
+        // unconditionally cleared+settled by destroy() (the only place that
+        // creates timers here), which gives the same "no dangling timer"
+        // guarantee the adapter-owned timer helpers provide elsewhere.
         return new Promise(resolve => {
             const timer = setTimeout(() => {
                 this.activeTimers.delete(timer);
