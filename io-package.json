@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.3.20",
+    "version": "0.3.21",
     "news": {
+      "0.3.21": {
+        "en": "**FIXED**: Enable the Gardena/Rainbird all-off command state only for matching valve types",
+        "de": "**BEHOBEN**: Der Gardena/Rainbird Alle-Aus-Befehlsstatus wird nur für passende Ventiltypen aktiviert",
+        "ru": "**ИСПРАВЛЕНО**: Состояние команды полного отключения Gardena/Rainbird включается только для соответствующих типов клапанов",
+        "pt": "**CORRIGIDO**: Ativar o estado de comando desligar-tudo Gardena/Rainbird apenas para tipos de válvula correspondentes",
+        "nl": "**OPGELOST**: De Gardena/Rainbird alles-uit-commando status alleen inschakelen voor overeenkomende kleptype",
+        "fr": "**CORRIGÉ** : Activer l'état de commande tout éteindre Gardena/Rainbird uniquement pour les types de vannes correspondants",
+        "it": "**RISOLTO**: Abilitare lo stato del comando spegni-tutto Gardena/Rainbird solo per i tipi di valvola corrispondenti",
+        "es": "**CORREGIDO**: Habilitar el estado de comando apagar-todo de Gardena/Rainbird solo para tipos de válvula coincidentes",
+        "pl": "**NAPRAWIONO**: Włączanie stanu polecenia wyłącz-wszystko Gardena/Rainbird tylko dla pasujących typów zaworów",
+        "uk": "**ВИПРАВЛЕНО**: Увімкнення стану команди вимкнути-все Gardena/Rainbird лише для відповідних типів клапанів",
+        "zh-cn": "**已修复**：仅为匹配的阀门类型启用 Gardena/Rainbird 全部关闭命令状态"
+      },
       "0.3.20": {
         "en": "**FIXED**: Removed the destructive delete-all-valves action from the valve configuration page",
         "de": "**BEHOBEN**: Die destruktive Aktion zum Löschen aller Ventile wurde von der Ventilkonfigurationsseite entfernt",
@@ -80,19 +93,6 @@
         "pl": "**NAPRAWIONO**: Uruchomienie zaworu przez jego `state` adaptera powoduje teraz jego działanie przez skonfigurowany czas ręczny, a zatrzymanie tego stanu czysto kończy ręczne uruchomienie",
         "uk": "**ВИПРАВЛЕНО**: Запуск клапана через його адаптер `state` тепер виконується протягом налаштованої ручної тривалості, а зупинка цього стану коректно завершує ручний запуск",
         "zh-cn": "**已修复**：通过适配器 `state` 启动阀门现在会按配置的手动持续时间运行，停止该状态会干净地结束手动运行"
-      },
-      "0.3.14": {
-        "en": "**ENHANCED**: Added a dedicated valve detail editor that keeps the main valve table compact while allowing all valve settings to be edited before saving the adapter configuration",
-        "de": "**VERBESSERT**: Ein dedizierter Ventildetail-Editor wurde hinzugefügt, der die Hauptventiltabelle kompakt hält und gleichzeitig ermöglicht, alle Ventileinstellungen zu bearbeiten, bevor die Adapterkonfiguration gespeichert wird",
-        "ru": "**УЛУЧШЕНО**: Добавлен специальный редактор деталей клапана, который сохраняет основную таблицу клапанов компактной и позволяет редактировать все настройки клапана перед сохранением конфигурации адаптера",
-        "pt": "**MELHORADO**: Adicionado um editor dedicado de detalhes de válvula que mantém a tabela principal de válvulas compacta, permitindo que todas as configurações de válvula sejam editadas antes de salvar a configuração do adaptador",
-        "nl": "**VERBETERD**: Een speciale ventieldetaileditor toegevoegd die de hoofdventieltabel compact houdt en tegelijkertijd alle ventielinstellingen laat bewerken voordat de adapterconfiguratie wordt opgeslagen",
-        "fr": "**AMÉLIORÉ**: Ajout d'un éditeur dédié aux détails des vannes qui maintient le tableau principal des vannes compact tout en permettant de modifier tous les paramètres des vannes avant d'enregistrer la configuration de l'adaptateur",
-        "it": "**MIGLIORATO**: Aggiunto un editor dedicato ai dettagli delle valvole che mantiene compatta la tabella principale delle valvole consentendo di modificare tutte le impostazioni delle valvole prima di salvare la configurazione dell'adattatore",
-        "es": "**MEJORADO**: Se agregó un editor dedicado de detalles de válvula que mantiene compacta la tabla principal de válvulas mientras permite editar todas las configuraciones de válvula antes de guardar la configuración del adaptador",
-        "pl": "**ULEPSZONE**: Dodano dedykowany edytor szczegółów zaworu, który utrzymuje główną tabelę zaworów w zwartej formie, jednocześnie umożliwiając edycję wszystkich ustawień zaworu przed zapisaniem konfiguracji adaptera",
-        "uk": "**ПОКРАЩЕНО**: Додано спеціальний редактор деталей клапана, який зберігає основну таблицю клапанів компактною та дозволяє редагувати всі налаштування клапана перед збереженням конфігурації адаптера",
-        "zh-cn": "**增强**：添加了专用的阀门详细信息编辑器，使主阀门表保持紧凑，同时允许在保存适配器配置之前编辑所有阀门设置"
       }
     },
     "titleLang": {

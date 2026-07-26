@@ -1,10 +1,11 @@
 # Context
 
 ## Current Task
-Destruktive Funktion „Alle Ventile löschen“ aus der Konfiguration entfernen.
+All-off-Befehlsstate auf Gardena- und Rainbird-Ventile beschränken.
 
 ## Key Decisions
-- Der UI-Button und sein zugehöriger `deleteAllValves`-Message-Handler wurden entfernt.
+- Das Feld ist nur bei ausgewähltem Ventiltyp Gardena oder Rainbird editierbar.
+- Bestehende Werte bleiben für andere Typen erhalten, können aber nicht bearbeitet werden.
 
 ## Next Steps
 - Keine offenen Schritte.

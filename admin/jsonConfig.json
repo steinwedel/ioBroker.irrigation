@@ -417,8 +417,9 @@
                     "type": "objectId",
                     "label": "All-off command state (Gardena/Rainbird)",
                     "doNotSave": true,
+                    "alsoDependsOn": ["_valveEditorType"],
                     "hidden": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
-                    "disabled": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
+                    "disabled": "data._editValveId === undefined || data._editValveId === null || data._editValveId === '' || (data._valveEditorType !== 'Gardena' && data._valveEditorType !== 'Rainbird')",
                     "sm": 12,
                     "md": 8,
                     "lg": 6

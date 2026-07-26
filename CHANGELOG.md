@@ -1,4 +1,7 @@
 # Changelog
+## 0.3.21 (2026-07-26)
+* (Gerhard Steinwedel) **FIXED**: Enable the Gardena/Rainbird all-off command state only for matching valve types
+
 ## 0.3.20 (2026-07-26)
 * (Gerhard Steinwedel) **FIXED**: Removed the destructive delete-all-valves action from the valve configuration page
 
