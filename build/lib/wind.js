@@ -66,12 +66,22 @@ class WindMonitor {
       await this.deps.adapter.unsubscribeForeignStatesAsync(id);
     }
     this.subscribedIds = [];
+    this.speed = void 0;
+    this.gust = void 0;
     const config = this.deps.getConfig().scheduler;
     for (const id of /* @__PURE__ */ new Set([config.windSpeedStateId, config.windGustStateId])) {
       if (id) {
         await this.deps.adapter.subscribeForeignStatesAsync(id);
         this.subscribedIds.push(id);
       }
+    }
+    if (config.windSpeedStateId) {
+      const state = await this.deps.adapter.getForeignStateAsync(config.windSpeedStateId);
+      this.speed = typeof (state == null ? void 0 : state.val) === "number" && Number.isFinite(state.val) ? state.val : void 0;
+    }
+    if (config.windGustStateId) {
+      const state = await this.deps.adapter.getForeignStateAsync(config.windGustStateId);
+      this.gust = typeof (state == null ? void 0 : state.val) === "number" && Number.isFinite(state.val) ? state.val : void 0;
     }
   }
   async onForeignStateChange(id, state) {
@@ -98,7 +108,7 @@ class WindMonitor {
       gustLimit: config.windGustLimit,
       belowSinceMs: this.belowSinceMs,
       nowMs: Date.now(),
-      hysteresisMs: Math.max(0, config.windHysteresisMinutes) * 6e4
+      hysteresisMs: Math.max(0, Number.isFinite(config.windHysteresisMinutes) ? config.windHysteresisMinutes : 10) * 6e4
     });
     this.belowSinceMs = result.belowSinceMs;
     if (result.paused !== this.paused) {

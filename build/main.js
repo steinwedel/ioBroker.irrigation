@@ -47,6 +47,31 @@ function readPlanName(message) {
   const value = message == null ? void 0 : message.planName;
   return typeof value === "string" ? value.trim() : void 0;
 }
+function deepEqual(a, b) {
+  if (a === b) {
+    return true;
+  }
+  if (typeof a !== typeof b) {
+    return false;
+  }
+  if (Array.isArray(a) || Array.isArray(b)) {
+    if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) {
+      return false;
+    }
+    return a.every((item, index) => deepEqual(item, b[index]));
+  }
+  if (a !== null && b !== null && typeof a === "object" && typeof b === "object") {
+    const aObj = a;
+    const bObj = b;
+    const aKeys = Object.keys(aObj).filter((key) => aObj[key] !== void 0);
+    const bKeys = Object.keys(bObj).filter((key) => bObj[key] !== void 0);
+    if (aKeys.length !== bKeys.length) {
+      return false;
+    }
+    return aKeys.every((key) => Object.prototype.hasOwnProperty.call(bObj, key) && deepEqual(aObj[key], bObj[key]));
+  }
+  return typeof a === "number" && typeof b === "number" && Number.isNaN(a) && Number.isNaN(b);
+}
 class Irrigation extends utils.Adapter {
   config2;
   valves = [];
@@ -62,6 +87,7 @@ class Irrigation extends utils.Adapter {
   rateLimiter;
   rateLimiterPoll;
   scanProgressClearTimer;
+  isScanning = false;
   constructor(options = {}) {
     super({
       ...options,
@@ -216,7 +242,7 @@ class Irrigation extends utils.Adapter {
       const synchronizedPlans = this.synchronizePlansWithValves(storedPlans);
       this.log.debug(`Loaded ${synchronizedPlans.length} plan(s) from automation.plansData.`);
       const hasLegacyFields = this.plansStateHasLegacyFields(plansState == null ? void 0 : plansState.val);
-      if (hasLegacyFields || JSON.stringify(synchronizedPlans) !== JSON.stringify(storedPlans)) {
+      if (hasLegacyFields || !deepEqual(synchronizedPlans, storedPlans)) {
         if (hasLegacyFields) {
           this.log.info("Removing legacy fields (e.g. valveOrder) from automation.plansData.");
         }
@@ -523,8 +549,23 @@ class Irrigation extends utils.Adapter {
       return void 0;
     }
   }
-  onUnload(callback) {
-    var _a, _b, _c, _d, _e, _f, _g, _h;
+  /**
+   * Runs a single cleanup step, logging (but never throwing) any error so
+   * that one module's failed destroy() can never prevent the cleanup of
+   * all subsequent modules. Awaits the result in case destroy() ever
+   * starts returning a Promise.
+   *
+   * @param label Name of the module being destroyed, used in the log message.
+   * @param destroyFn The cleanup callback to run.
+   */
+  async safeDestroy(label, destroyFn) {
+    try {
+      await destroyFn();
+    } catch (error) {
+      this.log.error(`Error destroying ${label} during unload: ${error.message}`);
+    }
+  }
+  async onUnload(callback) {
     try {
       if (this.rateLimiterPoll) {
         this.clearInterval(this.rateLimiterPoll);
@@ -534,33 +575,72 @@ class Irrigation extends utils.Adapter {
         this.clearTimeout(this.scanProgressClearTimer);
         this.scanProgressClearTimer = void 0;
       }
-      (_a = this.rateLimiter) == null ? void 0 : _a.destroy();
-      (_b = this.automation) == null ? void 0 : _b.destroy();
-      (_c = this.scheduler) == null ? void 0 : _c.destroy();
-      (_d = this.dwd) == null ? void 0 : _d.destroy();
-      (_e = this.windMonitor) == null ? void 0 : _e.destroy();
-      (_f = this.weatherApi) == null ? void 0 : _f.destroy();
-      (_g = this.flowMonitor) == null ? void 0 : _g.destroy();
-      (_h = this.sensorManager) == null ? void 0 : _h.destroy();
+      await this.safeDestroy("rateLimiter", () => {
+        var _a;
+        return (_a = this.rateLimiter) == null ? void 0 : _a.destroy();
+      });
+      await this.safeDestroy("automation", () => {
+        var _a;
+        return (_a = this.automation) == null ? void 0 : _a.destroy();
+      });
+      await this.safeDestroy("scheduler", () => {
+        var _a;
+        return (_a = this.scheduler) == null ? void 0 : _a.destroy();
+      });
+      await this.safeDestroy("dwd", () => {
+        var _a;
+        return (_a = this.dwd) == null ? void 0 : _a.destroy();
+      });
+      await this.safeDestroy("windMonitor", () => {
+        var _a;
+        return (_a = this.windMonitor) == null ? void 0 : _a.destroy();
+      });
+      await this.safeDestroy("weatherApi", () => {
+        var _a;
+        return (_a = this.weatherApi) == null ? void 0 : _a.destroy();
+      });
+      await this.safeDestroy("flowMonitor", () => {
+        var _a;
+        return (_a = this.flowMonitor) == null ? void 0 : _a.destroy();
+      });
+      await this.safeDestroy("sensorManager", () => {
+        var _a;
+        return (_a = this.sensorManager) == null ? void 0 : _a.destroy();
+      });
       for (const valve of this.valves) {
-        valve.destroy();
+        await this.safeDestroy(`valve ${valve.id}`, () => valve.destroy());
       }
-      callback();
     } catch (error) {
       this.log.error(`Error during unloading: ${error.message}`);
+    } finally {
       callback();
     }
   }
   async onStateChange(id, state) {
+    try {
+      await this.handleStateChange(id, state);
+    } catch (error) {
+      this.log.error(`Error handling state change for "${id}": ${error.message}`);
+    }
+  }
+  async handleStateChange(id, state) {
     var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
     if (!state) {
       return;
     }
     if (!id.startsWith(`${this.namespace}.`)) {
-      for (const valve of this.valves) {
-        if (await valve.onForeignStateChange(id, state)) {
-          return;
-        }
+      const matches = await Promise.all(
+        this.valves.map(
+          (valve) => valve.onForeignStateChange(id, state).catch((error) => {
+            this.log.error(
+              `Valve ${valve.id}: error handling foreign state change for "${id}": ${error.message}`
+            );
+            return false;
+          })
+        )
+      );
+      if (matches.some((matched) => matched)) {
+        return;
       }
       const handledBySensor = (_b = await ((_a = this.sensorManager) == null ? void 0 : _a.onForeignStateChange(id, state))) != null ? _b : false;
       const handledByWind = (_d = await ((_c = this.windMonitor) == null ? void 0 : _c.onForeignStateChange(id, state))) != null ? _d : false;
@@ -752,100 +832,39 @@ class Irrigation extends utils.Adapter {
     });
   }
   async onMessage(obj) {
-    var _a, _b, _c, _d;
+    try {
+      await this.handleMessage(obj);
+    } catch (error) {
+      this.log.error(`Error handling message "${obj == null ? void 0 : obj.command}": ${error.message}`);
+    }
+  }
+  async handleMessage(obj) {
+    var _a;
     if (obj === null || typeof obj !== "object" || !obj.command) {
       return;
     }
     if (obj.command === "scanValves") {
-      const payload = obj.message;
-      let effectiveInstance;
-      switch (payload.type) {
-        case "All":
-          effectiveInstance = "";
-          break;
-        case "Homematic":
-          effectiveInstance = (_a = payload.instanceHomematic) != null ? _a : "";
-          break;
-        case "Rainbird":
-          effectiveInstance = (_b = payload.instanceRainbird) != null ? _b : "";
-          break;
-        case "Hydrawise":
-          effectiveInstance = (_c = payload.instanceHydrawise) != null ? _c : "";
-          break;
-        default:
-          effectiveInstance = payload.instance;
-          break;
-      }
-      const setProgress = (message) => {
-        if (this.scanProgressClearTimer) {
-          this.clearTimeout(this.scanProgressClearTimer);
-          this.scanProgressClearTimer = void 0;
+      if (this.isScanning) {
+        this.log.warn("Valve scan requested while another scan is still running - rejecting.");
+        if (obj.callback) {
+          this.sendTo(
+            obj.from,
+            obj.command,
+            {
+              error: "scanInProgress",
+              result: "scanErrors",
+              errors: ["A valve scan is already running."]
+            },
+            obj.callback
+          );
         }
-        this.setState("scan.progress", { val: message, ack: true }).catch(() => {
-        });
-      };
-      const finishProgress = (message) => {
-        setProgress(message);
-        this.scanProgressClearTimer = this.setTimeout(() => {
-          this.scanProgressClearTimer = void 0;
-          this.setState("scan.progress", { val: "", ack: true }).catch(() => {
-          });
-        }, 1e4);
-      };
-      setProgress(`Scanning ${payload.type}...`);
-      const result = await (0, import_valvescanner.scanForValves)(this, payload.type, effectiveInstance, payload.locationId, setProgress);
-      const scannedValvesByStateId = new Map(result.valves.map((valve) => [valve.stateId, valve]));
-      const existingStateIds = new Set(this.config2.valves.map((valve) => valve.stateId));
-      const newValves = result.valves.filter((valve) => !existingStateIds.has(valve.stateId));
-      let updatedNames = 0;
-      let nextId = this.config2.nextValveId;
-      const mergedValves = [...this.config2.valves, ...newValves.map((valve) => ({ ...valve, id: nextId++ }))].map(
-        (valve, index) => {
-          var _a2;
-          const scannedValve = scannedValvesByStateId.get(valve.stateId);
-          const name = (scannedValve == null ? void 0 : scannedValve.name) || valve.name;
-          if (index < this.config2.valves.length && name !== valve.name) {
-            updatedNames++;
-          }
-          return {
-            ...valve,
-            name,
-            valveNumber: `valve_${(0, import_types.formatValveNumber)((_a2 = valve.id) != null ? _a2 : index)}`
-          };
-        }
-      );
-      this.log.info(
-        `Valve scan (${payload.type}): found ${result.valves.length}, added ${newValves.length} new, updated ${updatedNames} name(s), ${result.errors.length} error(s)`
-      );
-      if (newValves.length > 0 || updatedNames > 0) {
-        await this.writeNativeAsync({
-          valves: this.formatValvesForNative(mergedValves),
-          nextValveId: nextId
-        });
+        return;
       }
-      const doneMessage = result.errors.length > 0 ? `Scan finished with errors: ${result.errors.join("; ")}` : newValves.length > 0 ? `Found and added ${newValves.length} new valve(s).` : updatedNames > 0 ? `Updated ${updatedNames} valve name(s).` : "Scan finished, no new valves found.";
-      finishProgress(doneMessage);
-      if (obj.callback) {
-        this.sendTo(
-          obj.from,
-          obj.command,
-          {
-            found: result.valves.length,
-            new: newValves.length,
-            errors: result.errors,
-            // useNative (without saveConfig) merges the updated valves array into
-            // the currently open settings dialog's form state and forces a
-            // targeted re-render of the table, without triggering the "Save
-            // configuration?" dialog (that is only triggered by saveConfig: true,
-            // which we deliberately omit since persistence already happened above
-            // via writeValvesToNative/setForeignObjectAsync).
-            native: { valves: this.formatValvesForNative(mergedValves) },
-            result: result.errors.length > 0 ? "scanErrors" : "scanDone",
-            error: void 0,
-            args: [String(newValves.length), String(result.valves.length)]
-          },
-          obj.callback
-        );
+      this.isScanning = true;
+      try {
+        await this.handleScanValves(obj);
+      } finally {
+        this.isScanning = false;
       }
       return;
     }
@@ -861,7 +880,7 @@ class Irrigation extends utils.Adapter {
       return;
     }
     if (obj.command === "deleteValvesByStateId") {
-      const rawStateIds = (_d = obj.message) == null ? void 0 : _d.stateIds;
+      const rawStateIds = (_a = obj.message) == null ? void 0 : _a.stateIds;
       const stateIds = Array.isArray(rawStateIds) ? rawStateIds.filter((v) => typeof v === "string") : [];
       const toRemove = new Set(stateIds);
       const before = this.config2.valves.length;
@@ -1037,6 +1056,133 @@ class Irrigation extends utils.Adapter {
       this.sendTo(obj.from, obj.command, { native: { plans: updatedPlans } }, obj.callback);
       return;
     }
+  }
+  /**
+   * Runs the actual valve scan for the `scanValves` message command. Split
+   * out of handleMessage() so the isScanning guard there stays simple.
+   * Bounded by a timeout so a hung foreign adapter/API can never leave
+   * isScanning stuck forever (see the caller in handleMessage()).
+   *
+   * @param obj
+   */
+  async handleScanValves(obj) {
+    var _a, _b, _c;
+    const payload = obj.message;
+    let effectiveInstance;
+    switch (payload.type) {
+      case "All":
+        effectiveInstance = "";
+        break;
+      case "Homematic":
+        effectiveInstance = (_a = payload.instanceHomematic) != null ? _a : "";
+        break;
+      case "Rainbird":
+        effectiveInstance = (_b = payload.instanceRainbird) != null ? _b : "";
+        break;
+      case "Hydrawise":
+        effectiveInstance = (_c = payload.instanceHydrawise) != null ? _c : "";
+        break;
+      default:
+        effectiveInstance = payload.instance;
+        break;
+    }
+    const setProgress = (message) => {
+      if (this.scanProgressClearTimer) {
+        this.clearTimeout(this.scanProgressClearTimer);
+        this.scanProgressClearTimer = void 0;
+      }
+      this.setState("scan.progress", { val: message, ack: true }).catch(() => {
+      });
+    };
+    const finishProgress = (message) => {
+      setProgress(message);
+      this.scanProgressClearTimer = this.setTimeout(() => {
+        this.scanProgressClearTimer = void 0;
+        this.setState("scan.progress", { val: "", ack: true }).catch(() => {
+        });
+      }, 1e4);
+    };
+    setProgress(`Scanning ${payload.type}...`);
+    const SCAN_TIMEOUT_MS = 6e4;
+    let result;
+    try {
+      result = await Promise.race([
+        (0, import_valvescanner.scanForValves)(this, payload.type, effectiveInstance, payload.locationId, setProgress),
+        new Promise((_resolve, reject) => {
+          this.setTimeout(
+            () => reject(new Error(`Valve scan timed out after ${SCAN_TIMEOUT_MS / 1e3}s`)),
+            SCAN_TIMEOUT_MS
+          );
+        })
+      ]);
+    } catch (error) {
+      const message = error.message;
+      this.log.error(`Valve scan (${payload.type}) failed: ${message}`);
+      finishProgress(`Scan failed: ${message}`);
+      if (obj.callback) {
+        this.sendTo(
+          obj.from,
+          obj.command,
+          { error: "scanFailed", result: "scanErrors", errors: [message] },
+          obj.callback
+        );
+      }
+      return;
+    }
+    const scannedValvesByStateId = new Map(result.valves.map((valve) => [valve.stateId, valve]));
+    const existingStateIds = new Set(this.config2.valves.map((valve) => valve.stateId));
+    const newValves = result.valves.filter((valve) => !existingStateIds.has(valve.stateId));
+    let updatedNames = 0;
+    let nextId = this.config2.nextValveId;
+    const mergedValves = [...this.config2.valves, ...newValves.map((valve) => ({ ...valve, id: nextId++ }))].map(
+      (valve, index) => {
+        var _a2;
+        const scannedValve = scannedValvesByStateId.get(valve.stateId);
+        const name = (scannedValve == null ? void 0 : scannedValve.name) || valve.name;
+        if (index < this.config2.valves.length && name !== valve.name) {
+          updatedNames++;
+        }
+        return {
+          ...valve,
+          name,
+          valveNumber: `valve_${(0, import_types.formatValveNumber)((_a2 = valve.id) != null ? _a2 : index)}`
+        };
+      }
+    );
+    this.log.info(
+      `Valve scan (${payload.type}): found ${result.valves.length}, added ${newValves.length} new, updated ${updatedNames} name(s), ${result.errors.length} error(s)`
+    );
+    if (newValves.length > 0 || updatedNames > 0) {
+      await this.writeNativeAsync({
+        valves: this.formatValvesForNative(mergedValves),
+        nextValveId: nextId
+      });
+    }
+    const doneMessage = result.errors.length > 0 ? `Scan finished with errors: ${result.errors.join("; ")}` : newValves.length > 0 ? `Found and added ${newValves.length} new valve(s).` : updatedNames > 0 ? `Updated ${updatedNames} valve name(s).` : "Scan finished, no new valves found.";
+    finishProgress(doneMessage);
+    if (obj.callback) {
+      this.sendTo(
+        obj.from,
+        obj.command,
+        {
+          found: result.valves.length,
+          new: newValves.length,
+          errors: result.errors,
+          // useNative (without saveConfig) merges the updated valves array into
+          // the currently open settings dialog's form state and forces a
+          // targeted re-render of the table, without triggering the "Save
+          // configuration?" dialog (that is only triggered by saveConfig: true,
+          // which we deliberately omit since persistence already happened above
+          // via writeValvesToNative/setForeignObjectAsync).
+          native: { valves: this.formatValvesForNative(mergedValves) },
+          result: result.errors.length > 0 ? "scanErrors" : "scanDone",
+          error: void 0,
+          args: [String(newValves.length), String(result.valves.length)]
+        },
+        obj.callback
+      );
+    }
+    return;
   }
 }
 if (require.main !== module) {

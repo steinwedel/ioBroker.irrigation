@@ -692,10 +692,12 @@ class ValveController {
           await this.adapter.setForeignStateAsync(this.config.stateId, false);
           break;
       }
-      await this.setRunningState(false, 0);
-      if (!commandIssued) {
+      if (commandIssued) {
+        await this.setRunningState(false, 0);
+      } else {
+        this.running = true;
         await this.adapter.setStateAsync(`${this.id}.errorLast`, {
-          val: "Stop requested but no allOffId configured - physical Rainbird station may still be running.",
+          val: "Stop requested but no allOffId configured - physical Rainbird station may still be running. Valve state left unchanged.",
           ack: true
         });
       }

@@ -23,11 +23,14 @@ __export(dwd_exports, {
 });
 module.exports = __toCommonJS(dwd_exports);
 const DWD_URL_BASE = "https://opendata.dwd.de/weather/weather_reports/poi/";
+const FETCH_TIMEOUT_MS = 15e3;
+const MAX_TEMP_AGE_CHECK_MULTIPLIER = 3;
+const DEFAULT_MAX_TEMP_AGE_MS = 6 * 60 * 60 * 1e3;
 function annualDayOfYear(month, day) {
   return Math.floor((Date.UTC(2e3, month - 1, day) - Date.UTC(2e3, 0, 1)) / 864e5);
 }
 function parseAnnualDate(value) {
-  const match = /^([1-9]|[12]\d|3[01])\.([1-9]|1[0-2])$/.exec(value);
+  const match = /^(0?[1-9]|[12]\d|3[01])\.(0?[1-9]|1[0-2])$/.exec(value);
   if (!match) {
     return void 0;
   }
@@ -64,7 +67,8 @@ class DwdRestriction {
     if (!config.legalRestriction.enabled) {
       return;
     }
-    const intervalMs = Math.max(1, config.legalRestriction.checkInterval) * 60 * 1e3;
+    const checkIntervalMinutes = Number.isFinite(config.legalRestriction.checkInterval) ? config.legalRestriction.checkInterval : 10;
+    const intervalMs = Math.max(1, checkIntervalMinutes) * 60 * 1e3;
     this.checkTimer = this.deps.adapter.setInterval(() => {
       this.check().catch(
         (error) => this.deps.adapter.log.error(`Legal restriction check failed: ${error.message}`)
@@ -86,7 +90,16 @@ class DwdRestriction {
     const endDate = parseAnnualDate(config.endDate);
     const startTime = parseTime(config.startTime);
     const endTime = parseTime(config.endTime);
-    if (hasDateRange && (startDate === void 0 || endDate === void 0) || hasTimeRange && (startTime === void 0 || endTime === void 0)) {
+    if (hasDateRange && (startDate === void 0 || endDate === void 0)) {
+      this.deps.adapter.log.error(
+        `Legal restriction date range is invalid (startDate="${config.startDate}", endDate="${config.endDate}"); expected format D.M, e.g. "1.6" or "01.06". Restriction cannot be evaluated.`
+      );
+      return false;
+    }
+    if (hasTimeRange && (startTime === void 0 || endTime === void 0)) {
+      this.deps.adapter.log.error(
+        `Legal restriction time range is invalid (startTime="${config.startTime}", endTime="${config.endTime}"); expected format HH:MM. Restriction cannot be evaluated.`
+      );
       return false;
     }
     const currentDate = annualDayOfYear(now.getMonth() + 1, now.getDate());
@@ -168,8 +181,10 @@ class DwdRestriction {
     }
   }
   async fetchTemperature(stationId) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
     try {
-      const response = await fetch(`${DWD_URL_BASE}${stationId}-BEOB.csv`);
+      const response = await fetch(`${DWD_URL_BASE}${stationId}-BEOB.csv`, { signal: controller.signal });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
@@ -182,11 +197,36 @@ class DwdRestriction {
       await this.deps.adapter.setStateAsync("info.connection", { val: true, ack: true });
       return temp;
     } catch (error) {
-      const message = error.message;
+      const isAbort = error.name === "AbortError";
+      const message = isAbort ? `Request timed out after ${FETCH_TIMEOUT_MS / 1e3}s` : error.message;
       this.deps.adapter.log.warn(`DWD temperature fetch failed: ${message}`);
       await this.recordTemperatureError(message);
       await this.deps.adapter.setStateAsync("info.connection", { val: false, ack: true });
       return null;
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+  getMaxTempAgeMs() {
+    const config = this.deps.getConfig().legalRestriction;
+    if (!Number.isFinite(config.checkInterval) || config.checkInterval <= 0) {
+      return DEFAULT_MAX_TEMP_AGE_MS;
+    }
+    return config.checkInterval * 60 * 1e3 * MAX_TEMP_AGE_CHECK_MULTIPLIER;
+  }
+  async checkTemperatureAge() {
+    var _a, _b;
+    const state = await ((_b = (_a = this.deps.adapter).getStateAsync) == null ? void 0 : _b.call(_a, "legalRestriction.currentTempTs"));
+    const ts = typeof (state == null ? void 0 : state.val) === "number" ? state.val : void 0;
+    if (ts === void 0) {
+      return;
+    }
+    const maxAgeMs = this.getMaxTempAgeMs();
+    const ageMs = Date.now() - ts;
+    if (ageMs > maxAgeMs) {
+      this.deps.adapter.log.warn(
+        `Legal restriction: last successful temperature reading is ${Math.round(ageMs / 6e4)} minutes old (threshold ${Math.round(maxAgeMs / 6e4)} minutes). Restriction decisions may be based on stale data.`
+      );
     }
   }
   async recordTemperature(temp) {
@@ -196,6 +236,7 @@ class DwdRestriction {
   }
   async recordTemperatureError(message) {
     await this.deps.adapter.setStateAsync("legalRestriction.lastCheckError", { val: message, ack: true });
+    await this.checkTemperatureAge();
   }
 }
 function parseDwdTemperature(csv) {

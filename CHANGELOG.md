@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.3.11 (2026-07-26)
 * (Gerhard Steinwedel) **FIXED**: Pause/resume now tracks four independent blocker flags (rain, wind, legal restriction, manual) instead of a single `pauseReason` enum, so overlapping blockers (e.g. rain + legal restriction) are handled correctly and resume only happens when *all* blockers have cleared
 * (Gerhard Steinwedel) **FIXED**: Valve `endsAt` timestamps now refresh on every resume to reflect actual remaining time — previously each pause/resume cycle silently shortened watering duration because `tick()` compared against the original (stale) end time
 * (Gerhard Steinwedel) **ENHANCED**: DWD restriction date parsing now accepts zero-padded dates (e.g. "01.06") and validates date/time ranges with meaningful error messages; fetch timeout added (15s)

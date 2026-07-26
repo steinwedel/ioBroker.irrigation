@@ -252,6 +252,11 @@ async function scanRainbird(adapter, instance) {
       const objects = await adapter.getForeignObjectsAsync(`${inst}.device.stations.*`, "state");
       const stopId = `${inst}.device.commands.stopIrrigation`;
       const stopExists = await adapter.getForeignObjectAsync(stopId).catch(() => null);
+      if (!stopExists) {
+        adapter.log.warn(
+          `Rainbird scan: instance="${inst}" has no "${stopId}" state - valves discovered on this instance will be created without allOffId and cannot be reliably stopped by the adapter.`
+        );
+      }
       const runZoneIds = Object.keys(objects).filter((id) => id.endsWith(".runZone"));
       for (const runZoneId of runZoneIds) {
         const basePath = runZoneId.slice(0, -".runZone".length);

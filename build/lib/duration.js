@@ -26,7 +26,7 @@ function parseDuration(value, fallback = 600) {
   if (typeof value === "number" && Number.isFinite(value)) {
     return Math.max(1, Math.round(value));
   }
-  if (typeof value !== "string") {
+  if (typeof value !== "string" || value.trim() === "") {
     return fallback;
   }
   const parts = value.trim().split(":");
@@ -42,7 +42,7 @@ function parseDuration(value, fallback = 600) {
   } else {
     seconds = values[0] * 3600 + values[1] * 60 + values[2];
   }
-  return seconds > 0 ? seconds : fallback;
+  return seconds > 0 ? seconds : 1;
 }
 function formatDuration(seconds) {
   const value = Math.max(0, Math.round(seconds));

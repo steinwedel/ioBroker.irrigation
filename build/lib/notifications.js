@@ -28,15 +28,18 @@ class NotificationManager {
   }
   async send(title, message) {
     const config = this.deps.getConfig().notifications;
+    const sends = [];
     if (config.pushoverInstance) {
-      await this.sendTo(config.pushoverInstance, { title, message });
+      sends.push(this.sendTo(config.pushoverInstance, { title, message }));
     }
     if (config.telegramInstance) {
-      await this.sendTo(config.telegramInstance, `${title}: ${message}`);
+      sends.push(this.sendTo(config.telegramInstance, `${title}: ${message}`));
     }
-    if (!config.pushoverInstance && !config.telegramInstance) {
+    if (sends.length === 0) {
       this.deps.adapter.log.debug(`Notification "${title}" not sent: no instance configured.`);
+      return;
     }
+    await Promise.allSettled(sends);
   }
   async sendTo(instance, message) {
     try {

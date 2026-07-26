@@ -21,11 +21,15 @@ __export(sensors_exports, {
   SensorManager: () => SensorManager
 });
 module.exports = __toCommonJS(sensors_exports);
+const MAX_SENSOR_AGE_MS = 2 * 60 * 60 * 1e3;
 class SensorManager {
   deps;
   rainState = false;
   soilMoistureState = 0;
   temperatureState = 0;
+  rainStateTs;
+  soilMoistureTs;
+  temperatureTs;
   subscribedIds = [];
   constructor(deps) {
     this.deps = deps;
@@ -51,23 +55,74 @@ class SensorManager {
         this.subscribedIds.push(id);
       }
     }
+    if (config.sensors.rainId) {
+      const state = await this.deps.adapter.getForeignStateAsync(config.sensors.rainId);
+      if (typeof (state == null ? void 0 : state.val) === "boolean") {
+        this.rainState = state.val;
+        this.rainStateTs = typeof state.ts === "number" ? state.ts : Date.now();
+        await this.deps.adapter.setStateAsync("sensors.rain", { val: this.rainState, ack: true });
+      }
+    }
+    if (config.sensors.soilMoistureId) {
+      const state = await this.deps.adapter.getForeignStateAsync(config.sensors.soilMoistureId);
+      if (typeof (state == null ? void 0 : state.val) === "number" && Number.isFinite(state.val)) {
+        this.soilMoistureState = state.val;
+        this.soilMoistureTs = typeof state.ts === "number" ? state.ts : Date.now();
+        await this.deps.adapter.setStateAsync("sensors.soilMoisture", {
+          val: this.soilMoistureState,
+          ack: true
+        });
+      }
+    }
+    if (config.sensors.temperatureId) {
+      const state = await this.deps.adapter.getForeignStateAsync(config.sensors.temperatureId);
+      if (typeof (state == null ? void 0 : state.val) === "number" && Number.isFinite(state.val)) {
+        this.temperatureState = state.val;
+        this.temperatureTs = typeof state.ts === "number" ? state.ts : Date.now();
+        await this.deps.adapter.setStateAsync("sensors.temperature", {
+          val: this.temperatureState,
+          ack: true
+        });
+      }
+    }
   }
   async onForeignStateChange(id, state) {
     var _a, _b;
     const config = this.deps.getConfig();
     if (id === config.sensors.rainId) {
-      this.rainState = (state == null ? void 0 : state.val) === true;
+      if (typeof (state == null ? void 0 : state.val) === "boolean") {
+        this.rainState = state.val;
+      } else {
+        this.deps.adapter.log.warn(
+          `Rain sensor state ${id} has no valid boolean value; keeping previous value (${this.rainState}).`
+        );
+      }
+      this.rainStateTs = Date.now();
       await this.deps.adapter.setStateAsync("sensors.rain", { val: this.rainState, ack: true });
       await ((_b = (_a = this.deps).onRainChange) == null ? void 0 : _b.call(_a, this.rainState));
       return true;
     }
     if (id === config.sensors.soilMoistureId) {
-      this.soilMoistureState = typeof (state == null ? void 0 : state.val) === "number" ? state.val : 0;
+      if (typeof (state == null ? void 0 : state.val) === "number" && Number.isFinite(state.val)) {
+        this.soilMoistureState = state.val;
+      } else {
+        this.deps.adapter.log.warn(
+          `Soil moisture sensor state ${id} has no valid numeric value; keeping previous value (${this.soilMoistureState}).`
+        );
+      }
+      this.soilMoistureTs = Date.now();
       await this.deps.adapter.setStateAsync("sensors.soilMoisture", { val: this.soilMoistureState, ack: true });
       return true;
     }
     if (id === config.sensors.temperatureId) {
-      this.temperatureState = typeof (state == null ? void 0 : state.val) === "number" ? state.val : 0;
+      if (typeof (state == null ? void 0 : state.val) === "number" && Number.isFinite(state.val)) {
+        this.temperatureState = state.val;
+      } else {
+        this.deps.adapter.log.warn(
+          `Temperature sensor state ${id} has no valid numeric value; keeping previous value (${this.temperatureState}).`
+        );
+      }
+      this.temperatureTs = Date.now();
       await this.deps.adapter.setStateAsync("sensors.temperature", { val: this.temperatureState, ack: true });
       return true;
     }
@@ -81,6 +136,9 @@ class SensorManager {
   }
   getTemperature() {
     return this.temperatureState;
+  }
+  isStale(ts) {
+    return ts === void 0 || Date.now() - ts > MAX_SENSOR_AGE_MS;
   }
   async getTemperatureAdjustmentTemperature() {
     const stateId = this.deps.getConfig().scheduler.temperatureAdjustmentStateId;
@@ -116,6 +174,12 @@ class SensorManager {
     if (config.sensors.rainId && this.rainState && !valve.rainIndependent) {
       return { blocked: true, reason: "rain detected" };
     }
+    if (config.sensors.rainId && !valve.rainIndependent && this.isStale(this.rainStateTs)) {
+      this.deps.adapter.log.warn(
+        `Rain sensor value is stale (older than ${MAX_SENSOR_AGE_MS / 6e4} minutes); blocking valve as a precaution.`
+      );
+      return { blocked: true, reason: "rain sensor data is stale" };
+    }
     if (config.sensors.soilMoistureId && valve.moistureThreshold > 0 && this.soilMoistureState >= valve.moistureThreshold) {
       return {
         blocked: true,
@@ -133,6 +197,12 @@ class SensorManager {
     const temp = config.sensors.temperatureId ? this.temperatureState : void 0;
     if (temp === void 0) {
       return false;
+    }
+    if (config.sensors.temperatureId && this.isStale(this.temperatureTs)) {
+      this.deps.adapter.log.warn(
+        `Temperature sensor value is stale (older than ${MAX_SENSOR_AGE_MS / 6e4} minutes); assuming frost protection is active as a precaution.`
+      );
+      return true;
     }
     return temp < config.scheduler.frostMinTemp;
   }

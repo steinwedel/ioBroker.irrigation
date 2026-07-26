@@ -38,6 +38,18 @@ class FlowMonitor {
     await this.resubscribe();
   }
   async resubscribe() {
+    if (this.calibratingValveIndex !== void 0) {
+      const abortedValveIndex = this.calibratingValveIndex;
+      if (this.calibrationTimer) {
+        this.deps.adapter.clearTimeout(this.calibrationTimer);
+        this.calibrationTimer = void 0;
+      }
+      this.calibratingValveIndex = void 0;
+      this.calibrationSamples = [];
+      this.deps.adapter.log.warn(
+        `Calibration for valve ${abortedValveIndex} aborted: configuration changed while calibration was running.`
+      );
+    }
     if (this.subscribedId) {
       await this.deps.adapter.unsubscribeForeignStatesAsync(this.subscribedId);
       this.subscribedId = void 0;
@@ -192,10 +204,18 @@ class FlowMonitor {
     }, CALIBRATION_DURATION_SECS * 1e3);
   }
   async finishCalibration(valveIndex, closeValve) {
-    await closeValve();
-    const samples = this.calibrationSamples;
-    this.calibratingValveIndex = void 0;
-    this.calibrationSamples = [];
+    let samples;
+    try {
+      await closeValve();
+    } catch (error) {
+      this.deps.adapter.log.error(
+        `Calibration for valve ${valveIndex} failed to close the valve: ${error.message}`
+      );
+    } finally {
+      samples = this.calibrationSamples;
+      this.calibratingValveIndex = void 0;
+      this.calibrationSamples = [];
+    }
     if (samples.length === 0) {
       this.deps.adapter.log.warn(`Calibration for valve ${valveIndex} yielded no samples.`);
       return;

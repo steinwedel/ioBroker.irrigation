@@ -31,6 +31,13 @@ class WaterConsumptionTracker {
   currentDay = (/* @__PURE__ */ new Date()).getDate();
   currentWeekKey = weekKeyOf(/* @__PURE__ */ new Date());
   currentMonthKey = monthKeyOf(/* @__PURE__ */ new Date());
+  /**
+   * Serializes all state writes done by recordConsumption() so that
+   * concurrent calls for different valves can never interleave their
+   * setStateAsync() writes and persist a stale/too-low value. See
+   * ventile.ts's `commandChain` for the same pattern.
+   */
+  writeChain = Promise.resolve();
   constructor(deps) {
     this.deps = deps;
   }
@@ -57,18 +64,24 @@ class WaterConsumptionTracker {
    */
   onValveFlowChange(valveIndex, flowing) {
     var _a;
-    if (!this.deps.getConfig().waterConsumption.enabled) {
-      return;
-    }
     if (flowing) {
+      if (!this.deps.getConfig().waterConsumption.enabled) {
+        return;
+      }
       this.valveStartedAt.set(valveIndex, Date.now());
     } else {
       const startedAt = this.valveStartedAt.get(valveIndex);
+      this.valveStartedAt.delete(valveIndex);
       if (startedAt === void 0) {
+        this.deps.adapter.log.warn(
+          `Water consumption for valve ${valveIndex} could not be calculated: start time unknown, likely due to adapter restart during valve run.`
+        );
         return;
       }
-      this.valveStartedAt.delete(valveIndex);
-      const elapsedMin = (Date.now() - startedAt) / 6e4;
+      if (!this.deps.getConfig().waterConsumption.enabled) {
+        return;
+      }
+      const elapsedMin = Math.max(0, (Date.now() - startedAt) / 6e4);
       const config = this.deps.getConfig();
       const valve = config.valves[valveIndex];
       const liters = elapsedMin * ((_a = valve == null ? void 0 : valve.flowRateLpm) != null ? _a : 0);
@@ -78,6 +91,14 @@ class WaterConsumptionTracker {
     }
   }
   async recordConsumption(valveIndex, liters) {
+    this.writeChain = this.writeChain.then(() => this.doRecordConsumption(valveIndex, liters)).catch((error) => {
+      this.deps.adapter.log.error(
+        `Failed to record water consumption for valve ${valveIndex}: ${error.message}`
+      );
+    });
+    await this.writeChain;
+  }
+  async doRecordConsumption(valveIndex, liters) {
     this.rolloverIfNeeded();
     this.dayTotal += liters;
     this.weekTotal += liters;
