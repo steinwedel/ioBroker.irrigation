@@ -102,6 +102,7 @@ class Irrigation extends utils.Adapter {
   async onReady() {
     this.config2 = (0, import_config_defaults.normalizeConfig)(this.config);
     await this.migrateNativeConfig();
+    await this.migrateManualDurationsToTenMinutes();
     await this.cleanupStaleValveObjects();
     await this.cleanupStaleZoneObjects();
     await (0, import_states.createBaseStates)(this);
@@ -223,6 +224,15 @@ class Irrigation extends utils.Adapter {
       const nextValveId = Math.max(this.config2.nextValveId, maxAssignedId + 1);
       await this.writeNativeAsync({ valves: migratedValves, nextValveId });
     }
+  }
+  async migrateManualDurationsToTenMinutes() {
+    const valves = this.config2.valves.map((valve) => ({ ...valve, manualDuration: 600 }));
+    if (this.config2.valves.every((valve) => valve.manualDuration === 600)) {
+      return;
+    }
+    this.log.info(`Setting the manual duration of ${valves.length} valve(s) to 10 minutes.`);
+    this.config2 = { ...this.config2, valves };
+    await this.writeValvesToNative(valves);
   }
   /**
    * Loads `plans` from the dedicated `automation.plansData` state into

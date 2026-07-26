@@ -1,4 +1,7 @@
 # Changelog
+## 0.3.22 (2026-07-26)
+* (Gerhard Steinwedel) **ENHANCED**: Set manual watering duration to 10 minutes for existing valves once; new valves now consistently default to 10 minutes for both planned and manual watering
+
 ## 0.3.21 (2026-07-26)
 * (Gerhard Steinwedel) **FIXED**: Enable the Gardena/Rainbird all-off command state only for matching valve types
 

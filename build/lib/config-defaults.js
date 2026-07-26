@@ -124,7 +124,7 @@ function normalizeConfig(config) {
         rainIndependent: (_g2 = valve.rainIndependent) != null ? _g2 : false,
         moistureThreshold: (_h2 = valve.moistureThreshold) != null ? _h2 : 0,
         soilMoistureId: ((_i2 = valve.soilMoistureId) == null ? void 0 : _i2.trim()) || legacySoilMoistureId,
-        manualDuration: typeof valve.manualDuration === "number" ? Math.max(1, Math.round(valve.manualDuration * 60)) : valve.manualDuration === void 0 ? duration : Math.max(1, (0, import_duration.parseDuration)(valve.manualDuration)),
+        manualDuration: typeof valve.manualDuration === "number" ? Math.max(1, Math.round(valve.manualDuration * 60)) : valve.manualDuration === void 0 ? 600 : Math.max(1, (0, import_duration.parseDuration)(valve.manualDuration)),
         days: (_j2 = valve.days) != null ? _j2 : []
       };
     }),

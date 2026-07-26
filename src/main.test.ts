@@ -9,6 +9,7 @@ import { AutomationEngine, buildBatches, calculateTemperatureAdjustmentFactor } 
 import { parseDuration, formatDuration } from './lib/duration';
 import { applyValveEditorFields, buildValveEditorOptions, getValveEditorFields } from './lib/valve-editor';
 import { DwdRestriction, parseDwdTemperature } from './lib/dwd';
+import { normalizeConfig } from './lib/config-defaults';
 import { resolvePlanFromIcalTitle } from './lib/scheduler';
 import { parsePlanValveTableRows, synchronizePlanWithValves } from './lib/types';
 import { ValveController } from './lib/ventile';
@@ -43,6 +44,16 @@ describe('duration parsing and formatting', () => {
     it('formats durations as MM:SS or HH:MM:SS', () => {
         expect(formatDuration(90)).to.equal('01:30');
         expect(formatDuration(3723)).to.equal('01:02:03');
+    });
+});
+
+describe('valve duration defaults', () => {
+    it('assigns 10 minutes for manual starts when a newly created valve has no manual duration', () => {
+        const valve = makeValve({ duration: 15 });
+        delete (valve as Partial<IValveConfig>).manualDuration;
+        const config = normalizeConfig({ valves: [valve] });
+
+        expect(config.valves[0]).to.include({ duration: 900, manualDuration: 600 });
     });
 });
 

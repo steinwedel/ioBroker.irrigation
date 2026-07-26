@@ -129,7 +129,7 @@ export function normalizeConfig(config: Partial<IrrigationNativeConfig>): Irriga
                     typeof valve.manualDuration === 'number'
                         ? Math.max(1, Math.round(valve.manualDuration * 60))
                         : valve.manualDuration === undefined
-                          ? duration
+                          ? 600
                           : Math.max(1, parseDuration(valve.manualDuration)),
                 days: valve.days ?? [],
             };

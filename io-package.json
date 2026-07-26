@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.3.21",
+    "version": "0.3.22",
     "news": {
+      "0.3.22": {
+        "en": "**ENHANCED**: Set manual watering duration to 10 minutes for existing valves once; new valves now consistently default to 10 minutes for both planned and manual watering",
+        "de": "**VERBESSERT**: Manuelle Bewässerungsdauer für bestehende Ventile einmalig auf 10 Minuten gesetzt; neue Ventile verwenden nun einheitlich 10 Minuten als Standard für geplante und manuelle Bewässerung",
+        "ru": "**УЛУЧШЕНО**: Длительность ручного полива для существующих клапанов установлена на 10 минут однократно; новые клапаны теперь последовательно используют 10 минут по умолчанию как для запланированного, так и для ручного полива",
+        "pt": "**MELHORADO**: Duração da rega manual definida para 10 minutos para válvulas existentes uma vez; novas válvulas agora usam consistentemente 10 minutos como padrão para rega planejada e manual",
+        "nl": "**VERBETERD**: Handmatige bewateringsduur voor bestaande kleppen eenmalig ingesteld op 10 minuten; nieuwe kleppen gebruiken nu standaard consequent 10 minuten voor zowel geplande als handmatige bewatering",
+        "fr": "**AMÉLIORÉ**: Durée d'arrosage manuel définie à 10 minutes pour les vannes existantes une fois; les nouvelles vannes utilisent désormais systématiquement 10 minutes par défaut pour l'arrosage planifié et manuel",
+        "it": "**MIGLIORATO**: Durata dell'irrigazione manuale impostata a 10 minuti per le valvole esistenti una volta; le nuove valvole ora utilizzano costantemente 10 minuti come predefinito sia per l'irrigazione pianificata che manuale",
+        "es": "**MEJORADO**: Duración del riego manual establecida en 10 minutos para válvulas existentes una vez; las nuevas válvulas ahora usan consistentemente 10 minutos por defecto tanto para riego planificado como manual",
+        "pl": "**ULEPSZONE**: Czas ręcznego podlewania ustawiony na 10 minut dla istniejących zaworów jednorazowo; nowe zawory teraz konsekwentnie domyślnie używają 10 minut zarówno dla podlewania zaplanowanego, jak i ręcznego",
+        "uk": "**ПОКРАЩЕНО**: Тривалість ручного поливу для існуючих клапанів встановлено на 10 хвилин одноразово; нові клапани тепер послідовно використовують 10 хвилин за замовчуванням як для запланованого, так і для ручного поливу",
+        "zh-cn": "**增强**：现有阀门的手动浇水时长一次性设置为10分钟；新阀门现在统一默认使用10分钟用于计划浇水和手动浇水"
+      },
       "0.3.21": {
         "en": "**FIXED**: Enable the Gardena/Rainbird all-off command state only for matching valve types",
         "de": "**BEHOBEN**: Der Gardena/Rainbird Alle-Aus-Befehlsstatus wird nur für passende Ventiltypen aktiviert",
@@ -80,19 +93,6 @@
         "pl": "**NAPRAWIONO**: Wyłączenie edytora natężenia przepływu zaworu do czasu włączenia globalnego monitora przepływu i skonfigurowania ID stanu czujnika przepływu",
         "uk": "**ВИПРАВЛЕНО**: Редактор швидкості потоку клапана вимкнено, доки не буде увімкнено глобальний монітор потоку та не налаштовано ID стану датчика потоку",
         "zh-cn": "**已修复**：禁用阀门的流量编辑器，直到启用全局流量监控并配置流量传感器状态ID"
-      },
-      "0.3.15": {
-        "en": "**FIXED**: Starting a valve through its adapter `state` now runs it for the configured manual duration and stopping that state ends the manual run cleanly",
-        "de": "**BEHOBEN**: Das Starten eines Ventils über seinen Adapter-`state` lässt es nun für die konfigurierte manuelle Dauer laufen, und das Stoppen dieses States beendet den manuellen Lauf sauber",
-        "ru": "**ИСПРАВЛЕНО**: Запуск клапана через его адаптер `state` теперь выполняется в течение настроенной ручной длительности, а остановка этого состояния корректно завершает ручной запуск",
-        "pt": "**CORRIGIDO**: Iniciar uma válvula através do seu `state` do adaptador agora a executa pela duração manual configurada e parar esse estado encerra a execução manual de forma limpa",
-        "nl": "**OPGELOST**: Het starten van een klep via zijn adapter `state` laat deze nu draaien voor de geconfigureerde handmatige duur en het stoppen van die state beëindigt de handmatige run netjes",
-        "fr": "**CORRIGÉ** : Le démarrage d'une vanne via son `state` d'adaptateur l'exécute désormais pendant la durée manuelle configurée et l'arrêt de cet état termine proprement l'exécution manuelle",
-        "it": "**RISOLTO**: L'avvio di una valvola tramite il suo `state` dell'adattatore ora la fa funzionare per la durata manuale configurata e l'arresto di tale stato termina l'esecuzione manuale in modo pulito",
-        "es": "**SOLUCIONADO**: Iniciar una válvula a través de su `state` del adaptador ahora la ejecuta durante la duración manual configurada y detener ese estado finaliza la ejecución manual de forma limpia",
-        "pl": "**NAPRAWIONO**: Uruchomienie zaworu przez jego `state` adaptera powoduje teraz jego działanie przez skonfigurowany czas ręczny, a zatrzymanie tego stanu czysto kończy ręczne uruchomienie",
-        "uk": "**ВИПРАВЛЕНО**: Запуск клапана через його адаптер `state` тепер виконується протягом налаштованої ручної тривалості, а зупинка цього стану коректно завершує ручний запуск",
-        "zh-cn": "**已修复**：通过适配器 `state` 启动阀门现在会按配置的手动持续时间运行，停止该状态会干净地结束手动运行"
       }
     },
     "titleLang": {
