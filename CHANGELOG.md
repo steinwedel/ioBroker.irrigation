@@ -1,4 +1,7 @@
 # Changelog
+## 0.3.25 (2026-07-27)
+* (Gerhard Steinwedel) **ENHANCED**: Integrated all valve settings into the valve cards and removed the separate valve editor
+
 ## 0.3.24 (2026-07-27)
 * (Gerhard Steinwedel) **ENHANCED**: Always display valve configuration rows as cards across all browser viewport breakpoints
 

@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.3.24",
+    "version": "0.3.25",
     "news": {
+      "0.3.25": {
+        "en": "**ENHANCED**: Integrated all valve settings into the valve cards and removed the separate valve editor",
+        "de": "**VERBESSERT**: Alle Ventileinstellungen in die Ventilkarten integriert und den separaten Ventileditor entfernt",
+        "ru": "**УЛУЧШЕНО**: Все настройки клапанов интегрированы в карточки клапанов, отдельный редактор клапанов удален",
+        "pt": "**MELHORADO**: Integradas todas as configurações de válvulas nos cartões de válvulas e removido o editor de válvulas separado",
+        "nl": "**VERBETERD**: Alle klep-instellingen geïntegreerd in de klepkaarten en de aparte klepeditor verwijderd",
+        "fr": "**AMÉLIORÉ** : Toutes les paramètres de vanne intégrés dans les cartes de vanne et suppression de l'éditeur de vanne séparé",
+        "it": "**MIGLIORATO**: Integrate tutte le impostazioni delle valvole nelle schede valvole e rimosso l'editor valvole separato",
+        "es": "**MEJORADO**: Integradas todas las configuraciones de válvulas en las tarjetas de válvulas y eliminado el editor de válvulas separado",
+        "pl": "**ULEPSZONE**: Zintegrowano wszystkie ustawienia zaworów w kartach zaworów i usunięto osobny edytor zaworów",
+        "uk": "**ПОКРАЩЕНО**: Усі налаштування клапанів інтегровано в картки клапанів і видалено окремий редактор клапанів",
+        "zh-cn": "**增强**：将所有阀门设置集成到阀门卡片中，并移除了单独的阀门编辑器"
+      },
       "0.3.24": {
         "en": "**ENHANCED**: Always display valve configuration rows as cards across all browser viewport breakpoints",
         "de": "**VERBESSERT**: Ventilkonfigurationszeilen werden nun bei allen Browser-Viewport-Breakpoints immer als Karten angezeigt",
@@ -80,19 +93,6 @@
         "pl": "**ULEPSZONE**: Dodano trwałe wyjaśnienie formatu wprowadzania dozwolonych dni tygodnia oraz ich mapowania dzień-cyfra w edytorze zaworów",
         "uk": "**ПОКРАЩЕНО**: Додано постійне пояснення формату введення дозволених днів тижня та їх відповідності цифрам у редакторі клапанів",
         "zh-cn": "**增强**：在阀门编辑器中添加了允许工作日输入格式及其星期到数字映射的持久性说明"
-      },
-      "0.3.18": {
-        "en": "**ENHANCED**: Grouped the enabled switch, planned watering duration, and manual-start watering duration in the valve editor and clarified their labels",
-        "de": "**VERBESSERT**: Aktivierungsschalter, geplante Bewässerungsdauer und manuelle Bewässerungsdauer im Ventil-Editor gruppiert und deren Beschriftungen präzisiert",
-        "ru": "**УЛУЧШЕНО**: Переключатель включения, запланированная длительность полива и длительность ручного полива сгруппированы в редакторе клапана, их метки уточнены",
-        "pt": "**MELHORADO**: Agrupados o interruptor de ativação, duração de rega programada e duração de rega manual no editor de válvulas e esclarecidos os seus rótulos",
-        "nl": "**VERBETERD**: De ingeschakelde schakelaar, geplande gietduur en handmatige gietduur gegroepeerd in de klepeditor en hun labels verduidelijkt",
-        "fr": "**AMÉLIORÉ**: Regroupement de l'interrupteur d'activation, de la durée d'arrosage planifiée et de la durée d'arrosage manuel dans l'éditeur de vanne et clarification de leurs libellés",
-        "it": "**MIGLIORATO**: Raggruppati l'interruttore di abilitazione, la durata dell'irrigazione pianificata e la durata dell'irrigazione manuale nell'editor delle valvole e chiariti i loro label",
-        "es": "**MEJORADO**: Agrupados el interruptor de habilitación, la duración de riego programada y la duración de riego manual en el editor de válvulas y aclaradas sus etiquetas",
-        "pl": "**ULEPSZONE**: Zgrupowano przełącznik włączenia, planowany czas podlewania i ręczny czas podlewania w edytorze zaworów oraz doprecyzowano ich etykiety",
-        "uk": "**ПОКРАЩЕНО**: Згруповано перемикач увімкнення, заплановану тривалість поливу та ручну тривалість поливу в редакторі клапана та уточнено їх мітки",
-        "zh-cn": "**增强**：在阀门编辑器中对启用开关、计划浇水时长和手动启动浇水时长进行了分组，并明确了它们的标签"
       }
     },
     "titleLang": {

@@ -207,242 +207,81 @@
                             ]
                         },
                         {
-                            "type": "text",
-                            "attr": "duration",
-                            "title": "Watering duration (plan)",
-                            "width": "20%",
-                            "default": "10:00",
-                            "validator": "/^(?:\\d+|(?:\\d+:)?[0-5]\\d:[0-5]\\d)$/.test(data.duration)",
-                            "tooltip": "Enter minutes, MM:SS or HH:MM:SS"
-                        },
-                        {
                             "type": "objectId",
                             "attr": "stateId",
                             "title": "State id",
                             "width": "34%",
                             "sort": true,
                             "filter": true
+                        },
+                        {
+                            "type": "checkbox",
+                            "attr": "enabled",
+                            "title": "Enabled",
+                            "default": true
+                        },
+                        {
+                            "type": "text",
+                            "attr": "duration",
+                            "title": "Watering duration (plan)",
+                            "default": "10:00",
+                            "validator": "/^(?:\\d+|(?:\\d+:)?[0-5]\\d:[0-5]\\d)$/.test(data.duration)",
+                            "tooltip": "Enter minutes, MM:SS or HH:MM:SS"
+                        },
+                        {
+                            "type": "text",
+                            "attr": "manualDuration",
+                            "title": "Watering duration (manual start)",
+                            "default": "10:00",
+                            "validator": "/^(?:\\d+|(?:\\d+:)?[0-5]\\d:[0-5]\\d)$/.test(data.manualDuration)",
+                            "tooltip": "Enter minutes, MM:SS or HH:MM:SS"
+                        },
+                        {
+                            "type": "number",
+                            "attr": "flowRateLpm",
+                            "title": "Flow rate (l/min)",
+                            "default": 0,
+                            "min": 0,
+                            "alsoDependsOn": ["flowMonitor.enabled", "flowMonitor.sensorId"],
+                            "disabled": "!globalData.flowMonitor || !globalData.flowMonitor.enabled || !globalData.flowMonitor.sensorId || !globalData.flowMonitor.sensorId.trim()"
+                        },
+                        {
+                            "type": "checkbox",
+                            "attr": "rainIndependent",
+                            "title": "Rain independent",
+                            "default": false
+                        },
+                        {
+                            "type": "objectId",
+                            "attr": "soilMoistureId",
+                            "title": "Soil moisture sensor state id"
+                        },
+                        {
+                            "type": "number",
+                            "attr": "moistureThreshold",
+                            "title": "Moisture threshold (%)",
+                            "default": 0,
+                            "min": 0,
+                            "max": 100,
+                            "alsoDependsOn": ["soilMoistureId"],
+                            "disabled": "!data.soilMoistureId || !data.soilMoistureId.trim()"
+                        },
+                        {
+                            "type": "text",
+                            "attr": "days",
+                            "title": "Allowed weekdays",
+                            "tooltip": "Enter comma-separated digits: 0=Sunday, 1=Monday, 2=Tuesday, 3=Wednesday, 4=Thursday, 5=Friday, 6=Saturday. Leave empty to allow watering every day.",
+                            "validator": "/^\\s*(?:[0-6]\\s*(?:,\\s*[0-6]\\s*)*)?$/.test(data.days ?? '')",
+                            "validatorErrorText": "Enter weekdays as comma-separated values from 0 (Sunday) to 6 (Saturday), or leave empty for every day."
+                        },
+                        {
+                            "type": "objectId",
+                            "attr": "allOffId",
+                            "title": "All-off command state (Gardena/Rainbird)",
+                            "alsoDependsOn": ["type"],
+                            "disabled": "data.type !== 'Gardena' && data.type !== 'Rainbird'"
                         }
                     ]
-                },
-                "valveEditorHeader": {
-                    "type": "header",
-                    "text": "Edit valve",
-                    "size": 4,
-                    "newLine": true
-                },
-                "valveEditorHint": {
-                    "type": "staticText",
-                    "text": "Select a valve and load it to edit all of its settings. Apply updates the open form only; save the adapter configuration to persist the changes.",
-                    "newLine": true,
-                    "sm": 12,
-                    "md": 12,
-                    "lg": 8
-                },
-                "_editValveId": {
-                    "type": "selectSendTo",
-                    "label": "Selected valve",
-                    "command": "listValveEditorValves",
-                    "jsonData": "{\"valves\": ${JSON.stringify(data.valves ?? [])}}",
-                    "alsoDependsOn": ["valves"],
-                    "manual": false,
-                    "noTranslation": true,
-                    "doNotSave": true,
-                    "newLine": true,
-                    "sm": 6,
-                    "md": 4,
-                    "lg": 3
-                },
-                "loadValveEditor": {
-                    "type": "sendTo",
-                    "label": "Load selected valve",
-                    "command": "loadValveEditor",
-                    "jsonData": "{\"_editValveId\": ${JSON.stringify(data._editValveId ?? null)}, \"valves\": ${JSON.stringify(data.valves ?? [])}}",
-                    "alsoDependsOn": ["_editValveId", "valves"],
-                    "useNative": true,
-                    "disabled": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
-                    "error": {
-                        "noValveSelected": "No valve selected.",
-                        "valveNotFound": "The selected valve no longer exists."
-                    },
-                    "sm": 6,
-                    "md": 4,
-                    "lg": 3
-                },
-                "_valveEditorName": {
-                    "type": "text",
-                    "label": "Display name",
-                    "doNotSave": true,
-                    "newLine": true,
-                    "hidden": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
-                    "disabled": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
-                    "sm": 6,
-                    "md": 4,
-                    "lg": 3
-                },
-                "_valveEditorType": {
-                    "type": "select",
-                    "label": "Type",
-                    "options": [
-                        { "label": "Gardena", "value": "Gardena" },
-                        { "label": "Homematic", "value": "Homematic" },
-                        { "label": "Rainbird", "value": "Rainbird" },
-                        { "label": "Hydrawise", "value": "Hydrawise" },
-                        { "label": "Generic", "value": "Generic" }
-                    ],
-                    "doNotSave": true,
-                    "hidden": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
-                    "disabled": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
-                    "sm": 6,
-                    "md": 4,
-                    "lg": 3
-                },
-                "_valveEditorStateId": {
-                    "type": "objectId",
-                    "label": "State id",
-                    "doNotSave": true,
-                    "hidden": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
-                    "disabled": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
-                    "sm": 12,
-                    "md": 8,
-                    "lg": 6
-                },
-                "_valveEditorEnabled": {
-                    "type": "checkbox",
-                    "label": "Enabled",
-                    "doNotSave": true,
-                    "newLine": true,
-                    "hidden": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
-                    "disabled": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
-                    "sm": 6,
-                    "md": 4,
-                    "lg": 3
-                },
-                "_valveEditorDuration": {
-                    "type": "text",
-                    "label": "Watering duration (plan)",
-                    "tooltip": "Enter minutes, MM:SS or HH:MM:SS",
-                    "validator": "/^(?:\\d+|(?:\\d+:)?[0-5]\\d:[0-5]\\d)$/.test(data._valveEditorDuration ?? '')",
-                    "validatorErrorText": "Enter a valid duration.",
-                    "doNotSave": true,
-                    "hidden": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
-                    "disabled": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
-                    "sm": 6,
-                    "md": 4,
-                    "lg": 3
-                },
-                "_valveEditorManualDuration": {
-                    "type": "text",
-                    "label": "Watering duration (manual start)",
-                    "tooltip": "Enter minutes, MM:SS or HH:MM:SS",
-                    "validator": "/^(?:\\d+|(?:\\d+:)?[0-5]\\d:[0-5]\\d)$/.test(data._valveEditorManualDuration ?? '')",
-                    "validatorErrorText": "Enter a valid duration.",
-                    "doNotSave": true,
-                    "hidden": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
-                    "disabled": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
-                    "sm": 6,
-                    "md": 4,
-                    "lg": 3
-                },
-                "_valveEditorFlowRateLpm": {
-                    "type": "number",
-                    "label": "Flow rate (l/min)",
-                    "min": 0,
-                    "doNotSave": true,
-                    "alsoDependsOn": ["flowMonitor.enabled", "flowMonitor.sensorId"],
-                    "hidden": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
-                    "disabled": "data._editValveId === undefined || data._editValveId === null || data._editValveId === '' || !data.flowMonitor || !data.flowMonitor.enabled || !data.flowMonitor.sensorId || !data.flowMonitor.sensorId.trim()",
-                    "sm": 6,
-                    "md": 4,
-                    "lg": 3
-                },
-                "_valveEditorRainIndependent": {
-                    "type": "checkbox",
-                    "label": "Rain independent",
-                    "doNotSave": true,
-                    "hidden": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
-                    "disabled": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
-                    "sm": 6,
-                    "md": 4,
-                    "lg": 3
-                },
-                "_valveEditorSoilMoistureId": {
-                    "type": "objectId",
-                    "label": "Soil moisture sensor state id",
-                    "doNotSave": true,
-                    "newLine": true,
-                    "hidden": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
-                    "disabled": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
-                    "sm": 12,
-                    "md": 8,
-                    "lg": 6
-                },
-                "_valveEditorMoistureThreshold": {
-                    "type": "number",
-                    "label": "Moisture threshold (%)",
-                    "min": 0,
-                    "max": 100,
-                    "doNotSave": true,
-                    "alsoDependsOn": ["_valveEditorSoilMoistureId"],
-                    "hidden": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
-                    "disabled": "data._editValveId === undefined || data._editValveId === null || data._editValveId === '' || !data._valveEditorSoilMoistureId || !data._valveEditorSoilMoistureId.trim()",
-                    "sm": 6,
-                    "md": 4,
-                    "lg": 3
-                },
-                "_valveEditorDays": {
-                    "type": "text",
-                    "label": "Allowed weekdays",
-                    "tooltip": "Enter 0=Sunday through 6=Saturday as comma-separated values, or leave empty for every day.",
-                    "validator": "/^\\s*(?:[0-6]\\s*(?:,\\s*[0-6]\\s*)*)?$/.test(data._valveEditorDays ?? '')",
-                    "validatorErrorText": "Enter weekdays as comma-separated values from 0 (Sunday) to 6 (Saturday), or leave empty for every day.",
-                    "doNotSave": true,
-                    "hidden": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
-                    "disabled": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
-                    "sm": 12,
-                    "md": 8,
-                    "lg": 6
-                },
-                "valveEditorDaysHint": {
-                    "type": "staticText",
-                    "text": "Enter comma-separated digits: 0=Sunday, 1=Monday, 2=Tuesday, 3=Wednesday, 4=Thursday, 5=Friday, 6=Saturday. Leave empty to allow watering every day.",
-                    "newLine": true,
-                    "hidden": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 12,
-                    "lg": 8
-                },
-                "_valveEditorAllOffId": {
-                    "type": "objectId",
-                    "label": "All-off command state (Gardena/Rainbird)",
-                    "doNotSave": true,
-                    "alsoDependsOn": ["_valveEditorType"],
-                    "hidden": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
-                    "disabled": "data._editValveId === undefined || data._editValveId === null || data._editValveId === '' || (data._valveEditorType !== 'Gardena' && data._valveEditorType !== 'Rainbird')",
-                    "sm": 12,
-                    "md": 8,
-                    "lg": 6
-                },
-                "applyValveEditor": {
-                    "type": "sendTo",
-                    "label": "Apply valve changes",
-                    "command": "applyValveEditor",
-                    "jsonData": "{\"valves\": ${JSON.stringify(data.valves ?? [])}, \"_editValveId\": ${JSON.stringify(data._editValveId ?? null)}, \"_valveEditorName\": ${JSON.stringify(data._valveEditorName ?? '')}, \"_valveEditorType\": ${JSON.stringify(data._valveEditorType ?? '')}, \"_valveEditorStateId\": ${JSON.stringify(data._valveEditorStateId ?? '')}, \"_valveEditorDuration\": ${JSON.stringify(data._valveEditorDuration ?? '')}, \"_valveEditorEnabled\": ${JSON.stringify(data._valveEditorEnabled ?? false)}, \"_valveEditorFlowRateLpm\": ${JSON.stringify(data._valveEditorFlowRateLpm ?? 0)}, \"_valveEditorRainIndependent\": ${JSON.stringify(data._valveEditorRainIndependent ?? false)}, \"_valveEditorMoistureThreshold\": ${JSON.stringify(data._valveEditorMoistureThreshold ?? 0)}, \"_valveEditorSoilMoistureId\": ${JSON.stringify(data._valveEditorSoilMoistureId ?? '')}, \"_valveEditorManualDuration\": ${JSON.stringify(data._valveEditorManualDuration ?? '')}, \"_valveEditorDays\": ${JSON.stringify(data._valveEditorDays ?? '')}, \"_valveEditorAllOffId\": ${JSON.stringify(data._valveEditorAllOffId ?? '')}}",
-                    "alsoDependsOn": ["valves", "_editValveId", "_valveEditorName", "_valveEditorType", "_valveEditorStateId", "_valveEditorDuration", "_valveEditorEnabled", "_valveEditorFlowRateLpm", "_valveEditorRainIndependent", "_valveEditorMoistureThreshold", "_valveEditorSoilMoistureId", "_valveEditorManualDuration", "_valveEditorDays", "_valveEditorAllOffId"],
-                    "useNative": true,
-                    "disabled": "data._editValveId === undefined || data._editValveId === null || data._editValveId === ''",
-                    "error": {
-                        "noValveSelected": "No valve selected.",
-                        "valveNotFound": "The selected valve no longer exists.",
-                        "invalidDuration": "Enter a valid duration.",
-                        "invalidDays": "Enter weekdays as comma-separated values from 0 (Sunday) to 6 (Saturday), or leave empty for every day.",
-                        "invalidNumbers": "Enter valid numeric values for flow rate and moisture threshold."
-                    },
-                    "newLine": true,
-                    "sm": 6,
-                    "md": 4,
-                    "lg": 3
                 }
             }
         },

@@ -1,10 +1,12 @@
 # Context
 
 ## Current Task
-Browserunabhängig Kartenansicht für die Ventiltabelle verwenden.
+Alle Ventileinstellungen direkt in den Karten bearbeiten.
 
 ## Key Decisions
-- `useCardFor` umfasst alle Breakpoints (`xs` bis `xl`), damit Safari dieselbe Darstellung wie Chrome und Firefox zeigt.
+- Der separate Ventil-Detaileditor und seine Message-Commands wurden entfernt.
+- Karten verwenden zeilenbezogene Bedingungen für Sensor-, Feuchte- und All-off-Felder.
+- Textuelle Wochentageingaben werden zu sortierten Ziffern 0–6 normalisiert.
 
 ## Next Steps
 - Keine offenen Schritte.

@@ -6,7 +6,6 @@
 import * as utils from '@iobroker/adapter-core';
 import { normalizeConfig } from './lib/config-defaults';
 import { formatDuration } from './lib/duration';
-import { applyValveEditorFields, buildValveEditorOptions, getValveEditorFields } from './lib/valve-editor';
 import type { IPlanConfig, IrrigationNativeConfig, IValveConfig, ScanType } from './lib/types';
 import { formatValveNumber, NONE_SENTINEL, parsePlanValveTableRows, synchronizePlanWithValves } from './lib/types';
 import { createBaseStates, applyConfigToStates } from './lib/states';
@@ -1003,55 +1002,6 @@ class Irrigation extends utils.Adapter {
                 value: i,
             }));
             this.sendTo(obj.from, obj.command, options, obj.callback);
-            return;
-        }
-
-        if (obj.command === 'listValveEditorValves' && obj.callback) {
-            const rawValves = (obj.message as Record<string, unknown> | undefined)?.valves;
-            this.sendTo(obj.from, obj.command, buildValveEditorOptions(rawValves), obj.callback);
-            return;
-        }
-
-        if (obj.command === 'loadValveEditor' && obj.callback) {
-            const message = obj.message as Record<string, unknown> | undefined;
-            const valveId = message?._editValveId;
-            if (typeof valveId !== 'number' || !Number.isInteger(valveId) || valveId < 0) {
-                this.sendTo(obj.from, obj.command, { error: 'noValveSelected' }, obj.callback);
-                return;
-            }
-            const fields = getValveEditorFields(message?.valves, valveId);
-            if (!fields) {
-                this.sendTo(obj.from, obj.command, { error: 'valveNotFound' }, obj.callback);
-                return;
-            }
-            this.sendTo(obj.from, obj.command, { native: { _editValveId: valveId, ...fields } }, obj.callback);
-            return;
-        }
-
-        if (obj.command === 'applyValveEditor' && obj.callback) {
-            const message = obj.message as Record<string, unknown> | undefined;
-            const result = applyValveEditorFields(message?.valves, message?._editValveId, message);
-            if ('error' in result) {
-                this.sendTo(obj.from, obj.command, { error: result.error }, obj.callback);
-                return;
-            }
-            const fields = getValveEditorFields(result.valves, message?._editValveId);
-            if (!fields) {
-                this.sendTo(obj.from, obj.command, { error: 'valveNotFound' }, obj.callback);
-                return;
-            }
-            this.sendTo(
-                obj.from,
-                obj.command,
-                {
-                    native: {
-                        valves: this.formatValvesForNative(result.valves),
-                        _editValveId: message?._editValveId,
-                        ...fields,
-                    },
-                },
-                obj.callback,
-            );
             return;
         }
 

@@ -71,6 +71,13 @@ export const DEFAULT_CONFIG: IrrigationNativeConfig = {
     },
 };
 
+function normalizeDays(days: unknown): number[] {
+    const values = Array.isArray(days) ? days : typeof days === 'string' ? days.split(',') : [];
+    return [
+        ...new Set(values.map(value => Number(value)).filter(day => Number.isInteger(day) && day >= 0 && day <= 6)),
+    ].sort((a, b) => a - b);
+}
+
 /**
  * Merge a (possibly partial/older) config with defaults so newly introduced
  * fields are always present, without discarding existing user settings.
@@ -131,7 +138,7 @@ export function normalizeConfig(config: Partial<IrrigationNativeConfig>): Irriga
                         : valve.manualDuration === undefined
                           ? 600
                           : Math.max(1, parseDuration(valve.manualDuration)),
-                days: valve.days ?? [],
+                days: normalizeDays(valve.days),
             };
         }),
         nextValveId: config.nextValveId ?? DEFAULT_CONFIG.nextValveId,
