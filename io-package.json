@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.3.23",
+    "version": "0.3.24",
     "news": {
+      "0.3.24": {
+        "en": "**ENHANCED**: Always display valve configuration rows as cards across all browser viewport breakpoints",
+        "de": "**VERBESSERT**: Ventilkonfigurationszeilen werden nun bei allen Browser-Viewport-Breakpoints immer als Karten angezeigt",
+        "ru": "**УЛУЧШЕНО**: Строки конфигурации клапанов теперь всегда отображаются в виде карточек при любых контрольных точках области просмотра браузера",
+        "pt": "**MELHORADO**: As linhas de configuração de válvulas são sempre exibidas como cartões em todos os pontos de interrupção da janela de visualização do navegador",
+        "nl": "**VERBETERD**: Ventielconfiguratierijen worden nu altijd als kaarten weergegeven bij alle browser-viewport-breakpoints",
+        "fr": "**AMÉLIORÉ**: Les lignes de configuration des vannes sont toujours affichées sous forme de cartes à tous les points de rupture de la fenêtre d'affichage du navigateur",
+        "it": "**MIGLIORATO**: Le righe di configurazione delle valvole vengono sempre visualizzate come schede in tutti i breakpoint della finestra del browser",
+        "es": "**MEJORADO**: Las filas de configuración de válvulas se muestran siempre como tarjetas en todos los puntos de interrupción de la ventana del navegador",
+        "pl": "**ULEPSZONE**: Wiersze konfiguracji zaworów są zawsze wyświetlane jako karty we wszystkich punktach przerwania widoku przeglądarki",
+        "uk": "**ПОКРАЩЕНО**: Рядки конфігурації клапанів тепер завжди відображаються у вигляді карток при всіх контрольних точках області перегляду браузера",
+        "zh-cn": "**增强**：阀门配置行现在在所有浏览器视口断点下始终以卡片形式显示"
+      },
       "0.3.23": {
         "en": "**FIXED**: Removed the completed one-time manual-duration migration while retaining the 10-minute defaults for new valves",
         "de": "**BEHOBEN**: Die abgeschlossene einmalige Migration der manuellen Dauer wurde entfernt, wobei die 10-Minuten-Standardwerte für neue Ventile beibehalten wurden",
@@ -80,19 +93,6 @@
         "pl": "**ULEPSZONE**: Zgrupowano przełącznik włączenia, planowany czas podlewania i ręczny czas podlewania w edytorze zaworów oraz doprecyzowano ich etykiety",
         "uk": "**ПОКРАЩЕНО**: Згруповано перемикач увімкнення, заплановану тривалість поливу та ручну тривалість поливу в редакторі клапана та уточнено їх мітки",
         "zh-cn": "**增强**：在阀门编辑器中对启用开关、计划浇水时长和手动启动浇水时长进行了分组，并明确了它们的标签"
-      },
-      "0.3.17": {
-        "en": "**ENHANCED**: Added an optional object-tree selectable soil-moisture sensor per valve; its moisture threshold is enabled only when that valve has a sensor assignment",
-        "de": "**VERBESSERT**: Optionaler, im Objektbaum auswählbarer Bodenfeuchtigkeitssensor pro Ventil hinzugefügt; dessen Feuchtigkeitsschwellenwert wird nur aktiviert, wenn diesem Ventil ein Sensor zugewiesen ist",
-        "ru": "**УЛУЧШЕНО**: Добавлен опциональный датчик влажности почвы, выбираемый в дереве объектов, для каждого клапана; его порог влажности активируется только при назначении датчика этому клапану",
-        "pt": "**MELHORADO**: Adicionado um sensor de umidade do solo opcional selecionável na árvore de objetos por válvula; seu limite de umidade é ativado apenas quando essa válvula possui uma atribuição de sensor",
-        "nl": "**VERBETERD**: Optionele bodemvochtigheidssensor toegevoegd die per klep selecteerbaar is in de objectboom; de vochtdrempel wordt alleen ingeschakeld wanneer aan die klep een sensor is toegewezen",
-        "fr": "**AMÉLIORÉ** : Ajout d'un capteur d'humidité du sol optionnel sélectionnable dans l'arborescence d'objets par vanne ; son seuil d'humidité n'est activé que lorsque cette vanne a une affectation de capteur",
-        "it": "**MIGLIORATO**: Aggiunto un sensore di umidità del suolo opzionale selezionabile nell'albero degli oggetti per ogni valvola; la sua soglia di umidità viene abilitata solo quando a quella valvola è assegnato un sensore",
-        "es": "**MEJORADO**: Se agregó un sensor de humedad del suelo opcional seleccionable en el árbol de objetos por válvula; su umbral de humedad se habilita solo cuando esa válvula tiene asignado un sensor",
-        "pl": "**ULEPSZONE**: Dodano opcjonalny czujnik wilgotności gleby wybieralny w drzewie obiektów dla każdego zaworu; jego próg wilgotności jest włączany tylko wtedy, gdy do tego zaworu przypisany jest czujnik",
-        "uk": "**ПОКРАЩЕНО**: Додано опціональний датчик вологості ґрунту, що вибирається в дереві об'єктів, для кожного клапана; його поріг вологості активується лише тоді, коли цьому клапану призначено датчик",
-        "zh-cn": "**增强**：为每个阀门添加了可在对象树中选择的可选土壤湿度传感器；仅当该阀门分配了传感器时，其湿度阈值才会启用"
       }
     },
     "titleLang": {

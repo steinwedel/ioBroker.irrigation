@@ -1,4 +1,7 @@
 # Changelog
+## 0.3.24 (2026-07-27)
+* (Gerhard Steinwedel) **ENHANCED**: Always display valve configuration rows as cards across all browser viewport breakpoints
+
 ## 0.3.23 (2026-07-26)
 * (Gerhard Steinwedel) **FIXED**: Removed the completed one-time manual-duration migration while retaining the 10-minute defaults for new valves
 

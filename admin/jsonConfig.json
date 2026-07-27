@@ -173,7 +173,7 @@
                     "newLine": true,
                     "noDelete": false,
                     "compact": true,
-                    "useCardFor": ["xs", "sm", "md"],
+                    "useCardFor": ["xs", "sm", "md", "lg", "xl"],
                     "titleAttribute": "name",
                     "items": [
                         {

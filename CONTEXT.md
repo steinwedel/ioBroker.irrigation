@@ -1,11 +1,10 @@
 # Context
 
 ## Current Task
-All-off-Befehlsstate auf Gardena- und Rainbird-Ventile beschränken.
+Browserunabhängig Kartenansicht für die Ventiltabelle verwenden.
 
 ## Key Decisions
-- Das Feld ist nur bei ausgewähltem Ventiltyp Gardena oder Rainbird editierbar.
-- Bestehende Werte bleiben für andere Typen erhalten, können aber nicht bearbeitet werden.
+- `useCardFor` umfasst alle Breakpoints (`xs` bis `xl`), damit Safari dieselbe Darstellung wie Chrome und Firefox zeigt.
 
 ## Next Steps
 - Keine offenen Schritte.
