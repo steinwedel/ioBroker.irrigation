@@ -1,7 +1,44 @@
 import type { IrrigationNativeConfig } from './types';
+import { evaluateHysteresisPause, hysteresisMinutesToMs, type HysteresisPauseState } from './hysteresis';
 
 /** Sensor values older than this are considered stale and trigger conservative blocking. */
 const MAX_SENSOR_AGE_MS = 2 * 60 * 60 * 1000;
+
+/** How often evaluateRainPause() is re-run even without a new rain-sensor event, so the hysteresis delay elapses reliably while rain stays off. Mirrors WindMonitor's periodic check. */
+const RAIN_CHECK_INTERVAL_MS = 30_000;
+
+/** @deprecated Use HysteresisPauseState from './hysteresis' instead; kept as an alias for existing imports/tests. */
+export type RainPauseState = HysteresisPauseState;
+
+/**
+ * Pure decision function for the rain pause-with-hysteresis logic. Many rain
+ * sensors (e.g. tipping-bucket gauges) toggle their boolean "rain detected"
+ * state true/false in quick succession as individual drops register; without
+ * this hysteresis, every such flip would immediately stop and then restart
+ * every currently running valve via AutomationEngine.setRainPause(),
+ * producing a sustained stream of real start()/stop() hardware commands with
+ * no obvious external trigger. Once rain is detected, the pause is
+ * immediate; once rain stops, it only resumes after staying clear
+ * continuously for `hysteresisMs`. Delegates the actual hysteresis timing to
+ * the shared evaluateHysteresisPause() (see hysteresis.ts), which
+ * WindMonitor's evaluate() (wind.ts) also uses, so both stay behaviorally
+ * consistent.
+ *
+ * @param params
+ * @param params.raining Current raw rain-sensor reading.
+ * @param params.belowSinceMs Previous `belowSinceMs` from the last evaluation (state carried between calls).
+ * @param params.nowMs Current timestamp in ms.
+ * @param params.hysteresisMs Minimum time in ms that rain must stay off before resuming.
+ */
+export function evaluateRainPause(params: {
+    raining: boolean;
+    belowSinceMs: number | null;
+    nowMs: number;
+    hysteresisMs: number;
+}): RainPauseState {
+    const { raining, belowSinceMs, nowMs, hysteresisMs } = params;
+    return evaluateHysteresisPause({ overLimit: raining, belowSinceMs, nowMs, hysteresisMs });
+}
 
 export interface SensorsDeps {
     adapter: ioBroker.Adapter;
@@ -24,6 +61,11 @@ export class SensorManager {
     private readonly soilMoistureValues = new Map<string, { value: number; ts: number }>();
     private temperatureTs: number | undefined;
     private subscribedIds: string[] = [];
+    /** Debounced/hysteresis-applied pause decision last reported via onRainChange(), see evaluateRainPause(). */
+    private rainPaused = false;
+    private rainBelowSinceMs: number | null = null;
+    /** Periodic re-evaluation so the resume hysteresis elapses even without a new rain-sensor event. */
+    private rainCheckTimer: ReturnType<ioBroker.Adapter['setInterval']> | undefined;
 
     public constructor(deps: SensorsDeps) {
         this.deps = deps;
@@ -31,6 +73,12 @@ export class SensorManager {
 
     public async init(): Promise<void> {
         await this.resubscribe();
+        this.rainCheckTimer = this.deps.adapter.setInterval(() => {
+            this.evaluateRainPause().catch(error =>
+                this.deps.adapter.log.error(`Rain pause check failed: ${(error as Error).message}`),
+            );
+        }, RAIN_CHECK_INTERVAL_MS);
+        await this.evaluateRainPause();
     }
 
     public async resubscribe(): Promise<void> {
@@ -110,7 +158,12 @@ export class SensorManager {
             }
             this.rainStateTs = Date.now();
             await this.deps.adapter.setStateAsync('sensors.rain', { val: this.rainState, ack: true });
-            await this.deps.onRainChange?.(this.rainState);
+            // Debounced through evaluateRainPause() rather than calling onRainChange()
+            // directly here - see the evaluateRainPause()/RainPauseState doc comment
+            // for why an un-debounced pause signal can repeatedly stop and restart
+            // every currently running valve for a flapping (e.g. tipping-bucket) rain
+            // sensor.
+            await this.evaluateRainPause();
             return true;
         }
         const isGlobalSoilMoistureSensor = id === config.sensors.soilMoistureId;
@@ -181,10 +234,37 @@ export class SensorManager {
      * weatherApi, flowMonitor, valves).
      */
     public destroy(): void {
+        if (this.rainCheckTimer) {
+            this.deps.adapter.clearInterval(this.rainCheckTimer);
+            this.rainCheckTimer = undefined;
+        }
         for (const id of this.subscribedIds) {
             this.deps.adapter.unsubscribeForeignStatesAsync(id).catch(() => undefined);
         }
         this.subscribedIds = [];
+    }
+
+    /**
+     * Applies evaluateRainPause() to the current raw `rainState` and only
+     * calls onRainChange() when the debounced decision actually flips - see
+     * the evaluateRainPause()/RainPauseState doc comment for why this
+     * debouncing is necessary. Run both on every rain-sensor event and
+     * periodically (see RAIN_CHECK_INTERVAL_MS) so the hysteresis delay
+     * elapses reliably even while no new sensor event arrives.
+     */
+    private async evaluateRainPause(): Promise<void> {
+        const hysteresisMinutes = this.deps.getConfig().scheduler.rainHysteresisMinutes;
+        const result = evaluateRainPause({
+            raining: this.rainState,
+            belowSinceMs: this.rainBelowSinceMs,
+            nowMs: Date.now(),
+            hysteresisMs: hysteresisMinutesToMs(hysteresisMinutes),
+        });
+        this.rainBelowSinceMs = result.belowSinceMs;
+        if (result.paused !== this.rainPaused) {
+            this.rainPaused = result.paused;
+            await this.deps.onRainChange?.(this.rainPaused);
+        }
     }
 
     /**

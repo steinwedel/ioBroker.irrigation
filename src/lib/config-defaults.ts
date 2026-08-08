@@ -13,6 +13,7 @@ export const DEFAULT_CONFIG: IrrigationNativeConfig = {
     scheduler: {
         autoMode: false,
         pauseOnRain: false,
+        rainHysteresisMinutes: 10,
         windPauseEnabled: false,
         windSpeedStateId: '',
         windSpeedLimit: 0,
@@ -20,7 +21,6 @@ export const DEFAULT_CONFIG: IrrigationNativeConfig = {
         windGustLimit: 0,
         windHysteresisMinutes: 10,
         timerTimes: [],
-        extensionFactor: 1,
         temperatureAdjustmentEnabled: false,
         temperatureAdjustmentStateId: '',
         pumpCapacity: 0,

@@ -1,4 +1,5 @@
 import type { IrrigationNativeConfig } from './types';
+import { evaluateHysteresisPause, hysteresisMinutesToMs, type HysteresisPauseState } from './hysteresis';
 
 export interface WindDeps {
     adapter: ioBroker.Adapter;
@@ -6,12 +7,8 @@ export interface WindDeps {
     onWindPauseChange: (paused: boolean) => Promise<void>;
 }
 
-export interface WindPauseState {
-    /** True while speed or gust is at/above its configured limit, or hysteresis has not elapsed yet */
-    paused: boolean;
-    /** Timestamp (ms) since speed/gust first dropped below both limits, or null while over limit */
-    belowSinceMs: number | null;
-}
+/** @deprecated Use HysteresisPauseState from './hysteresis' instead; kept as an alias for existing imports/tests. */
+export type WindPauseState = HysteresisPauseState;
 
 /**
  * Pure decision function for the wind/gust pause-with-hysteresis logic (see
@@ -19,7 +16,9 @@ export interface WindPauseState {
  * that particular check. Once over a limit, the valve stays paused
  * immediately; once both are back under their limits, it only resumes after
  * staying there continuously for `hysteresisMs`, avoiding rapid pause/resume
- * flapping in gusty conditions.
+ * flapping in gusty conditions. Delegates the actual hysteresis timing to the
+ * shared evaluateHysteresisPause() (see hysteresis.ts), which SensorManager's
+ * rain pause (sensors.ts) also uses, so both stay behaviorally consistent.
  *
  * @param params
  * @param params.speed Current wind speed in km/h, or undefined if not configured/available.
@@ -43,14 +42,7 @@ export function evaluateWindPause(params: {
     const overLimit =
         (speedLimit > 0 && speed !== undefined && speed >= speedLimit) ||
         (gustLimit > 0 && gust !== undefined && gust >= gustLimit);
-
-    if (overLimit) {
-        return { paused: true, belowSinceMs: null };
-    }
-
-    const effectiveBelowSinceMs = belowSinceMs ?? nowMs;
-    const elapsedMs = nowMs - effectiveBelowSinceMs;
-    return { paused: elapsedMs < hysteresisMs, belowSinceMs: effectiveBelowSinceMs };
+    return evaluateHysteresisPause({ overLimit, belowSinceMs, nowMs, hysteresisMs });
 }
 
 /**
@@ -148,8 +140,7 @@ export class WindMonitor {
             gustLimit: config.windGustLimit,
             belowSinceMs: this.belowSinceMs,
             nowMs: Date.now(),
-            hysteresisMs:
-                Math.max(0, Number.isFinite(config.windHysteresisMinutes) ? config.windHysteresisMinutes : 10) * 60_000,
+            hysteresisMs: hysteresisMinutesToMs(config.windHysteresisMinutes),
         });
         this.belowSinceMs = result.belowSinceMs;
         if (result.paused !== this.paused) {

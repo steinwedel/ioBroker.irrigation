@@ -1,4 +1,7 @@
 # Changelog
+## 0.3.26 (2026-08-08)
+* (Gerhard Steinwedel) **FIXED**: Reliably reset Gardena valve states when their local watering countdown reaches zero
+
 ## 0.3.25 (2026-07-27)
 * (Gerhard Steinwedel) **ENHANCED**: Integrated all valve settings into the valve cards and removed the separate valve editor
 

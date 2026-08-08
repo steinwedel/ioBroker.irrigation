@@ -426,7 +426,7 @@ export class AutomationEngine {
     }
 
     private effectiveDuration(config: IrrigationNativeConfig, valveIndex: number): number {
-        return config.valves[valveIndex].duration * config.scheduler.extensionFactor * this.temperatureAdjustmentFactor;
+        return config.valves[valveIndex].duration * this.temperatureAdjustmentFactor;
     }
 
     /**

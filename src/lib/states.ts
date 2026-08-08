@@ -32,6 +32,15 @@ export async function createBaseStates(adapter: ioBroker.Adapter): Promise<void>
         write: true,
         def: false,
     });
+    await setObj(adapter, 'automation.rainHysteresisMinutes', {
+        name: 'Rain resume hysteresis',
+        type: 'number',
+        role: 'value',
+        unit: 'min',
+        read: true,
+        write: false,
+        def: 10,
+    });
     await setObj(adapter, 'automation.windPauseEnabled', {
         name: 'Pause automatic watering when windy',
         type: 'boolean',
@@ -242,16 +251,6 @@ export async function createBaseStates(adapter: ioBroker.Adapter): Promise<void>
         read: true,
         write: true,
         def: 'All',
-    });
-    await setObj(adapter, 'automation.extensionFactor', {
-        name: 'Duration extension factor',
-        type: 'number',
-        role: 'value',
-        read: true,
-        write: true,
-        min: 0.5,
-        max: 5,
-        def: 1,
     });
     await setObj(adapter, 'automation.temperatureAdjustmentEnabled', {
         name: 'Temperature-controlled irrigation adjustment enabled',
@@ -707,6 +706,10 @@ export async function createBaseStates(adapter: ioBroker.Adapter): Promise<void>
 export async function applyConfigToStates(adapter: ioBroker.Adapter, config: IrrigationNativeConfig): Promise<void> {
     await adapter.setStateAsync('automation.active', { val: config.scheduler.autoMode, ack: true });
     await adapter.setStateAsync('automation.pauseOnRain', { val: config.scheduler.pauseOnRain, ack: true });
+    await adapter.setStateAsync('automation.rainHysteresisMinutes', {
+        val: config.scheduler.rainHysteresisMinutes,
+        ack: true,
+    });
     await adapter.setStateAsync('automation.windPauseEnabled', { val: config.scheduler.windPauseEnabled, ack: true });
     await adapter.setStateAsync('automation.windSpeedStateId', { val: config.scheduler.windSpeedStateId, ack: true });
     await adapter.setStateAsync('automation.windSpeedLimit', { val: config.scheduler.windSpeedLimit, ack: true });
@@ -716,7 +719,6 @@ export async function applyConfigToStates(adapter: ioBroker.Adapter, config: Irr
         val: config.scheduler.windHysteresisMinutes,
         ack: true,
     });
-    await adapter.setStateAsync('automation.extensionFactor', { val: config.scheduler.extensionFactor, ack: true });
     await adapter.setStateAsync('automation.temperatureAdjustmentEnabled', {
         val: config.scheduler.temperatureAdjustmentEnabled,
         ack: true,

@@ -1,12 +1,12 @@
 # Context
 
 ## Current Task
-Alle Ventileinstellungen direkt in den Karten bearbeiten.
+Feature-Gap-Vergleich mit ioBroker.sprinklecontrol und kommerziellen Bewässerungscomputern durchgeführt und Umsetzungsplan erstellt.
 
 ## Key Decisions
-- Der separate Ventil-Detaileditor und seine Message-Commands wurden entfernt.
-- Karten verwenden zeilenbezogene Bedingungen für Sensor-, Feuchte- und All-off-Felder.
-- Textuelle Wochentageingaben werden zu sortierten Ziffern 0–6 normalisiert.
+- Vollständiger Plan mit 15 Punkten in 3 Phasen liegt in `docs/feature-gap-plan.md`.
+- Durchfluss-Anomalie-Erkennung und Frost-/Wind-Blockade vor Start sind bereits vorhanden (keine echten Gaps).
+- Noch keine der geplanten Funktionen umgesetzt.
 
 ## Next Steps
-- Keine offenen Schritte.
+- Bei Bedarf mit Phase 1 (Quick Wins) beginnen, siehe `docs/feature-gap-plan.md`.

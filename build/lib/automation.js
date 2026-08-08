@@ -355,7 +355,7 @@ class AutomationEngine {
     return totalSeconds / 60;
   }
   effectiveDuration(config, valveIndex) {
-    return config.valves[valveIndex].duration * config.scheduler.extensionFactor * this.temperatureAdjustmentFactor;
+    return config.valves[valveIndex].duration * this.temperatureAdjustmentFactor;
   }
   /**
    * Computes the "logical" elapsed time (in seconds) that would have passed

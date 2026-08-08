@@ -159,6 +159,15 @@ export interface IPlanConfig {
 export interface ISchedulerConfig {
     autoMode: boolean;
     pauseOnRain: boolean;
+    /**
+     * Minutes the rain sensor must report "no rain" continuously before
+     * resuming watering. Mirrors windHysteresisMinutes: many rain sensors
+     * (e.g. tipping-bucket gauges) toggle their boolean "rain detected"
+     * state true/false in quick succession as individual drops register,
+     * and without a resume delay every such flip would stop and restart
+     * every currently running valve.
+     */
+    rainHysteresisMinutes: number;
     windPauseEnabled: boolean;
     windSpeedStateId: string;
     /** km/h, 0 = disabled */
@@ -170,7 +179,6 @@ export interface ISchedulerConfig {
     windHysteresisMinutes: number;
     /** "HH:MM" strings */
     timerTimes: string[];
-    extensionFactor: number;
     temperatureAdjustmentEnabled: boolean;
     temperatureAdjustmentStateId: string;
     /** l/min, 0 = sequential only, >0 = parallel batch optimization */
@@ -269,7 +277,7 @@ export type Batch = number[];
 
 export interface IActiveValveRuntime {
     valveIndex: number;
-    /** Effective duration in minutes for this run (already includes extensionFactor for automatic runs) */
+    /** Effective duration in minutes for this run (already includes the temperature adjustment factor for automatic runs) */
     durationMinutes: number;
     startedAt: number;
 }

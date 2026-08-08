@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.3.25",
+    "version": "0.3.26",
     "news": {
+      "0.3.26": {
+        "en": "**FIXED**: Reliably reset Gardena valve states when their local watering countdown reaches zero",
+        "de": "**BEHOBEN**: Zuverlässiges Zurücksetzen der Gardena-Ventilzustände, wenn deren lokaler Bewässerungs-Countdown Null erreicht",
+        "ru": "**ИСПРАВЛЕНО**: Надёжный сброс состояний клапанов Gardena при достижении нуля локальным таймером полива",
+        "pt": "**CORRIGIDO**: Redefinição confiável dos estados das válvulas Gardena quando a contagem regressiva local de irrigação atinge zero",
+        "nl": "**OPGELOST**: Betrouwbaar resetten van Gardena-klepstaten wanneer hun lokale bewateringsaftelling nul bereikt",
+        "fr": "**CORRIGÉ** : Réinitialisation fiable des états des vannes Gardena lorsque leur compte à rebours d'arrosage local atteint zéro",
+        "it": "**RISOLTO**: Ripristino affidabile degli stati delle valvole Gardena quando il conto alla rovescia locale dell'irrigazione raggiunge zero",
+        "es": "**SOLUCIONADO**: Restablecimiento fiable de los estados de las válvulas Gardena cuando su cuenta regresiva local de riego llega a cero",
+        "pl": "**NAPRAWIONO**: Niezawodne resetowanie stanów zaworów Gardena, gdy ich lokalny licznik czasu podlewania osiągnie zero",
+        "uk": "**ВИПРАВЛЕНО**: Надійне скидання станів клапанів Gardena, коли їхній локальний таймер зрошення досягає нуля",
+        "zh-cn": "**已修复**：当本地浇水倒计时归零时，可靠地重置 Gardena 阀门状态"
+      },
       "0.3.25": {
         "en": "**ENHANCED**: Integrated all valve settings into the valve cards and removed the separate valve editor",
         "de": "**VERBESSERT**: Alle Ventileinstellungen in die Ventilkarten integriert und den separaten Ventileditor entfernt",
@@ -80,19 +93,6 @@
         "pl": "**NAPRAWIONO**: Usunięto destrukcyjną akcję usuwania wszystkich zaworów ze strony konfiguracji zaworów",
         "uk": "**ВИПРАВЛЕНО**: Видалено деструктивну дію видалення всіх клапанів зі сторінки конфігурації клапанів",
         "zh-cn": "**已修复**：从阀门配置页面中移除了删除所有阀门的破坏性操作"
-      },
-      "0.3.19": {
-        "en": "**ENHANCED**: Added a persistent explanation of the allowed-weekdays input format and its weekday-to-digit mapping in the valve editor",
-        "de": "**VERBESSERT**: Eine dauerhafte Erklärung des Eingabeformats für erlaubte Wochentage und deren Wochentag-zu-Ziffer-Zuordnung wurde im Ventil-Editor hinzugefügt",
-        "ru": "**УЛУЧШЕНО**: Добавлено постоянное объяснение формата ввода разрешённых дней недели и их соответствия цифрам в редакторе клапанов",
-        "pt": "**MELHORADO**: Adicionada uma explicação permanente do formato de entrada dos dias da semana permitidos e seu mapeamento de dia da semana para dígito no editor de válvulas",
-        "nl": "**VERBETERD**: Een permanente uitleg van het invoerformaat voor toegestane weekdagen en de toewijzing van weekdag naar cijfer toegevoegd in de klep-editor",
-        "fr": "**AMÉLIORÉ** : Ajout d'une explication permanente du format de saisie des jours de la semaine autorisés et de leur correspondance jour-chiffre dans l'éditeur de vannes",
-        "it": "**MIGLIORATO**: Aggiunta una spiegazione permanente del formato di input dei giorni della settimana consentiti e della loro mappatura giorno-cifra nell'editor delle valvole",
-        "es": "**MEJORADO**: Se agregó una explicación permanente del formato de entrada de los días de la semana permitidos y su mapeo de día de la semana a dígito en el editor de válvulas",
-        "pl": "**ULEPSZONE**: Dodano trwałe wyjaśnienie formatu wprowadzania dozwolonych dni tygodnia oraz ich mapowania dzień-cyfra w edytorze zaworów",
-        "uk": "**ПОКРАЩЕНО**: Додано постійне пояснення формату введення дозволених днів тижня та їх відповідності цифрам у редакторі клапанів",
-        "zh-cn": "**增强**：在阀门编辑器中添加了允许工作日输入格式及其星期到数字映射的持久性说明"
       }
     },
     "titleLang": {

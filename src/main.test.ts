@@ -13,7 +13,7 @@ import { resolvePlanFromIcalTitle } from './lib/scheduler';
 import { parsePlanValveTableRows, synchronizePlanWithValves } from './lib/types';
 import { ValveController } from './lib/ventile';
 import { evaluateWindPause, WindMonitor } from './lib/wind';
-import { SensorManager } from './lib/sensors';
+import { SensorManager, evaluateRainPause } from './lib/sensors';
 import type { AutomationDeps } from './lib/automation';
 import type { IPlanConfig, IrrigationNativeConfig, IValveConfig } from './lib/types';
 
@@ -154,6 +154,53 @@ describe('wind.evaluateWindPause', () => {
     it('resets belowSinceMs to null and restarts the hysteresis if wind goes back over the limit', () => {
         const stillOver = evaluateWindPause({ ...base, speed: 25, gust: 10, belowSinceMs: 500_000, nowMs: 1_000_000 });
         expect(stillOver).to.deep.equal({ paused: true, belowSinceMs: null });
+    });
+});
+
+describe('sensors.evaluateRainPause', () => {
+    const base = { belowSinceMs: null, nowMs: 1_000_000, hysteresisMs: 600_000 };
+
+    it('pauses immediately while raining', () => {
+        const result = evaluateRainPause({ ...base, raining: true });
+        expect(result).to.deep.equal({ paused: true, belowSinceMs: null });
+    });
+
+    it('does not pause once rain has stopped and the hysteresis has already elapsed', () => {
+        const result = evaluateRainPause({ ...base, raining: false, belowSinceMs: base.nowMs - base.hysteresisMs });
+        expect(result.paused).to.equal(false);
+    });
+
+    it('starts the hysteresis timer on the first no-rain evaluation and stays paused until it elapses', () => {
+        const firstBelow = evaluateRainPause({ ...base, raining: false, belowSinceMs: null, nowMs: 1_000_000 });
+        expect(firstBelow).to.deep.equal({ paused: true, belowSinceMs: 1_000_000 });
+
+        const stillWithinHysteresis = evaluateRainPause({
+            ...base,
+            raining: false,
+            belowSinceMs: firstBelow.belowSinceMs,
+            nowMs: 1_000_000 + 300_000, // 5 min < 10 min hysteresis
+        });
+        expect(stillWithinHysteresis).to.deep.equal({ paused: true, belowSinceMs: 1_000_000 });
+
+        const afterHysteresis = evaluateRainPause({
+            ...base,
+            raining: false,
+            belowSinceMs: firstBelow.belowSinceMs,
+            nowMs: 1_000_000 + 600_000, // exactly 10 min hysteresis elapsed
+        });
+        expect(afterHysteresis).to.deep.equal({ paused: false, belowSinceMs: 1_000_000 });
+    });
+
+    it('resets belowSinceMs to null and restarts the hysteresis if rain starts again, so a flapping (tipping-bucket) sensor cannot repeatedly toggle the pause decision', () => {
+        // Simulates a sensor that flips true/false every few seconds: each "true" pulse
+        // must reset the countdown, so the debounced decision (evaluateRainPause's
+        // result, as consumed by SensorManager.evaluateRainPause()) never flips to
+        // "resume" until rain has genuinely stayed off for the full hysteresis window.
+        const rainAgain = evaluateRainPause({ ...base, raining: true, belowSinceMs: 500_000, nowMs: 1_000_000 });
+        expect(rainAgain).to.deep.equal({ paused: true, belowSinceMs: null });
+
+        const belowRightAfter = evaluateRainPause({ ...base, raining: false, belowSinceMs: null, nowMs: 1_000_001 });
+        expect(belowRightAfter).to.deep.equal({ paused: true, belowSinceMs: 1_000_001 });
     });
 });
 
@@ -390,18 +437,29 @@ describe('ValveController Rainbird allOffId guard', () => {
 describe('ValveController per-type start/stop/status', () => {
     function makeFakeAdapter(): ioBroker.Adapter {
         const foreignStates = new Map<string, unknown>();
+        const states = new Map<string, unknown>();
         const fake = {
+            intervalHandler: undefined as (() => void) | undefined,
             setForeignStateAsync: (id: string, val: unknown) => {
                 foreignStates.set(id, val);
                 return Promise.resolve();
             },
             getForeignStateAsync: () => Promise.resolve(undefined),
-            setStateAsync: () => Promise.resolve(),
+            setStateAsync: (id: string, state: ioBroker.SettableState) => {
+                states.set(id, state.val);
+                return Promise.resolve();
+            },
             subscribeForeignStatesAsync: () => Promise.resolve(),
-            setInterval: (handler: () => void, timeout: number) => global.setInterval(handler, timeout),
-            clearInterval: (timer: NodeJS.Timeout) => global.clearInterval(timer),
+            setInterval: (handler: () => void) => {
+                fake.intervalHandler = handler;
+                return 1;
+            },
+            clearInterval: () => {
+                fake.intervalHandler = undefined;
+            },
             log: { debug: () => undefined, info: () => undefined, warn: () => undefined, error: () => undefined },
             foreignStates,
+            states,
         };
         return fake as unknown as ioBroker.Adapter;
     }
@@ -428,6 +486,29 @@ describe('ValveController per-type start/stop/status', () => {
                 'smartgarden.0.DEVICE_x.SERVICE_VALVE_x.duration_value',
             ),
         ).to.equal('STOP_UNTIL_NEXT_TASK');
+    });
+
+    it('Gardena: marks the valve state off when its local duration reaches zero', async () => {
+        const adapter = makeFakeAdapter();
+        const valve = new ValveController(
+            adapter,
+            0,
+            makeValve({ type: 'Gardena', stateId: 'smartgarden.0.DEVICE_x.SERVICE_VALVE_x.duration_value' }),
+        );
+
+        await valve.start(1);
+        const fake = adapter as unknown as {
+            intervalHandler: (() => void) | undefined;
+            states: Map<string, unknown>;
+        };
+        const tick = fake.intervalHandler;
+        expect(tick).to.be.a('function');
+        tick?.();
+        await new Promise<void>(resolve => setImmediate(resolve));
+
+        expect(valve.isRunning()).to.equal(false);
+        expect(fake.states.get('valves.valve_000.state')).to.equal(false);
+        expect(fake.states.get('valves.valve_000.remainingDuration')).to.equal(0);
     });
 
     it('Gardena: a device-reported activity_value of SCHEDULED_WATERING marks the valve as running', async () => {
@@ -598,6 +679,7 @@ describe('dwd.DwdRestriction.check', () => {
             scheduler: {
                 autoMode: false,
                 pauseOnRain: false,
+                rainHysteresisMinutes: 10,
                 windPauseEnabled: false,
                 windSpeedStateId: '',
                 windSpeedLimit: 0,
@@ -605,7 +687,6 @@ describe('dwd.DwdRestriction.check', () => {
                 windGustLimit: 0,
                 windHysteresisMinutes: 10,
                 timerTimes: [],
-                extensionFactor: 1,
                 temperatureAdjustmentEnabled: false,
                 temperatureAdjustmentStateId: '',
                 pumpCapacity: 0,
@@ -982,6 +1063,7 @@ describe('automation temperature-controlled irrigation adjustment (full plan run
             scheduler: {
                 autoMode: false,
                 pauseOnRain: false,
+                rainHysteresisMinutes: 10,
                 windPauseEnabled: false,
                 windSpeedStateId: '',
                 windSpeedLimit: 0,
@@ -989,7 +1071,6 @@ describe('automation temperature-controlled irrigation adjustment (full plan run
                 windGustLimit: 0,
                 windHysteresisMinutes: 10,
                 timerTimes: [],
-                extensionFactor: 1,
                 temperatureAdjustmentEnabled,
                 temperatureAdjustmentStateId: temperatureAdjustmentEnabled ? 'sensors.outside_temp' : '',
                 pumpCapacity: 0,
@@ -1173,6 +1254,7 @@ describe('automation.recoverAfterRestart', () => {
             scheduler: {
                 autoMode: false,
                 pauseOnRain: false,
+                rainHysteresisMinutes: 10,
                 windPauseEnabled: false,
                 windSpeedStateId: '',
                 windSpeedLimit: 0,
@@ -1180,7 +1262,6 @@ describe('automation.recoverAfterRestart', () => {
                 windGustLimit: 0,
                 windHysteresisMinutes: 10,
                 timerTimes: [],
-                extensionFactor: 1,
                 temperatureAdjustmentEnabled: false,
                 temperatureAdjustmentStateId: '',
                 pumpCapacity: 0,
@@ -1337,6 +1418,7 @@ describe('automation pause/resume: correct remaining time and overlapping blocke
             scheduler: {
                 autoMode: false,
                 pauseOnRain: true,
+                rainHysteresisMinutes: 10,
                 windPauseEnabled: true,
                 windSpeedStateId: '',
                 windSpeedLimit: 0,
@@ -1344,7 +1426,6 @@ describe('automation pause/resume: correct remaining time and overlapping blocke
                 windGustLimit: 0,
                 windHysteresisMinutes: 10,
                 timerTimes: [],
-                extensionFactor: 1,
                 temperatureAdjustmentEnabled: false,
                 temperatureAdjustmentStateId: '',
                 pumpCapacity: 0,
@@ -1490,7 +1571,6 @@ describe('automation pause/resume: correct remaining time and overlapping blocke
         expect(engine.isManualRunActive()).to.equal(true);
 
         await engine.manualSetValveState(0, false);
-
         expect(valve.stopCalls).to.equal(1);
         expect(engine.isManualRunActive()).to.equal(false);
     });
@@ -1618,6 +1698,7 @@ describe('wind.WindMonitor initial sensor read', () => {
             scheduler: {
                 autoMode: false,
                 pauseOnRain: false,
+                rainHysteresisMinutes: 10,
                 windPauseEnabled: true,
                 windSpeedStateId: 'sensors.windSpeed',
                 windSpeedLimit: 20,
@@ -1625,7 +1706,6 @@ describe('wind.WindMonitor initial sensor read', () => {
                 windGustLimit: 40,
                 windHysteresisMinutes: 10,
                 timerTimes: [],
-                extensionFactor: 1,
                 temperatureAdjustmentEnabled: false,
                 temperatureAdjustmentStateId: '',
                 pumpCapacity: 0,
@@ -1742,6 +1822,7 @@ describe('sensors.SensorManager initial read and stale-data detection', () => {
             scheduler: {
                 autoMode: false,
                 pauseOnRain: false,
+                rainHysteresisMinutes: 10,
                 windPauseEnabled: false,
                 windSpeedStateId: '',
                 windSpeedLimit: 0,
@@ -1749,7 +1830,6 @@ describe('sensors.SensorManager initial read and stale-data detection', () => {
                 windGustLimit: 0,
                 windHysteresisMinutes: 10,
                 timerTimes: [],
-                extensionFactor: 1,
                 temperatureAdjustmentEnabled: false,
                 temperatureAdjustmentStateId: '',
                 pumpCapacity: 0,
@@ -1798,6 +1878,8 @@ describe('sensors.SensorManager initial read and stale-data detection', () => {
             subscribeForeignStatesAsync: () => Promise.resolve(),
             unsubscribeForeignStatesAsync: () => Promise.resolve(),
             setStateAsync: () => Promise.resolve(),
+            setInterval: () => undefined as unknown as ReturnType<ioBroker.Adapter['setInterval']>,
+            clearInterval: () => undefined,
             log: { debug: () => undefined, info: () => undefined, warn: () => undefined, error: () => undefined },
         };
         return fake as unknown as ioBroker.Adapter;

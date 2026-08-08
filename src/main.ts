@@ -118,6 +118,20 @@ class Irrigation extends utils.Adapter {
     private rateLimiterPoll: ReturnType<ioBroker.Adapter['setInterval']> | undefined;
     private scanProgressClearTimer: ReturnType<ioBroker.Adapter['setTimeout']> | undefined;
     private isScanning = false;
+    /**
+     * False until onReady() has fully finished constructing/initializing every
+     * dependency (automation, valves, sensors, etc.). On a system with many
+     * configured valves and/or a slow/unresponsive DWD or weather API, this
+     * full startup sequence can take many seconds. subscribeStates() is
+     * called as the very first thing in onReady() (see there) so no command
+     * write is ever silently lost, but the command handlers below still need
+     * `this.automation`/`this.valves` etc. to exist - any ack=false command
+     * that arrives before that is queued here (see pendingEarlyCommands)
+     * instead of either crashing (TypeError on an undefined dependency) or
+     * being dropped, and is replayed once onReady() completes.
+     */
+    private isFullyReady = false;
+    private readonly pendingEarlyCommands: { id: string; state: ioBroker.State }[] = [];
 
     public constructor(options: Partial<utils.AdapterOptions> = {}) {
         super({
@@ -131,6 +145,47 @@ class Irrigation extends utils.Adapter {
     }
 
     private async onReady(): Promise<void> {
+        try {
+            await this.onReadyInner();
+        } catch (error) {
+            // If onReadyInner() throws before reaching `isFullyReady = true` (e.g. a
+            // hard failure in dwd.init()/weatherApi.init()), any commands already
+            // queued in pendingEarlyCommands (see the field comment) are about to be
+            // discarded - the process will exit/restart and this in-memory queue does
+            // not survive that. Surface that loss explicitly at error level (matching
+            // the severity of the crash itself) rather than leaving only the earlier,
+            // easy-to-miss per-command "queuing" log line as the only trace of a
+            // real-world command (e.g. "Start") that never actually ran.
+            if (this.pendingEarlyCommands.length > 0) {
+                this.log.error(
+                    `Adapter startup failed with ${this.pendingEarlyCommands.length} command(s) still queued and now lost: ` +
+                        `${this.pendingEarlyCommands.map(c => c.id).join(', ')}`,
+                );
+            }
+            throw error;
+        }
+    }
+
+    private async onReadyInner(): Promise<void> {
+        // Subscribe as the very first thing, before any other (possibly slow) async
+        // initialization below - migrateNativeConfig, cleanupStale*, createBaseStates,
+        // the per-valve init() loop (can be significant with many configured valves),
+        // and especially dwd.init()/weatherApi.init() (real network requests) can
+        // together take many seconds on a loaded system. Until subscribeStates()
+        // actually registers these patterns, ioBroker delivers a stateChange event for
+        // them to no one - it does not queue or replay events from before the
+        // subscription existed - so a command (e.g. "Start") sent in that window is
+        // silently lost with no error and no log entry. See isFullyReady/
+        // pendingEarlyCommands for how a command that arrives before the dependencies
+        // these handlers need (this.automation, this.valves, ...) are constructed is
+        // now queued and replayed instead of being dropped or throwing.
+        this.subscribeStates('automation.*');
+        this.subscribeStates('valves.*.manualStart');
+        this.subscribeStates('valves.*.calibrateFlow');
+        this.subscribeStates('valves.*.duration');
+        this.subscribeStates('watchdog.testNotify');
+        this.subscribeStates('valves.*.state');
+
         this.config2 = normalizeConfig(this.config);
         await this.migrateNativeConfig();
         await this.cleanupStaleValveObjects();
@@ -218,17 +273,19 @@ class Irrigation extends utils.Adapter {
         this.weatherApi = new WeatherApi({ adapter: this, getConfig: () => this.config2 });
         await this.weatherApi.init();
 
-        // Subscribe to all our own automation/zone/valve control states
-        this.subscribeStates('automation.*');
-        this.subscribeStates('valves.*.manualStart');
-        this.subscribeStates('valves.*.calibrateFlow');
-        this.subscribeStates('valves.*.duration');
-        this.subscribeStates('watchdog.testNotify');
-        this.subscribeStates('valves.*.state');
-
         await this.setStateAsync('info.connection', { val: true, ack: true });
 
         this.rateLimiterPoll = this.setInterval(() => this.updateRateLimitStates(), 10_000);
+
+        // Startup is now fully complete: replay any command that arrived (and was
+        // queued, see isFullyReady/pendingEarlyCommands) while this method was still
+        // running, in the order it was received.
+        this.isFullyReady = true;
+        const queued = this.pendingEarlyCommands.splice(0, this.pendingEarlyCommands.length);
+        for (const { id, state } of queued) {
+            this.log.info(`Replaying command for "${id}" that arrived while the adapter was still starting up.`);
+            await this.onStateChange(id, state);
+        }
     }
 
     /**
@@ -738,6 +795,54 @@ class Irrigation extends utils.Adapter {
         // method itself guards against feedback loops from our own status
         // echoes (see its docstring).
         const valveStateMatch = /^valves\.valve_\d+\.state$/.exec(localId);
+
+        // subscribeStates() is registered as the very first thing in onReady() (see
+        // there) specifically so that no command write is ever silently lost, but
+        // the handlers below need `this.automation`/`this.valves`/etc. to actually
+        // exist. If onReady() has not finished yet (can take many seconds with many
+        // configured valves and/or a slow DWD/weather API), queue a genuine incoming
+        // command instead of either dropping it or crashing on an undefined
+        // dependency; onReady() replays every queued command, in order, once it
+        // completes (see isFullyReady/pendingEarlyCommands).
+        //
+        // Only ack=false writes are deferred here - NOT ack=true writes to
+        // "valves.*.state" (the valveStateMatch special case above), even though
+        // those are otherwise treated as commands too (see the comment above
+        // valveStateMatch). The overwhelming majority of ack=true "state" writes are
+        // this adapter's OWN status echoes, most notably ValveController's initial
+        // echo written by setRunningState() during valve.init() - which itself runs
+        // in the per-valve init loop in onReady(), before isFullyReady is set. That
+        // echo handling is self-contained (governed entirely by ValveController's
+        // own pendingEchoCount/commandChain, see ventile.ts) and does not depend on
+        // `this.automation` or any other not-yet-constructed dependency, so there is
+        // no need to defer it - doing so anyway would needlessly queue and replay a
+        // duplicate, delayed pass through onOwnStateChange() for every configured
+        // valve on every startup. The rare genuine command case (an admin editing
+        // the Objects tab directly with ack=true, before the adapter has finished
+        // starting) is not deferred either; if that reaches ValveController.start()/
+        // stop() before `this.automation` exists, the resulting error is caught and
+        // logged by the try/catch in onStateChange() rather than silently dropped,
+        // which is an acceptable trade-off for this narrow edge case.
+        if (!state.ack && !this.isFullyReady) {
+            this.log.warn(`Adapter is still starting up - queuing command for "${id}" to run once startup completes.`);
+            this.pendingEarlyCommands.push({ id, state });
+            // "Start"/"Start plan" specifically is given immediate feedback via
+            // automation.status - without this, a user pressing Start while the
+            // adapter is still waiting on e.g. a slow/unresponsive weather or DWD
+            // API request sees no visible reaction at all for however long startup
+            // takes (this can be many seconds, see the isFullyReady field comment),
+            // which looks exactly like the command did nothing. The real status text
+            // (idle/running/paused/...) is published as usual once the command is
+            // actually replayed and runPlan() runs for real.
+            if (localId === 'automation.start' || localId === 'automation.startPlan') {
+                await this.setStateAsync('automation.status', {
+                    val: 'Mode: loading (Plan wird geladen - Adapter initialisiert noch)',
+                    ack: true,
+                });
+            }
+            return;
+        }
+
         if (valveStateMatch) {
             for (const valve of this.valves) {
                 if (await valve.onOwnStateChange(localId, state)) {

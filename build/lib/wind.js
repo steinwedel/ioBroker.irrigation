@@ -22,15 +22,11 @@ __export(wind_exports, {
   evaluateWindPause: () => evaluateWindPause
 });
 module.exports = __toCommonJS(wind_exports);
+var import_hysteresis = require("./hysteresis");
 function evaluateWindPause(params) {
   const { speed, gust, speedLimit, gustLimit, belowSinceMs, nowMs, hysteresisMs } = params;
   const overLimit = speedLimit > 0 && speed !== void 0 && speed >= speedLimit || gustLimit > 0 && gust !== void 0 && gust >= gustLimit;
-  if (overLimit) {
-    return { paused: true, belowSinceMs: null };
-  }
-  const effectiveBelowSinceMs = belowSinceMs != null ? belowSinceMs : nowMs;
-  const elapsedMs = nowMs - effectiveBelowSinceMs;
-  return { paused: elapsedMs < hysteresisMs, belowSinceMs: effectiveBelowSinceMs };
+  return (0, import_hysteresis.evaluateHysteresisPause)({ overLimit, belowSinceMs, nowMs, hysteresisMs });
 }
 class WindMonitor {
   deps;
@@ -108,7 +104,7 @@ class WindMonitor {
       gustLimit: config.windGustLimit,
       belowSinceMs: this.belowSinceMs,
       nowMs: Date.now(),
-      hysteresisMs: Math.max(0, Number.isFinite(config.windHysteresisMinutes) ? config.windHysteresisMinutes : 10) * 6e4
+      hysteresisMs: (0, import_hysteresis.hysteresisMinutesToMs)(config.windHysteresisMinutes)
     });
     this.belowSinceMs = result.belowSinceMs;
     if (result.paused !== this.paused) {

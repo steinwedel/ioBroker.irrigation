@@ -390,7 +390,7 @@ class ValveController {
           const running = activity === "SCHEDULED_WATERING" || activity === "MANUAL_WATERING";
           action = async () => {
             await this.setRunningState(running, running ? void 0 : 0);
-            if (running) {
+            if (running && this.remainingSecs > 0) {
               this.scheduleTick();
             } else {
               this.clearTickTimer();
@@ -399,7 +399,12 @@ class ValveController {
         } else if (id === `${base}.duration_leftover_i`) {
           matched = true;
           const remainingSecs = parseGardenaLeftoverMinutes(state == null ? void 0 : state.val);
-          action = () => this.setRunningState(remainingSecs > 0 || this.running, remainingSecs);
+          action = async () => {
+            await this.setRunningState(remainingSecs > 0 || this.running, remainingSecs);
+            if (remainingSecs > 0) {
+              this.scheduleTick();
+            }
+          };
         }
         break;
       }
@@ -743,10 +748,7 @@ class ValveController {
       );
       if (this.remainingSecs <= 0) {
         this.clearTickTimer();
-        if (this.config.type === "Gardena") {
-          return;
-        }
-        this.commandChain = this.commandChain.then(() => this.stop()).catch((error) => {
+        this.commandChain = this.commandChain.then(() => this.config.type === "Gardena" ? this.setRunningState(false, 0) : this.stop()).catch((error) => {
           if (error instanceof import_rate_limiter.CancelledError) {
             return;
           }

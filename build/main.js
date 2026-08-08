@@ -88,6 +88,20 @@ class Irrigation extends utils.Adapter {
   rateLimiterPoll;
   scanProgressClearTimer;
   isScanning = false;
+  /**
+   * False until onReady() has fully finished constructing/initializing every
+   * dependency (automation, valves, sensors, etc.). On a system with many
+   * configured valves and/or a slow/unresponsive DWD or weather API, this
+   * full startup sequence can take many seconds. subscribeStates() is
+   * called as the very first thing in onReady() (see there) so no command
+   * write is ever silently lost, but the command handlers below still need
+   * `this.automation`/`this.valves` etc. to exist - any ack=false command
+   * that arrives before that is queued here (see pendingEarlyCommands)
+   * instead of either crashing (TypeError on an undefined dependency) or
+   * being dropped, and is replayed once onReady() completes.
+   */
+  isFullyReady = false;
+  pendingEarlyCommands = [];
   constructor(options = {}) {
     super({
       ...options,
@@ -99,6 +113,24 @@ class Irrigation extends utils.Adapter {
     this.on("unload", this.onUnload.bind(this));
   }
   async onReady() {
+    try {
+      await this.onReadyInner();
+    } catch (error) {
+      if (this.pendingEarlyCommands.length > 0) {
+        this.log.error(
+          `Adapter startup failed with ${this.pendingEarlyCommands.length} command(s) still queued and now lost: ${this.pendingEarlyCommands.map((c) => c.id).join(", ")}`
+        );
+      }
+      throw error;
+    }
+  }
+  async onReadyInner() {
+    this.subscribeStates("automation.*");
+    this.subscribeStates("valves.*.manualStart");
+    this.subscribeStates("valves.*.calibrateFlow");
+    this.subscribeStates("valves.*.duration");
+    this.subscribeStates("watchdog.testNotify");
+    this.subscribeStates("valves.*.state");
     this.config2 = (0, import_config_defaults.normalizeConfig)(this.config);
     await this.migrateNativeConfig();
     await this.cleanupStaleValveObjects();
@@ -178,14 +210,14 @@ class Irrigation extends utils.Adapter {
     await this.scheduler.init();
     this.weatherApi = new import_weather_api.WeatherApi({ adapter: this, getConfig: () => this.config2 });
     await this.weatherApi.init();
-    this.subscribeStates("automation.*");
-    this.subscribeStates("valves.*.manualStart");
-    this.subscribeStates("valves.*.calibrateFlow");
-    this.subscribeStates("valves.*.duration");
-    this.subscribeStates("watchdog.testNotify");
-    this.subscribeStates("valves.*.state");
     await this.setStateAsync("info.connection", { val: true, ack: true });
     this.rateLimiterPoll = this.setInterval(() => this.updateRateLimitStates(), 1e4);
+    this.isFullyReady = true;
+    const queued = this.pendingEarlyCommands.splice(0, this.pendingEarlyCommands.length);
+    for (const { id, state } of queued) {
+      this.log.info(`Replaying command for "${id}" that arrived while the adapter was still starting up.`);
+      await this.onStateChange(id, state);
+    }
   }
   /**
    * Persists newly introduced or migrated valve config fields.
@@ -665,6 +697,17 @@ class Irrigation extends utils.Adapter {
     }
     const localId = id.slice(this.namespace.length + 1);
     const valveStateMatch = /^valves\.valve_\d+\.state$/.exec(localId);
+    if (!state.ack && !this.isFullyReady) {
+      this.log.warn(`Adapter is still starting up - queuing command for "${id}" to run once startup completes.`);
+      this.pendingEarlyCommands.push({ id, state });
+      if (localId === "automation.start" || localId === "automation.startPlan") {
+        await this.setStateAsync("automation.status", {
+          val: "Mode: loading (Plan wird geladen - Adapter initialisiert noch)",
+          ack: true
+        });
+      }
+      return;
+    }
     if (valveStateMatch) {
       for (const valve of this.valves) {
         if (await valve.onOwnStateChange(localId, state)) {

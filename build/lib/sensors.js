@@ -18,10 +18,17 @@ var __copyProps = (to, from, except, desc) => {
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 var sensors_exports = {};
 __export(sensors_exports, {
-  SensorManager: () => SensorManager
+  SensorManager: () => SensorManager,
+  evaluateRainPause: () => evaluateRainPause
 });
 module.exports = __toCommonJS(sensors_exports);
+var import_hysteresis = require("./hysteresis");
 const MAX_SENSOR_AGE_MS = 2 * 60 * 60 * 1e3;
+const RAIN_CHECK_INTERVAL_MS = 3e4;
+function evaluateRainPause(params) {
+  const { raining, belowSinceMs, nowMs, hysteresisMs } = params;
+  return (0, import_hysteresis.evaluateHysteresisPause)({ overLimit: raining, belowSinceMs, nowMs, hysteresisMs });
+}
 class SensorManager {
   deps;
   rainState = false;
@@ -32,11 +39,22 @@ class SensorManager {
   soilMoistureValues = /* @__PURE__ */ new Map();
   temperatureTs;
   subscribedIds = [];
+  /** Debounced/hysteresis-applied pause decision last reported via onRainChange(), see evaluateRainPause(). */
+  rainPaused = false;
+  rainBelowSinceMs = null;
+  /** Periodic re-evaluation so the resume hysteresis elapses even without a new rain-sensor event. */
+  rainCheckTimer;
   constructor(deps) {
     this.deps = deps;
   }
   async init() {
     await this.resubscribe();
+    this.rainCheckTimer = this.deps.adapter.setInterval(() => {
+      this.evaluateRainPause().catch(
+        (error) => this.deps.adapter.log.error(`Rain pause check failed: ${error.message}`)
+      );
+    }, RAIN_CHECK_INTERVAL_MS);
+    await this.evaluateRainPause();
   }
   async resubscribe() {
     for (const id of this.subscribedIds) {
@@ -100,7 +118,6 @@ class SensorManager {
     }
   }
   async onForeignStateChange(id, state) {
-    var _a, _b;
     const config = this.deps.getConfig();
     if (id === config.sensors.rainId) {
       if (typeof (state == null ? void 0 : state.val) === "boolean") {
@@ -112,7 +129,7 @@ class SensorManager {
       }
       this.rainStateTs = Date.now();
       await this.deps.adapter.setStateAsync("sensors.rain", { val: this.rainState, ack: true });
-      await ((_b = (_a = this.deps).onRainChange) == null ? void 0 : _b.call(_a, this.rainState));
+      await this.evaluateRainPause();
       return true;
     }
     const isGlobalSoilMoistureSensor = id === config.sensors.soilMoistureId;
@@ -177,10 +194,37 @@ class SensorManager {
    * weatherApi, flowMonitor, valves).
    */
   destroy() {
+    if (this.rainCheckTimer) {
+      this.deps.adapter.clearInterval(this.rainCheckTimer);
+      this.rainCheckTimer = void 0;
+    }
     for (const id of this.subscribedIds) {
       this.deps.adapter.unsubscribeForeignStatesAsync(id).catch(() => void 0);
     }
     this.subscribedIds = [];
+  }
+  /**
+   * Applies evaluateRainPause() to the current raw `rainState` and only
+   * calls onRainChange() when the debounced decision actually flips - see
+   * the evaluateRainPause()/RainPauseState doc comment for why this
+   * debouncing is necessary. Run both on every rain-sensor event and
+   * periodically (see RAIN_CHECK_INTERVAL_MS) so the hysteresis delay
+   * elapses reliably even while no new sensor event arrives.
+   */
+  async evaluateRainPause() {
+    var _a, _b;
+    const hysteresisMinutes = this.deps.getConfig().scheduler.rainHysteresisMinutes;
+    const result = evaluateRainPause({
+      raining: this.rainState,
+      belowSinceMs: this.rainBelowSinceMs,
+      nowMs: Date.now(),
+      hysteresisMs: (0, import_hysteresis.hysteresisMinutesToMs)(hysteresisMinutes)
+    });
+    this.rainBelowSinceMs = result.belowSinceMs;
+    if (result.paused !== this.rainPaused) {
+      this.rainPaused = result.paused;
+      await ((_b = (_a = this.deps).onRainChange) == null ? void 0 : _b.call(_a, this.rainPaused));
+    }
   }
   /**
    * See plan behavior rules "Niederschlagsunabhängigkeit" and "Bodenfeuchte-Schwellwert".
@@ -245,6 +289,7 @@ class SensorManager {
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  SensorManager
+  SensorManager,
+  evaluateRainPause
 });
 //# sourceMappingURL=sensors.js.map

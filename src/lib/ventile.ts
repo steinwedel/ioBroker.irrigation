@@ -456,7 +456,7 @@ export class ValveController {
                     const running = activity === 'SCHEDULED_WATERING' || activity === 'MANUAL_WATERING';
                     action = async () => {
                         await this.setRunningState(running, running ? undefined : 0);
-                        if (running) {
+                        if (running && this.remainingSecs > 0) {
                             this.scheduleTick();
                         } else {
                             this.clearTickTimer();
@@ -467,7 +467,12 @@ export class ValveController {
                     const remainingSecs = parseGardenaLeftoverMinutes(state?.val);
                     // Only (re-)infer the running state from the countdown itself if we
                     // have not already got a definitive answer from activity_value.
-                    action = () => this.setRunningState(remainingSecs > 0 || this.running, remainingSecs);
+                    action = async () => {
+                        await this.setRunningState(remainingSecs > 0 || this.running, remainingSecs);
+                        if (remainingSecs > 0) {
+                            this.scheduleTick();
+                        }
+                    };
                 }
                 break;
             }
@@ -903,16 +908,8 @@ export class ValveController {
                 );
             if (this.remainingSecs <= 0) {
                 this.clearTickTimer();
-                if (this.config.type === 'Gardena') {
-                    return;
-                }
-                // Chain onto commandChain rather than calling stop() directly, so this
-                // auto-stop can never run concurrently with a command arriving via
-                // onOwnStateChange()/onForeignStateChange() at the same moment - see
-                // the commandChain field comment for why that interleaving reopens the
-                // feedback-loop window.
                 this.commandChain = this.commandChain
-                    .then(() => this.stop())
+                    .then(() => (this.config.type === 'Gardena' ? this.setRunningState(false, 0) : this.stop()))
                     .catch(error => {
                         if (error instanceof CancelledError) {
                             return;

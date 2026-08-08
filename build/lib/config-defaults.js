@@ -31,6 +31,7 @@ const DEFAULT_CONFIG = {
   scheduler: {
     autoMode: false,
     pauseOnRain: false,
+    rainHysteresisMinutes: 10,
     windPauseEnabled: false,
     windSpeedStateId: "",
     windSpeedLimit: 0,
@@ -38,7 +39,6 @@ const DEFAULT_CONFIG = {
     windGustLimit: 0,
     windHysteresisMinutes: 10,
     timerTimes: [],
-    extensionFactor: 1,
     temperatureAdjustmentEnabled: false,
     temperatureAdjustmentStateId: "",
     pumpCapacity: 0,
