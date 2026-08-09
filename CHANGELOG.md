@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.3.28 (2026-08-09)
 * (Gerhard Steinwedel) **ENHANCED**: iCal trigger mode is now an expert-mode-only feature — the trigger mode selector and all iCal configuration fields are hidden in the admin UI when expert mode is disabled, and the configuration normalization enforces "timer" mode when expert mode is off. A startup reset mechanism corrects the trigger mode setting if it is still set to "ical" while expert mode is now disabled
 
 ## 0.3.27 (2026-08-09)
