@@ -487,257 +487,17 @@
                     "lg": 4,
                     "xl": 4
                 },
-                "scheduler.timerTimes": {
-                    "type": "chips",
-                    "label": "Timer times (HH:MM)",
-                    "disabled": "!data.scheduler?.autoMode",
-                    "newLine": true,
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4
-                },
-                "_seasonDivider": {
-                    "type": "divider",
-                    "newLine": true,
-                    "hidden": "!data.expertMode"
-                },
-                "scheduler.seasonEnabled": {
-                    "type": "checkbox",
-                    "label": "Seasonal automation enabled",
-                    "disabled": "!data.scheduler?.autoMode",
-                    "newLine": true,
-                    "hidden": "!data.expertMode",
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4
-                },
-                "scheduler.seasonStart": {
+                "scheduler.triggerMode": {
                     "type": "select",
-                    "label": "Season start month",
+                    "label": "Trigger mode",
+                    "help": "Timer times and the iCal calendar trigger are mutually exclusive alternatives - choose which one starts automatic runs.",
                     "options": [
-                        { "label": "January", "value": 1 },
-                        { "label": "February", "value": 2 },
-                        { "label": "March", "value": 3 },
-                        { "label": "April", "value": 4 },
-                        { "label": "May", "value": 5 },
-                        { "label": "June", "value": 6 },
-                        { "label": "July", "value": 7 },
-                        { "label": "August", "value": 8 },
-                        { "label": "September", "value": 9 },
-                        { "label": "October", "value": 10 },
-                        { "label": "November", "value": 11 },
-                        { "label": "December", "value": 12 }
+                        { "label": "Timer times", "value": "timer" },
+                        { "label": "iCal calendar", "value": "ical" }
                     ],
-                    "disabled": "!data.scheduler?.autoMode || !data.scheduler?.seasonEnabled",
-                    "hidden": "!data.expertMode",
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4
-                },
-                "scheduler.seasonEnd": {
-                    "type": "select",
-                    "label": "Season end month",
-                    "options": [
-                        { "label": "January", "value": 1 },
-                        { "label": "February", "value": 2 },
-                        { "label": "March", "value": 3 },
-                        { "label": "April", "value": 4 },
-                        { "label": "May", "value": 5 },
-                        { "label": "June", "value": 6 },
-                        { "label": "July", "value": 7 },
-                        { "label": "August", "value": 8 },
-                        { "label": "September", "value": 9 },
-                        { "label": "October", "value": 10 },
-                        { "label": "November", "value": 11 },
-                        { "label": "December", "value": 12 }
-                    ],
-                    "disabled": "!data.scheduler?.autoMode || !data.scheduler?.seasonEnabled",
-                    "hidden": "!data.expertMode",
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4
-                },
-                "scheduler.pauseOnRain": {
-                    "type": "checkbox",
-                    "label": "Pause automatic watering when raining",
-                    "disabled": "!data.scheduler?.autoMode || !data.sensors?.rainId",
-                    "help": "Pauses a running automatic plan when the configured rain sensor reports rain and resumes it after rain stops.",
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4
-                },
-                "scheduler.rainHysteresisMinutes": {
-                    "type": "number",
-                    "label": "Rain resume hysteresis (min)",
-                    "min": 0,
-                    "default": 10,
-                    "help": "Minutes the rain sensor must report no rain before watering resumes. Prevents rapidly toggling (e.g. tipping-bucket) rain sensors from repeatedly stopping and restarting every running valve.",
-                    "disabled": "!data.scheduler?.autoMode",
-                    "hidden": "!data.expertMode",
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4
-                },
-                "scheduler.windSpeedStateId": {
-                    "type": "objectId",
-                    "label": "Wind speed state (km/h)",
+                    "default": "timer",
                     "disabled": "!data.scheduler?.autoMode",
                     "newLine": true,
-                    "hidden": "!data.expertMode",
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4
-                },
-                "scheduler.windSpeedLimit": {
-                    "type": "number",
-                    "label": "Wind speed limit (km/h)",
-                    "min": 0,
-                    "default": 0,
-                    "help": "0 disables the wind speed check.",
-                    "disabled": "!data.scheduler?.autoMode",
-                    "hidden": "!data.expertMode",
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4
-                },
-                "scheduler.windGustStateId": {
-                    "type": "objectId",
-                    "label": "Wind gust state (km/h)",
-                    "disabled": "!data.scheduler?.autoMode",
-                    "newLine": true,
-                    "hidden": "!data.expertMode",
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4
-                },
-                "scheduler.windGustLimit": {
-                    "type": "number",
-                    "label": "Wind gust limit (km/h)",
-                    "min": 0,
-                    "default": 0,
-                    "help": "0 disables the wind gust check.",
-                    "disabled": "!data.scheduler?.autoMode",
-                    "hidden": "!data.expertMode",
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4
-                },
-                "scheduler.windHysteresisMinutes": {
-                    "type": "number",
-                    "label": "Wind resume hysteresis (min)",
-                    "min": 0,
-                    "default": 10,
-                    "help": "Minutes wind speed/gust must stay below both limits before watering resumes.",
-                    "disabled": "!data.scheduler?.autoMode",
-                    "hidden": "!data.expertMode",
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4
-                },
-                "scheduler.windPauseEnabled": {
-                    "type": "checkbox",
-                    "label": "Pause automatic watering when windy",
-                    "disabled": "!data.scheduler?.autoMode || (!data.scheduler?.windSpeedStateId && !data.scheduler?.windGustStateId)",
-                    "help": "Pauses a running automatic plan while wind speed or gust is at/above its configured limit, and resumes once both have stayed below the limit for the configured hysteresis time.",
-                    "newLine": true,
-                    "hidden": "!data.expertMode",
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4
-                },
-                "scheduler.temperatureAdjustmentStateId": {
-                    "type": "objectId",
-                    "label": "Temperature state for irrigation adjustment",
-                    "help": "Current temperature in °C used to calculate the watering duration factor.",
-                    "disabled": "!data.scheduler?.autoMode",
-                    "newLine": true,
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4
-                },
-                "scheduler.temperatureAdjustmentEnabled": {
-                    "type": "checkbox",
-                    "label": "Temperature-controlled irrigation adjustment",
-                    "help": "Adjusts automatic plan durations by 7% per °C relative to 20 °C.",
-                    "disabled": "!data.scheduler?.autoMode || !data.scheduler?.temperatureAdjustmentStateId",
-                    "onChange": {
-                        "alsoDependsOn": ["scheduler.temperatureAdjustmentStateId"],
-                        "calculateFunc": "data.scheduler?.temperatureAdjustmentStateId ? data.scheduler?.temperatureAdjustmentEnabled : false",
-                        "ignoreOwnChanges": true
-                    },
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4
-                },
-                "scheduler.pumpCapacity": {
-                    "type": "number",
-                    "label": "Pump capacity (l/min, 0 = sequential only)",
-                    "min": 0,
-                    "disabled": "!data.scheduler?.autoMode",
-                    "hidden": "!data.expertMode",
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4
-                },
-                "scheduler.valvePause": {
-                    "type": "number",
-                    "label": "Pause between batches (min)",
-                    "min": 0,
-                    "disabled": "!data.scheduler?.autoMode",
-                    "hidden": "!data.expertMode",
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4
-                },
-                "scheduler.frostEnabled": {
-                    "type": "checkbox",
-                    "label": "Frost protection enabled",
-                    "disabled": "!data.scheduler?.autoMode",
-                    "newLine": true,
-                    "hidden": "!data.expertMode",
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4
-                },
-                "scheduler.frostMinTemp": {
-                    "type": "number",
-                    "label": "Frost protection minimum temperature (°C)",
-                    "disabled": "!data.scheduler?.autoMode",
-                    "hidden": "!data.expertMode",
                     "xs": 12,
                     "sm": 12,
                     "md": 6,
@@ -749,8 +509,8 @@
                     "label": "iCal adapter instance",
                     "adapter": "ical",
                     "disabled": "!data.scheduler?.autoMode",
+                    "hidden": "data.scheduler?.triggerMode !== 'ical'",
                     "newLine": true,
-                    "hidden": "!data.expertMode",
                     "xs": 12,
                     "sm": 12,
                     "md": 6,
@@ -761,7 +521,7 @@
                     "type": "objectId",
                     "label": "iCal trigger state id",
                     "disabled": "!data.scheduler?.autoMode",
-                    "hidden": "!data.expertMode",
+                    "hidden": "data.scheduler?.triggerMode !== 'ical'",
                     "xs": 12,
                     "sm": 12,
                     "md": 6,
@@ -771,6 +531,487 @@
                 "scheduler.icalTitlePrefix": {
                     "type": "text",
                     "label": "iCal event title prefix",
+                    "disabled": "!data.scheduler?.autoMode",
+                    "hidden": "data.scheduler?.triggerMode !== 'ical'",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "scheduler.timerTimes": {
+                    "type": "chips",
+                    "label": "Timer times (HH:MM)",
+                    "disabled": "!data.scheduler?.autoMode",
+                    "hidden": "data.scheduler?.triggerMode !== 'timer'",
+                    "onChange": {
+                        "alsoDependsOn": ["scheduler.timerTimes"],
+                        "ignoreOwnChanges": false,
+                        "calculateFunc": "Array.isArray(data.scheduler?.timerTimes) ? data.scheduler.timerTimes.map(t => ({ t, m: (m => (m ? (+m[1]) * 60 + +m[2] : 999999))(/^([0-9]{1,2}):([0-9]{2})$/.exec((t || '').trim())) })).sort((a, b) => a.m - b.m).map(x => x.t) : data.scheduler?.timerTimes"
+                    },
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "_seasonGroup": {
+                    "type": "panel",
+                    "disabled": "!data.scheduler?.autoMode",
+                    "hidden": "!data.expertMode || data.scheduler?.triggerMode !== 'timer'",
+                    "newLine": true,
+                    "innerStyle": {
+                        "border": "1px solid rgba(128, 128, 128, 0.5)",
+                        "borderRadius": "4px",
+                        "padding": "8px 16px 16px 16px",
+                        "marginBottom": "8px"
+                    },
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12,
+                    "items": {
+                        "scheduler.seasonEnabled": {
+                            "type": "checkbox",
+                            "label": "Seasonal automation enabled",
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 12,
+                            "lg": 12,
+                            "xl": 12
+                        },
+                        "scheduler.seasonStart": {
+                            "type": "select",
+                            "label": "Season start month",
+                            "options": [
+                                { "label": "January", "value": 1 },
+                                { "label": "February", "value": 2 },
+                                { "label": "March", "value": 3 },
+                                { "label": "April", "value": 4 },
+                                { "label": "May", "value": 5 },
+                                { "label": "June", "value": 6 },
+                                { "label": "July", "value": 7 },
+                                { "label": "August", "value": 8 },
+                                { "label": "September", "value": 9 },
+                                { "label": "October", "value": 10 },
+                                { "label": "November", "value": 11 },
+                                { "label": "December", "value": 12 }
+                            ],
+                            "disabled": "!data.scheduler?.seasonEnabled",
+                            "newLine": true,
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 6,
+                            "lg": 4,
+                            "xl": 4
+                        },
+                        "scheduler.seasonEnd": {
+                            "type": "select",
+                            "label": "Season end month",
+                            "options": [
+                                { "label": "January", "value": 1 },
+                                { "label": "February", "value": 2 },
+                                { "label": "March", "value": 3 },
+                                { "label": "April", "value": 4 },
+                                { "label": "May", "value": 5 },
+                                { "label": "June", "value": 6 },
+                                { "label": "July", "value": 7 },
+                                { "label": "August", "value": 8 },
+                                { "label": "September", "value": 9 },
+                                { "label": "October", "value": 10 },
+                                { "label": "November", "value": 11 },
+                                { "label": "December", "value": 12 }
+                            ],
+                            "disabled": "!data.scheduler?.seasonEnabled",
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 6,
+                            "lg": 4,
+                            "xl": 4
+                        }
+                    }
+                },
+                "_temperatureAdjustmentGroup": {
+                    "type": "panel",
+                    "disabled": "!data.scheduler?.autoMode",
+                    "newLine": true,
+                    "innerStyle": {
+                        "border": "1px solid rgba(128, 128, 128, 0.5)",
+                        "borderRadius": "4px",
+                        "padding": "8px 16px 16px 16px",
+                        "marginBottom": "8px"
+                    },
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12,
+                    "items": {
+                        "scheduler.temperatureAdjustmentEnabled": {
+                            "type": "checkbox",
+                            "label": "Temperature-controlled irrigation adjustment",
+                            "help": "Adjusts automatic plan durations by 7% per °C relative to 20 °C.",
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 12,
+                            "lg": 12,
+                            "xl": 12
+                        },
+                        "scheduler.temperatureAdjustmentStateId": {
+                            "type": "objectId",
+                            "label": "Temperature state for irrigation adjustment",
+                            "help": "Current temperature in °C used to calculate the watering duration factor.",
+                            "disabled": "!data.scheduler?.temperatureAdjustmentEnabled",
+                            "newLine": true,
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 6,
+                            "lg": 4,
+                            "xl": 4
+                        }
+                    }
+                },
+                "_rainGroup": {
+                    "type": "panel",
+                    "disabled": "!data.scheduler?.autoMode || !data.sensors?.rainId",
+                    "newLine": true,
+                    "innerStyle": {
+                        "border": "1px solid rgba(128, 128, 128, 0.5)",
+                        "borderRadius": "4px",
+                        "padding": "8px 16px 16px 16px",
+                        "marginBottom": "8px"
+                    },
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12,
+                    "items": {
+                        "scheduler.pauseOnRain": {
+                            "type": "checkbox",
+                            "label": "Pause automatic watering when raining",
+                            "help": "Pauses a running automatic plan when the configured rain sensor reports rain and resumes it after rain stops.",
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 12,
+                            "lg": 12,
+                            "xl": 12
+                        },
+                        "scheduler.rainHysteresisMinutes": {
+                            "type": "number",
+                            "label": "Rain resume hysteresis (min)",
+                            "min": 0,
+                            "default": 10,
+                            "help": "Minutes the rain sensor must report no rain before watering resumes. Prevents rapidly toggling (e.g. tipping-bucket) rain sensors from repeatedly stopping and restarting every running valve.",
+                            "disabled": "!data.scheduler?.pauseOnRain",
+                            "hidden": "!data.expertMode",
+                            "newLine": true,
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 6,
+                            "lg": 4,
+                            "xl": 4
+                        }
+                    }
+                },
+                "_legalRestrictionGroup": {
+                    "type": "panel",
+                    "hidden": "!data.expertMode",
+                    "newLine": true,
+                    "innerStyle": {
+                        "border": "1px solid rgba(128, 128, 128, 0.5)",
+                        "borderRadius": "4px",
+                        "padding": "8px 16px 16px 16px",
+                        "marginBottom": "8px"
+                    },
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12,
+                    "items": {
+                        "legalRestriction.enabled": {
+                            "type": "checkbox",
+                            "label": "Pause automatic watering on hot days",
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 12,
+                            "lg": 12,
+                            "xl": 12
+                        },
+                        "legalRestriction.stationId": {
+                            "type": "selectSendTo",
+                            "label": "DWD station",
+                            "command": "listDwdStations",
+                            "jsonData": "{}",
+                            "disabled": "!data.legalRestriction?.enabled",
+                            "onChange": {
+                                "alsoDependsOn": ["legalRestriction.temperatureStateId"],
+                                "calculateFunc": "data.legalRestriction?.temperatureStateId ? '' : data.legalRestriction?.stationId",
+                                "ignoreOwnChanges": true
+                            },
+                            "newLine": true,
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 6,
+                            "lg": 4,
+                            "xl": 4
+                        },
+                        "legalRestriction.temperatureStateId": {
+                            "type": "objectId",
+                            "label": "Local temperature state",
+                            "help": "If selected, this state is used instead of the DWD station.",
+                            "disabled": "!data.legalRestriction?.enabled",
+                            "onChange": {
+                                "alsoDependsOn": ["legalRestriction.stationId"],
+                                "calculateFunc": "data.legalRestriction?.stationId ? '' : data.legalRestriction?.temperatureStateId",
+                                "ignoreOwnChanges": true
+                            },
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 6,
+                            "lg": 4,
+                            "xl": 4
+                        },
+                        "legalRestriction.startDate": {
+                            "type": "text",
+                            "label": "Restriction start date",
+                            "placeholder": "13.5",
+                            "disabled": "!data.legalRestriction?.enabled",
+                            "validator": "(!data.legalRestriction?.startDate && !data.legalRestriction?.endDate) || (/^(?:(?:[1-9]|[12]\\d|3[01])\\.(?:1|3|5|7|8|10|12)|(?:[1-9]|[12]\\d|30)\\.(?:4|6|9|11)|(?:[1-9]|1\\d|2[0-9])\\.2)$/.test(data.legalRestriction?.startDate || '') && /^(?:(?:[1-9]|[12]\\d|3[01])\\.(?:1|3|5|7|8|10|12)|(?:[1-9]|[12]\\d|30)\\.(?:4|6|9|11)|(?:[1-9]|1\\d|2[0-9])\\.2)$/.test(data.legalRestriction?.endDate || ''))",
+                            "validatorErrorText": "Enter both dates as valid D.M values or leave both empty.",
+                            "validatorNoSaveOnError": true,
+                            "newLine": true,
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 6,
+                            "lg": 4,
+                            "xl": 4
+                        },
+                        "legalRestriction.endDate": {
+                            "type": "text",
+                            "label": "Restriction end date",
+                            "placeholder": "13.9",
+                            "disabled": "!data.legalRestriction?.enabled || !data.legalRestriction?.startDate",
+                            "onChange": {
+                                "alsoDependsOn": ["legalRestriction.startDate"],
+                                "calculateFunc": "data.legalRestriction?.startDate ? data.legalRestriction?.endDate : ''",
+                                "ignoreOwnChanges": true
+                            },
+                            "validator": "(!data.legalRestriction?.startDate && !data.legalRestriction?.endDate) || (/^(?:(?:[1-9]|[12]\\d|3[01])\\.(?:1|3|5|7|8|10|12)|(?:[1-9]|[12]\\d|30)\\.(?:4|6|9|11)|(?:[1-9]|1\\d|2[0-9])\\.2)$/.test(data.legalRestriction?.startDate || '') && /^(?:(?:[1-9]|[12]\\d|3[01])\\.(?:1|3|5|7|8|10|12)|(?:[1-9]|[12]\\d|30)\\.(?:4|6|9|11)|(?:[1-9]|1\\d|2[0-9])\\.2)$/.test(data.legalRestriction?.endDate || ''))",
+                            "validatorErrorText": "Enter both dates as valid D.M values or leave both empty.",
+                            "validatorNoSaveOnError": true,
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 6,
+                            "lg": 4,
+                            "xl": 4
+                        },
+                        "legalRestriction.startTime": {
+                            "type": "text",
+                            "label": "Restriction start time",
+                            "placeholder": "15:10",
+                            "disabled": "!data.legalRestriction?.enabled",
+                            "validator": "(!data.legalRestriction?.startTime && !data.legalRestriction?.endTime) || (/^(?:[01]\\d|2[0-3]):[0-5]\\d$/.test(data.legalRestriction?.startTime || '') && /^(?:[01]\\d|2[0-3]):[0-5]\\d$/.test(data.legalRestriction?.endTime || ''))",
+                            "validatorErrorText": "Enter both times as valid HH:MM values or leave both empty.",
+                            "validatorNoSaveOnError": true,
+                            "newLine": true,
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 6,
+                            "lg": 4,
+                            "xl": 4
+                        },
+                        "legalRestriction.endTime": {
+                            "type": "text",
+                            "label": "Restriction end time",
+                            "placeholder": "17:00",
+                            "disabled": "!data.legalRestriction?.enabled || !data.legalRestriction?.startTime",
+                            "onChange": {
+                                "alsoDependsOn": ["legalRestriction.startTime"],
+                                "calculateFunc": "data.legalRestriction?.startTime ? data.legalRestriction?.endTime : ''",
+                                "ignoreOwnChanges": true
+                            },
+                            "validator": "(!data.legalRestriction?.startTime && !data.legalRestriction?.endTime) || (/^(?:[01]\\d|2[0-3]):[0-5]\\d$/.test(data.legalRestriction?.startTime || '') && /^(?:[01]\\d|2[0-3]):[0-5]\\d$/.test(data.legalRestriction?.endTime || ''))",
+                            "validatorErrorText": "Enter both times as valid HH:MM values or leave both empty.",
+                            "validatorNoSaveOnError": true,
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 6,
+                            "lg": 4,
+                            "xl": 4
+                        },
+                        "legalRestriction.minTemperature": {
+                            "type": "number",
+                            "label": "Maximum irrigation temperature (°C)",
+                            "disabled": "!data.legalRestriction?.enabled || (!data.legalRestriction?.stationId && !data.legalRestriction?.temperatureStateId)",
+                            "onChange": {
+                                "alsoDependsOn": ["legalRestriction.stationId", "legalRestriction.temperatureStateId"]
+                            },
+                            "newLine": true,
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 6,
+                            "lg": 4,
+                            "xl": 4
+                        },
+                        "legalRestriction.checkInterval": {
+                            "type": "number",
+                            "label": "Check interval (min)",
+                            "min": 1,
+                            "disabled": "!data.legalRestriction?.enabled",
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 6,
+                            "lg": 4,
+                            "xl": 4
+                        }
+                    }
+                },
+                "_windGroup": {
+                    "type": "panel",
+                    "disabled": "!data.scheduler?.autoMode",
+                    "hidden": "!data.expertMode",
+                    "newLine": true,
+                    "innerStyle": {
+                        "border": "1px solid rgba(128, 128, 128, 0.5)",
+                        "borderRadius": "4px",
+                        "padding": "8px 16px 16px 16px",
+                        "marginBottom": "8px"
+                    },
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12,
+                    "items": {
+                        "scheduler.windPauseEnabled": {
+                            "type": "checkbox",
+                            "label": "Pause automatic watering when windy",
+                            "help": "Pauses a running automatic plan while wind speed or gust is at/above its configured limit, and resumes once both have stayed below the limit for the configured hysteresis time.",
+                            "disabled": "!data.scheduler?.windSpeedStateId && !data.scheduler?.windGustStateId",
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 12,
+                            "lg": 12,
+                            "xl": 12
+                        },
+                        "scheduler.windSpeedStateId": {
+                            "type": "objectId",
+                            "label": "Wind speed state (km/h)",
+                            "newLine": true,
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 6,
+                            "lg": 4,
+                            "xl": 4
+                        },
+                        "scheduler.windSpeedLimit": {
+                            "type": "number",
+                            "label": "Wind speed limit (km/h)",
+                            "min": 0,
+                            "default": 0,
+                            "help": "0 disables the wind speed check.",
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 6,
+                            "lg": 4,
+                            "xl": 4
+                        },
+                        "scheduler.windGustStateId": {
+                            "type": "objectId",
+                            "label": "Wind gust state (km/h)",
+                            "newLine": true,
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 6,
+                            "lg": 4,
+                            "xl": 4
+                        },
+                        "scheduler.windGustLimit": {
+                            "type": "number",
+                            "label": "Wind gust limit (km/h)",
+                            "min": 0,
+                            "default": 0,
+                            "help": "0 disables the wind gust check.",
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 6,
+                            "lg": 4,
+                            "xl": 4
+                        },
+                        "scheduler.windHysteresisMinutes": {
+                            "type": "number",
+                            "label": "Wind resume hysteresis (min)",
+                            "min": 0,
+                            "default": 10,
+                            "help": "Minutes wind speed/gust must stay below both limits before watering resumes.",
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 6,
+                            "lg": 4,
+                            "xl": 4
+                        }
+                    }
+                },
+                "_frostGroup": {
+                    "type": "panel",
+                    "disabled": "!data.scheduler?.autoMode",
+                    "hidden": "!data.expertMode",
+                    "newLine": true,
+                    "innerStyle": {
+                        "border": "1px solid rgba(128, 128, 128, 0.5)",
+                        "borderRadius": "4px",
+                        "padding": "8px 16px 16px 16px",
+                        "marginBottom": "8px"
+                    },
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12,
+                    "items": {
+                        "scheduler.frostEnabled": {
+                            "type": "checkbox",
+                            "label": "Frost protection enabled",
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 12,
+                            "lg": 12,
+                            "xl": 12
+                        },
+                        "scheduler.frostMinTemp": {
+                            "type": "number",
+                            "label": "Frost protection minimum temperature (°C)",
+                            "disabled": "!data.scheduler?.frostEnabled",
+                            "newLine": true,
+                            "xs": 12,
+                            "sm": 12,
+                            "md": 6,
+                            "lg": 4,
+                            "xl": 4
+                        }
+                    }
+                },
+                "scheduler.pumpCapacity": {
+                    "type": "number",
+                    "label": "Pump capacity (l/min, 0 = sequential only)",
+                    "min": 0,
+                    "disabled": "!data.scheduler?.autoMode",
+                    "hidden": "!data.expertMode",
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "scheduler.valvePause": {
+                    "type": "number",
+                    "label": "Pause between batches (min)",
+                    "min": 0,
                     "disabled": "!data.scheduler?.autoMode",
                     "hidden": "!data.expertMode",
                     "xs": 12,
@@ -877,144 +1118,6 @@
                     "type": "number",
                     "label": "Poll interval (min)",
                     "newLine": true,
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4
-                }
-            }
-        },
-        "_legalRestrictionTab": {
-            "type": "panel",
-            "label": "Legal restriction",
-            "hidden": "!data.expertMode",
-            "items": {
-                "legalRestriction.enabled": {
-                    "type": "checkbox",
-                    "label": "Legal restriction check enabled",
-                    "newLine": true,
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4
-                },
-                "legalRestriction.stationId": {
-                    "type": "selectSendTo",
-                    "label": "DWD station",
-                    "command": "listDwdStations",
-                    "jsonData": "{}",
-                    "onChange": {
-                        "alsoDependsOn": ["legalRestriction.temperatureStateId"],
-                        "calculateFunc": "data.legalRestriction?.temperatureStateId ? '' : data.legalRestriction?.stationId",
-                        "ignoreOwnChanges": true
-                    },
-                    "newLine": true,
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4
-                },
-                "legalRestriction.temperatureStateId": {
-                    "type": "objectId",
-                    "label": "Local temperature state",
-                    "help": "If selected, this state is used instead of the DWD station.",
-                    "onChange": {
-                        "alsoDependsOn": ["legalRestriction.stationId"],
-                        "calculateFunc": "data.legalRestriction?.stationId ? '' : data.legalRestriction?.temperatureStateId",
-                        "ignoreOwnChanges": true
-                    },
-                    "newLine": true,
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4
-                },
-                "legalRestriction.startDate": {
-                    "type": "text",
-                    "label": "Restriction start date",
-                    "placeholder": "13.5",
-                    "validator": "(!data.legalRestriction?.startDate && !data.legalRestriction?.endDate) || (/^(?:(?:[1-9]|[12]\\d|3[01])\\.(?:1|3|5|7|8|10|12)|(?:[1-9]|[12]\\d|30)\\.(?:4|6|9|11)|(?:[1-9]|1\\d|2[0-9])\\.2)$/.test(data.legalRestriction?.startDate || '') && /^(?:(?:[1-9]|[12]\\d|3[01])\\.(?:1|3|5|7|8|10|12)|(?:[1-9]|[12]\\d|30)\\.(?:4|6|9|11)|(?:[1-9]|1\\d|2[0-9])\\.2)$/.test(data.legalRestriction?.endDate || ''))",
-                    "validatorErrorText": "Enter both dates as valid D.M values or leave both empty.",
-                    "validatorNoSaveOnError": true,
-                    "newLine": true,
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4
-                },
-                "legalRestriction.endDate": {
-                    "type": "text",
-                    "label": "Restriction end date",
-                    "placeholder": "13.9",
-                    "disabled": "!data.legalRestriction?.startDate",
-                    "onChange": {
-                        "alsoDependsOn": ["legalRestriction.startDate"],
-                        "calculateFunc": "data.legalRestriction?.startDate ? data.legalRestriction?.endDate : ''",
-                        "ignoreOwnChanges": true
-                    },
-                    "validator": "(!data.legalRestriction?.startDate && !data.legalRestriction?.endDate) || (/^(?:(?:[1-9]|[12]\\d|3[01])\\.(?:1|3|5|7|8|10|12)|(?:[1-9]|[12]\\d|30)\\.(?:4|6|9|11)|(?:[1-9]|1\\d|2[0-9])\\.2)$/.test(data.legalRestriction?.startDate || '') && /^(?:(?:[1-9]|[12]\\d|3[01])\\.(?:1|3|5|7|8|10|12)|(?:[1-9]|[12]\\d|30)\\.(?:4|6|9|11)|(?:[1-9]|1\\d|2[0-9])\\.2)$/.test(data.legalRestriction?.endDate || ''))",
-                    "validatorErrorText": "Enter both dates as valid D.M values or leave both empty.",
-                    "validatorNoSaveOnError": true,
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4
-                },
-                "legalRestriction.startTime": {
-                    "type": "text",
-                    "label": "Restriction start time",
-                    "placeholder": "15:10",
-                    "validator": "(!data.legalRestriction?.startTime && !data.legalRestriction?.endTime) || (/^(?:[01]\\d|2[0-3]):[0-5]\\d$/.test(data.legalRestriction?.startTime || '') && /^(?:[01]\\d|2[0-3]):[0-5]\\d$/.test(data.legalRestriction?.endTime || ''))",
-                    "validatorErrorText": "Enter both times as valid HH:MM values or leave both empty.",
-                    "validatorNoSaveOnError": true,
-                    "newLine": true,
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4
-                },
-                "legalRestriction.endTime": {
-                    "type": "text",
-                    "label": "Restriction end time",
-                    "placeholder": "17:00",
-                    "disabled": "!data.legalRestriction?.startTime",
-                    "onChange": {
-                        "alsoDependsOn": ["legalRestriction.startTime"],
-                        "calculateFunc": "data.legalRestriction?.startTime ? data.legalRestriction?.endTime : ''",
-                        "ignoreOwnChanges": true
-                    },
-                    "validator": "(!data.legalRestriction?.startTime && !data.legalRestriction?.endTime) || (/^(?:[01]\\d|2[0-3]):[0-5]\\d$/.test(data.legalRestriction?.startTime || '') && /^(?:[01]\\d|2[0-3]):[0-5]\\d$/.test(data.legalRestriction?.endTime || ''))",
-                    "validatorErrorText": "Enter both times as valid HH:MM values or leave both empty.",
-                    "validatorNoSaveOnError": true,
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4
-                },
-                "legalRestriction.minTemperature": {
-                    "type": "number",
-                    "label": "Maximum irrigation temperature (°C)",
-                    "disabled": "!data.legalRestriction?.stationId && !data.legalRestriction?.temperatureStateId",
-                    "alsoDependsOn": ["legalRestriction.stationId", "legalRestriction.temperatureStateId"],
-                    "newLine": true,
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4
-                },
-                "legalRestriction.checkInterval": {
-                    "type": "number",
-                    "label": "Check interval (min)",
-                    "min": 1,
                     "xs": 12,
                     "sm": 12,
                     "md": 6,

@@ -19,7 +19,8 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 var scheduler_exports = {};
 __export(scheduler_exports, {
   Scheduler: () => Scheduler,
-  resolvePlanFromIcalTitle: () => resolvePlanFromIcalTitle
+  resolvePlanFromIcalTitle: () => resolvePlanFromIcalTitle,
+  sortTimerTimes: () => sortTimerTimes
 });
 module.exports = __toCommonJS(scheduler_exports);
 const TIME_RE = /^([01]?\d|2[0-3]):([0-5]\d)$/;
@@ -38,8 +39,9 @@ class Scheduler {
       );
     }, 1e3);
     this.timerHandles.push(handle);
-    const icalState = this.deps.getConfig().scheduler.icalTriggerState;
-    if (icalState) {
+    const config = this.deps.getConfig();
+    const icalState = config.scheduler.icalTriggerState;
+    if (config.scheduler.triggerMode === "ical" && icalState) {
       await this.deps.adapter.subscribeForeignStatesAsync(icalState);
       this.icalTriggerSubscribed = true;
     }
@@ -59,7 +61,7 @@ class Scheduler {
     }
     this.lastCheckedMinute = minuteKey;
     const config = this.deps.getConfig();
-    if (!config.scheduler.autoMode) {
+    if (!config.scheduler.autoMode || config.scheduler.triggerMode !== "timer") {
       return;
     }
     if (this.deps.isSeasonBlocked() || this.deps.isFrostBlocked()) {
@@ -87,14 +89,14 @@ class Scheduler {
   async onForeignStateChange(id, state) {
     var _a, _b;
     const config = this.deps.getConfig();
-    if (id !== config.scheduler.icalTriggerState) {
+    if (config.scheduler.triggerMode !== "ical" || id !== config.scheduler.icalTriggerState) {
       return false;
     }
     if ((state == null ? void 0 : state.val) !== true) {
       return true;
     }
-    if (this.deps.isSeasonBlocked() || this.deps.isFrostBlocked()) {
-      this.deps.adapter.log.info("iCal trigger fired but season/frost block is active - ignored.");
+    if (this.deps.isFrostBlocked()) {
+      this.deps.adapter.log.info("iCal trigger fired but frost protection block is active - ignored.");
       return true;
     }
     const planName = (_b = (_a = config.plans[0]) == null ? void 0 : _a.name) != null ? _b : "All";
@@ -121,6 +123,16 @@ function normalizeTime(value) {
   }
   return `${parseInt(match[1], 10)}:${match[2]}`;
 }
+function timeStringToMinutes(value) {
+  const match = TIME_RE.exec(value.trim());
+  if (!match) {
+    return Number.POSITIVE_INFINITY;
+  }
+  return parseInt(match[1], 10) * 60 + parseInt(match[2], 10);
+}
+function sortTimerTimes(timerTimes) {
+  return [...timerTimes].sort((a, b) => timeStringToMinutes(a) - timeStringToMinutes(b));
+}
 function resolvePlanFromIcalTitle(title, prefix, planNames, defaultPlan) {
   const trimmed = title.trim();
   const prefixLower = prefix.toLowerCase();
@@ -138,6 +150,7 @@ function resolvePlanFromIcalTitle(title, prefix, planNames, defaultPlan) {
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   Scheduler,
-  resolvePlanFromIcalTitle
+  resolvePlanFromIcalTitle,
+  sortTimerTimes
 });
 //# sourceMappingURL=scheduler.js.map

@@ -9,7 +9,7 @@ import { AutomationEngine, buildBatches, calculateTemperatureAdjustmentFactor } 
 import { parseDuration, formatDuration } from './lib/duration';
 import { DwdRestriction, parseDwdTemperature } from './lib/dwd';
 import { normalizeConfig } from './lib/config-defaults';
-import { resolvePlanFromIcalTitle } from './lib/scheduler';
+import { resolvePlanFromIcalTitle, Scheduler, sortTimerTimes } from './lib/scheduler';
 import { parsePlanValveTableRows, synchronizePlanWithValves } from './lib/types';
 import { ValveController } from './lib/ventile';
 import { evaluateWindPause, WindMonitor } from './lib/wind';
@@ -678,6 +678,7 @@ describe('dwd.DwdRestriction.check', () => {
             plans: [{ name: 'All', valveIndexes: [] }],
             scheduler: {
                 autoMode: false,
+                triggerMode: 'timer',
                 pauseOnRain: false,
                 rainHysteresisMinutes: 10,
                 windPauseEnabled: false,
@@ -1062,6 +1063,7 @@ describe('automation temperature-controlled irrigation adjustment (full plan run
             plans: [{ name: 'All', valveIndexes: [] }],
             scheduler: {
                 autoMode: false,
+                triggerMode: 'timer',
                 pauseOnRain: false,
                 rainHysteresisMinutes: 10,
                 windPauseEnabled: false,
@@ -1183,6 +1185,31 @@ describe('automation temperature-controlled irrigation adjustment (full plan run
     });
 });
 
+describe('scheduler.sortTimerTimes', () => {
+    it('sorts by time-of-day, not lexicographically (e.g. "6:30" before "21:30")', () => {
+        expect(sortTimerTimes(['21:30', '6:30'])).to.deep.equal(['6:30', '21:30']);
+    });
+
+    it('sorts a longer, fully out-of-order list correctly', () => {
+        expect(sortTimerTimes(['21:30', '6:30', '3:00', '12:15'])).to.deep.equal(['3:00', '6:30', '12:15', '21:30']);
+    });
+
+    it('does not mutate the input array', () => {
+        const input = ['21:30', '6:30'];
+        const result = sortTimerTimes(input);
+        expect(input).to.deep.equal(['21:30', '6:30']);
+        expect(result).to.not.equal(input);
+    });
+
+    it('sorts unparsable entries last, without throwing', () => {
+        expect(sortTimerTimes(['21:30', 'not-a-time', '6:30'])).to.deep.equal(['6:30', '21:30', 'not-a-time']);
+    });
+
+    it('leaves an already-sorted list unchanged in content', () => {
+        expect(sortTimerTimes(['3:00', '6:30', '21:30'])).to.deep.equal(['3:00', '6:30', '21:30']);
+    });
+});
+
 describe('scheduler.resolvePlanFromIcalTitle', () => {
     const planNames = ['All', 'Rasen', 'Beete'];
 
@@ -1253,6 +1280,7 @@ describe('automation.recoverAfterRestart', () => {
             plans: [{ name: 'All', valveIndexes: [] }],
             scheduler: {
                 autoMode: false,
+                triggerMode: 'timer',
                 pauseOnRain: false,
                 rainHysteresisMinutes: 10,
                 windPauseEnabled: false,
@@ -1417,6 +1445,7 @@ describe('automation pause/resume: correct remaining time and overlapping blocke
             plans: [{ name: 'All', valveIndexes: [] }],
             scheduler: {
                 autoMode: false,
+                triggerMode: 'timer',
                 pauseOnRain: true,
                 rainHysteresisMinutes: 10,
                 windPauseEnabled: true,
@@ -1697,6 +1726,7 @@ describe('wind.WindMonitor initial sensor read', () => {
             plans: [{ name: 'All', valveIndexes: [] }],
             scheduler: {
                 autoMode: false,
+                triggerMode: 'timer',
                 pauseOnRain: false,
                 rainHysteresisMinutes: 10,
                 windPauseEnabled: true,
@@ -1821,6 +1851,7 @@ describe('sensors.SensorManager initial read and stale-data detection', () => {
             plans: [{ name: 'All', valveIndexes: [] }],
             scheduler: {
                 autoMode: false,
+                triggerMode: 'timer',
                 pauseOnRain: false,
                 rainHysteresisMinutes: 10,
                 windPauseEnabled: false,
@@ -1971,5 +2002,246 @@ describe('sensors.SensorManager initial read and stale-data detection', () => {
 
         expect(sensors.isRaining()).to.equal(true); // kept previous value, not reset to false
         expect(warnings.some(w => w.includes('no valid boolean value'))).to.equal(true);
+    });
+});
+
+describe('config-defaults.normalizeConfig triggerMode migration', () => {
+    it('defaults to "timer" for a config that predates triggerMode and has no iCal trigger configured', () => {
+        const config = normalizeConfig({ scheduler: { icalTriggerState: '' } as never });
+        expect(config.scheduler.triggerMode).to.equal('timer');
+    });
+
+    it('infers "ical" for a config that predates triggerMode but already has an iCal trigger state configured, so upgrading does not silently disable an existing iCal-based setup', () => {
+        const config = normalizeConfig({ scheduler: { icalTriggerState: 'ical.0.data.table' } as never });
+        expect(config.scheduler.triggerMode).to.equal('ical');
+    });
+
+    it('respects an explicitly saved triggerMode over inferring it from icalTriggerState', () => {
+        const config = normalizeConfig({
+            scheduler: { triggerMode: 'timer', icalTriggerState: 'ical.0.data.table' } as never,
+        });
+        expect(config.scheduler.triggerMode).to.equal('timer');
+    });
+});
+
+describe('scheduler.Scheduler "timer"/"ical" mutual exclusivity', () => {
+    function makeFakeAdapter(): {
+        intervalHandler: (() => void) | undefined;
+        subscribeCalls: string[];
+        subscribeForeignStatesAsync: (id: string) => Promise<void>;
+        unsubscribeForeignStatesAsync: () => Promise<void>;
+        setInterval: (handler: () => void) => number;
+        clearInterval: () => void;
+        log: { debug: () => void; info: () => void; warn: () => void; error: () => void };
+    } {
+        const fake = {
+            intervalHandler: undefined as (() => void) | undefined,
+            subscribeCalls: [] as string[],
+            subscribeForeignStatesAsync: (id: string) => {
+                fake.subscribeCalls.push(id);
+                return Promise.resolve();
+            },
+            unsubscribeForeignStatesAsync: () => Promise.resolve(),
+            setInterval: (handler: () => void) => {
+                fake.intervalHandler = handler;
+                return 1;
+            },
+            clearInterval: () => {
+                fake.intervalHandler = undefined;
+            },
+            log: { debug: () => undefined, info: () => undefined, warn: () => undefined, error: () => undefined },
+        };
+        return fake;
+    }
+
+    // Use the actual current time as the configured timer time, rather than faking the
+    // clock, so checkTimers()'s `new Date()` comparison matches regardless of when the
+    // test suite happens to run.
+    function currentHourMinute(): string {
+        const now = new Date();
+        return `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+    }
+
+    it('does not fire the "timer" trigger while triggerMode is "ical", even at a matching HH:MM', async () => {
+        const config = normalizeConfig({
+            plans: [{ name: 'All', valveIndexes: [] }],
+            scheduler: {
+                autoMode: true,
+                triggerMode: 'ical',
+                timerTimes: [currentHourMinute()],
+                icalTriggerState: 'ical.0.data.table',
+            } as never,
+        });
+        const adapter = makeFakeAdapter();
+        const triggers: { planName: string; source: 'timer' | 'ical' }[] = [];
+        const scheduler = new Scheduler({
+            adapter: adapter as unknown as ioBroker.Adapter,
+            getConfig: () => config,
+            onTrigger: (planName, source) => {
+                triggers.push({ planName, source });
+                return Promise.resolve();
+            },
+            isFrostBlocked: () => false,
+            isSeasonBlocked: () => false,
+        });
+
+        await scheduler.init();
+        expect(adapter.intervalHandler).to.not.equal(undefined);
+        adapter.intervalHandler?.();
+        // checkTimers() itself is async and its internal await(s) are not awaited by
+        // the interval callback (see scheduler.ts init()); flush the microtask queue
+        // with a real timer tick so the (fake) onTrigger call has actually run before
+        // asserting on it.
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        expect(triggers).to.deep.equal([]);
+    });
+
+    it('fires the "timer" trigger at a matching HH:MM while triggerMode is "timer"', async () => {
+        const config = normalizeConfig({
+            plans: [{ name: 'All', valveIndexes: [] }],
+            scheduler: { autoMode: true, triggerMode: 'timer', timerTimes: [currentHourMinute()] } as never,
+        });
+        const adapter = makeFakeAdapter();
+        const triggers: { planName: string; source: 'timer' | 'ical' }[] = [];
+        const scheduler = new Scheduler({
+            adapter: adapter as unknown as ioBroker.Adapter,
+            getConfig: () => config,
+            onTrigger: (planName, source) => {
+                triggers.push({ planName, source });
+                return Promise.resolve();
+            },
+            isFrostBlocked: () => false,
+            isSeasonBlocked: () => false,
+        });
+
+        await scheduler.init();
+        adapter.intervalHandler?.();
+        // checkTimers() itself is async and its internal await(s) are not awaited by
+        // the interval callback (see scheduler.ts init()); flush the microtask queue
+        // with a real timer tick so the (fake) onTrigger call has actually run before
+        // asserting on it.
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        expect(triggers).to.deep.equal([{ planName: 'All', source: 'timer' }]);
+    });
+
+    it('season block prevents the "timer" trigger, matching the "season is timer-only" behavior', async () => {
+        const config = normalizeConfig({
+            plans: [{ name: 'All', valveIndexes: [] }],
+            scheduler: { autoMode: true, triggerMode: 'timer', timerTimes: [currentHourMinute()] } as never,
+        });
+        const adapter = makeFakeAdapter();
+        const triggers: { planName: string; source: 'timer' | 'ical' }[] = [];
+        const scheduler = new Scheduler({
+            adapter: adapter as unknown as ioBroker.Adapter,
+            getConfig: () => config,
+            onTrigger: (planName, source) => {
+                triggers.push({ planName, source });
+                return Promise.resolve();
+            },
+            isFrostBlocked: () => false,
+            isSeasonBlocked: () => true,
+        });
+
+        await scheduler.init();
+        adapter.intervalHandler?.();
+        // checkTimers() itself is async and its internal await(s) are not awaited by
+        // the interval callback (see scheduler.ts init()); flush the microtask queue
+        // with a real timer tick so the (fake) onTrigger call has actually run before
+        // asserting on it.
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        expect(triggers).to.deep.equal([]);
+    });
+
+    it('does not subscribe to the iCal trigger state and never fires it while triggerMode is "timer"', async () => {
+        const config = normalizeConfig({
+            plans: [{ name: 'All', valveIndexes: [] }],
+            scheduler: { autoMode: true, triggerMode: 'timer', icalTriggerState: 'ical.0.data.table' } as never,
+        });
+        const adapter = makeFakeAdapter();
+        const triggers: { planName: string; source: 'timer' | 'ical' }[] = [];
+        const scheduler = new Scheduler({
+            adapter: adapter as unknown as ioBroker.Adapter,
+            getConfig: () => config,
+            onTrigger: (planName, source) => {
+                triggers.push({ planName, source });
+                return Promise.resolve();
+            },
+            isFrostBlocked: () => false,
+            isSeasonBlocked: () => false,
+        });
+
+        await scheduler.init();
+        expect(adapter.subscribeCalls).to.deep.equal([]);
+
+        const handled = await scheduler.onForeignStateChange('ical.0.data.table', {
+            val: true,
+        } as ioBroker.State);
+        expect(handled).to.equal(false);
+        expect(triggers).to.deep.equal([]);
+    });
+
+    it('fires the "ical" trigger while triggerMode is "ical", ignoring a season block but respecting a frost block', async () => {
+        const config = normalizeConfig({
+            plans: [{ name: 'All', valveIndexes: [] }],
+            scheduler: {
+                autoMode: true,
+                triggerMode: 'ical',
+                icalTriggerState: 'ical.0.data.table',
+            } as never,
+        });
+        const adapter = makeFakeAdapter();
+        const triggers: { planName: string; source: 'timer' | 'ical' }[] = [];
+        const scheduler = new Scheduler({
+            adapter: adapter as unknown as ioBroker.Adapter,
+            getConfig: () => config,
+            onTrigger: (planName, source) => {
+                triggers.push({ planName, source });
+                return Promise.resolve();
+            },
+            isFrostBlocked: () => false,
+            // Season blocking must NOT prevent an iCal-triggered run.
+            isSeasonBlocked: () => true,
+        });
+
+        await scheduler.init();
+        expect(adapter.subscribeCalls).to.deep.equal(['ical.0.data.table']);
+        const handled = await scheduler.onForeignStateChange('ical.0.data.table', {
+            val: true,
+        } as ioBroker.State);
+        expect(handled).to.equal(true);
+        expect(triggers).to.deep.equal([{ planName: 'All', source: 'ical' }]);
+    });
+
+    it('frost block prevents the "ical" trigger', async () => {
+        const config = normalizeConfig({
+            plans: [{ name: 'All', valveIndexes: [] }],
+            scheduler: {
+                autoMode: true,
+                triggerMode: 'ical',
+                icalTriggerState: 'ical.0.data.table',
+            } as never,
+        });
+        const adapter = makeFakeAdapter();
+        const triggers: { planName: string; source: 'timer' | 'ical' }[] = [];
+        const scheduler = new Scheduler({
+            adapter: adapter as unknown as ioBroker.Adapter,
+            getConfig: () => config,
+            onTrigger: (planName, source) => {
+                triggers.push({ planName, source });
+                return Promise.resolve();
+            },
+            isFrostBlocked: () => true,
+            isSeasonBlocked: () => false,
+        });
+
+        await scheduler.init();
+        const handled = await scheduler.onForeignStateChange('ical.0.data.table', {
+            val: true,
+        } as ioBroker.State);
+        expect(handled).to.equal(true);
+        expect(triggers).to.deep.equal([]);
     });
 });

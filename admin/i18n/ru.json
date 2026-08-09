@@ -66,8 +66,6 @@
     "Latitude": "Широта",
     "Leave empty to scan all Homematic instances.": "Оставьте пустым, чтобы сканировать все экземпляры Homematic.",
     "Leave empty to scan all Hydrawise instances.": "Оставьте пустым, чтобы сканировать все экземпляры Hydrawise.",
-    "Legal restriction": "Юридическое ограничение",
-    "Legal restriction check enabled": "Проверка юридических ограничений включена",
     "Load selected valve": "Загрузить выбранный клапан",
     "Load valves for selected plan": "Нагрузочные клапаны для выбранного плана",
     "Local temperature state": "Местное температурное состояние",

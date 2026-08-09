@@ -21,6 +21,7 @@ export const DEFAULT_CONFIG: IrrigationNativeConfig = {
         windGustLimit: 0,
         windHysteresisMinutes: 10,
         timerTimes: [],
+        triggerMode: 'timer',
         temperatureAdjustmentEnabled: false,
         temperatureAdjustmentStateId: '',
         pumpCapacity: 0,
@@ -146,7 +147,18 @@ export function normalizeConfig(config: Partial<IrrigationNativeConfig>): Irriga
             config.plans && config.plans.length > 0
                 ? config.plans.map(p => ({ name: p.name ?? '', valveIndexes: p.valveIndexes ?? [] }))
                 : DEFAULT_CONFIG.plans,
-        scheduler: { ...DEFAULT_CONFIG.scheduler, ...config.scheduler },
+        // "Timer times" and the iCal trigger are mutually exclusive alternatives
+        // (see ISchedulerConfig.triggerMode doc comment). Configs saved before this
+        // field existed have no `triggerMode` at all; for those, infer "ical" if an
+        // iCal trigger state was already configured (preserving their existing
+        // behavior across the upgrade), otherwise default to "timer".
+        scheduler: {
+            ...DEFAULT_CONFIG.scheduler,
+            ...config.scheduler,
+            triggerMode:
+                config.scheduler?.triggerMode ??
+                (config.scheduler?.icalTriggerState ? 'ical' : DEFAULT_CONFIG.scheduler.triggerMode),
+        },
         sensors: { ...DEFAULT_CONFIG.sensors, ...config.sensors },
         weather: { ...DEFAULT_CONFIG.weather, ...config.weather },
         legalRestriction,

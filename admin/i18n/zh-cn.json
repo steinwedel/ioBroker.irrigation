@@ -66,8 +66,6 @@
     "Latitude": "纬度",
     "Leave empty to scan all Homematic instances.": "留空以扫描所有 Homematic 实例。",
     "Leave empty to scan all Hydrawise instances.": "留空以扫描所有 Hydrawise 实例。",
-    "Legal restriction": "法律限制",
-    "Legal restriction check enabled": "启用法律限制检查",
     "Load selected valve": "加载选定的阀门",
     "Load valves for selected plan": "所选计划的负载阀",
     "Local temperature state": "局部温度状态",

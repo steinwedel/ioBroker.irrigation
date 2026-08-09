@@ -1,0 +1,3 @@
+chore: release v0.3.26
+
+* (Gerhard Steinwedel) **FIXED**: Reliably reset Gardena valve states when their local watering countdown reaches zero

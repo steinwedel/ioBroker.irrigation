@@ -39,6 +39,15 @@ async function createBaseStates(adapter) {
     write: true,
     def: false
   });
+  await setObj(adapter, "automation.triggerMode", {
+    name: "Automatic trigger mode (timer/ical)",
+    type: "string",
+    role: "text",
+    states: { timer: "timer", ical: "ical" },
+    read: true,
+    write: false,
+    def: "timer"
+  });
   await setObj(adapter, "automation.pauseOnRain", {
     name: "Pause automatic watering when raining",
     type: "boolean",
@@ -686,6 +695,7 @@ async function createBaseStates(adapter) {
 }
 async function applyConfigToStates(adapter, config) {
   await adapter.setStateAsync("automation.active", { val: config.scheduler.autoMode, ack: true });
+  await adapter.setStateAsync("automation.triggerMode", { val: config.scheduler.triggerMode, ack: true });
   await adapter.setStateAsync("automation.pauseOnRain", { val: config.scheduler.pauseOnRain, ack: true });
   await adapter.setStateAsync("automation.rainHysteresisMinutes", {
     val: config.scheduler.rainHysteresisMinutes,

@@ -35,8 +35,14 @@ export class Scheduler {
         }, 1000);
         this.timerHandles.push(handle);
 
-        const icalState = this.deps.getConfig().scheduler.icalTriggerState;
-        if (icalState) {
+        // "Timer times" and the iCal trigger are mutually exclusive alternatives
+        // (see ISchedulerConfig.triggerMode doc comment) - only subscribe to the
+        // iCal trigger state when it is actually the active mode, so a state change
+        // on a stale/leftover icalTriggerState from a previous "ical" configuration
+        // can never fire a run while "timer" mode is selected.
+        const config = this.deps.getConfig();
+        const icalState = config.scheduler.icalTriggerState;
+        if (config.scheduler.triggerMode === 'ical' && icalState) {
             await this.deps.adapter.subscribeForeignStatesAsync(icalState);
             this.icalTriggerSubscribed = true;
         }
@@ -58,9 +64,13 @@ export class Scheduler {
         this.lastCheckedMinute = minuteKey;
 
         const config = this.deps.getConfig();
-        if (!config.scheduler.autoMode) {
+        if (!config.scheduler.autoMode || config.scheduler.triggerMode !== 'timer') {
             return;
         }
+        // Season-based automation only applies to the fixed-time timer trigger, not
+        // to iCal-triggered runs (see ISchedulerConfig.triggerMode doc comment) -
+        // isSeasonBlocked() is therefore only ever checked here, never in
+        // onForeignStateChange()'s iCal path below.
         if (this.deps.isSeasonBlocked() || this.deps.isFrostBlocked()) {
             return;
         }
@@ -87,15 +97,17 @@ export class Scheduler {
      */
     public async onForeignStateChange(id: string, state: ioBroker.State | null | undefined): Promise<boolean> {
         const config = this.deps.getConfig();
-        if (id !== config.scheduler.icalTriggerState) {
+        if (config.scheduler.triggerMode !== 'ical' || id !== config.scheduler.icalTriggerState) {
             return false;
         }
         if (state?.val !== true) {
             return true;
         }
 
-        if (this.deps.isSeasonBlocked() || this.deps.isFrostBlocked()) {
-            this.deps.adapter.log.info('iCal trigger fired but season/frost block is active - ignored.');
+        // Season-based automation is timer-only (see checkTimers()); only frost
+        // protection also blocks iCal-triggered runs.
+        if (this.deps.isFrostBlocked()) {
+            this.deps.adapter.log.info('iCal trigger fired but frost protection block is active - ignored.');
             return true;
         }
 
@@ -124,6 +136,42 @@ function normalizeTime(value: string): string {
         return value.trim();
     }
     return `${parseInt(match[1], 10)}:${match[2]}`;
+}
+
+/**
+ * Converts a valid "HH:MM"/"H:MM" string to minutes since midnight, or
+ * `Number.POSITIVE_INFINITY` for anything that doesn't match `TIME_RE`, so
+ * unparsable entries always sort last rather than throwing or corrupting the
+ * order of the valid entries around them.
+ *
+ * @param value
+ */
+function timeStringToMinutes(value: string): number {
+    const match = TIME_RE.exec(value.trim());
+    if (!match) {
+        return Number.POSITIVE_INFINITY;
+    }
+    return parseInt(match[1], 10) * 60 + parseInt(match[2], 10);
+}
+
+/**
+ * Returns a new array with `timerTimes` sorted in ascending time-of-day
+ * order (not lexicographic string order, so e.g. "6:30" sorts before
+ * "21:30" despite "2" < "6" as characters). Used both by the admin UI's
+ * live chip-input re-sort (see admin/jsonConfig.json's onChange.calculateFunc
+ * on "scheduler.timerTimes", which duplicates this exact comparison in a
+ * JS-expression string since it must run client-side without access to this
+ * module) and by main.ts's onReady() self-heal for already-saved,
+ * out-of-order config values that predate that admin UI live-sort fix (the
+ * live-sort only re-sorts on the next add/remove of a chip in an *already
+ * open* config dialog - it does not retroactively fix a value that was saved
+ * out of order before the fix existed, or entered directly via the Objects
+ * tab / a script).
+ *
+ * @param timerTimes
+ */
+export function sortTimerTimes(timerTimes: string[]): string[] {
+    return [...timerTimes].sort((a, b) => timeStringToMinutes(a) - timeStringToMinutes(b));
 }
 
 /**

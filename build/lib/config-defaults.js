@@ -39,6 +39,7 @@ const DEFAULT_CONFIG = {
     windGustLimit: 0,
     windHysteresisMinutes: 10,
     timerTimes: [],
+    triggerMode: "timer",
     temperatureAdjustmentEnabled: false,
     temperatureAdjustmentStateId: "",
     pumpCapacity: 0,
@@ -95,7 +96,7 @@ function normalizeDays(days) {
   ].sort((a, b) => a - b);
 }
 function normalizeConfig(config) {
-  var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p;
+  var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s;
   const legacyRestriction = config.legalRestriction;
   const legacyStartMonth = (_a = legacyRestriction == null ? void 0 : legacyRestriction.monthStart) != null ? _a : 6;
   const legacyEndMonth = (_b = legacyRestriction == null ? void 0 : legacyRestriction.monthEnd) != null ? _b : 9;
@@ -139,7 +140,16 @@ function normalizeConfig(config) {
       var _a2, _b2;
       return { name: (_a2 = p.name) != null ? _a2 : "", valveIndexes: (_b2 = p.valveIndexes) != null ? _b2 : [] };
     }) : DEFAULT_CONFIG.plans,
-    scheduler: { ...DEFAULT_CONFIG.scheduler, ...config.scheduler },
+    // "Timer times" and the iCal trigger are mutually exclusive alternatives
+    // (see ISchedulerConfig.triggerMode doc comment). Configs saved before this
+    // field existed have no `triggerMode` at all; for those, infer "ical" if an
+    // iCal trigger state was already configured (preserving their existing
+    // behavior across the upgrade), otherwise default to "timer".
+    scheduler: {
+      ...DEFAULT_CONFIG.scheduler,
+      ...config.scheduler,
+      triggerMode: (_s = (_q = config.scheduler) == null ? void 0 : _q.triggerMode) != null ? _s : ((_r = config.scheduler) == null ? void 0 : _r.icalTriggerState) ? "ical" : DEFAULT_CONFIG.scheduler.triggerMode
+    },
     sensors: { ...DEFAULT_CONFIG.sensors, ...config.sensors },
     weather: { ...DEFAULT_CONFIG.weather, ...config.weather },
     legalRestriction,

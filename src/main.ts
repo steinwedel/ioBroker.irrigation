@@ -11,7 +11,7 @@ import { formatValveNumber, NONE_SENTINEL, parsePlanValveTableRows, synchronizeP
 import { createBaseStates, applyConfigToStates } from './lib/states';
 import { ValveController } from './lib/ventile';
 import { AutomationEngine } from './lib/automation';
-import { Scheduler, resolvePlanFromIcalTitle } from './lib/scheduler';
+import { Scheduler, resolvePlanFromIcalTitle, sortTimerTimes } from './lib/scheduler';
 import { SensorManager } from './lib/sensors';
 import { WindMonitor } from './lib/wind';
 import { DwdRestriction } from './lib/dwd';
@@ -188,6 +188,7 @@ class Irrigation extends utils.Adapter {
 
         this.config2 = normalizeConfig(this.config);
         await this.migrateNativeConfig();
+        await this.sortTimerTimesIfNeeded();
         await this.cleanupStaleValveObjects();
         await this.cleanupStaleZoneObjects();
 
@@ -320,6 +321,31 @@ class Irrigation extends utils.Adapter {
             const nextValveId = Math.max(this.config2.nextValveId, maxAssignedId + 1);
             await this.writeNativeAsync({ valves: migratedValves as unknown as IValveConfig[], nextValveId });
         }
+    }
+
+    /**
+     * Self-heals an already-saved `scheduler.timerTimes` value that is not in
+     * ascending time-of-day order, e.g. because it was saved before the admin
+     * UI's live chip-input re-sort existed (see admin/jsonConfig.json's
+     * onChange.calculateFunc on "scheduler.timerTimes"), or entered directly
+     * via the Objects tab or a script. That admin-side fix only re-sorts the
+     * displayed* chips the next time a chip is added/removed in an already
+     * open config dialog - it never rewrites a value that was already saved
+     * out of order, so re-opening the config dialog without editing anything
+     * would otherwise keep showing the old, unsorted order indefinitely.
+     * Rewriting the underlying native config here, once, at every adapter
+     * start, ensures the admin UI shows the corrected order the next time it
+     * reads the object (which happens right after this write triggers the
+     * unconditional adapter restart that any native config write causes).
+     */
+    private async sortTimerTimesIfNeeded(): Promise<void> {
+        const current = this.config2.scheduler.timerTimes;
+        const sorted = sortTimerTimes(current);
+        if (deepEqual(current, sorted)) {
+            return;
+        }
+        this.log.info(`Sorting scheduler.timerTimes into ascending time-of-day order: [${sorted.join(', ')}].`);
+        await this.writeNativeAsync({ scheduler: { ...this.config2.scheduler, timerTimes: sorted } });
     }
 
     /**

@@ -179,6 +179,14 @@ export interface ISchedulerConfig {
     windHysteresisMinutes: number;
     /** "HH:MM" strings */
     timerTimes: string[];
+    /**
+     * "Timer times (HH:MM)" and the iCal calendar trigger are mutually exclusive
+     * alternative ways to schedule automatic runs - only one can be active at a
+     * time. "timer" also gates the season-based automation (seasonEnabled/
+     * seasonStart/seasonEnd), which only applies to the fixed-time timer trigger,
+     * not to iCal-triggered runs.
+     */
+    triggerMode: 'timer' | 'ical';
     temperatureAdjustmentEnabled: boolean;
     temperatureAdjustmentStateId: string;
     /** l/min, 0 = sequential only, >0 = parallel batch optimization */

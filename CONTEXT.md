@@ -1,12 +1,12 @@
 # Context
 
 ## Current Task
-Feature-Gap-Vergleich mit ioBroker.sprinklecontrol und kommerziellen Bewässerungscomputern durchgeführt und Umsetzungsplan erstellt.
+Admin-UI (Steuerung-Tab) auf Gruppenboxen für Saison/Regen/Wind/Frost/Temperatur umgestellt und live auf haus20a verifiziert.
 
 ## Key Decisions
-- Vollständiger Plan mit 15 Punkten in 3 Phasen liegt in `docs/feature-gap-plan.md`.
-- Durchfluss-Anomalie-Erkennung und Frost-/Wind-Blockade vor Start sind bereits vorhanden (keine echten Gaps).
-- Noch keine der geplanten Funktionen umgesetzt.
+- Gruppenboxen nutzen `type: panel` + `innerStyle` (nicht `style`, sonst doppelter Rahmen) für einzelnen, vollbreiten Rahmen.
+- Checkbox jeweils als erstes Item im Panel platziert (Kopfzeile im Rahmen), abhängige Felder darunter.
+- Wichtig: `npm install <tgz>` reicht für jsonConfig.json-Änderungen nicht aus; zusätzlich `iobroker upload irrigation` + `iobroker restart admin.0` nötig, sonst liefert Admin veraltete Konfiguration aus.
 
 ## Next Steps
-- Bei Bedarf mit Phase 1 (Quick Wins) beginnen, siehe `docs/feature-gap-plan.md`.
+- Keine offenen Schritte für diese Umsetzung.

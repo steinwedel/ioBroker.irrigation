@@ -133,6 +133,7 @@ class Irrigation extends utils.Adapter {
     this.subscribeStates("valves.*.state");
     this.config2 = (0, import_config_defaults.normalizeConfig)(this.config);
     await this.migrateNativeConfig();
+    await this.sortTimerTimesIfNeeded();
     await this.cleanupStaleValveObjects();
     await this.cleanupStaleZoneObjects();
     await (0, import_states.createBaseStates)(this);
@@ -254,6 +255,30 @@ class Irrigation extends utils.Adapter {
       const nextValveId = Math.max(this.config2.nextValveId, maxAssignedId + 1);
       await this.writeNativeAsync({ valves: migratedValves, nextValveId });
     }
+  }
+  /**
+   * Self-heals an already-saved `scheduler.timerTimes` value that is not in
+   * ascending time-of-day order, e.g. because it was saved before the admin
+   * UI's live chip-input re-sort existed (see admin/jsonConfig.json's
+   * onChange.calculateFunc on "scheduler.timerTimes"), or entered directly
+   * via the Objects tab or a script. That admin-side fix only re-sorts the
+   * displayed* chips the next time a chip is added/removed in an already
+   * open config dialog - it never rewrites a value that was already saved
+   * out of order, so re-opening the config dialog without editing anything
+   * would otherwise keep showing the old, unsorted order indefinitely.
+   * Rewriting the underlying native config here, once, at every adapter
+   * start, ensures the admin UI shows the corrected order the next time it
+   * reads the object (which happens right after this write triggers the
+   * unconditional adapter restart that any native config write causes).
+   */
+  async sortTimerTimesIfNeeded() {
+    const current = this.config2.scheduler.timerTimes;
+    const sorted = (0, import_scheduler.sortTimerTimes)(current);
+    if (deepEqual(current, sorted)) {
+      return;
+    }
+    this.log.info(`Sorting scheduler.timerTimes into ascending time-of-day order: [${sorted.join(", ")}].`);
+    await this.writeNativeAsync({ scheduler: { ...this.config2.scheduler, timerTimes: sorted } });
   }
   /**
    * Loads `plans` from the dedicated `automation.plansData` state into
