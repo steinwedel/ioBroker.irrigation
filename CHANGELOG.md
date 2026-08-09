@@ -1,4 +1,7 @@
 # Changelog
+## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **ENHANCED**: iCal trigger mode is now an expert-mode-only feature — the trigger mode selector and all iCal configuration fields are hidden in the admin UI when expert mode is disabled, and the configuration normalization enforces "timer" mode when expert mode is off. A startup reset mechanism corrects the trigger mode setting if it is still set to "ical" while expert mode is now disabled
+
 ## 0.3.27 (2026-08-09)
 * (Gerhard Steinwedel) **FIXED**: Legal restriction (hot-day pause) now only reports active when both `legalRestriction.enabled` and `scheduler.autoMode` are enabled — avoids misleading restriction warnings when automatic watering is disabled
 * (Gerhard Steinwedel) **NEW**: Trigger mode selector (`scheduler.triggerMode`) allows choosing between timer times and iCal calendar as mutually exclusive alternatives for starting automatic runs — season automation is limited to timer mode, timer times are auto-sorted ascending
