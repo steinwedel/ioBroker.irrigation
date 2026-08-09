@@ -913,6 +913,19 @@ class Irrigation extends utils.Adapter {
                 return;
             case 'automation.active':
                 this.config2.scheduler.autoMode = state.val === true;
+                // Re-evaluate the heat-pause restriction immediately instead
+                // of waiting for its next periodic interval tick: it is now
+                // gated on autoMode too (see dwd.ts isRestrictionEnabled()),
+                // so toggling autoMode off must clear an active restriction
+                // right away, and toggling it back on must resume evaluating
+                // it right away, not minutes later.
+                await this.dwd
+                    .check()
+                    .catch(error =>
+                        this.log.error(
+                            `Legal restriction re-check after autoMode change failed: ${(error as Error).message}`,
+                        ),
+                    );
                 return;
             case 'automation.planSelect':
                 return; // stored, used on next requestRun

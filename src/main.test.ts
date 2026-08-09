@@ -677,7 +677,11 @@ describe('dwd.DwdRestriction.check', () => {
             nextValveId: 0,
             plans: [{ name: 'All', valveIndexes: [] }],
             scheduler: {
-                autoMode: false,
+                // The heat-pause restriction under test here is gated on
+                // autoMode too (see dwd.ts isRestrictionEnabled()), so it
+                // must be on for these tests to exercise the legalRestriction
+                // logic in isolation, same as legalRestriction.enabled below.
+                autoMode: true,
                 triggerMode: 'timer',
                 pauseOnRain: false,
                 rainHysteresisMinutes: 10,
@@ -753,6 +757,21 @@ describe('dwd.DwdRestriction.check', () => {
         const restricted = await dwd.check();
         expect(restricted).to.equal(true);
         expect(dwd.isActive()).to.equal(true);
+    });
+
+    it('is never active while scheduler.autoMode is off, even if legalRestriction.enabled and the temperature qualify', async () => {
+        const config = makeLegalRestrictionConfig({ temperatureStateId: 'sensors.terrace_temp', minTemperature: 27 });
+        config.scheduler.autoMode = false;
+        const adapter = makeFakeAdapter({ 'sensors.terrace_temp': 28 });
+        const dwd = new DwdRestriction({
+            adapter,
+            getConfig: () => config,
+            onRestrictionChanged: () => Promise.resolve(),
+        });
+
+        const restricted = await dwd.check();
+        expect(restricted).to.equal(false);
+        expect(dwd.isActive()).to.equal(false);
     });
 
     it('local temperature source: stays inactive below minTemperature', async () => {

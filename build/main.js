@@ -775,6 +775,11 @@ class Irrigation extends utils.Adapter {
         return;
       case "automation.active":
         this.config2.scheduler.autoMode = state.val === true;
+        await this.dwd.check().catch(
+          (error) => this.log.error(
+            `Legal restriction re-check after autoMode change failed: ${error.message}`
+          )
+        );
         return;
       case "automation.planSelect":
         return;

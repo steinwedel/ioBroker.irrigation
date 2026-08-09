@@ -39,6 +39,23 @@ function parseTime(value: string): number | undefined {
 }
 
 /**
+ * The heat-pause restriction only makes sense while automatic watering is
+ * itself enabled: `scheduler.autoMode` off means no scheduled/automatic runs
+ * can start in the first place, so evaluating/reporting a restriction that
+ * has nothing to actually restrict would be misleading (e.g. the admin UI's
+ * "Pause automatic watering on hot days" checkbox is now disabled together
+ * with "Automatic mode enabled", see jsonConfig.json). Treat the restriction
+ * as effectively disabled - without touching the user's saved
+ * `legalRestriction.enabled` value - so it turns back on unchanged as soon as
+ * automatic mode is re-enabled.
+ *
+ * @param config The full adapter native config.
+ */
+function isRestrictionEnabled(config: IrrigationNativeConfig): boolean {
+    return config.legalRestriction.enabled && config.scheduler.autoMode;
+}
+
+/**
  * Fetches the current temperature from the DWD POI CSV feed and evaluates
  * the "gesetzliche Beregnungssperre" rule. See plan section
  * "Beregnungssperre" and the reference BW Automatik.js implementation.
@@ -65,6 +82,16 @@ export class DwdRestriction {
         if (!config.legalRestriction.enabled) {
             return;
         }
+
+        // The interval keeps running even while `scheduler.autoMode` is
+        // currently off - check()/apply() below gate the actual restriction
+        // value on isRestrictionEnabled(), not just legalRestriction.enabled.
+        // This is required because autoMode can be toggled at runtime (via
+        // the automation.active state) without an adapter restart, unlike
+        // legalRestriction.enabled which only changes via a native config
+        // write (which always restarts the adapter). If the interval were
+        // only started here while autoMode also happens to be on already,
+        // re-enabling autoMode later would never resume restriction checks.
 
         const checkIntervalMinutes = Number.isFinite(config.legalRestriction.checkInterval)
             ? config.legalRestriction.checkInterval
@@ -123,7 +150,7 @@ export class DwdRestriction {
 
     public async check(): Promise<boolean> {
         const config = this.deps.getConfig();
-        if (!config.legalRestriction.enabled) {
+        if (!isRestrictionEnabled(config)) {
             await this.apply(false);
             return false;
         }
@@ -153,7 +180,7 @@ export class DwdRestriction {
         if (id !== config.legalRestriction.temperatureStateId.trim()) {
             return false;
         }
-        if (!config.legalRestriction.enabled || !this.isWithinWindow(new Date())) {
+        if (!isRestrictionEnabled(config) || !this.isWithinWindow(new Date())) {
             await this.apply(false);
             return true;
         }

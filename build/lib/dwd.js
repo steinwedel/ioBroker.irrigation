@@ -48,6 +48,9 @@ function parseTime(value) {
   }
   return Number(match[1]) * 60 + Number(match[2]);
 }
+function isRestrictionEnabled(config) {
+  return config.legalRestriction.enabled && config.scheduler.autoMode;
+}
 class DwdRestriction {
   deps;
   checkTimer;
@@ -110,7 +113,7 @@ class DwdRestriction {
   }
   async check() {
     const config = this.deps.getConfig();
-    if (!config.legalRestriction.enabled) {
+    if (!isRestrictionEnabled(config)) {
       await this.apply(false);
       return false;
     }
@@ -135,7 +138,7 @@ class DwdRestriction {
     if (id !== config.legalRestriction.temperatureStateId.trim()) {
       return false;
     }
-    if (!config.legalRestriction.enabled || !this.isWithinWindow(/* @__PURE__ */ new Date())) {
+    if (!isRestrictionEnabled(config) || !this.isWithinWindow(/* @__PURE__ */ new Date())) {
       await this.apply(false);
       return true;
     }
