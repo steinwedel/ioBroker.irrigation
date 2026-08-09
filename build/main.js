@@ -134,6 +134,7 @@ class Irrigation extends utils.Adapter {
     this.config2 = (0, import_config_defaults.normalizeConfig)(this.config);
     await this.migrateNativeConfig();
     await this.sortTimerTimesIfNeeded();
+    await this.resetTriggerModeIfExpertModeDisabled();
     await this.cleanupStaleValveObjects();
     await this.cleanupStaleZoneObjects();
     await (0, import_states.createBaseStates)(this);
@@ -279,6 +280,30 @@ class Irrigation extends utils.Adapter {
     }
     this.log.info(`Sorting scheduler.timerTimes into ascending time-of-day order: [${sorted.join(", ")}].`);
     await this.writeNativeAsync({ scheduler: { ...this.config2.scheduler, timerTimes: sorted } });
+  }
+  /**
+   * The iCal trigger mode is an expert-only feature: the admin UI hides the
+   * "Trigger mode" selector and every iCal-related field, forcing timer mode,
+   * whenever Expert mode is off (see admin/jsonConfig.json). `this.config2`
+   * (built by normalizeConfig()) already reflects this at runtime regardless
+   * of what is still saved, so scheduling itself is never affected by this
+   * method running late or not at all.
+   *
+   * This method instead heals the underlying native config so the admin UI
+   * shows "Timer times" instead of the actual, now-unreachable "iCal
+   * calendar" option the next time the settings dialog is opened - e.g.
+   * after a user who had iCal configured while Expert mode was on later
+   * turns Expert mode off again without touching the (now hidden) trigger
+   * mode selector itself.
+   */
+  async resetTriggerModeIfExpertModeDisabled() {
+    if (this.config2.expertMode || this.config2.scheduler.triggerMode === "timer") {
+      return;
+    }
+    this.log.info(
+      'Expert mode is off; resetting scheduler.triggerMode from "ical" to "timer" (iCal trigger mode requires Expert mode).'
+    );
+    await this.writeNativeAsync({ scheduler: { ...this.config2.scheduler, triggerMode: "timer" } });
   }
   /**
    * Loads `plans` from the dedicated `automation.plansData` state into

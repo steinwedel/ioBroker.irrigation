@@ -490,13 +490,19 @@
                 "scheduler.triggerMode": {
                     "type": "select",
                     "label": "Trigger mode",
-                    "help": "Timer times and the iCal calendar trigger are mutually exclusive alternatives - choose which one starts automatic runs.",
+                    "help": "Timer times and the iCal calendar trigger are mutually exclusive alternatives - choose which one starts automatic runs. The iCal option requires Expert mode.",
                     "options": [
                         { "label": "Timer times", "value": "timer" },
                         { "label": "iCal calendar", "value": "ical" }
                     ],
                     "default": "timer",
                     "disabled": "!data.scheduler?.autoMode",
+                    "hidden": "!data.expertMode",
+                    "onChange": {
+                        "alsoDependsOn": ["expertMode"],
+                        "calculateFunc": "data.expertMode ? data.scheduler?.triggerMode : 'timer'",
+                        "ignoreOwnChanges": true
+                    },
                     "newLine": true,
                     "xs": 12,
                     "sm": 12,
@@ -509,7 +515,7 @@
                     "label": "iCal adapter instance",
                     "adapter": "ical",
                     "disabled": "!data.scheduler?.autoMode",
-                    "hidden": "data.scheduler?.triggerMode !== 'ical'",
+                    "hidden": "!data.expertMode || data.scheduler?.triggerMode !== 'ical'",
                     "newLine": true,
                     "xs": 12,
                     "sm": 12,
@@ -521,7 +527,7 @@
                     "type": "objectId",
                     "label": "iCal trigger state id",
                     "disabled": "!data.scheduler?.autoMode",
-                    "hidden": "data.scheduler?.triggerMode !== 'ical'",
+                    "hidden": "!data.expertMode || data.scheduler?.triggerMode !== 'ical'",
                     "xs": 12,
                     "sm": 12,
                     "md": 6,
@@ -532,7 +538,7 @@
                     "type": "text",
                     "label": "iCal event title prefix",
                     "disabled": "!data.scheduler?.autoMode",
-                    "hidden": "data.scheduler?.triggerMode !== 'ical'",
+                    "hidden": "!data.expertMode || data.scheduler?.triggerMode !== 'ical'",
                     "xs": 12,
                     "sm": 12,
                     "md": 6,

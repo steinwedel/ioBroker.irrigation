@@ -109,8 +109,9 @@ function normalizeConfig(config) {
     endTime: (_l = (_j = config.legalRestriction) == null ? void 0 : _j.endTime) != null ? _l : `${String((_k = legacyRestriction == null ? void 0 : legacyRestriction.hourEnd) != null ? _k : 17).padStart(2, "0")}:00`
   };
   const legacySoilMoistureId = ((_n = (_m = config.sensors) == null ? void 0 : _m.soilMoistureId) == null ? void 0 : _n.trim()) || void 0;
+  const expertMode = (_o = config.expertMode) != null ? _o : DEFAULT_CONFIG.expertMode;
   return {
-    expertMode: (_o = config.expertMode) != null ? _o : DEFAULT_CONFIG.expertMode,
+    expertMode,
     valves: (Array.isArray(config.valves) ? config.valves : []).map((valve, index) => {
       var _a2, _b2, _c2, _d2, _e2, _f2, _g2, _h2, _i2;
       const legacyRunFor = valve.runFor;
@@ -145,10 +146,19 @@ function normalizeConfig(config) {
     // field existed have no `triggerMode` at all; for those, infer "ical" if an
     // iCal trigger state was already configured (preserving their existing
     // behavior across the upgrade), otherwise default to "timer".
+    //
+    // The iCal trigger mode is an expert-only feature (the admin UI hides the
+    // "Trigger mode" selector and every iCal-related field unless Expert mode
+    // is on). If expert mode is off - whether it never was on, or the user
+    // just turned it off after previously configuring iCal - force "timer" here
+    // unconditionally, regardless of what is still saved in native config. This
+    // keeps scheduling behavior consistent with what the admin UI actually shows
+    // and lets the user toggle: without needing to remember to first switch the
+    // (now hidden) trigger mode back manually.
     scheduler: {
       ...DEFAULT_CONFIG.scheduler,
       ...config.scheduler,
-      triggerMode: (_s = (_q = config.scheduler) == null ? void 0 : _q.triggerMode) != null ? _s : ((_r = config.scheduler) == null ? void 0 : _r.icalTriggerState) ? "ical" : DEFAULT_CONFIG.scheduler.triggerMode
+      triggerMode: !expertMode ? "timer" : (_s = (_q = config.scheduler) == null ? void 0 : _q.triggerMode) != null ? _s : ((_r = config.scheduler) == null ? void 0 : _r.icalTriggerState) ? "ical" : DEFAULT_CONFIG.scheduler.triggerMode
     },
     sensors: { ...DEFAULT_CONFIG.sensors, ...config.sensors },
     weather: { ...DEFAULT_CONFIG.weather, ...config.weather },

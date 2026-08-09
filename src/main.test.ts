@@ -2031,13 +2031,28 @@ describe('config-defaults.normalizeConfig triggerMode migration', () => {
     });
 
     it('infers "ical" for a config that predates triggerMode but already has an iCal trigger state configured, so upgrading does not silently disable an existing iCal-based setup', () => {
-        const config = normalizeConfig({ scheduler: { icalTriggerState: 'ical.0.data.table' } as never });
+        // iCal trigger mode requires Expert mode (see the Expert-mode-off test
+        // below); an upgraded pre-existing iCal setup implies Expert mode was
+        // already on to configure it in the first place.
+        const config = normalizeConfig({
+            expertMode: true,
+            scheduler: { icalTriggerState: 'ical.0.data.table' } as never,
+        });
         expect(config.scheduler.triggerMode).to.equal('ical');
     });
 
     it('respects an explicitly saved triggerMode over inferring it from icalTriggerState', () => {
         const config = normalizeConfig({
+            expertMode: true,
             scheduler: { triggerMode: 'timer', icalTriggerState: 'ical.0.data.table' } as never,
+        });
+        expect(config.scheduler.triggerMode).to.equal('timer');
+    });
+
+    it('forces triggerMode back to "timer" when Expert mode is off, even if "ical" was explicitly saved (e.g. Expert mode was turned off again after configuring iCal)', () => {
+        const config = normalizeConfig({
+            expertMode: false,
+            scheduler: { triggerMode: 'ical', icalTriggerState: 'ical.0.data.table' } as never,
         });
         expect(config.scheduler.triggerMode).to.equal('timer');
     });
@@ -2083,6 +2098,8 @@ describe('scheduler.Scheduler "timer"/"ical" mutual exclusivity', () => {
 
     it('does not fire the "timer" trigger while triggerMode is "ical", even at a matching HH:MM', async () => {
         const config = normalizeConfig({
+            // iCal trigger mode requires Expert mode; see config-defaults.ts.
+            expertMode: true,
             plans: [{ name: 'All', valveIndexes: [] }],
             scheduler: {
                 autoMode: true,
@@ -2204,6 +2221,7 @@ describe('scheduler.Scheduler "timer"/"ical" mutual exclusivity', () => {
 
     it('fires the "ical" trigger while triggerMode is "ical", ignoring a season block but respecting a frost block', async () => {
         const config = normalizeConfig({
+            expertMode: true,
             plans: [{ name: 'All', valveIndexes: [] }],
             scheduler: {
                 autoMode: true,
@@ -2236,6 +2254,7 @@ describe('scheduler.Scheduler "timer"/"ical" mutual exclusivity', () => {
 
     it('frost block prevents the "ical" trigger', async () => {
         const config = normalizeConfig({
+            expertMode: true,
             plans: [{ name: 'All', valveIndexes: [] }],
             scheduler: {
                 autoMode: true,

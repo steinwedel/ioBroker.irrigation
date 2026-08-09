@@ -107,9 +107,10 @@ export function normalizeConfig(config: Partial<IrrigationNativeConfig>): Irriga
     };
 
     const legacySoilMoistureId = config.sensors?.soilMoistureId?.trim() || undefined;
+    const expertMode = config.expertMode ?? DEFAULT_CONFIG.expertMode;
 
     return {
-        expertMode: config.expertMode ?? DEFAULT_CONFIG.expertMode,
+        expertMode,
         valves: (Array.isArray(config.valves) ? config.valves : []).map((valve, index) => {
             const legacyRunFor = (valve as Partial<IrrigationNativeConfig['valves'][number]> & { runFor?: number })
                 .runFor;
@@ -152,12 +153,22 @@ export function normalizeConfig(config: Partial<IrrigationNativeConfig>): Irriga
         // field existed have no `triggerMode` at all; for those, infer "ical" if an
         // iCal trigger state was already configured (preserving their existing
         // behavior across the upgrade), otherwise default to "timer".
+        //
+        // The iCal trigger mode is an expert-only feature (the admin UI hides the
+        // "Trigger mode" selector and every iCal-related field unless Expert mode
+        // is on). If expert mode is off - whether it never was on, or the user
+        // just turned it off after previously configuring iCal - force "timer" here
+        // unconditionally, regardless of what is still saved in native config. This
+        // keeps scheduling behavior consistent with what the admin UI actually shows
+        // and lets the user toggle: without needing to remember to first switch the
+        // (now hidden) trigger mode back manually.
         scheduler: {
             ...DEFAULT_CONFIG.scheduler,
             ...config.scheduler,
-            triggerMode:
-                config.scheduler?.triggerMode ??
-                (config.scheduler?.icalTriggerState ? 'ical' : DEFAULT_CONFIG.scheduler.triggerMode),
+            triggerMode: !expertMode
+                ? 'timer'
+                : (config.scheduler?.triggerMode ??
+                  (config.scheduler?.icalTriggerState ? 'ical' : DEFAULT_CONFIG.scheduler.triggerMode)),
         },
         sensors: { ...DEFAULT_CONFIG.sensors, ...config.sensors },
         weather: { ...DEFAULT_CONFIG.weather, ...config.weather },
