@@ -1,4 +1,9 @@
 # Changelog
+## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **FIXED**: Legal restriction (hot-day pause) now only reports active when both `legalRestriction.enabled` and `scheduler.autoMode` are enabled — avoids misleading restriction warnings when automatic watering is disabled
+* (Gerhard Steinwedel) **NEW**: Trigger mode selector (`scheduler.triggerMode`) allows choosing between timer times and iCal calendar as mutually exclusive alternatives for starting automatic runs — season automation is limited to timer mode, timer times are auto-sorted ascending
+* (Gerhard Steinwedel) **ENHANCED**: Admin UI restructured with group boxes for scheduler settings (season/rain/wind/frost/temperature) — trigger mode, timer times, and iCal calendar now clearly separated in dedicated panels
+
 ## 0.3.26 (2026-08-08)
 * (Gerhard Steinwedel) **FIXED**: Reliably reset Gardena valve states when their local watering countdown reaches zero
 
