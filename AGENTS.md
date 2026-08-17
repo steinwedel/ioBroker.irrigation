@@ -14,6 +14,17 @@ Der Adapter steuert Ventile direkt und führt Bewässerungsprogramme auf Basis v
 - Optionale Wetter-API-Integration (Regenwahrscheinlichkeit, Temperatur)
 - Manuelle Überbrückung und Saison-Pausen
 
+### Build und Deploy
+
+Lokales Deploy nutzt die Sammlungsscripts eine Ebene höher (`../scripts/`, `../.env`). Siehe `../AGENTS.md`. Keine adapter-lokalen `scripts/` anlegen.
+
+Öffentliches Release im GitHub-Repo: `npm run release patch` (`release-script`, standalone).
+
+```bash
+../scripts/deploy.sh
+../scripts/build.sh patch
+```
+
 ---
 
 ## 1. ioBroker-Adapter-Grundregeln

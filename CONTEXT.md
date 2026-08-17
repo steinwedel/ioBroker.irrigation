@@ -1,12 +1,14 @@
 # Context
 
 ## Current Task
-Admin-UI (Steuerung-Tab) auf Gruppenboxen für Saison/Regen/Wind/Frost/Temperatur umgestellt und live auf haus20a verifiziert.
+Adapter für öffentliche Veröffentlichung vorbereitet (standalone release-script, CI-Deploy, Icon 512px/31KB).
 
 ## Key Decisions
-- Gruppenboxen nutzen `type: panel` + `innerStyle` (nicht `style`, sonst doppelter Rahmen) für einzelnen, vollbreiten Rahmen.
-- Checkbox jeweils als erstes Item im Panel platziert (Kopfzeile im Rahmen), abhängige Felder darunter.
-- Wichtig: `npm install <tgz>` reicht für jsonConfig.json-Änderungen nicht aus; zusätzlich `iobroker upload irrigation` + `iobroker restart admin.0` nötig, sonst liefert Admin veraltete Konfiguration aus.
+- `npm run release` ist nur noch `release-script`; Changelog/News-Übersetzung bleibt in `../scripts/`.
+- CI-Deploy ohne Sentry; npm Trusted Publishing muss einmalig auf npmjs.com eingerichtet werden.
+- Icon von 1024px/839KB auf 512px/31KB reduziert (Adapter Checker).
 
 ## Next Steps
-- Keine offenen Schritte für diese Umsetzung.
+- GitHub-Repo `steinwedel/ioBroker.irrigation` anlegen und `main` + Tags pushen.
+- npm Trusted Publishing für das Repo setzen, danach Tag-Push publiziert.
+- PR nach ioBroker.repositories + Forum-Tester-Thread.

@@ -70,9 +70,7 @@
     "check": "tsc --noEmit",
     "lint": "eslint -c eslint.config.mjs .",
     "translate": "translate-adapter",
-    "release:prepare": "node scripts/prepare-changelog.js",
-    "release:translate-news": "node scripts/translate-news.js",
-    "release": "npm run release:prepare && node scripts/release-with-translation.js",
+    "release": "release-script",
     "dev-server": "dev-server"
   },
   "bugs": {
