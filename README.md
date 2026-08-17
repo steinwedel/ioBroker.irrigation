@@ -8,7 +8,7 @@
 
 [![NPM](https://nodei.co/npm/iobroker.irrigation.png?downloads=true)](https://nodei.co/npm/iobroker.irrigation/)
 
-**Tests:** ![Test and Release](https://github.com/steinwedel/ioBroker.irrigation/workflows/Test%20and%20Release/badge.svg)
+**Tests:** ![Test and Release](https://github.com/steinwedel/ioBroker.irrigation/actions/workflows/test-and-release.yml/badge.svg?branch=main)
 
 ## irrigation adapter for ioBroker
 
