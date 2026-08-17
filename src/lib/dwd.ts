@@ -230,10 +230,10 @@ export class DwdRestriction {
     }
 
     private async fetchTemperature(stationId: string): Promise<number | null> {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
         try {
-            const response = await fetch(`${DWD_URL_BASE}${stationId}-BEOB.csv`, { signal: controller.signal });
+            const response = await fetch(`${DWD_URL_BASE}${stationId}-BEOB.csv`, {
+                signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+            });
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
@@ -246,14 +246,13 @@ export class DwdRestriction {
             await this.deps.adapter.setStateAsync('info.connection', { val: true, ack: true });
             return temp;
         } catch (error) {
-            const isAbort = (error as { name?: string }).name === 'AbortError';
+            const name = (error as { name?: string }).name;
+            const isAbort = name === 'AbortError' || name === 'TimeoutError';
             const message = isAbort ? `Request timed out after ${FETCH_TIMEOUT_MS / 1000}s` : (error as Error).message;
             this.deps.adapter.log.warn(`DWD temperature fetch failed: ${message}`);
             await this.recordTemperatureError(message);
             await this.deps.adapter.setStateAsync('info.connection', { val: false, ack: true });
             return null;
-        } finally {
-            clearTimeout(timeout);
         }
     }
 

@@ -33,12 +33,30 @@
                             "type": "select",
                             "label": "System type to scan",
                             "options": [
-                                { "label": "Gardena", "value": "Gardena" },
-                                { "label": "Homematic", "value": "Homematic" },
-                                { "label": "Rainbird", "value": "Rainbird" },
-                                { "label": "Hydrawise", "value": "Hydrawise" },
-                                { "label": "Generic (any adapter)", "value": "Generic" },
-                                { "label": "All", "value": "All" }
+                                {
+                                    "label": "Gardena",
+                                    "value": "Gardena"
+                                },
+                                {
+                                    "label": "Homematic",
+                                    "value": "Homematic"
+                                },
+                                {
+                                    "label": "Rainbird",
+                                    "value": "Rainbird"
+                                },
+                                {
+                                    "label": "Hydrawise",
+                                    "value": "Hydrawise"
+                                },
+                                {
+                                    "label": "Generic (any adapter)",
+                                    "value": "Generic"
+                                },
+                                {
+                                    "label": "All",
+                                    "value": "All"
+                                }
                             ],
                             "default": "All",
                             "newLine": true,
@@ -98,7 +116,7 @@
                         },
                         "_scanHomematicInfo": {
                             "type": "staticText",
-                            "text": "Homematic discovery scans the \"Bewässerung\" function enum (enum.functions) for members with a switch state, optionally restricted to the selected adapter instance.",
+                            "text": "Homematic discovery scans the \"Bew\u00e4sserung\" function enum (enum.functions) for members with a switch state, optionally restricted to the selected adapter instance.",
                             "hidden": "data.scanType !== 'Homematic'",
                             "xs": 12,
                             "sm": 12,
@@ -108,7 +126,7 @@
                         },
                         "_scanGenericInfo": {
                             "type": "staticText",
-                            "text": "Generic discovery scans the \"Bewässerung\"/\"Irrigation\" function enum (enum.functions) for members with a switch state, across all adapters. Adapters with a dedicated scan type (Gardena, Rainbird, Homematic, Hydrawise), the alias adapter and this irrigation adapter itself are always excluded.",
+                            "text": "Generic discovery scans the \"Bew\u00e4sserung\"/\"Irrigation\" function enum (enum.functions) for members with a switch state, across all adapters. Adapters with a dedicated scan type (Gardena, Rainbird, Homematic, Hydrawise), the alias adapter and this irrigation adapter itself are always excluded.",
                             "hidden": "data.scanType !== 'Generic'",
                             "xs": 12,
                             "sm": 12,
@@ -165,7 +183,9 @@
                     "newLine": true,
                     "sm": 12,
                     "md": 12,
-                    "lg": 8
+                    "lg": 8,
+                    "xs": 12,
+                    "xl": 8
                 },
                 "valves": {
                     "type": "table",
@@ -173,7 +193,13 @@
                     "newLine": true,
                     "noDelete": false,
                     "compact": true,
-                    "useCardFor": ["xs", "sm", "md", "lg", "xl"],
+                    "useCardFor": [
+                        "xs",
+                        "sm",
+                        "md",
+                        "lg",
+                        "xl"
+                    ],
                     "titleAttribute": "name",
                     "items": [
                         {
@@ -199,11 +225,26 @@
                             "sort": true,
                             "filter": true,
                             "options": [
-                                { "label": "Gardena", "value": "Gardena" },
-                                { "label": "Homematic", "value": "Homematic" },
-                                { "label": "Rainbird", "value": "Rainbird" },
-                                { "label": "Hydrawise", "value": "Hydrawise" },
-                                { "label": "Generic", "value": "Generic" }
+                                {
+                                    "label": "Gardena",
+                                    "value": "Gardena"
+                                },
+                                {
+                                    "label": "Homematic",
+                                    "value": "Homematic"
+                                },
+                                {
+                                    "label": "Rainbird",
+                                    "value": "Rainbird"
+                                },
+                                {
+                                    "label": "Hydrawise",
+                                    "value": "Hydrawise"
+                                },
+                                {
+                                    "label": "Generic",
+                                    "value": "Generic"
+                                }
                             ]
                         },
                         {
@@ -242,7 +283,10 @@
                             "title": "Flow rate (l/min)",
                             "default": 0,
                             "min": 0,
-                            "alsoDependsOn": ["flowMonitor.enabled", "flowMonitor.sensorId"],
+                            "alsoDependsOn": [
+                                "flowMonitor.enabled",
+                                "flowMonitor.sensorId"
+                            ],
                             "disabled": "!globalData.flowMonitor || !globalData.flowMonitor.enabled || !globalData.flowMonitor.sensorId || !globalData.flowMonitor.sensorId.trim()"
                         },
                         {
@@ -263,7 +307,9 @@
                             "default": 0,
                             "min": 0,
                             "max": 100,
-                            "alsoDependsOn": ["soilMoistureId"],
+                            "alsoDependsOn": [
+                                "soilMoistureId"
+                            ],
                             "disabled": "!data.soilMoistureId || !data.soilMoistureId.trim()"
                         },
                         {
@@ -278,10 +324,17 @@
                             "type": "objectId",
                             "attr": "allOffId",
                             "title": "All-off command state (Gardena/Rainbird)",
-                            "alsoDependsOn": ["type"],
+                            "alsoDependsOn": [
+                                "type"
+                            ],
                             "disabled": "data.type !== 'Gardena' && data.type !== 'Rainbird'"
                         }
-                    ]
+                    ],
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12
                 }
             }
         },
@@ -300,19 +353,25 @@
                     "label": "Selected plan",
                     "command": "listPlans",
                     "jsonData": "{}",
-                    "alsoDependsOn": ["plans"],
+                    "alsoDependsOn": [
+                        "plans"
+                    ],
                     "doNotSave": true,
                     "newLine": true,
                     "sm": 6,
                     "md": 4,
-                    "lg": 3
+                    "lg": 3,
+                    "xs": 12,
+                    "xl": 3
                 },
                 "deletePlan": {
                     "type": "sendTo",
                     "label": "Delete selected plan",
                     "command": "deletePlan",
                     "jsonData": "{\"_editPlan\": ${JSON.stringify(data._editPlan ?? null)}}",
-                    "alsoDependsOn": ["_editPlan"],
+                    "alsoDependsOn": [
+                        "_editPlan"
+                    ],
                     "useNative": true,
                     "icon": "delete",
                     "color": "secondary",
@@ -329,7 +388,9 @@
                     },
                     "sm": 6,
                     "md": 4,
-                    "lg": 3
+                    "lg": 3,
+                    "xs": 12,
+                    "xl": 3
                 },
                 "planName": {
                     "type": "text",
@@ -338,14 +399,19 @@
                     "doNotSave": true,
                     "sm": 6,
                     "md": 4,
-                    "lg": 3
+                    "lg": 3,
+                    "xs": 12,
+                    "xl": 3
                 },
                 "renamePlan": {
                     "type": "sendTo",
                     "label": "Rename selected plan",
                     "command": "renamePlan",
                     "jsonData": "{\"_editPlan\": ${JSON.stringify(data._editPlan ?? null)}, \"planName\": ${JSON.stringify(data.planName ?? '')}}",
-                    "alsoDependsOn": ["_editPlan", "planName"],
+                    "alsoDependsOn": [
+                        "_editPlan",
+                        "planName"
+                    ],
                     "useNative": true,
                     "disabled": "!data.planName || !data.planName.trim()",
                     "confirm": {
@@ -354,7 +420,9 @@
                         "type": "info",
                         "ok": "Rename",
                         "cancel": "Cancel",
-                        "alsoDependsOn": ["planName"]
+                        "alsoDependsOn": [
+                            "planName"
+                        ]
                     },
                     "icon": "edit",
                     "variant": "contained",
@@ -365,15 +433,18 @@
                     },
                     "sm": 6,
                     "md": 4,
-                    "lg": 3
+                    "lg": 3,
+                    "xs": 12,
+                    "xl": 3
                 },
-
                 "addPlan": {
                     "type": "sendTo",
                     "label": "Add new plan",
                     "command": "createPlan",
                     "jsonData": "{\"planName\": ${JSON.stringify(data.planName ?? '')}}",
-                    "alsoDependsOn": ["planName"],
+                    "alsoDependsOn": [
+                        "planName"
+                    ],
                     "useNative": true,
                     "disabled": "!data.planName || !data.planName.trim()",
                     "confirm": {
@@ -382,7 +453,9 @@
                         "type": "info",
                         "ok": "Create",
                         "cancel": "Cancel",
-                        "alsoDependsOn": ["planName"]
+                        "alsoDependsOn": [
+                            "planName"
+                        ]
                     },
                     "icon": "add",
                     "variant": "contained",
@@ -391,7 +464,9 @@
                     },
                     "sm": 6,
                     "md": 4,
-                    "lg": 3
+                    "lg": 3,
+                    "xs": 12,
+                    "xl": 3
                 },
                 "planValvesHeader": {
                     "type": "header",
@@ -404,7 +479,9 @@
                     "newLine": true,
                     "sm": 12,
                     "md": 12,
-                    "lg": 8
+                    "lg": 8,
+                    "xs": 12,
+                    "xl": 8
                 },
                 "loadPlanValveTable": {
                     "type": "sendTo",
@@ -418,14 +495,19 @@
                     "newLine": true,
                     "sm": 6,
                     "md": 4,
-                    "lg": 3
+                    "lg": 3,
+                    "xs": 12,
+                    "xl": 3
                 },
                 "applyPlanValveTable": {
                     "type": "sendTo",
                     "label": "Apply valve assignment",
                     "command": "applyPlanValveTable",
                     "jsonData": "{\"_editPlan\": ${JSON.stringify(data._editPlan ?? null)}, \"planValveTable\": ${JSON.stringify(data.planValveTable ?? [])}}",
-                    "alsoDependsOn": ["_editPlan", "planValveTable"],
+                    "alsoDependsOn": [
+                        "_editPlan",
+                        "planValveTable"
+                    ],
                     "useNative": true,
                     "icon": "save",
                     "variant": "contained",
@@ -434,7 +516,9 @@
                     },
                     "sm": 6,
                     "md": 4,
-                    "lg": 3
+                    "lg": 3,
+                    "xs": 12,
+                    "xl": 3
                 },
                 "planValveTable": {
                     "type": "table",
@@ -469,7 +553,9 @@
                             "readOnly": true,
                             "sort": true
                         }
-                    ]
+                    ],
+                    "xs": 12,
+                    "xl": 8
                 }
             }
         },
@@ -492,14 +578,22 @@
                     "label": "Trigger mode",
                     "help": "Timer times and the iCal calendar trigger are mutually exclusive alternatives - choose which one starts automatic runs. The iCal option requires Expert mode.",
                     "options": [
-                        { "label": "Timer times", "value": "timer" },
-                        { "label": "iCal calendar", "value": "ical" }
+                        {
+                            "label": "Timer times",
+                            "value": "timer"
+                        },
+                        {
+                            "label": "iCal calendar",
+                            "value": "ical"
+                        }
                     ],
                     "default": "timer",
                     "disabled": "!data.scheduler?.autoMode",
                     "hidden": "!data.expertMode",
                     "onChange": {
-                        "alsoDependsOn": ["expertMode"],
+                        "alsoDependsOn": [
+                            "expertMode"
+                        ],
                         "calculateFunc": "data.expertMode ? data.scheduler?.triggerMode : 'timer'",
                         "ignoreOwnChanges": true
                     },
@@ -551,7 +645,9 @@
                     "disabled": "!data.scheduler?.autoMode",
                     "hidden": "data.scheduler?.triggerMode !== 'timer'",
                     "onChange": {
-                        "alsoDependsOn": ["scheduler.timerTimes"],
+                        "alsoDependsOn": [
+                            "scheduler.timerTimes"
+                        ],
                         "ignoreOwnChanges": false,
                         "calculateFunc": "Array.isArray(data.scheduler?.timerTimes) ? data.scheduler.timerTimes.map(t => ({ t, m: (m => (m ? (+m[1]) * 60 + +m[2] : 999999))(/^([0-9]{1,2}):([0-9]{2})$/.exec((t || '').trim())) })).sort((a, b) => a.m - b.m).map(x => x.t) : data.scheduler?.timerTimes"
                     },
@@ -592,18 +688,54 @@
                             "type": "select",
                             "label": "Season start month",
                             "options": [
-                                { "label": "January", "value": 1 },
-                                { "label": "February", "value": 2 },
-                                { "label": "March", "value": 3 },
-                                { "label": "April", "value": 4 },
-                                { "label": "May", "value": 5 },
-                                { "label": "June", "value": 6 },
-                                { "label": "July", "value": 7 },
-                                { "label": "August", "value": 8 },
-                                { "label": "September", "value": 9 },
-                                { "label": "October", "value": 10 },
-                                { "label": "November", "value": 11 },
-                                { "label": "December", "value": 12 }
+                                {
+                                    "label": "January",
+                                    "value": 1
+                                },
+                                {
+                                    "label": "February",
+                                    "value": 2
+                                },
+                                {
+                                    "label": "March",
+                                    "value": 3
+                                },
+                                {
+                                    "label": "April",
+                                    "value": 4
+                                },
+                                {
+                                    "label": "May",
+                                    "value": 5
+                                },
+                                {
+                                    "label": "June",
+                                    "value": 6
+                                },
+                                {
+                                    "label": "July",
+                                    "value": 7
+                                },
+                                {
+                                    "label": "August",
+                                    "value": 8
+                                },
+                                {
+                                    "label": "September",
+                                    "value": 9
+                                },
+                                {
+                                    "label": "October",
+                                    "value": 10
+                                },
+                                {
+                                    "label": "November",
+                                    "value": 11
+                                },
+                                {
+                                    "label": "December",
+                                    "value": 12
+                                }
                             ],
                             "disabled": "!data.scheduler?.seasonEnabled",
                             "newLine": true,
@@ -617,18 +749,54 @@
                             "type": "select",
                             "label": "Season end month",
                             "options": [
-                                { "label": "January", "value": 1 },
-                                { "label": "February", "value": 2 },
-                                { "label": "March", "value": 3 },
-                                { "label": "April", "value": 4 },
-                                { "label": "May", "value": 5 },
-                                { "label": "June", "value": 6 },
-                                { "label": "July", "value": 7 },
-                                { "label": "August", "value": 8 },
-                                { "label": "September", "value": 9 },
-                                { "label": "October", "value": 10 },
-                                { "label": "November", "value": 11 },
-                                { "label": "December", "value": 12 }
+                                {
+                                    "label": "January",
+                                    "value": 1
+                                },
+                                {
+                                    "label": "February",
+                                    "value": 2
+                                },
+                                {
+                                    "label": "March",
+                                    "value": 3
+                                },
+                                {
+                                    "label": "April",
+                                    "value": 4
+                                },
+                                {
+                                    "label": "May",
+                                    "value": 5
+                                },
+                                {
+                                    "label": "June",
+                                    "value": 6
+                                },
+                                {
+                                    "label": "July",
+                                    "value": 7
+                                },
+                                {
+                                    "label": "August",
+                                    "value": 8
+                                },
+                                {
+                                    "label": "September",
+                                    "value": 9
+                                },
+                                {
+                                    "label": "October",
+                                    "value": 10
+                                },
+                                {
+                                    "label": "November",
+                                    "value": 11
+                                },
+                                {
+                                    "label": "December",
+                                    "value": 12
+                                }
                             ],
                             "disabled": "!data.scheduler?.seasonEnabled",
                             "xs": 12,
@@ -658,7 +826,7 @@
                         "scheduler.temperatureAdjustmentEnabled": {
                             "type": "checkbox",
                             "label": "Temperature-controlled irrigation adjustment",
-                            "help": "Adjusts automatic plan durations by 7% per °C relative to 20 °C.",
+                            "help": "Adjusts automatic plan durations by 7% per \u00b0C relative to 20 \u00b0C.",
                             "xs": 12,
                             "sm": 12,
                             "md": 12,
@@ -668,7 +836,7 @@
                         "scheduler.temperatureAdjustmentStateId": {
                             "type": "objectId",
                             "label": "Temperature state for irrigation adjustment",
-                            "help": "Current temperature in °C used to calculate the watering duration factor.",
+                            "help": "Current temperature in \u00b0C used to calculate the watering duration factor.",
                             "disabled": "!data.scheduler?.temperatureAdjustmentEnabled",
                             "newLine": true,
                             "xs": 12,
@@ -755,7 +923,9 @@
                             "jsonData": "{}",
                             "disabled": "!data.scheduler?.autoMode || !data.legalRestriction?.enabled",
                             "onChange": {
-                                "alsoDependsOn": ["legalRestriction.temperatureStateId"],
+                                "alsoDependsOn": [
+                                    "legalRestriction.temperatureStateId"
+                                ],
                                 "calculateFunc": "data.legalRestriction?.temperatureStateId ? '' : data.legalRestriction?.stationId",
                                 "ignoreOwnChanges": true
                             },
@@ -772,7 +942,9 @@
                             "help": "If selected, this state is used instead of the DWD station.",
                             "disabled": "!data.scheduler?.autoMode || !data.legalRestriction?.enabled",
                             "onChange": {
-                                "alsoDependsOn": ["legalRestriction.stationId"],
+                                "alsoDependsOn": [
+                                    "legalRestriction.stationId"
+                                ],
                                 "calculateFunc": "data.legalRestriction?.stationId ? '' : data.legalRestriction?.temperatureStateId",
                                 "ignoreOwnChanges": true
                             },
@@ -803,7 +975,9 @@
                             "placeholder": "13.9",
                             "disabled": "!data.scheduler?.autoMode || !data.legalRestriction?.enabled || !data.legalRestriction?.startDate",
                             "onChange": {
-                                "alsoDependsOn": ["legalRestriction.startDate"],
+                                "alsoDependsOn": [
+                                    "legalRestriction.startDate"
+                                ],
                                 "calculateFunc": "data.legalRestriction?.startDate ? data.legalRestriction?.endDate : ''",
                                 "ignoreOwnChanges": true
                             },
@@ -837,7 +1011,9 @@
                             "placeholder": "17:00",
                             "disabled": "!data.scheduler?.autoMode || !data.legalRestriction?.enabled || !data.legalRestriction?.startTime",
                             "onChange": {
-                                "alsoDependsOn": ["legalRestriction.startTime"],
+                                "alsoDependsOn": [
+                                    "legalRestriction.startTime"
+                                ],
                                 "calculateFunc": "data.legalRestriction?.startTime ? data.legalRestriction?.endTime : ''",
                                 "ignoreOwnChanges": true
                             },
@@ -852,10 +1028,13 @@
                         },
                         "legalRestriction.minTemperature": {
                             "type": "number",
-                            "label": "Maximum irrigation temperature (°C)",
+                            "label": "Maximum irrigation temperature (\u00b0C)",
                             "disabled": "!data.scheduler?.autoMode || !data.legalRestriction?.enabled || (!data.legalRestriction?.stationId && !data.legalRestriction?.temperatureStateId)",
                             "onChange": {
-                                "alsoDependsOn": ["legalRestriction.stationId", "legalRestriction.temperatureStateId"]
+                                "alsoDependsOn": [
+                                    "legalRestriction.stationId",
+                                    "legalRestriction.temperatureStateId"
+                                ]
                             },
                             "newLine": true,
                             "xs": 12,
@@ -991,7 +1170,7 @@
                         },
                         "scheduler.frostMinTemp": {
                             "type": "number",
-                            "label": "Frost protection minimum temperature (°C)",
+                            "label": "Frost protection minimum temperature (\u00b0C)",
                             "disabled": "!data.scheduler?.frostEnabled",
                             "newLine": true,
                             "xs": 12,
@@ -1084,7 +1263,12 @@
                 "weather.apiType": {
                     "type": "select",
                     "label": "API type",
-                    "options": [{ "label": "OpenWeatherMap", "value": "openweathermap" }],
+                    "options": [
+                        {
+                            "label": "OpenWeatherMap",
+                            "value": "openweathermap"
+                        }
+                    ],
                     "newLine": true,
                     "xs": 12,
                     "sm": 12,

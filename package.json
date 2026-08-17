@@ -10,6 +10,7 @@
   "homepage": "https://github.com/steinwedel/ioBroker.irrigation",
   "license": "MIT",
   "keywords": [
+    "ioBroker",
     "irrigation",
     "garden",
     "watering",
@@ -17,15 +18,14 @@
     "zones",
     "valves",
     "sensor",
-    "weather",
-    "smart home"
+    "weather"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/steinwedel/ioBroker.irrigation.git"
+    "url": "git+https://github.com/steinwedel/ioBroker.irrigation.git"
   },
   "engines": {
-    "node": ">= 20"
+    "node": ">=22"
   },
   "dependencies": {
     "@iobroker/adapter-core": "^3.4.3"

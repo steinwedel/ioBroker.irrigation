@@ -1,4 +1,7 @@
 # Changelog
+## **WORK IN PROGRESS**
+* (Gerhard Steinwedel) **ENHANCED**: Adapter Checker publication fixes — Node >=22, README changelog, GitHub topics/CI/dependabot, i18n and jsonConfig layout, fetch timeouts via AbortSignal
+
 ## 0.3.29 (2026-08-17)
 * (Gerhard Steinwedel) **ENHANCED**: Adapter prepared for public GitHub/npm release — standalone `release-script` replaces custom release tooling, CI now deploys to npm via trusted publishing, and admin icon shrunk from 1024px/839KB to 512px/31KB to pass Adapter Checker requirements
 

@@ -104,6 +104,7 @@
     "Timer times (HH:MM)": "Timer times (HH:MM)",
     "Trigger mode": "Trigger mode",
     "Timer times and the iCal calendar trigger are mutually exclusive alternatives - choose which one starts automatic runs.": "Timer times and the iCal calendar trigger are mutually exclusive alternatives - choose which one starts automatic runs.",
+    "Timer times and the iCal calendar trigger are mutually exclusive alternatives - choose which one starts automatic runs. The iCal option requires Expert mode.": "Timer times and the iCal calendar trigger are mutually exclusive alternatives - choose which one starts automatic runs. The iCal option requires Expert mode.",
     "Timer times": "Timer times",
     "iCal calendar": "iCal calendar",
     "Temperature state for irrigation adjustment": "Temperature state for irrigation adjustment",

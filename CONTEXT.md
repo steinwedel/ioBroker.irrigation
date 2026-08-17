@@ -1,14 +1,14 @@
 # Context
 
 ## Current Task
-Adapter für öffentliche Veröffentlichung vorbereitet; Repo liegt unter https://github.com/steinwedel/ioBroker.irrigation.
+Veröffentlichung: Checker-Blocker behoben, 0.3.29-Fixes auf main; npm-Publish braucht OTP.
 
 ## Key Decisions
-- `npm run release` ist nur noch `release-script`; Changelog/News-Übersetzung bleibt in `../scripts/`.
-- CI-Deploy ohne Sentry aktiviert; Icon auf 512px/31KB reduziert.
-- origin zeigt auf GitHub; alter `/tmp`-Remote heißt `local-mirror`.
+- Node >=22, Tests 22/24; deploy-Job auf Node 24.
+- News in io-package nur 0.3.29/0.3.28 (nur diese sind bzw. werden auf npm sein).
+- Trusted Publishing und Forum-Thread bleiben manuell.
 
 ## Next Steps
-- npm Trusted Publishing für das Repo setzen, dann Version auf npm publizieren.
-- Adapter Checker + PR nach ioBroker.repositories.
+- `npm publish` mit OTP, dann `npm owner add bluefox iobroker.irrigation`.
+- Trusted Publishing auf npmjs.com setzen.
 - Forum-Tester-Thread.

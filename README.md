@@ -15,7 +15,7 @@
 Controls irrigation zones, valves and watering schedules based on sensors and weather data.
 
 ### Features
-- Valve support for Gardena (smartgarden), Homematic, Rain Bird, Hydrawise and generic ioBroker states, with auto-discovery via object-tree scanning
+- Valve support for [Gardena](https://www.gardena.com/) (smartgarden), Homematic, [Rain Bird](https://www.rainbird.com/) and [Hydrawise](https://hydrawise.com/), plus generic ioBroker states, with auto-discovery via object-tree scanning
 - Zones with configurable duration, weekday schedule, groups and rain/soil-moisture based skipping
 - Plans that group zones for combined watering runs, with automatic parallel batching based on pump capacity
 - Manual per-zone watering, independent of the automatic schedule
@@ -404,7 +404,13 @@ There is only **one** shared flow sensor for the whole installation, installed d
 
 
 ## Changelog
-See [CHANGELOG.md](CHANGELOG.md)
+### 0.3.29 (2026-08-17)
+* (Gerhard Steinwedel) **ENHANCED**: Adapter prepared for public GitHub/npm release — standalone `release-script`, CI npm deploy via trusted publishing, admin icon reduced for Adapter Checker
+
+### 0.3.28 (2026-08-09)
+* (Gerhard Steinwedel) **ENHANCED**: iCal trigger mode is now expert-mode-only
+
+Older changes: [CHANGELOG.md](CHANGELOG.md)
 
 ## License
 MIT License

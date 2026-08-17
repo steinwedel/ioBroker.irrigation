@@ -54,11 +54,9 @@ export class WeatherApi {
 
     private async poll(): Promise<void> {
         const config = this.deps.getConfig().weather;
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
         try {
             const url = `https://api.openweathermap.org/data/2.5/weather?lat=${config.latitude}&lon=${config.longitude}&appid=${config.apiKey}&units=metric`;
-            const response = await fetch(url, { signal: controller.signal });
+            const response = await fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
@@ -87,14 +85,13 @@ export class WeatherApi {
             await this.deps.adapter.setStateAsync('weather.lastUpdate', { val: Date.now(), ack: true });
             await this.deps.adapter.setStateAsync('info.connection', { val: true, ack: true });
         } catch (error) {
-            const isAbort = (error as { name?: string }).name === 'AbortError';
+            const name = (error as { name?: string }).name;
+            const isAbort = name === 'AbortError' || name === 'TimeoutError';
             const message = isAbort
                 ? `Request timed out after ${FETCH_TIMEOUT_MS / 1000}s`
                 : maskApiKey((error as Error).message);
             this.deps.adapter.log.warn(`Weather API request failed: ${message}`);
             await this.deps.adapter.setStateAsync('info.connection', { val: false, ack: true });
-        } finally {
-            clearTimeout(timeout);
         }
     }
 }

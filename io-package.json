@@ -28,71 +28,6 @@
         "pl": "**ULEPSZONE**: Tryb wyzwalacza iCal jest teraz funkcją dostępną tylko w trybie eksperckim — selektor trybu wyzwalacza i wszystkie pola konfiguracji iCal są ukryte w interfejsie administratora, gdy tryb ekspercki jest wyłączony, a normalizacja konfiguracji wymusza tryb \"timer\", gdy tryb ekspercki jest wyłączony. Mechanizm resetowania przy starcie koryguje ustawienie trybu wyzwalacza, jeśli nadal jest ustawione na \"ical\", podczas gdy tryb ekspercki jest teraz wyłączony",
         "uk": "**ПОКРАЩЕНО**: Режим тригера iCal тепер є функцією лише для експертного режиму — селектор режиму тригера та всі поля конфігурації iCal приховані в інтерфейсі адміністратора, коли експертний режим вимкнено, а нормалізація конфігурації примусово встановлює режим \"timer\", коли експертний режим вимкнено. Механізм скидання при запуску виправляє налаштування режиму тригера, якщо воно все ще встановлено на \"ical\", тоді як експертний режим тепер вимкнено",
         "zh-cn": "**增强**：iCal 触发模式现在是仅限专家模式的功能 — 当专家模式被禁用时，触发模式选择器和所有 iCal 配置字段在管理界面中被隐藏，并且配置规范化会在专家模式关闭时强制使用 \"timer\" 模式。启动重置机制会在专家模式现已禁用而触发模式设置仍为 \"ical\" 时纠正触发模式设置"
-      },
-      "0.3.27": {
-        "en": "**FIXED**: Legal restriction (hot-day pause) now only reports active when both `legalRestriction.enabled` and `scheduler.autoMode` are enabled — avoids misleading restriction warnings when automatic watering is disabled\n**NEW**: Trigger mode selector (`scheduler.triggerMode`) allows choosing between timer times and iCal calendar as mutually exclusive alternatives for starting automatic runs — season automation is limited to timer mode, timer times are auto-sorted ascending\n**ENHANCED**: Admin UI restructured with group boxes for scheduler settings (season/rain/wind/frost/temperature) — trigger mode, timer times, and iCal calendar now clearly separated in dedicated panels",
-        "de": "**BEHOBEN**: Gesetzliche Einschränkung (Hitzetag-Pause) wird jetzt nur noch als aktiv gemeldet, wenn sowohl `legalRestriction.enabled` als auch `scheduler.autoMode` aktiviert sind — vermeidet irreführende Einschränkungswarnungen, wenn die automatische Bewässerung deaktiviert ist **NEU**: Auslösemodus-Auswahl (`scheduler.triggerMode`) ermöglicht die Wahl zwischen Timer-Zeiten und iCal-Kalender als sich gegenseitig ausschließende Alternativen zum Starten automatischer Durchläufe — Saisonautomatisierung ist auf den Timer-Modus beschränkt, Timer-Zeiten werden automatisch aufsteigend sortiert **VERBESSERT**: Admin-Oberfläche mit Gruppenfeldern für Scheduler-Einstellungen (Saison/Regen/Wind/Frost/Temperatur) umstrukturiert — Auslösemodus, Timer-Zeiten und iCal-Kalender sind jetzt in eigenen Bereichen klar getrennt",
-        "ru": "**ИСПРАВЛЕНО**: Законодательное ограничение (пауза в жаркий день) теперь сообщается как активное только когда включены и `legalRestriction.enabled`, и `scheduler.autoMode` — предотвращает вводящие в заблуждение предупреждения об ограничениях, когда автоматический полив отключен **НОВОЕ**: Селектор режима запуска (`scheduler.triggerMode`) позволяет выбирать между временем таймера и календарём iCal как взаимоисключающими альтернативами для запуска автоматических циклов — сезонная автоматизация ограничена режимом таймера, время таймера автоматически сортируется по возрастанию **УЛУЧШЕНО**: Интерфейс администратора реорганизован с группами для настроек планировщика (сезон/дождь/ветер/мороз/температура) — режим запуска, время таймера и календарь iCal теперь чётко разделены в отдельных панелях",
-        "pt": "**CORRIGIDO**: Restrição legal (pausa em dia quente) agora só reporta ativa quando tanto `legalRestriction.enabled` quanto `scheduler.autoMode` estão habilitados — evita avisos de restrição enganosos quando a rega automática está desabilitada **NOVO**: Seletor de modo de acionamento (`scheduler.triggerMode`) permite escolher entre horários do temporizador e calendário iCal como alternativas mutuamente exclusivas para iniciar execuções automáticas — automação sazonal é limitada ao modo temporizador, horários do temporizador são ordenados automaticamente em ordem crescente **MELHORADO**: Interface de administração reestruturada com caixas de grupo para configurações do agendador (estação/chuva/vento/geada/temperatura) — modo de acionamento, horários do temporizador e calendário iCal agora claramente separados em painéis dedicados",
-        "nl": "**OPGELOST**: Wettelijke beperking (hete-dag-pauze) rapporteert nu alleen actief wanneer zowel `legalRestriction.enabled` als `scheduler.autoMode` zijn ingeschakeld — voorkomt misleidende beperkingswaarschuwingen wanneer automatische bewatering is uitgeschakeld **NIEUW**: Triggermodus-selector (`scheduler.triggerMode`) maakt het mogelijk te kiezen tussen timertijden en iCal-kalender als elkaar uitsluitende alternatieven voor het starten van automatische runs — seizoensautomatisering is beperkt tot timermodus, timertijden worden automatisch oplopend gesorteerd **VERBETERD**: Beheerinterface geherstructureerd met groepsvakken voor scheduler-instellingen (seizoen/regen/wind/vorst/temperatuur) — triggermodus, timertijden en iCal-kalender zijn nu duidelijk gescheiden in speciale panelen",
-        "fr": "**CORRIGÉ** : La restriction légale (pause jour de chaleur) ne signale désormais active que lorsque `legalRestriction.enabled` et `scheduler.autoMode` sont tous deux activés — évite les avertissements de restriction trompeurs lorsque l'arrosage automatique est désactivé **NOUVEAU** : Le sélecteur de mode de déclenchement (`scheduler.triggerMode`) permet de choisir entre les heures de minuterie et le calendrier iCal comme alternatives mutuellement exclusives pour démarrer les exécutions automatiques — l'automatisation saisonnière est limitée au mode minuterie, les heures de minuterie sont triées automatiquement par ordre croissant **AMÉLIORÉ** : Interface d'administration restructurée avec des boîtes de groupe pour les paramètres du planificateur (saison/pluie/vent/gel/température) — le mode de déclenchement, les heures de minuterie et le calendrier iCal sont désormais clairement séparés dans des panneaux dédiés",
-        "it": "**RISOLTO**: La restrizione legale (pausa giorno caldo) ora segnala attiva solo quando sia `legalRestriction.enabled` che `scheduler.autoMode` sono abilitati — evita avvisi di restrizione fuorvianti quando l'irrigazione automatica è disabilitata **NUOVO**: Il selettore della modalità di attivazione (`scheduler.triggerMode`) consente di scegliere tra orari del timer e calendario iCal come alternative mutuamente esclusive per avviare esecuzioni automatiche — l'automazione stagionale è limitata alla modalità timer, gli orari del timer vengono ordinati automaticamente in ordine crescente **MIGLIORATO**: Interfaccia di amministrazione ristrutturata con riquadri di gruppo per le impostazioni dello scheduler (stagione/pioggia/vento/gelo/temperatura) — modalità di attivazione, orari del timer e calendario iCal ora chiaramente separati in pannelli dedicati",
-        "es": "**CORREGIDO**: La restricción legal (pausa por día caluroso) ahora solo informa activa cuando tanto `legalRestriction.enabled` como `scheduler.autoMode` están habilitados — evita advertencias de restricción engañosas cuando el riego automático está deshabilitado **NUEVO**: El selector de modo de activación (`scheduler.triggerMode`) permite elegir entre horarios del temporizador y calendario iCal como alternativas mutuamente excluyentes para iniciar ejecuciones automáticas — la automatización estacional está limitada al modo temporizador, los horarios del temporizador se ordenan automáticamente de forma ascendente **MEJORADO**: Interfaz de administración reestructurada con cuadros de grupo para configuraciones del programador (estación/lluvia/viento/helada/temperatura) — modo de activación, horarios del temporizador y calendario iCal ahora claramente separados en paneles dedicados",
-        "pl": "**NAPRAWIONO**: Ograniczenie prawne (pauza w gorący dzień) jest teraz zgłaszane jako aktywne tylko wtedy, gdy włączone są zarówno `legalRestriction.enabled`, jak i `scheduler.autoMode` — zapobiega mylącym ostrzeżeniom o ograniczeniach, gdy automatyczne podlewanie jest wyłączone **NOWE**: Selektor trybu wyzwalania (`scheduler.triggerMode`) umożliwia wybór między czasami timera a kalendarzem iCal jako wzajemnie wykluczającymi się alternatywami do uruchamiania automatycznych cykli — automatyzacja sezonowa jest ograniczona do trybu timera, czasy timera są automatycznie sortowane rosnąco **ULEPSZONE**: Interfejs administratora zrestrukturyzowany z polami grupowymi dla ustawień harmonogramu (sezon/deszcz/wiatr/mróz/temperatura) — tryb wyzwalania, czasy timera i kalendarz iCal są teraz wyraźnie oddzielone w dedykowanych panelach",
-        "uk": "**ВИПРАВЛЕНО**: Законодавче обмеження (пауза в спекотний день) тепер повідомляється як активне лише коли ввімкнені і `legalRestriction.enabled`, і `scheduler.autoMode` — запобігає оманливим попередженням про обмеження, коли автоматичний полив вимкнено **НОВЕ**: Селектор режиму запуску (`scheduler.triggerMode`) дозволяє вибирати між часом таймера та календарем iCal як взаємовиключними альтернативами для запуску автоматичних циклів — сезонна автоматизація обмежена режимом таймера, час таймера автоматично сортується за зростанням **ПОКРАЩЕНО**: Інтерфейс адміністратора реорганізовано з групами для налаштувань планувальника (сезон/дощ/вітер/мороз/температура) — режим запуску, час таймера та календар iCal тепер чітко розділені в окремих панелях",
-        "zh-cn": "**修复**：法律限制（高温日暂停）现在仅在 `legalRestriction.enabled` 和 `scheduler.autoMode` 均启用时才报告为活动状态——避免在自动浇水被禁用时出现误导性的限制警告 **新增**：触发模式选择器（`scheduler.triggerMode`）允许在定时器时间和 iCal 日历之间选择作为互斥的替代方案来启动自动运行——季节自动化仅限于定时器模式，定时器时间自动按升序排序 **增强**：管理界面重构，为调度器设置（季节/雨/风/霜/温度）添加了分组框——触发模式、定时器时间和 iCal 日历现在在专用面板中清晰分隔"
-      },
-      "0.3.26": {
-        "en": "**FIXED**: Reliably reset Gardena valve states when their local watering countdown reaches zero",
-        "de": "**BEHOBEN**: Zuverlässiges Zurücksetzen der Gardena-Ventilzustände, wenn deren lokaler Bewässerungs-Countdown Null erreicht",
-        "ru": "**ИСПРАВЛЕНО**: Надёжный сброс состояний клапанов Gardena при достижении нуля локальным таймером полива",
-        "pt": "**CORRIGIDO**: Redefinição confiável dos estados das válvulas Gardena quando a contagem regressiva local de irrigação atinge zero",
-        "nl": "**OPGELOST**: Betrouwbaar resetten van Gardena-klepstaten wanneer hun lokale bewateringsaftelling nul bereikt",
-        "fr": "**CORRIGÉ** : Réinitialisation fiable des états des vannes Gardena lorsque leur compte à rebours d'arrosage local atteint zéro",
-        "it": "**RISOLTO**: Ripristino affidabile degli stati delle valvole Gardena quando il conto alla rovescia locale dell'irrigazione raggiunge zero",
-        "es": "**SOLUCIONADO**: Restablecimiento fiable de los estados de las válvulas Gardena cuando su cuenta regresiva local de riego llega a cero",
-        "pl": "**NAPRAWIONO**: Niezawodne resetowanie stanów zaworów Gardena, gdy ich lokalny licznik czasu podlewania osiągnie zero",
-        "uk": "**ВИПРАВЛЕНО**: Надійне скидання станів клапанів Gardena, коли їхній локальний таймер зрошення досягає нуля",
-        "zh-cn": "**已修复**：当本地浇水倒计时归零时，可靠地重置 Gardena 阀门状态"
-      },
-      "0.3.25": {
-        "en": "**ENHANCED**: Integrated all valve settings into the valve cards and removed the separate valve editor",
-        "de": "**VERBESSERT**: Alle Ventileinstellungen in die Ventilkarten integriert und den separaten Ventileditor entfernt",
-        "ru": "**УЛУЧШЕНО**: Все настройки клапанов интегрированы в карточки клапанов, отдельный редактор клапанов удален",
-        "pt": "**MELHORADO**: Integradas todas as configurações de válvulas nos cartões de válvulas e removido o editor de válvulas separado",
-        "nl": "**VERBETERD**: Alle klep-instellingen geïntegreerd in de klepkaarten en de aparte klepeditor verwijderd",
-        "fr": "**AMÉLIORÉ** : Toutes les paramètres de vanne intégrés dans les cartes de vanne et suppression de l'éditeur de vanne séparé",
-        "it": "**MIGLIORATO**: Integrate tutte le impostazioni delle valvole nelle schede valvole e rimosso l'editor valvole separato",
-        "es": "**MEJORADO**: Integradas todas las configuraciones de válvulas en las tarjetas de válvulas y eliminado el editor de válvulas separado",
-        "pl": "**ULEPSZONE**: Zintegrowano wszystkie ustawienia zaworów w kartach zaworów i usunięto osobny edytor zaworów",
-        "uk": "**ПОКРАЩЕНО**: Усі налаштування клапанів інтегровано в картки клапанів і видалено окремий редактор клапанів",
-        "zh-cn": "**增强**：将所有阀门设置集成到阀门卡片中，并移除了单独的阀门编辑器"
-      },
-      "0.3.24": {
-        "en": "**ENHANCED**: Always display valve configuration rows as cards across all browser viewport breakpoints",
-        "de": "**VERBESSERT**: Ventilkonfigurationszeilen werden nun bei allen Browser-Viewport-Breakpoints immer als Karten angezeigt",
-        "ru": "**УЛУЧШЕНО**: Строки конфигурации клапанов теперь всегда отображаются в виде карточек при любых контрольных точках области просмотра браузера",
-        "pt": "**MELHORADO**: As linhas de configuração de válvulas são sempre exibidas como cartões em todos os pontos de interrupção da janela de visualização do navegador",
-        "nl": "**VERBETERD**: Ventielconfiguratierijen worden nu altijd als kaarten weergegeven bij alle browser-viewport-breakpoints",
-        "fr": "**AMÉLIORÉ**: Les lignes de configuration des vannes sont toujours affichées sous forme de cartes à tous les points de rupture de la fenêtre d'affichage du navigateur",
-        "it": "**MIGLIORATO**: Le righe di configurazione delle valvole vengono sempre visualizzate come schede in tutti i breakpoint della finestra del browser",
-        "es": "**MEJORADO**: Las filas de configuración de válvulas se muestran siempre como tarjetas en todos los puntos de interrupción de la ventana del navegador",
-        "pl": "**ULEPSZONE**: Wiersze konfiguracji zaworów są zawsze wyświetlane jako karty we wszystkich punktach przerwania widoku przeglądarki",
-        "uk": "**ПОКРАЩЕНО**: Рядки конфігурації клапанів тепер завжди відображаються у вигляді карток при всіх контрольних точках області перегляду браузера",
-        "zh-cn": "**增强**：阀门配置行现在在所有浏览器视口断点下始终以卡片形式显示"
-      },
-      "0.3.23": {
-        "en": "**FIXED**: Removed the completed one-time manual-duration migration while retaining the 10-minute defaults for new valves",
-        "de": "**BEHOBEN**: Die abgeschlossene einmalige Migration der manuellen Dauer wurde entfernt, wobei die 10-Minuten-Standardwerte für neue Ventile beibehalten wurden",
-        "ru": "**ИСПРАВЛЕНО**: Удалена завершённая одноразовая миграция ручной длительности с сохранением 10-минутных значений по умолчанию для новых клапанов",
-        "pt": "**CORRIGIDO**: Removida a migração única concluída da duração manual, mantendo os padrões de 10 minutos para novas válvulas",
-        "nl": "**OPGELOST**: De voltooide eenmalige migratie van handmatige duur is verwijderd, waarbij de standaardwaarden van 10 minuten voor nieuwe kleppen behouden blijven",
-        "fr": "**CORRIGÉ**: Suppression de la migration ponctuelle terminée de la durée manuelle tout en conservant les valeurs par défaut de 10 minutes pour les nouvelles vannes",
-        "it": "**RISOLTO**: Rimossa la migrazione una tantum completata della durata manuale mantenendo i valori predefiniti di 10 minuti per le nuove valvole",
-        "es": "**SOLUCIONADO**: Se eliminó la migración única completada de duración manual manteniendo los valores predeterminados de 10 minutos para las nuevas válvulas",
-        "pl": "**NAPRAWIONO**: Usunięto zakończoną jednorazową migrację czasu trwania ręcznego, zachowując domyślne wartości 10 minut dla nowych zaworów",
-        "uk": "**ВИПРАВЛЕНО**: Видалено завершену одноразову міграцію ручної тривалості зі збереженням 10-хвилинних значень за замовчуванням для нових клапанів",
-        "zh-cn": "**已修复**：移除了已完成的一次性手动持续时间迁移，同时保留新阀门的10分钟默认值"
       }
     },
     "titleLang": {
@@ -121,6 +56,7 @@
       "uk": "Controls irrigation zones, valves and watering schedules based on sensors and weather data",
       "zh-cn": "根据传感器和天气数据控制灌溉区、阀门和浇水时间表"
     },
+    "author": "Gerhard Steinwedel <dev@steinwedel.de>",
     "authors": [
       "Gerhard Steinwedel <dev@steinwedel.de>"
     ],
@@ -132,8 +68,7 @@
       "zones",
       "valves",
       "sensor",
-      "weather",
-      "smart home"
+      "weather"
     ],
     "licenseInformation": {
       "type": "free",
@@ -160,12 +95,12 @@
     },
     "dependencies": [
       {
-        "js-controller": ">=6.0.11"
+        "js-controller": ">=7.0.7"
       }
     ],
     "globalDependencies": [
       {
-        "admin": ">=7.0.23"
+        "admin": ">=7.6.20"
       }
     ]
   },
