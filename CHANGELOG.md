@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.3.29 (2026-08-17)
 * (Gerhard Steinwedel) **ENHANCED**: Adapter prepared for public GitHub/npm release — standalone `release-script` replaces custom release tooling, CI now deploys to npm via trusted publishing, and admin icon shrunk from 1024px/839KB to 512px/31KB to pass Adapter Checker requirements
 
 ## 0.3.28 (2026-08-09)

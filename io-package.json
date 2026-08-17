@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "irrigation",
-    "version": "0.3.28",
+    "version": "0.3.29",
     "news": {
+      "0.3.29": {
+        "en": "**ENHANCED**: Adapter prepared for public GitHub/npm release — standalone `release-script` replaces custom release tooling, CI now deploys to npm via trusted publishing, and admin icon shrunk from 1024px/839KB to 512px/31KB to pass Adapter Checker requirements",
+        "de": "**VERBESSERT**: Adapter für öffentliche GitHub/npm-Veröffentlichung vorbereitet — eigenständiges `release-script` ersetzt benutzerdefinierte Release-Tools, CI stellt nun über Trusted Publishing auf npm bereit, und Admin-Icon von 1024px/839KB auf 512px/31KB verkleinert, um die Anforderungen des Adapter Checkers zu erfüllen",
+        "ru": "**УЛУЧШЕНО**: Адаптер подготовлен к публичному релизу на GitHub/npm — автономный `release-script` заменяет пользовательские инструменты релиза, CI теперь развертывает в npm через доверенную публикацию, а иконка администратора уменьшена с 1024px/839KB до 512px/31KB для соответствия требованиям Adapter Checker",
+        "pt": "**MELHORADO**: Adaptador preparado para lançamento público no GitHub/npm — `release-script` autônomo substitui ferramentas de lançamento personalizadas, CI agora implanta no npm via publicação confiável, e ícone de administração reduzido de 1024px/839KB para 512px/31KB para atender aos requisitos do Adapter Checker",
+        "nl": "**VERBETERD**: Adapter voorbereid voor publieke GitHub/npm-release — zelfstandig `release-script` vervangt aangepaste release-tooling, CI implementeert nu naar npm via trusted publishing, en admin-pictogram verkleind van 1024px/839KB naar 512px/31KB om aan de eisen van Adapter Checker te voldoen",
+        "fr": "**AMÉLIORÉ** : Adaptateur préparé pour la publication publique sur GitHub/npm — le `release-script` autonome remplace les outils de publication personnalisés, CI déploie désormais sur npm via publication de confiance, et l'icône d'administration réduite de 1024px/839KB à 512px/31KB pour répondre aux exigences d'Adapter Checker",
+        "it": "**MIGLIORATO**: Adattatore preparato per il rilascio pubblico su GitHub/npm — `release-script` autonomo sostituisce gli strumenti di rilascio personalizzati, CI ora distribuisce su npm tramite pubblicazione affidabile, e icona admin ridotta da 1024px/839KB a 512px/31KB per soddisfare i requisiti di Adapter Checker",
+        "es": "**MEJORADO**: Adaptador preparado para lanzamiento público en GitHub/npm — `release-script` independiente reemplaza las herramientas de lanzamiento personalizadas, CI ahora despliega en npm mediante publicación confiable, e icono de administración reducido de 1024px/839KB a 512px/31KB para cumplir con los requisitos de Adapter Checker",
+        "pl": "**ULEPSZONE**: Adapter przygotowany do publicznego wydania na GitHub/npm — samodzielny `release-script` zastępuje niestandardowe narzędzia wydawnicze, CI teraz wdraża do npm przez zaufane publikowanie, a ikona administratora zmniejszona z 1024px/839KB do 512px/31KB, aby spełnić wymagania Adapter Checker",
+        "uk": "**ПОКРАЩЕНО**: Адаптер підготовлено до публічного релізу на GitHub/npm — автономний `release-script` замінює власні інструменти релізу, CI тепер розгортає в npm через довірене публікування, а іконку адміністратора зменшено з 1024px/839KB до 512px/31KB для відповідності вимогам Adapter Checker",
+        "zh-cn": "**增强**：适配器已准备好在 GitHub/npm 上公开发布 — 独立的 `release-script` 替代了自定义发布工具，CI 现在通过可信发布部署到 npm，管理员图标从 1024px/839KB 缩小到 512px/31KB 以满足 Adapter Checker 要求"
+      },
       "0.3.28": {
         "en": "**ENHANCED**: iCal trigger mode is now an expert-mode-only feature — the trigger mode selector and all iCal configuration fields are hidden in the admin UI when expert mode is disabled, and the configuration normalization enforces \"timer\" mode when expert mode is off. A startup reset mechanism corrects the trigger mode setting if it is still set to \"ical\" while expert mode is now disabled",
         "de": "**VERBESSERT**: Der iCal-Trigger-Modus ist jetzt eine Funktion nur für den Experten-Modus – die Trigger-Modus-Auswahl und alle iCal-Konfigurationsfelder werden in der Admin-Oberfläche ausgeblendet, wenn der Experten-Modus deaktiviert ist, und die Konfigurationsnormalisierung erzwingt den \"timer\"-Modus, wenn der Experten-Modus ausgeschaltet ist. Ein Startup-Reset-Mechanismus korrigiert die Trigger-Modus-Einstellung, falls sie noch auf \"ical\" gesetzt ist, während der Experten-Modus jetzt deaktiviert ist",
@@ -80,19 +93,6 @@
         "pl": "**NAPRAWIONO**: Usunięto zakończoną jednorazową migrację czasu trwania ręcznego, zachowując domyślne wartości 10 minut dla nowych zaworów",
         "uk": "**ВИПРАВЛЕНО**: Видалено завершену одноразову міграцію ручної тривалості зі збереженням 10-хвилинних значень за замовчуванням для нових клапанів",
         "zh-cn": "**已修复**：移除了已完成的一次性手动持续时间迁移，同时保留新阀门的10分钟默认值"
-      },
-      "0.3.22": {
-        "en": "**ENHANCED**: Set manual watering duration to 10 minutes for existing valves once; new valves now consistently default to 10 minutes for both planned and manual watering",
-        "de": "**VERBESSERT**: Manuelle Bewässerungsdauer für bestehende Ventile einmalig auf 10 Minuten gesetzt; neue Ventile verwenden nun einheitlich 10 Minuten als Standard für geplante und manuelle Bewässerung",
-        "ru": "**УЛУЧШЕНО**: Длительность ручного полива для существующих клапанов установлена на 10 минут однократно; новые клапаны теперь последовательно используют 10 минут по умолчанию как для запланированного, так и для ручного полива",
-        "pt": "**MELHORADO**: Duração da rega manual definida para 10 minutos para válvulas existentes uma vez; novas válvulas agora usam consistentemente 10 minutos como padrão para rega planejada e manual",
-        "nl": "**VERBETERD**: Handmatige bewateringsduur voor bestaande kleppen eenmalig ingesteld op 10 minuten; nieuwe kleppen gebruiken nu standaard consequent 10 minuten voor zowel geplande als handmatige bewatering",
-        "fr": "**AMÉLIORÉ**: Durée d'arrosage manuel définie à 10 minutes pour les vannes existantes une fois; les nouvelles vannes utilisent désormais systématiquement 10 minutes par défaut pour l'arrosage planifié et manuel",
-        "it": "**MIGLIORATO**: Durata dell'irrigazione manuale impostata a 10 minuti per le valvole esistenti una volta; le nuove valvole ora utilizzano costantemente 10 minuti come predefinito sia per l'irrigazione pianificata che manuale",
-        "es": "**MEJORADO**: Duración del riego manual establecida en 10 minutos para válvulas existentes una vez; las nuevas válvulas ahora usan consistentemente 10 minutos por defecto tanto para riego planificado como manual",
-        "pl": "**ULEPSZONE**: Czas ręcznego podlewania ustawiony na 10 minut dla istniejących zaworów jednorazowo; nowe zawory teraz konsekwentnie domyślnie używają 10 minut zarówno dla podlewania zaplanowanego, jak i ręcznego",
-        "uk": "**ПОКРАЩЕНО**: Тривалість ручного поливу для існуючих клапанів встановлено на 10 хвилин одноразово; нові клапани тепер послідовно використовують 10 хвилин за замовчуванням як для запланованого, так і для ручного поливу",
-        "zh-cn": "**增强**：现有阀门的手动浇水时长一次性设置为10分钟；新阀门现在统一默认使用10分钟用于计划浇水和手动浇水"
       }
     },
     "titleLang": {
